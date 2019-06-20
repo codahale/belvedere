@@ -48,28 +48,7 @@ func EnableServices(ctx context.Context, projectID string) error {
 
 	// Divide the required services up into batches of at most 20 services.
 	for _, batch := range batchStrings(requiredServices, 20) {
-		// Enable the services.
-		op, err := su.Services.BatchEnable(
-			fmt.Sprintf("projects/%s", projectID),
-			&serviceusage.BatchEnableServicesRequest{
-				ServiceIds: batch,
-			},
-		).Do()
-		if err != nil {
-			return err
-		}
-
-		// Record which services we enabled.
-		for _, service := range batch {
-			span.Annotate([]trace.Attribute{
-				trace.StringAttribute("service", service),
-				trace.StringAttribute("operation", op.Name),
-			}, "Enabled service")
-		}
-
-		// Wait for the services to be enabled.
-		f := checkServiceUsageOperation(ctx, su, op)
-		if err := wait.PollImmediate(10*time.Second, 5*time.Minute, f); err != nil {
+		if err := enableServicesBatch(ctx, su, projectID, batch); err != nil {
 			return err
 		}
 	}
@@ -78,6 +57,37 @@ func EnableServices(ctx context.Context, projectID string) error {
 	return enableDeploymentManagerIAM(ctx, projectID)
 }
 
+func enableServicesBatch(ctx context.Context, su *serviceusage.Service, projectID string, serviceIDs []string) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.EnableServices.batch")
+	defer span.End()
+
+	// Enable the services.
+	op, err := su.Services.BatchEnable(
+		fmt.Sprintf("projects/%s", projectID),
+		&serviceusage.BatchEnableServicesRequest{
+			ServiceIds: serviceIDs,
+		},
+	).Do()
+	if err != nil {
+		return err
+	}
+
+	// Record which services we enabled.
+	for _, service := range serviceIDs {
+		span.Annotate([]trace.Attribute{
+			trace.StringAttribute("service", service),
+			trace.StringAttribute("operation", op.Name),
+		}, "Enabled service")
+	}
+
+	// Wait for the services to be enabled.
+	f := checkServiceUsageOperation(ctx, su, op)
+	return wait.PollImmediate(10*time.Second, 5*time.Minute, f)
+}
+
+// enableDeploymentManagerIAM binds the Deployment Manager service account to the `owner` role if
+// it has not already been so bound. This allows Deployment Manager to add IAM roles to service
+// accounts per https://cloud.google.com/deployment-manager/docs/configuration/set-access-control-resources#granting_deployment_manager_permission_to_set_iam_policies
 func enableDeploymentManagerIAM(ctx context.Context, projectID string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.EnableDeploymentManagerIAMRoles")
 	defer span.End()
