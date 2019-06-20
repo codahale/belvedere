@@ -21,7 +21,7 @@ func main() {
 	usage := `Belvedere: A fine place from which to survey your estate.
 
 Usage:
-  belvedere enable <project-id> [--debug]
+  belvedere enable <project-id> [--debug|--quiet]
   belvedere -h | --help
   belvedere --version
 
@@ -29,6 +29,7 @@ Options:
   -h --help     Show this screen.
   --version     Show version.
   --debug       Enable debug output.
+  --quiet       Disable all log output.
 `
 
 	opts, err := docopt.ParseArgs(usage, nil, buildVersion)
@@ -45,7 +46,7 @@ Options:
 		pe := &exporter.PrintExporter{}
 		trace.RegisterExporter(pe)
 		view.RegisterExporter(pe)
-	} else {
+	} else if quiet, err := opts.Bool("--quiet"); err != nil || !quiet {
 		trace.RegisterExporter(belvedere.NewTraceLogger())
 	}
 

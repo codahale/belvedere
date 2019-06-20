@@ -2,6 +2,7 @@ package belvedere
 
 import (
 	"fmt"
+	"os"
 	"sort"
 	"time"
 
@@ -16,20 +17,20 @@ func NewTraceLogger() trace.Exporter {
 }
 
 func (l *traceLogger) ExportSpan(s *trace.SpanData) {
-	fmt.Printf("%s: %s", s.EndTime.Format(time.Stamp), s.Name)
+	_, _ = fmt.Fprintf(os.Stderr, "%s: %s", s.EndTime.Format(time.Stamp), s.Name)
 	if s.Code != 0 {
-		fmt.Printf(" code=%d", s.Code)
+		_, _ = fmt.Fprintf(os.Stderr, " code=%d", s.Code)
 	}
 	if s.Message != "" {
-		fmt.Printf(" message=%s", s.Message)
+		_, _ = fmt.Fprintf(os.Stderr, " message=%s", s.Message)
 	}
 	l.printAttributes(s.Attributes)
-	fmt.Println()
+	_, _ = fmt.Fprintln(os.Stderr)
 
 	for _, a := range s.Annotations {
-		fmt.Printf("  %s", a.Message)
+		_, _ = fmt.Fprintf(os.Stderr, "  %s", a.Message)
 		l.printAttributes(a.Attributes)
-		fmt.Println()
+		_, _ = fmt.Fprintln(os.Stderr)
 	}
 }
 
@@ -40,6 +41,6 @@ func (l *traceLogger) printAttributes(attributes map[string]interface{}) {
 	}
 	sort.Strings(keys)
 	for _, k := range keys {
-		fmt.Printf(" %v=%v", k, attributes[k])
+		_, _ = fmt.Fprintf(os.Stderr, " %v=%v", k, attributes[k])
 	}
 }
