@@ -45,7 +45,7 @@ Options:
 		trace.RegisterExporter(pe)
 		view.RegisterExporter(pe)
 	} else {
-		trace.RegisterExporter(&belvedere.TraceLogger{})
+		trace.RegisterExporter(belvedere.NewTraceLogger())
 	}
 
 	if enable, _ := opts.Bool("enable"); enable {

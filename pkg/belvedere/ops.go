@@ -11,7 +11,7 @@ import (
 
 func checkServiceUsageOperation(ctx context.Context, su *serviceusage.Service, op *serviceusage.Operation) wait.ConditionFunc {
 	return func() (bool, error) {
-		_, span := trace.StartSpan(ctx, "belvedere.CheckServiceUsageOperation")
+		_, span := trace.StartSpan(ctx, "belvedere.checkServiceUsageOperation")
 		defer span.End()
 
 		o, err := su.Operations.Get(op.Name).Do()
@@ -24,7 +24,8 @@ func checkServiceUsageOperation(ctx context.Context, su *serviceusage.Service, o
 				trace.Int64Attribute("error.code", o.Error.Code),
 				trace.StringAttribute("error.message", o.Error.Message),
 				trace.StringAttribute("error.details", fmt.Sprint(o.Error.Details)),
-			}, "Error during operation")
+			}, "Error")
+			span.SetStatus(trace.Status{Code: trace.StatusCodeAborted, Message: o.Error.Message})
 		}
 		span.AddAttributes(trace.BoolAttribute("done", op.Done))
 		return o.Done, nil
