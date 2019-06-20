@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/user"
 
 	"github.com/codahale/belvedere/pkg/belvedere"
 	"github.com/docopt/docopt-go"
@@ -50,21 +51,30 @@ Options:
 
 	if ok, _ := opts.Bool("enable"); ok {
 		projectID, _ := opts.String("<project-id>")
-		if err := enable(context.Background(), projectID); err != nil {
+		if err := enable(projectID); err != nil {
 			panic(err)
 		}
 	}
 }
 
-func enable(ctx context.Context, projectID string) error {
-	ctx, span := trace.StartSpan(context.Background(), "belvedere.enable")
-	defer span.End()
-
+func enable(projectID string) error {
+	ctx, span := rootSpan("belvedere.enable")
 	span.AddAttributes(trace.StringAttribute("project_id", projectID))
+	defer span.End()
 
 	if err := belvedere.EnableServices(ctx, projectID); err != nil {
 		return err
 	}
-
 	return belvedere.EnableDeploymentManagerIAM(ctx, projectID)
+}
+
+func rootSpan(name string) (context.Context, *trace.Span) {
+	ctx, span := trace.StartSpan(context.Background(), name)
+	if hostname, err := os.Hostname(); err == nil {
+		span.AddAttributes(trace.StringAttribute("hostname", hostname))
+	}
+	if u, err := user.Current(); err == nil {
+		span.AddAttributes(trace.StringAttribute("user", u.Username))
+	}
+	return ctx, span
 }
