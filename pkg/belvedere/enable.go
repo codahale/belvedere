@@ -137,3 +137,26 @@ func EnableDeploymentManagerIAM(ctx context.Context, projectID string) error {
 	}).Do()
 	return err
 }
+
+func checkServiceUsageOperation(ctx context.Context, su *serviceusage.Service, op *serviceusage.Operation) wait.ConditionFunc {
+	return func() (bool, error) {
+		_, span := trace.StartSpan(ctx, "belvedere.checkServiceUsageOperation")
+		defer span.End()
+
+		o, err := su.Operations.Get(op.Name).Do()
+		if err != nil {
+			return false, err
+		}
+
+		if o.Error != nil {
+			span.Annotate([]trace.Attribute{
+				trace.Int64Attribute("error.code", o.Error.Code),
+				trace.StringAttribute("error.message", o.Error.Message),
+				trace.StringAttribute("error.details", fmt.Sprint(o.Error.Details)),
+			}, "Error")
+			span.SetStatus(trace.Status{Code: trace.StatusCodeAborted, Message: o.Error.Message})
+		}
+		span.AddAttributes(trace.BoolAttribute("done", op.Done))
+		return o.Done, nil
+	}
+}

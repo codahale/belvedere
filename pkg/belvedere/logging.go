@@ -17,7 +17,7 @@ func NewTraceLogger() trace.Exporter {
 }
 
 func (l *traceLogger) ExportSpan(s *trace.SpanData) {
-	_, _ = fmt.Fprintf(os.Stderr, "%s: %s", s.EndTime.Format(time.Stamp), s.Name)
+	_, _ = fmt.Fprintf(os.Stderr, "%s: %s (%s)", s.EndTime.Format(time.Stamp), s.Name, s.SpanID)
 	if s.Code != 0 {
 		_, _ = fmt.Fprintf(os.Stderr, " code=%d", s.Code)
 	}
