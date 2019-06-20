@@ -12,6 +12,10 @@ import (
 	"go.opencensus.io/trace"
 )
 
+var (
+	buildVersion = "unknown"
+)
+
 func main() {
 	usage := `Belvedere: A fine place from which to survey your estate.
 
@@ -26,7 +30,7 @@ Options:
   --debug       Enable debug output.
 `
 
-	opts, err := docopt.ParseDoc(usage)
+	opts, err := docopt.ParseArgs(usage, nil, buildVersion)
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(-1)
