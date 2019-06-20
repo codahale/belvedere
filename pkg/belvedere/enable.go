@@ -74,15 +74,14 @@ func EnableServices(ctx context.Context, projectID string) error {
 		}
 	}
 
-	// Finally, ensure that Deployment Manager has the permissions to manage IAM permissions.
-	return enableDeploymentManagerIAM(ctx, projectID)
+	return nil
 }
 
-// enableDeploymentManagerIAM binds the Deployment Manager service account to the `owner` role if
+// EnableDeploymentManagerIAM binds the Deployment Manager service account to the `owner` role if
 // it has not already been so bound. This allows Deployment Manager to add IAM roles to service
 // accounts per https://cloud.google.com/deployment-manager/docs/configuration/set-access-control-resources#granting_deployment_manager_permission_to_set_iam_policies
-func enableDeploymentManagerIAM(ctx context.Context, projectID string) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.enableDeploymentManagerIAM")
+func EnableDeploymentManagerIAM(ctx context.Context, projectID string) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.EnableDeploymentManagerIAM")
 	defer span.End()
 
 	crm, err := cloudresourcemanager.NewService(ctx)

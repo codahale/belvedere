@@ -20,7 +20,7 @@ func main() {
 	usage := `Belvedere: A fine place from which to survey your estate.
 
 Usage:
-  belvedere enable [--debug]
+  belvedere enable <project-id> [--debug]
   belvedere -h | --help
   belvedere --version
 
@@ -48,9 +48,23 @@ Options:
 		trace.RegisterExporter(belvedere.NewTraceLogger())
 	}
 
-	if enable, _ := opts.Bool("enable"); enable {
-		if err := belvedere.EnableServices(context.Background(), "codahale-com"); err != nil {
+	if ok, _ := opts.Bool("enable"); ok {
+		projectID, _ := opts.String("<project-id>")
+		if err := enable(context.Background(), projectID); err != nil {
 			panic(err)
 		}
 	}
+}
+
+func enable(ctx context.Context, projectID string) error {
+	ctx, span := trace.StartSpan(context.Background(), "belvedere.enable")
+	defer span.End()
+
+	span.AddAttributes(trace.StringAttribute("project_id", projectID))
+
+	if err := belvedere.EnableServices(ctx, projectID); err != nil {
+		return err
+	}
+
+	return belvedere.EnableDeploymentManagerIAM(ctx, projectID)
 }
