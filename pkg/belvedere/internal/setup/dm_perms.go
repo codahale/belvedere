@@ -1,4 +1,4 @@
-package base
+package setup
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 // SetDMPerms binds the Deployment Manager service account to the `owner` role if it has not already
 // been so bound. This allows Deployment Manager to add IAM roles to service accounts per
 // https://cloud.google.com/deployment-manager/docs/configuration/set-access-control-resources#granting_deployment_manager_permission_to_set_iam_policies
-func SetDMPerms(ctx context.Context, projectID string) error {
+func SetDMPerms(ctx context.Context, project string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.base.SetDMPerms")
 	defer span.End()
 
@@ -21,18 +21,18 @@ func SetDMPerms(ctx context.Context, projectID string) error {
 	}
 
 	// Resolve the project's numeric ID.
-	project, err := crm.Projects.Get(projectID).Fields("projectNumber").Do()
+	p, err := crm.Projects.Get(project).Fields("projectNumber").Do()
 	if err != nil {
 		return err
 	}
 
 	// Get the project's IAM policy.
-	policy, err := crm.Projects.GetIamPolicy(projectID, &cloudresourcemanager.GetIamPolicyRequest{}).Do()
+	policy, err := crm.Projects.GetIamPolicy(project, &cloudresourcemanager.GetIamPolicyRequest{}).Do()
 	if err != nil {
 		return err
 	}
 
-	crmMember := fmt.Sprintf("serviceAccount:%d@cloudservices.gserviceaccount.com", project.ProjectNumber)
+	crmMember := fmt.Sprintf("serviceAccount:%d@cloudservices.gserviceaccount.com", p.ProjectNumber)
 	const owner = "roles/owner"
 
 	// Look for an existing IAM binding giving Deployment Manager ownership of the project.
@@ -42,7 +42,7 @@ func SetDMPerms(ctx context.Context, projectID string) error {
 				if member == crmMember {
 					span.Annotate(
 						[]trace.Attribute{
-							trace.Int64Attribute("project_id", project.ProjectNumber),
+							trace.Int64Attribute("project_number", p.ProjectNumber),
 						},
 						"Binding verified",
 					)
@@ -55,7 +55,7 @@ func SetDMPerms(ctx context.Context, projectID string) error {
 	// If none exists, add a binding and update the policy.
 	span.Annotate(
 		[]trace.Attribute{
-			trace.Int64Attribute("project_id", project.ProjectNumber),
+			trace.Int64Attribute("project_number", p.ProjectNumber),
 		},
 		"Binding created",
 	)
@@ -63,7 +63,7 @@ func SetDMPerms(ctx context.Context, projectID string) error {
 		Members: []string{crmMember},
 		Role:    owner,
 	})
-	_, err = crm.Projects.SetIamPolicy(projectID, &cloudresourcemanager.SetIamPolicyRequest{
+	_, err = crm.Projects.SetIamPolicy(project, &cloudresourcemanager.SetIamPolicyRequest{
 		Policy: policy,
 	}).Do()
 	return err

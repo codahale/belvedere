@@ -1,4 +1,4 @@
-package base
+package setup
 
 import (
 	"context"
@@ -37,7 +37,7 @@ var (
 )
 
 // EnableServices enables all required services for the given GCP project.
-func EnableServices(ctx context.Context, projectID string) error {
+func EnableServices(ctx context.Context, project string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.base.EnableServices")
 	defer span.End()
 
@@ -50,7 +50,7 @@ func EnableServices(ctx context.Context, projectID string) error {
 	for _, serviceIDs := range batchStrings(requiredServices, 20) {
 		// Enable the services.
 		op, err := su.Services.BatchEnable(
-			fmt.Sprintf("projects/%s", projectID),
+			fmt.Sprintf("projects/%s", project),
 			&serviceusage.BatchEnableServicesRequest{
 				ServiceIds: serviceIDs,
 			},

@@ -11,10 +11,10 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-func Create(ctx context.Context, projectID, name string, config *Config, labels map[string]string) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.createDeployment")
+func Insert(ctx context.Context, project, name string, config *Config, labels map[string]string) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Insert")
 	span.AddAttributes(
-		trace.StringAttribute("project_id", projectID),
+		trace.StringAttribute("project", project),
 		trace.StringAttribute("name", name),
 	)
 	defer span.End()
@@ -37,7 +37,7 @@ func Create(ctx context.Context, projectID, name string, config *Config, labels 
 		return err
 	}
 
-	op, err := dm.Deployments.Insert(projectID, &deploymentmanager.Deployment{
+	op, err := dm.Deployments.Insert(project, &deploymentmanager.Deployment{
 		Labels: l,
 		Name:   name,
 		Target: &deploymentmanager.TargetConfiguration{
@@ -50,17 +50,39 @@ func Create(ctx context.Context, projectID, name string, config *Config, labels 
 		return err
 	}
 
-	f := checkOperation(ctx, dm, projectID, op.Name)
+	f := checkOperation(ctx, dm, project, op.Name)
 	return wait.Poll(10*time.Second, 5*time.Minute, f)
 }
 
-func checkOperation(ctx context.Context, dm *deploymentmanager.Service, projectID string, operation string) wait.ConditionFunc {
+func Delete(ctx context.Context, project, name string) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Delete")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+		trace.StringAttribute("name", name),
+	)
+	defer span.End()
+
+	dm, err := deploymentmanager.NewService(ctx)
+	if err != nil {
+		return err
+	}
+
+	op, err := dm.Deployments.Delete(project, name).Do()
+	if err != nil {
+		return err
+	}
+
+	f := checkOperation(ctx, dm, project, op.Name)
+	return wait.Poll(10*time.Second, 5*time.Minute, f)
+}
+
+func checkOperation(ctx context.Context, dm *deploymentmanager.Service, project string, operation string) wait.ConditionFunc {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.checkOperation")
 		span.AddAttributes(trace.StringAttribute("operation", operation))
 		defer span.End()
 
-		op, err := dm.Operations.Get(projectID, operation).Context(ctx).Do()
+		op, err := dm.Operations.Get(project, operation).Context(ctx).Do()
 		if err != nil {
 			return false, err
 		}

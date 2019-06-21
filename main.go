@@ -83,7 +83,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 	}
 	defer span.End()
 
-	projectID, err := config(ctx, opts)
+	project, err := config(ctx, opts)
 	if err != nil {
 		return err
 	}
@@ -91,9 +91,9 @@ func run(ctx context.Context, opts docopt.Opts) error {
 	switch {
 	case isCmd(opts, "setup"):
 		dnsZone, _ := opts.String("<dns zone>")
-		return belvedere.Setup(ctx, projectID, dnsZone)
+		return belvedere.Setup(ctx, project, dnsZone)
 	case isCmd(opts, "apps", "list"):
-		apps, err := belvedere.ListApps(ctx, projectID)
+		apps, err := belvedere.ListApps(ctx, project)
 		if err != nil {
 			return err
 		}
@@ -109,14 +109,14 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		if err != nil {
 			return err
 		}
-		return belvedere.CreateApp(ctx, projectID, appName, config)
+		return belvedere.CreateApp(ctx, project, appName, config)
 	case isCmd(opts, "apps", "destroy"):
 		appName, _ := opts.String("<app>")
-		return belvedere.DestroyApp(ctx, projectID, appName)
+		return belvedere.DestroyApp(ctx, project, appName)
 	case isCmd(opts, "releases", "list"):
 		appName, _ := opts.String("<app>")
 		// TODO implement release printing
-		return belvedere.ListReleases(ctx, projectID, appName)
+		return belvedere.ListReleases(ctx, project, appName)
 	case isCmd(opts, "releases", "create"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")
@@ -126,19 +126,19 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		if err != nil {
 			return err
 		}
-		return belvedere.CreateRelease(ctx, projectID, appName, relName, config, image)
+		return belvedere.CreateRelease(ctx, project, appName, relName, config, image)
 	case isCmd(opts, "releases", "enable"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")
-		return belvedere.EnableRelease(ctx, projectID, appName, relName)
+		return belvedere.EnableRelease(ctx, project, appName, relName)
 	case isCmd(opts, "releases", "disable"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")
-		return belvedere.DisableRelease(ctx, projectID, appName, relName)
+		return belvedere.DisableRelease(ctx, project, appName, relName)
 	case isCmd(opts, "releases", "destroy"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")
-		return belvedere.DestroyRelease(ctx, projectID, appName, relName)
+		return belvedere.DestroyRelease(ctx, project, appName, relName)
 	default:
 		return fmt.Errorf("unimplemented: %v", opts)
 	}
@@ -154,8 +154,8 @@ func isCmd(opts docopt.Opts, commands ...string) bool {
 }
 
 func config(ctx context.Context, opts docopt.Opts) (string, error) {
-	if projectID, err := opts.String("--project"); err == nil {
-		return projectID, nil
+	if project, err := opts.String("--project"); err == nil {
+		return project, nil
 	}
 
 	ctx, span := trace.StartSpan(ctx, "belvedere.config")
@@ -180,9 +180,9 @@ func config(ctx context.Context, opts docopt.Opts) (string, error) {
 		return "", fmt.Errorf("unable to find default project: %s", err)
 	}
 
-	projectID := config.Configuration.Properties.Core.Project
-	if projectID == "" {
+	project := config.Configuration.Properties.Core.Project
+	if project == "" {
 		return "", fmt.Errorf("unable to find default project")
 	}
-	return projectID, nil
+	return project, nil
 }

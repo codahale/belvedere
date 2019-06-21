@@ -7,26 +7,8 @@ import (
 	"os"
 
 	"go.opencensus.io/trace"
-	"google.golang.org/api/deploymentmanager/v2"
 	"gopkg.in/yaml.v2"
 )
-
-type AppConfig struct {
-}
-
-func LoadAppConfig(configPath string) (*AppConfig, error) {
-	r, err := openPath(configPath)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = r.Close() }()
-
-	var config AppConfig
-	if err := yaml.NewDecoder(r).Decode(&config); err != nil {
-		return nil, err
-	}
-	return &config, nil
-}
 
 type ReleaseConfig struct {
 	MachineType      string            `yaml:"machineType"`
@@ -51,64 +33,10 @@ func LoadReleaseConfig(configPath string) (*ReleaseConfig, error) {
 	return &config, nil
 }
 
-func ListApps(ctx context.Context, projectID string) ([]string, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.ListApps")
-	span.AddAttributes(
-		trace.StringAttribute("project", projectID),
-	)
-	defer span.End()
-
-	dm, err := deploymentmanager.NewService(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := dm.Deployments.List(projectID).Filter("labels.type eq belvedere-app").Do()
-	if err != nil {
-		return nil, err
-	}
-
-	var names []string
-	for _, d := range resp.Deployments {
-		for _, l := range d.Labels {
-			if l.Key == "belvedere-name" {
-				names = append(names, l.Value)
-			}
-		}
-	}
-	return names, nil
-}
-
-func CreateApp(ctx context.Context, projectID, appName string, config *AppConfig) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.CreateApps")
-	span.AddAttributes(
-		trace.StringAttribute("project", projectID),
-		trace.StringAttribute("app", appName),
-	)
-	defer span.End()
-
-	// TODO create deployment w/ load balancer gubbins
-
-	return errUnimplemented
-}
-
-func DestroyApp(ctx context.Context, projectID, appName string) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.DestroyApp")
-	span.AddAttributes(
-		trace.StringAttribute("project", projectID),
-		trace.StringAttribute("app", appName),
-	)
-	defer span.End()
-
-	// TODO delete deployment
-
-	return errUnimplemented
-}
-
-func ListReleases(ctx context.Context, projectID, appName string) error {
+func ListReleases(ctx context.Context, project, appName string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.ListReleases")
 	span.AddAttributes(
-		trace.StringAttribute("project", projectID),
+		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", appName),
 	)
 	defer span.End()
@@ -119,10 +47,10 @@ func ListReleases(ctx context.Context, projectID, appName string) error {
 	return errUnimplemented
 }
 
-func CreateRelease(ctx context.Context, projectID, appName, relName string, config *ReleaseConfig, image string) error {
+func CreateRelease(ctx context.Context, project, appName, relName string, config *ReleaseConfig, image string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateRelease")
 	span.AddAttributes(
-		trace.StringAttribute("project", projectID),
+		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", appName),
 		trace.StringAttribute("release", relName),
 		trace.StringAttribute("image", image),
@@ -134,10 +62,10 @@ func CreateRelease(ctx context.Context, projectID, appName, relName string, conf
 	return errUnimplemented
 }
 
-func EnableRelease(ctx context.Context, projectID, appName, relName string) error {
+func EnableRelease(ctx context.Context, project, appName, relName string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.EnableRelease")
 	span.AddAttributes(
-		trace.StringAttribute("project", projectID),
+		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", appName),
 		trace.StringAttribute("release", relName),
 	)
@@ -148,10 +76,10 @@ func EnableRelease(ctx context.Context, projectID, appName, relName string) erro
 	return errUnimplemented
 }
 
-func DisableRelease(ctx context.Context, projectID, appName, relName string) error {
+func DisableRelease(ctx context.Context, project, appName, relName string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DisableRelease")
 	span.AddAttributes(
-		trace.StringAttribute("project", projectID),
+		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", appName),
 		trace.StringAttribute("release", relName),
 	)
@@ -162,10 +90,10 @@ func DisableRelease(ctx context.Context, projectID, appName, relName string) err
 	return errUnimplemented
 }
 
-func DestroyRelease(ctx context.Context, projectID, appName, relName string) error {
+func DestroyRelease(ctx context.Context, project, appName, relName string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DestroyRelease")
 	span.AddAttributes(
-		trace.StringAttribute("project", projectID),
+		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", appName),
 		trace.StringAttribute("release", relName),
 	)
