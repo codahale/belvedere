@@ -116,8 +116,14 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		return belvedere.DestroyApp(ctx, project, appName)
 	case isCmd(opts, "releases", "list"):
 		appName, _ := opts.String("<app>")
-		// TODO implement release printing
-		return belvedere.ListReleases(ctx, project, appName)
+		releases, err := belvedere.ListReleases(ctx, project, appName)
+		if err != nil {
+			return err
+		}
+		for _, release := range releases {
+			fmt.Println(release)
+		}
+		return nil
 	case isCmd(opts, "releases", "create"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")

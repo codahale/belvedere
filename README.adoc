@@ -1,3 +1,11 @@
 = Belvedere
 
 _A small lookout tower (usually square) on the roof of a house._
+
+== TODO
+
+- [ ] Automatically provision A records for apps
+- [ ] Provision managed TLS certs instead of self-signed ones
+- [ ] Lock down access to app instances
+- [ ] Enable IAP tunneling to app instances
+- [ ] Block external access to `/healthz`
