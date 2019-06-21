@@ -21,10 +21,15 @@ func main() {
 	usage := `Belvedere: A fine place from which to survey your estate.
 
 Usage:
-  belvedere enable <project-id> [options]
-  belvedere envs list <project-id> [options]
-  belvedere envs create <project-id> <env name> <dns name> [options]
-  belvedere envs destroy <project-id> <env name> [options]
+  belvedere initialize <project> <dns zone> [options]
+  belvedere apps list <project> [options]
+  belvedere apps create <project> <app> <config> [options]
+  belvedere apps destroy <project> <app> [options] 
+  belvedere releases list <project> <app> [options]
+  belvedere releases create <project> <app> <release> <config> <image> [options]
+  belvedere releases enable <project> <app> <release> [options]
+  belvedere releases disable <project> <app> <release> [options]
+  belvedere releases destroy <project> <app> <release> [options]
   belvedere -h | --help
   belvedere --version
 
@@ -35,110 +40,100 @@ Options:
   --quiet       Disable all log output.
 `
 
+	// Parse arguments and options.
 	opts, err := docopt.ParseArgs(usage, nil, buildVersion)
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(-1)
 	}
 
+	// Export all traces.
 	trace.ApplyConfig(trace.Config{
 		DefaultSampler: trace.AlwaysSample(),
 	})
 
 	if debug, err := opts.Bool("--debug"); err == nil && debug {
+		// Use the print exporter for debugging, as it prints everything.
 		pe := &exporter.PrintExporter{}
 		trace.RegisterExporter(pe)
 		view.RegisterExporter(pe)
 	} else if quiet, err := opts.Bool("--quiet"); err != nil || !quiet {
-		trace.RegisterExporter(belvedere.NewTraceLogger())
+		// Unless we're quiet, use the trace logger for more practical logging.
+		trace.RegisterExporter(&traceLogger{})
 	}
 
-	if ok, _ := opts.Bool("enable"); ok {
-		projectID, _ := opts.String("<project-id>")
-		if err := enable(projectID); err != nil {
-			panic(err)
-		}
-	} else if ok, _ := opts.Bool("envs"); ok {
-		projectID, _ := opts.String("<project-id>")
-
-		if ok, _ := opts.Bool("list"); ok {
-			if err := envsList(projectID); err != nil {
-				panic(err)
-			}
-		} else if ok, _ := opts.Bool("create"); ok {
-			envName, _ := opts.String("<env name>")
-			dnsName, _ := opts.String("<dns name>")
-			if err := envsCreate(projectID, envName, dnsName); err != nil {
-				panic(err)
-			}
-		} else if ok, _ := opts.Bool("destroy"); ok {
-			envName, _ := opts.String("<env name>")
-			if err := envsDestroy(projectID, envName); err != nil {
-				panic(err)
-			}
-		}
-	} else {
-		panic(fmt.Sprintf("unknown command: %v", opts))
+	// Run commands.
+	if err := run(context.Background(), opts); err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
+		os.Exit(-1)
 	}
 }
 
-func enable(projectID string) error {
-	ctx, span := rootSpan("belvedere.enable")
-	span.AddAttributes(trace.StringAttribute("project_id", projectID))
-	defer span.End()
-
-	if err := belvedere.EnableServices(ctx, projectID); err != nil {
-		return err
-	}
-	return belvedere.EnableDeploymentManagerIAM(ctx, projectID)
-}
-
-func envsList(projectID string) error {
-	ctx, span := rootSpan("belvedere.envs.list")
-	span.AddAttributes(trace.StringAttribute("project_id", projectID))
-	defer span.End()
-
-	envs, err := belvedere.ListEnvs(ctx, projectID)
-	if err != nil {
-		return err
-	}
-
-	for _, env := range envs {
-		fmt.Printf("%+v\n", env)
-	}
-	return nil
-}
-
-func envsCreate(projectID, envName, dnsName string) error {
-	ctx, span := rootSpan("belvedere.envs.create")
-	span.AddAttributes(
-		trace.StringAttribute("project_id", projectID),
-		trace.StringAttribute("env_name", envName),
-		trace.StringAttribute("dns_name", dnsName),
-	)
-	defer span.End()
-
-	return belvedere.CreateEnv(ctx, projectID, envName, dnsName)
-}
-
-func envsDestroy(projectID, envName string) error {
-	ctx, span := rootSpan("belvedere.envs.destroy")
-	span.AddAttributes(
-		trace.StringAttribute("project_id", projectID),
-		trace.StringAttribute("env_name", envName),
-	)
-	defer span.End()
-
-	return belvedere.DestroyEnv(ctx, projectID, envName)
-}
-
-func rootSpan(name string) (context.Context, *trace.Span) {
-	ctx, span := trace.StartSpan(context.Background(), name)
+func run(ctx context.Context, opts docopt.Opts) error {
+	// Create a root span with some common attributes.
+	ctx, span := trace.StartSpan(ctx, "belvedere")
 	if hostname, err := os.Hostname(); err == nil {
 		span.AddAttributes(trace.StringAttribute("hostname", hostname))
 	}
 	if u, err := user.Current(); err == nil {
 		span.AddAttributes(trace.StringAttribute("user", u.Username))
 	}
-	return ctx, span
+	defer span.End()
+
+	projectID, _ := opts.String("<project>")
+	switch {
+	case isCmd(opts, "initialize"):
+		dnsZone, _ := opts.String("<dns zone>")
+		return belvedere.Initialize(ctx, projectID, dnsZone)
+	case isCmd(opts, "apps", "list"):
+		// TODO implement app printing
+		return belvedere.ListApps(ctx, projectID)
+	case isCmd(opts, "apps", "create"):
+		appName, _ := opts.String("<app>")
+		configPath, _ := opts.String("<config>")
+		config, err := belvedere.LoadAppConfig(configPath)
+		if err != nil {
+			return err
+		}
+		return belvedere.CreateApp(ctx, projectID, appName, config)
+	case isCmd(opts, "apps", "destroy"):
+		appName, _ := opts.String("<app>")
+		return belvedere.DestroyApp(ctx, projectID, appName)
+	case isCmd(opts, "releases", "list"):
+		appName, _ := opts.String("<app>")
+		// TODO implement release printing
+		return belvedere.ListReleases(ctx, projectID, appName)
+	case isCmd(opts, "releases", "create"):
+		appName, _ := opts.String("<app>")
+		relName, _ := opts.String("<release>")
+		image, _ := opts.String("<image>")
+		configPath, _ := opts.String("<config>")
+		config, err := belvedere.LoadReleaseConfig(configPath)
+		if err != nil {
+			return err
+		}
+		return belvedere.CreateRelease(ctx, projectID, appName, relName, config, image)
+	case isCmd(opts, "releases", "enable"):
+		appName, _ := opts.String("<app>")
+		relName, _ := opts.String("<release>")
+		return belvedere.EnableRelease(ctx, projectID, appName, relName)
+	case isCmd(opts, "releases", "disable"):
+		appName, _ := opts.String("<app>")
+		relName, _ := opts.String("<release>")
+		return belvedere.DisableRelease(ctx, projectID, appName, relName)
+	case isCmd(opts, "releases", "destroy"):
+		appName, _ := opts.String("<app>")
+		relName, _ := opts.String("<release>")
+		return belvedere.DestroyRelease(ctx, projectID, appName, relName)
+	}
+	return fmt.Errorf("unimplemented: %v", opts)
+}
+
+func isCmd(opts docopt.Opts, commands ...string) bool {
+	for _, s := range commands {
+		if ok, _ := opts.Bool(s); !ok {
+			return false
+		}
+	}
+	return true
 }

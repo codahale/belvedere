@@ -1,4 +1,4 @@
-package belvedere
+package main
 
 import (
 	"fmt"
@@ -10,10 +10,6 @@ import (
 )
 
 type traceLogger struct {
-}
-
-func NewTraceLogger() trace.Exporter {
-	return &traceLogger{}
 }
 
 func (l *traceLogger) ExportSpan(s *trace.SpanData) {
