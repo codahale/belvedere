@@ -83,7 +83,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 	}
 	defer span.End()
 
-	projectID, err := findProject(ctx, opts)
+	projectID, err := config(ctx, opts)
 	if err != nil {
 		return err
 	}
@@ -153,12 +153,12 @@ func isCmd(opts docopt.Opts, commands ...string) bool {
 	return true
 }
 
-func findProject(ctx context.Context, opts docopt.Opts) (string, error) {
+func config(ctx context.Context, opts docopt.Opts) (string, error) {
 	if projectID, err := opts.String("--project"); err == nil {
 		return projectID, nil
 	}
 
-	ctx, span := trace.StartSpan(ctx, "belvedere.findProject")
+	ctx, span := trace.StartSpan(ctx, "belvedere.config")
 	defer span.End()
 
 	cmd := exec.Command("gcloud", "config", "config-helper", "--format=json")
