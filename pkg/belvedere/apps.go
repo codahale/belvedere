@@ -3,9 +3,11 @@ package belvedere
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"go.opencensus.io/trace"
+	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/deploymentmanager/v2"
 	"gopkg.in/yaml.v2"
 )
@@ -13,15 +15,26 @@ import (
 type AppConfig struct {
 }
 
-func LoadAppConfig(configPath string) (*AppConfig, error) {
-	r, err := openPath(configPath)
+func LoadAppConfig(ctx context.Context, path string) (*AppConfig, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.LoadAppConfig")
+	span.AddAttributes(
+		trace.StringAttribute("path", path),
+	)
+	defer span.End()
+
+	r, err := openPath(path)
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = r.Close() }()
 
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+
 	var config AppConfig
-	if err := yaml.NewDecoder(r).Decode(&config); err != nil {
+	if err := yaml.Unmarshal(b, &config); err != nil {
 		return nil, err
 	}
 	return &config, nil
@@ -39,7 +52,7 @@ func ListApps(ctx context.Context, project string) ([]string, error) {
 		return nil, err
 	}
 
-	resp, err := dm.Deployments.List(project).Filter("labels.type eq belvedere-app").Do()
+	resp, err := dm.Deployments.List(project).Filter("labels.belvedere-type eq app").Do()
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +68,7 @@ func ListApps(ctx context.Context, project string) ([]string, error) {
 	return names, nil
 }
 
-func CreateApp(ctx context.Context, project, appName string, config *AppConfig) error {
+func CreateApp(ctx context.Context, project, appName string, app *AppConfig) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateApp")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -63,9 +76,39 @@ func CreateApp(ctx context.Context, project, appName string, config *AppConfig) 
 	)
 	defer span.End()
 
-	// TODO create deployment w/ load balancer gubbins
+	config := &deployments.Config{
+		Resources: []deployments.Resource{
+			{
+				Name: "firewall",
+				Type: "compute.beta.firewall",
+				Properties: compute.Firewall{
+					Name: fmt.Sprintf("belvedere-app-%s", appName),
+					Allowed: []*compute.FirewallAllowed{
+						{
+							IPProtocol: "TCP",
+							Ports:      []string{"8443"},
+						},
+					},
+					TargetTags: []string{
+						fmt.Sprintf("belvedere-app-%s", appName),
+					},
+				},
+			},
+			// TODO add global forwarding rule
+			// TODO add target proxy
+			// TODO add url map
+			// TODO add backend service
+			// TODO add health check
+			// TODO add managed SSL cert
+			// TODO add service account w/ role bindings
+		},
+	}
 
-	return errUnimplemented
+	name := fmt.Sprintf("belvedere-%s", appName)
+	return deployments.Insert(ctx, project, name, config, map[string]string{
+		"belvedere-type": "app",
+		"belvedere-name": appName,
+	})
 }
 
 func DestroyApp(ctx context.Context, project, appName string) error {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"io/ioutil"
 	"os"
 
 	"go.opencensus.io/trace"
@@ -19,15 +20,26 @@ type ReleaseConfig struct {
 	Env              map[string]string `yaml:"env"`
 }
 
-func LoadReleaseConfig(configPath string) (*ReleaseConfig, error) {
-	r, err := openPath(configPath)
+func LoadReleaseConfig(ctx context.Context, path string) (*ReleaseConfig, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.LoadReleaseConfig")
+	span.AddAttributes(
+		trace.StringAttribute("path", path),
+	)
+	defer span.End()
+
+	r, err := openPath(path)
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = r.Close() }()
 
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+
 	var config ReleaseConfig
-	if err := yaml.NewDecoder(r).Decode(&config); err != nil {
+	if err := yaml.Unmarshal(b, &config); err != nil {
 		return nil, err
 	}
 	return &config, nil

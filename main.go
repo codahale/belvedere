@@ -104,8 +104,8 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		return nil
 	case isCmd(opts, "apps", "create"):
 		appName, _ := opts.String("<app>")
-		configPath, _ := opts.String("<config>")
-		config, err := belvedere.LoadAppConfig(configPath)
+		path, _ := opts.String("<config>")
+		config, err := belvedere.LoadAppConfig(ctx, path)
 		if err != nil {
 			return err
 		}
@@ -121,8 +121,8 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")
 		image, _ := opts.String("<image>")
-		configPath, _ := opts.String("<config>")
-		config, err := belvedere.LoadReleaseConfig(configPath)
+		path, _ := opts.String("<config>")
+		config, err := belvedere.LoadReleaseConfig(ctx, path)
 		if err != nil {
 			return err
 		}
@@ -154,12 +154,15 @@ func isCmd(opts docopt.Opts, commands ...string) bool {
 }
 
 func config(ctx context.Context, opts docopt.Opts) (string, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.config")
+	defer span.End()
+
 	if project, err := opts.String("--project"); err == nil {
+		span.AddAttributes(trace.StringAttribute("project", project))
 		return project, nil
 	}
 
-	ctx, span := trace.StartSpan(ctx, "belvedere.config")
-	defer span.End()
+	span.AddAttributes(trace.BoolAttribute("from_gcloud", true))
 
 	cmd := exec.Command("gcloud", "config", "config-helper", "--format=json")
 	b, err := cmd.Output()
@@ -184,5 +187,7 @@ func config(ctx context.Context, opts docopt.Opts) (string, error) {
 	if project == "" {
 		return "", fmt.Errorf("unable to find default project")
 	}
+
+	span.AddAttributes(trace.StringAttribute("project", project))
 	return project, nil
 }
