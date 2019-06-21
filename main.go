@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"os/user"
 
 	"github.com/codahale/belvedere/pkg/belvedere"
@@ -21,23 +23,24 @@ func main() {
 	usage := `Belvedere: A fine place from which to survey your estate.
 
 Usage:
-  belvedere initialize <project> <dns zone> [options]
-  belvedere apps list <project> [options]
-  belvedere apps create <project> <app> <config> [options]
-  belvedere apps destroy <project> <app> [options] 
-  belvedere releases list <project> <app> [options]
-  belvedere releases create <project> <app> <release> <config> <image> [options]
-  belvedere releases enable <project> <app> <release> [options]
-  belvedere releases disable <project> <app> <release> [options]
-  belvedere releases destroy <project> <app> <release> [options]
+  belvedere setup <dns zone> [options]
+  belvedere apps list [options]
+  belvedere apps create <app> <config> [options]
+  belvedere apps destroy <app> [options] 
+  belvedere releases list <app> [options]
+  belvedere releases create <app> <release> <config> <image> [options]
+  belvedere releases enable <app> <release> [options]
+  belvedere releases disable <app> <release> [options]
+  belvedere releases destroy <app> <release> [options]
   belvedere -h | --help
   belvedere --version
 
 Options:
-  -h --help     Show this screen.
-  --version     Show version.
-  --debug       Enable debug output.
-  --quiet       Disable all log output.
+  -h --help              Show this screen.
+  --version              Show version.
+  --debug                Enable debug output.
+  --quiet                Disable all log output.
+  --project=<project-id> Specify a project ID. Defaults to using gcloud's config.
 `
 
 	// Parse arguments and options.
@@ -80,11 +83,15 @@ func run(ctx context.Context, opts docopt.Opts) error {
 	}
 	defer span.End()
 
-	projectID, _ := opts.String("<project>")
+	projectID, err := findProject(ctx, opts)
+	if err != nil {
+		return err
+	}
+
 	switch {
-	case isCmd(opts, "initialize"):
+	case isCmd(opts, "setup"):
 		dnsZone, _ := opts.String("<dns zone>")
-		return belvedere.Initialize(ctx, projectID, dnsZone)
+		return belvedere.Setup(ctx, projectID, dnsZone)
 	case isCmd(opts, "apps", "list"):
 		// TODO implement app printing
 		return belvedere.ListApps(ctx, projectID)
@@ -136,4 +143,38 @@ func isCmd(opts docopt.Opts, commands ...string) bool {
 		}
 	}
 	return true
+}
+
+func findProject(ctx context.Context, opts docopt.Opts) (string, error) {
+	if projectID, err := opts.String("--project"); err == nil {
+		return projectID, nil
+	}
+
+	ctx, span := trace.StartSpan(ctx, "belvedere.findProject")
+	defer span.End()
+
+	cmd := exec.Command("gcloud", "config", "config-helper", "--format=json")
+	b, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("unable to find default project: %s", err)
+	}
+
+	var config struct {
+		Configuration struct {
+			Properties struct {
+				Core struct {
+					Project string `json:"project"`
+				} `json:"core"`
+			} `json:"properties"`
+		} `json:"configuration"`
+	}
+	if err := json.Unmarshal(b, &config); err != nil {
+		return "", fmt.Errorf("unable to find default project: %s", err)
+	}
+
+	projectID := config.Configuration.Properties.Core.Project
+	if projectID == "" {
+		return "", fmt.Errorf("unable to find default project")
+	}
+	return projectID, nil
 }

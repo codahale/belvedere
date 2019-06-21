@@ -51,7 +51,7 @@ func LoadReleaseConfig(configPath string) (*ReleaseConfig, error) {
 }
 
 func ListApps(ctx context.Context, projectID string) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.cli.ListApps")
+	ctx, span := trace.StartSpan(ctx, "belvedere.ListApps")
 	span.AddAttributes(
 		trace.StringAttribute("project", projectID),
 	)
@@ -64,7 +64,7 @@ func ListApps(ctx context.Context, projectID string) error {
 }
 
 func CreateApp(ctx context.Context, projectID, appName string, config *AppConfig) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.cli.CreateApps")
+	ctx, span := trace.StartSpan(ctx, "belvedere.CreateApps")
 	span.AddAttributes(
 		trace.StringAttribute("project", projectID),
 		trace.StringAttribute("app", appName),
@@ -77,7 +77,7 @@ func CreateApp(ctx context.Context, projectID, appName string, config *AppConfig
 }
 
 func DestroyApp(ctx context.Context, projectID, appName string) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.cli.DestroyApp")
+	ctx, span := trace.StartSpan(ctx, "belvedere.DestroyApp")
 	span.AddAttributes(
 		trace.StringAttribute("project", projectID),
 		trace.StringAttribute("app", appName),
@@ -90,7 +90,7 @@ func DestroyApp(ctx context.Context, projectID, appName string) error {
 }
 
 func ListReleases(ctx context.Context, projectID, appName string) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.cli.ListReleases")
+	ctx, span := trace.StartSpan(ctx, "belvedere.ListReleases")
 	span.AddAttributes(
 		trace.StringAttribute("project", projectID),
 		trace.StringAttribute("app", appName),
@@ -104,7 +104,7 @@ func ListReleases(ctx context.Context, projectID, appName string) error {
 }
 
 func CreateRelease(ctx context.Context, projectID, appName, relName string, config *ReleaseConfig, image string) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.cli.CreateRelease")
+	ctx, span := trace.StartSpan(ctx, "belvedere.CreateRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", projectID),
 		trace.StringAttribute("app", appName),
@@ -119,7 +119,7 @@ func CreateRelease(ctx context.Context, projectID, appName, relName string, conf
 }
 
 func EnableRelease(ctx context.Context, projectID, appName, relName string) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.cli.EnableRelease")
+	ctx, span := trace.StartSpan(ctx, "belvedere.EnableRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", projectID),
 		trace.StringAttribute("app", appName),
@@ -133,7 +133,7 @@ func EnableRelease(ctx context.Context, projectID, appName, relName string) erro
 }
 
 func DisableRelease(ctx context.Context, projectID, appName, relName string) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.cli.DisableRelease")
+	ctx, span := trace.StartSpan(ctx, "belvedere.DisableRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", projectID),
 		trace.StringAttribute("app", appName),
@@ -147,7 +147,7 @@ func DisableRelease(ctx context.Context, projectID, appName, relName string) err
 }
 
 func DestroyRelease(ctx context.Context, projectID, appName, relName string) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.cli.DestroyRelease")
+	ctx, span := trace.StartSpan(ctx, "belvedere.DestroyRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", projectID),
 		trace.StringAttribute("app", appName),

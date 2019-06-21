@@ -11,8 +11,11 @@ import (
 	"google.golang.org/api/dns/v1"
 )
 
-func Initialize(ctx context.Context, projectID, dnsZone string) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.cli.Initialize")
+// Setup enables all required GCP services, grants Deployment Manager the permissions required to
+// manage service accounts and IAM roles, and creates a deployment with the base resources needed
+// to use Belvedere.
+func Setup(ctx context.Context, projectID, dnsZone string) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.Setup")
 	span.AddAttributes(
 		trace.StringAttribute("project", projectID),
 		trace.StringAttribute("dns_zone", dnsZone),
