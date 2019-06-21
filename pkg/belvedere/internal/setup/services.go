@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/serviceusage/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -68,37 +69,12 @@ func EnableServices(ctx context.Context, project string) error {
 		}
 
 		// Wait for the services to be enabled.
-		f := checkOperation(ctx, su, op.Name)
-		if err := wait.Poll(10*time.Second, 5*time.Minute, f); err != nil {
+		if err := wait.Poll(10*time.Second, 5*time.Minute, check.SU(ctx, su, op.Name)); err != nil {
 			return err
 		}
 	}
 
 	return nil
-}
-
-func checkOperation(ctx context.Context, su *serviceusage.Service, operation string) wait.ConditionFunc {
-	return func() (bool, error) {
-		ctx, span := trace.StartSpan(ctx, "belvedere.internal.base.checkOperation")
-		span.AddAttributes(trace.StringAttribute("operation", operation))
-		defer span.End()
-
-		op, err := su.Operations.Get(operation).Context(ctx).Do()
-		if err != nil {
-			return false, err
-		}
-
-		if op.Error != nil {
-			span.Annotate([]trace.Attribute{
-				trace.Int64Attribute("error.code", op.Error.Code),
-				trace.StringAttribute("error.message", op.Error.Message),
-				trace.StringAttribute("error.details", fmt.Sprint(op.Error.Details)),
-			}, "Error")
-			span.SetStatus(trace.Status{Code: trace.StatusCodeAborted, Message: op.Error.Message})
-		}
-		span.AddAttributes(trace.BoolAttribute("done", op.Done))
-		return op.Done, nil
-	}
 }
 
 func batchStrings(s []string, n int) [][]string {

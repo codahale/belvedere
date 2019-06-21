@@ -4,12 +4,16 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"time"
 
+	"github.com/codahale/belvedere/pkg/belvedere/internal/backends"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/deploymentmanager/v2"
 	"gopkg.in/yaml.v2"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 type ReleaseConfig struct {
@@ -205,7 +209,7 @@ func CreateRelease(ctx context.Context, project, region, appName, relName string
 	})
 }
 
-func EnableRelease(ctx context.Context, project, appName, relName string) error {
+func EnableRelease(ctx context.Context, project, region, appName, relName string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.EnableRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -214,12 +218,22 @@ func EnableRelease(ctx context.Context, project, appName, relName string) error 
 	)
 	defer span.End()
 
-	// TODO patch backend service w/ release IGM
+	gce, err := compute.NewService(ctx)
+	if err != nil {
+		return err
+	}
 
-	return errUnimplemented
+	backendService := fmt.Sprintf("%s-bes", appName)
+	instanceGroup := fmt.Sprintf("%s-%s-ig", appName, relName)
+	if err := backends.Add(ctx, gce, project, region, backendService, instanceGroup); err != nil {
+		return err
+	}
+
+	f := check.Health(ctx, gce, project, region, backendService, instanceGroup)
+	return wait.Poll(10*time.Second, 5*time.Minute, f)
 }
 
-func DisableRelease(ctx context.Context, project, appName, relName string) error {
+func DisableRelease(ctx context.Context, project, region, appName, relName string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DisableRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -228,9 +242,14 @@ func DisableRelease(ctx context.Context, project, appName, relName string) error
 	)
 	defer span.End()
 
-	// TODO patch backend service w/o release IGM
+	gce, err := compute.NewService(ctx)
+	if err != nil {
+		return err
+	}
 
-	return errUnimplemented
+	backendService := fmt.Sprintf("%s-bes", appName)
+	instanceGroup := fmt.Sprintf("%s-%s-ig", appName, relName)
+	return backends.Remove(ctx, gce, project, region, backendService, instanceGroup)
 }
 
 func DestroyRelease(ctx context.Context, project, appName, relName string) error {

@@ -3,12 +3,43 @@ package deployments
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
+	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/deploymentmanager/v2"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
+
+func Ref(name, property string) string {
+	return fmt.Sprintf("$(ref.%s.%s)", name, property)
+}
+
+func SelfLink(name string) string {
+	return Ref(name, "selfLink")
+}
+
+type Metadata struct {
+	DependsOn []string `json:"dependsOn,omitempty"`
+}
+
+type Output struct {
+	Name  string `json:"name"`
+	Value string `json:"name"`
+}
+
+type Resource struct {
+	Name       string      `json:"name"`
+	Type       string      `json:"type"`
+	Properties interface{} `json:"properties"`
+	Metadata   *Metadata   `json:"metadata,omitempty"`
+	Outputs    []Output    `json:"outputs,omitempty"`
+}
+
+type Config struct {
+	Resources []Resource `json:"resources,omitempty"`
+}
 
 func Insert(ctx context.Context, project, name string, config *Config, labels map[string]string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Insert")
@@ -49,8 +80,7 @@ func Insert(ctx context.Context, project, name string, config *Config, labels ma
 		return err
 	}
 
-	f := checkOperation(ctx, dm, project, op.Name)
-	return wait.Poll(10*time.Second, 5*time.Minute, f)
+	return wait.Poll(10*time.Second, 5*time.Minute, check.DM(ctx, dm, project, op.Name))
 }
 
 func Delete(ctx context.Context, project, name string) error {
@@ -71,32 +101,5 @@ func Delete(ctx context.Context, project, name string) error {
 		return err
 	}
 
-	f := checkOperation(ctx, dm, project, op.Name)
-	return wait.Poll(10*time.Second, 5*time.Minute, f)
-}
-
-func checkOperation(ctx context.Context, dm *deploymentmanager.Service, project string, operation string) wait.ConditionFunc {
-	return func() (bool, error) {
-		ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.checkOperation")
-		span.AddAttributes(trace.StringAttribute("operation", operation))
-		defer span.End()
-
-		op, err := dm.Operations.Get(project, operation).Context(ctx).Do()
-		if err != nil {
-			return false, err
-		}
-
-		if op.Error != nil {
-			for _, e := range op.Error.Errors {
-				span.Annotate([]trace.Attribute{
-					trace.StringAttribute("code", e.Code),
-					trace.StringAttribute("message", e.Message),
-					trace.StringAttribute("location", e.Location),
-				}, "Error")
-			}
-			span.SetStatus(trace.Status{Code: trace.StatusCodeAborted})
-		}
-		span.AddAttributes(trace.StringAttribute("status", op.Status))
-		return op.Status == "DONE", nil
-	}
+	return wait.Poll(10*time.Second, 5*time.Minute, check.DM(ctx, dm, project, op.Name))
 }

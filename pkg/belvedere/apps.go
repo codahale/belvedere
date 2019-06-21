@@ -85,7 +85,7 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 	)
 	defer span.End()
 
-	certPEM, keyPEM, err := cert.GenerateSelfSignedCertKey(fmt.Sprintf("belvedere-%s.blort"), nil, nil)
+	certPEM, keyPEM, err := cert.GenerateSelfSignedCertKey(fmt.Sprintf("belvedere-%s.blort", appName), nil, nil)
 	if err != nil {
 		return err
 	}

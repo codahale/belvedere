@@ -137,11 +137,11 @@ func run(ctx context.Context, opts docopt.Opts) error {
 	case isCmd(opts, "releases", "enable"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")
-		return belvedere.EnableRelease(ctx, project, appName, relName)
+		return belvedere.EnableRelease(ctx, project, region, appName, relName)
 	case isCmd(opts, "releases", "disable"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")
-		return belvedere.DisableRelease(ctx, project, appName, relName)
+		return belvedere.DisableRelease(ctx, project, region, appName, relName)
 	case isCmd(opts, "releases", "destroy"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")
