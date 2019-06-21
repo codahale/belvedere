@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"go.opencensus.io/trace"
+	"google.golang.org/api/deploymentmanager/v2"
 	"gopkg.in/yaml.v2"
 )
 
@@ -50,17 +51,32 @@ func LoadReleaseConfig(configPath string) (*ReleaseConfig, error) {
 	return &config, nil
 }
 
-func ListApps(ctx context.Context, projectID string) error {
+func ListApps(ctx context.Context, projectID string) ([]string, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.ListApps")
 	span.AddAttributes(
 		trace.StringAttribute("project", projectID),
 	)
 	defer span.End()
 
-	// TODO list deployments with filter `labels.type eq belvedere-app`
-	// TODO return list of apps
+	dm, err := deploymentmanager.NewService(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	return errUnimplemented
+	resp, err := dm.Deployments.List(projectID).Filter("labels.type eq belvedere-app").Do()
+	if err != nil {
+		return nil, err
+	}
+
+	var names []string
+	for _, d := range resp.Deployments {
+		for _, l := range d.Labels {
+			if l.Key == "belvedere-name" {
+				names = append(names, l.Value)
+			}
+		}
+	}
+	return names, nil
 }
 
 func CreateApp(ctx context.Context, projectID, appName string, config *AppConfig) error {

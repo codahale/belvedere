@@ -93,8 +93,15 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		dnsZone, _ := opts.String("<dns zone>")
 		return belvedere.Setup(ctx, projectID, dnsZone)
 	case isCmd(opts, "apps", "list"):
-		// TODO implement app printing
-		return belvedere.ListApps(ctx, projectID)
+		apps, err := belvedere.ListApps(ctx, projectID)
+		if err != nil {
+			return err
+		}
+
+		for _, app := range apps {
+			fmt.Println(app)
+		}
+		return nil
 	case isCmd(opts, "apps", "create"):
 		appName, _ := opts.String("<app>")
 		configPath, _ := opts.String("<config>")
@@ -132,8 +139,9 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")
 		return belvedere.DestroyRelease(ctx, projectID, appName, relName)
+	default:
+		return fmt.Errorf("unimplemented: %v", opts)
 	}
-	return fmt.Errorf("unimplemented: %v", opts)
 }
 
 func isCmd(opts docopt.Opts, commands ...string) bool {
