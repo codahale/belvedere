@@ -7,7 +7,7 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"go.opencensus.io/trace"
-	compute "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/deploymentmanager/v2"
 	"gopkg.in/yaml.v2"
 	"k8s.io/client-go/util/cert"
@@ -54,17 +54,24 @@ func ListApps(ctx context.Context, project string) ([]string, error) {
 		return nil, err
 	}
 
-	resp, err := dm.Deployments.List(project).Filter("labels.belvedere-type eq app").Do()
+	resp, err := dm.Deployments.List(project).Do()
 	if err != nil {
 		return nil, err
 	}
 
 	var names []string
 	for _, d := range resp.Deployments {
+		var app bool
+		var name string
 		for _, l := range d.Labels {
-			if l.Key == "belvedere-name" {
-				names = append(names, l.Value)
+			if l.Key == "belvedere-app" {
+				name = l.Value
+			} else if l.Key == "belvedere-type" && l.Value == "app" {
+				app = true
 			}
+		}
+		if app {
+			names = append(names, name)
 		}
 	}
 	return names, nil
@@ -103,7 +110,7 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 						"0.0.0.0/0", // TODO lock down access to apps
 					},
 					TargetTags: []string{
-						fmt.Sprintf("belvedere-app-%s", appName),
+						fmt.Sprintf("belvedere-%s", appName),
 					},
 				},
 			},
@@ -218,7 +225,7 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 	name := fmt.Sprintf("belvedere-%s", appName)
 	return deployments.Insert(ctx, project, name, config, map[string]string{
 		"belvedere-type": "app",
-		"belvedere-name": appName,
+		"belvedere-app":  appName,
 	})
 }
 
