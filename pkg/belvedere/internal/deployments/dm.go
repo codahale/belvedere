@@ -3,7 +3,6 @@ package deployments
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"go.opencensus.io/trace"
@@ -88,12 +87,11 @@ func checkOperation(ctx context.Context, dm *deploymentmanager.Service, project 
 		}
 
 		if op.Error != nil {
-			for i, e := range op.Error.Errors {
-				prefix := fmt.Sprintf("error.%d.", i)
+			for _, e := range op.Error.Errors {
 				span.Annotate([]trace.Attribute{
-					trace.StringAttribute(prefix+"code", e.Code),
-					trace.StringAttribute(prefix+"message", e.Message),
-					trace.StringAttribute(prefix+"location", e.Location),
+					trace.StringAttribute("code", e.Code),
+					trace.StringAttribute("message", e.Message),
+					trace.StringAttribute("location", e.Location),
 				}, "Error")
 			}
 			span.SetStatus(trace.Status{Code: trace.StatusCodeAborted})

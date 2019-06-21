@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -83,7 +84,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 	}
 	defer span.End()
 
-	project, err := config(ctx, opts)
+	project, region, err := config(ctx, opts)
 	if err != nil {
 		return err
 	}
@@ -109,7 +110,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		if err != nil {
 			return err
 		}
-		return belvedere.CreateApp(ctx, project, appName, config)
+		return belvedere.CreateApp(ctx, project, region, appName, config)
 	case isCmd(opts, "apps", "destroy"):
 		appName, _ := opts.String("<app>")
 		return belvedere.DestroyApp(ctx, project, appName)
@@ -153,21 +154,27 @@ func isCmd(opts docopt.Opts, commands ...string) bool {
 	return true
 }
 
-func config(ctx context.Context, opts docopt.Opts) (string, error) {
+func config(ctx context.Context, opts docopt.Opts) (project, region string, err error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.config")
+	defer func() {
+		span.AddAttributes(
+			trace.StringAttribute("project", project),
+			trace.StringAttribute("region", region),
+		)
+	}()
 	defer span.End()
 
-	if project, err := opts.String("--project"); err == nil {
-		span.AddAttributes(trace.StringAttribute("project", project))
-		return project, nil
-	}
+	project, _ = opts.String("--project")
+	region, _ = opts.String("--region")
 
-	span.AddAttributes(trace.BoolAttribute("from_gcloud", true))
+	if project != "" && region != "" {
+		return
+	}
 
 	cmd := exec.Command("gcloud", "config", "config-helper", "--format=json")
 	b, err := cmd.Output()
 	if err != nil {
-		return "", fmt.Errorf("unable to find default project: %s", err)
+		return
 	}
 
 	var config struct {
@@ -176,18 +183,31 @@ func config(ctx context.Context, opts docopt.Opts) (string, error) {
 				Core struct {
 					Project string `json:"project"`
 				} `json:"core"`
+				Compute struct {
+					Region string `json:"region"`
+				} `json:"compute"`
 			} `json:"properties"`
 		} `json:"configuration"`
 	}
-	if err := json.Unmarshal(b, &config); err != nil {
-		return "", fmt.Errorf("unable to find default project: %s", err)
+	if err = json.Unmarshal(b, &config); err != nil {
+		return
 	}
 
-	project := config.Configuration.Properties.Core.Project
 	if project == "" {
-		return "", fmt.Errorf("unable to find default project")
+		project = config.Configuration.Properties.Core.Project
 	}
 
-	span.AddAttributes(trace.StringAttribute("project", project))
-	return project, nil
+	if region == "" {
+		region = config.Configuration.Properties.Compute.Region
+	}
+
+	if project == "" {
+		return "", "", errors.New("project not found")
+	}
+
+	if region == "" {
+		return "", "", errors.New("region not found")
+	}
+
+	return
 }
