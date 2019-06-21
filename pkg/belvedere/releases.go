@@ -82,17 +82,6 @@ func ListReleases(ctx context.Context, project, appName string) ([]string, error
 	return names, nil
 }
 
-const (
-	cosStable = "https://www.googleapis.com/compute/v1/projects/gce-uefi-images/global/images/family/cos-stable"
-)
-
-func metaData(key, value string) *compute.MetadataItems {
-	return &compute.MetadataItems{
-		Key:   key,
-		Value: &value,
-	}
-}
-
 func CreateRelease(ctx context.Context, project, region, appName, relName string, release *ReleaseConfig, imageURL string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateRelease")
 	span.AddAttributes(
@@ -254,4 +243,15 @@ func DestroyRelease(ctx context.Context, project, appName, relName string) error
 	defer span.End()
 
 	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s-%s", appName, relName))
+}
+
+const (
+	cosStable = "https://www.googleapis.com/compute/v1/projects/gce-uefi-images/global/images/family/cos-stable"
+)
+
+func metaData(key, value string) *compute.MetadataItems {
+	return &compute.MetadataItems{
+		Key:   key,
+		Value: &value,
+	}
 }
