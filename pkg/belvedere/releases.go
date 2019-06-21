@@ -150,6 +150,14 @@ func CreateRelease(ctx context.Context, project, region, appName, relName string
 								},
 							},
 						},
+						ServiceAccounts: []*compute.ServiceAccount{
+							{
+								Email: fmt.Sprintf("app-%s@%s.iam.gserviceaccount.com", appName, project),
+								Scopes: []string{
+									compute.CloudPlatformScope,
+								},
+							},
+						},
 						ShieldedVmConfig: &compute.ShieldedVmConfig{
 							EnableIntegrityMonitoring: true,
 							EnableSecureBoot:          true,
