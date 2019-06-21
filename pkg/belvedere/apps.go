@@ -85,19 +85,27 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 	)
 	defer span.End()
 
-	tlsCert, tlsKey, err := cert.GenerateSelfSignedCertKey(fmt.Sprintf("belvedere-%s.blort"), nil, nil)
+	certPEM, keyPEM, err := cert.GenerateSelfSignedCertKey(fmt.Sprintf("belvedere-%s.blort"), nil, nil)
 	if err != nil {
 		return err
 	}
+
+	firewall := fmt.Sprintf("%s-fw", appName)
+	healthcheck := fmt.Sprintf("%s-hc", appName)
+	backendService := fmt.Sprintf("%s-bes", appName)
+	urlMap := fmt.Sprintf("%s-urlmap", appName)
+	sslCertificate := fmt.Sprintf("%s-cert", appName)
+	targetProxy := fmt.Sprintf("%s-tp", appName)
+	forwardingRule := fmt.Sprintf("%s-fr", appName)
+	serviceAccount := fmt.Sprintf("%s-sa", appName)
 
 	config := &deployments.Config{
 		Resources: []deployments.Resource{
 			// A firewall rule allowing access from the load balancer to app instances on port 8443.
 			{
-				Name: "firewall",
+				Name: firewall,
 				Type: "compute.beta.firewall",
 				Properties: compute.Firewall{
-					Name: fmt.Sprintf("belvedere-app-%s", appName),
 					Allowed: []*compute.FirewallAllowed{
 						{
 							IPProtocol: "TCP",
@@ -117,10 +125,9 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 			// An HTTP2 healthcheck which sends a request to the svc-https named port for the path
 			// /healthz.
 			{
-				Name: "healthcheck",
+				Name: healthcheck,
 				Type: "compute.beta.healthCheck",
 				Properties: compute.HealthCheck{
-					Name: fmt.Sprintf("belvedere-%s", appName),
 					Type: "HTTP2",
 					Http2HealthCheck: &compute.HTTP2HealthCheck{
 						PortName:    "svc-https",
@@ -130,14 +137,13 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 			},
 			// An HTTP2 backend service connected to the healthcheck.
 			{
-				Name: "backend-service",
+				Name: backendService,
 				Type: "compute.beta.backendService",
 				Properties: compute.BackendService{
-					Name:     fmt.Sprintf("belvedere-%s", appName),
 					Protocol: "HTTP2",
 					PortName: "svc-https",
 					HealthChecks: []string{
-						deployments.SelfLink("healthcheck"),
+						deployments.SelfLink(healthcheck),
 					},
 					Region: region,
 				},
@@ -145,11 +151,10 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 			// A URL map directing requests to the backend service while blocking access to the
 			// app's health check URL.
 			{
-				Name: "url-map",
+				Name: urlMap,
 				Type: "compute.beta.urlMap",
 				Properties: compute.UrlMap{
-					Name:           fmt.Sprintf("belvedere-%s", appName),
-					DefaultService: deployments.SelfLink("backend-service"),
+					DefaultService: deployments.SelfLink(backendService),
 					// TODO add WAF rule turning /healthz from external sources into 404
 					//PathMatchers: []*compute.PathMatcher{
 					//	{
@@ -175,42 +180,39 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 			{
 				// TODO replace self-signed certs with managed certs
 				// https://cloud.google.com/load-balancing/docs/ssl-certificates#google-managed_ssl_certificate_renewal
-				Name: "tls-cert",
+				Name: sslCertificate,
 				Type: "compute.beta.sslCertificate",
 				Properties: compute.SslCertificate{
-					Name:        fmt.Sprintf("belvedere-%s", appName),
-					Certificate: string(tlsCert),
-					PrivateKey:  string(tlsKey),
+					Certificate: string(certPEM),
+					PrivateKey:  string(keyPEM),
 				},
 			},
 			// A QUIC-enabled HTTPS target proxy using the app's TLS cert and directing requests to
 			// the URL map.
 			{
-				Name: "target-proxy",
+				Name: targetProxy,
 				Type: "compute.beta.targetHttpsProxy",
 				Properties: compute.TargetHttpsProxy{
-					Name: fmt.Sprintf("belvedere-%s", appName),
 					SslCertificates: []string{
-						deployments.SelfLink("tls-cert"),
+						deployments.SelfLink(sslCertificate),
 					},
 					QuicOverride: "ENABLE",
-					UrlMap:       deployments.SelfLink("url-map"),
+					UrlMap:       deployments.SelfLink(urlMap),
 				},
 			},
 			// A global forwarding rule directing TCP:443 to the target proxy.
 			{
-				Name: "global-forwarding-rule",
+				Name: forwardingRule,
 				Type: "compute.beta.globalForwardingRule",
 				Properties: compute.ForwardingRule{
-					Name:       fmt.Sprintf("belvedere-%s", appName),
 					IPProtocol: "TCP",
 					PortRange:  "443",
-					Target:     deployments.SelfLink("target-proxy"),
+					Target:     deployments.SelfLink(targetProxy),
 				},
 			},
 			// A service account.
 			{
-				Name: "service-account",
+				Name: serviceAccount,
 				Type: "iam.v1.serviceAccount",
 				Properties: map[string]string{
 					"accountId":   fmt.Sprintf("app-%s", appName),
@@ -220,7 +222,7 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 		},
 	}
 
-	config.Resources = append(config.Resources, roleBindings(project, appName, app)...)
+	config.Resources = append(config.Resources, roleBindings(project, serviceAccount, app)...)
 
 	name := fmt.Sprintf("belvedere-%s", appName)
 	return deployments.Insert(ctx, project, name, config, map[string]string{

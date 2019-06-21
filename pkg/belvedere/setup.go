@@ -37,7 +37,7 @@ func Setup(ctx context.Context, project, dnsZone string) error {
 	config := &deployments.Config{
 		Resources: []deployments.Resource{
 			{
-				Name: "managed-zone",
+				Name: "belvedere-managed-zone",
 				Type: "dns.v1.managedZone",
 				Properties: dns.ManagedZone{
 					Description: fmt.Sprintf("Belvedere managed zone for %s", dnsZone),
@@ -46,7 +46,7 @@ func Setup(ctx context.Context, project, dnsZone string) error {
 				},
 			},
 			{
-				Name: "deny-ssh-firewall",
+				Name: "belvedere-deny-ssh-firewall",
 				Type: "compute.beta.firewall",
 				Properties: compute.Firewall{
 					Denied: []*compute.FirewallDenied{
@@ -64,7 +64,7 @@ func Setup(ctx context.Context, project, dnsZone string) error {
 				},
 			},
 			{
-				Name: "iap-tunneling-firewall",
+				Name: "belvedere-iap-tunneling-firewall",
 				Type: "compute.beta.firewall",
 				Properties: compute.Firewall{
 					Allowed: []*compute.FirewallAllowed{

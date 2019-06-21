@@ -17,25 +17,25 @@ var requiredRoles = []string{
 	"roles/storage.objectViewer",
 }
 
-func roleBinding(project, app, role string) deployments.Resource {
+func roleBinding(project, serviceAccount, role string) deployments.Resource {
 	return deployments.Resource{
-		Name: fmt.Sprintf("%s-%s", app, role),
+		Name: fmt.Sprintf("%s-%s", serviceAccount, role),
 		Type: "gcp-types/cloudresourcemanager-v1:virtual.projects.iamMemberBinding",
 		Properties: map[string]string{
 			"resource": project,
 			"role":     role,
-			"member":   fmt.Sprintf("serviceAccount:%s", deployments.Ref("service-account", "email")),
+			"member":   fmt.Sprintf("serviceAccount:%s", deployments.Ref(serviceAccount, "email")),
 		},
 	}
 }
 
-func roleBindings(project, appName string, app *AppConfig) []deployments.Resource {
+func roleBindings(project, serviceAccount string, app *AppConfig) []deployments.Resource {
 	var bindings []deployments.Resource
 	for _, role := range requiredRoles {
-		bindings = append(bindings, roleBinding(project, appName, role))
+		bindings = append(bindings, roleBinding(project, serviceAccount, role))
 	}
 	for _, role := range app.IAMRoles {
-		bindings = append(bindings, roleBinding(project, appName, role))
+		bindings = append(bindings, roleBinding(project, serviceAccount, role))
 	}
 	return bindings
 }
