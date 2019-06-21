@@ -13,12 +13,12 @@ import (
 )
 
 type ReleaseConfig struct {
-	MachineType      string            `yaml:"machineType"`
-	MinInstances     int               `yaml:"minInstances"`
-	MaxInstances     int               `yaml:"maxInstances"`
-	InitialInstances int               `yaml:"initialInstances"`
-	TargetCapacity   float64           `yaml:"targetCapacity"`
-	Env              map[string]string `yaml:"env"`
+	MachineType       string            `yaml:"machineType"`
+	MinInstances      int               `yaml:"minInstances"`
+	MaxInstances      int               `yaml:"maxInstances"`
+	InitialInstances  int               `yaml:"initialInstances"`
+	UtilizationTarget float64           `yaml:"utilizationTarget"`
+	Env               map[string]string `yaml:"env"`
 }
 
 func LoadReleaseConfig(ctx context.Context, path string) (*ReleaseConfig, error) {
@@ -93,23 +93,26 @@ func metaData(key, value string) *compute.MetadataItems {
 	}
 }
 
-func CreateRelease(ctx context.Context, project, appName, relName string, release *ReleaseConfig, imageURL string) error {
+func CreateRelease(ctx context.Context, project, region, appName, relName string, release *ReleaseConfig, imageURL string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
+		trace.StringAttribute("region", region),
 		trace.StringAttribute("app", appName),
 		trace.StringAttribute("release", relName),
 		trace.StringAttribute("image_url", imageURL),
 	)
 	defer span.End()
 
+	instanceTemplate := fmt.Sprintf("%s-%s-it", appName, relName)
+	instanceGroupManager := fmt.Sprintf("%s-%s-ig", appName, relName)
+	autoscaler := fmt.Sprintf("%s-%s-as", appName, relName)
 	config := &deployments.Config{
 		Resources: []deployments.Resource{
 			{
-				Name: "instance-template",
+				Name: instanceTemplate,
 				Type: "compute.beta.instanceTemplate",
 				Properties: compute.InstanceTemplate{
-					Name: fmt.Sprintf("belvedere-%s-%s", appName, relName),
 					Properties: &compute.InstanceProperties{
 						Disks: []*compute.AttachedDisk{
 							{
@@ -161,8 +164,38 @@ func CreateRelease(ctx context.Context, project, appName, relName string, releas
 					},
 				},
 			},
-			// TODO region autoscaler
-			// TODO region instance group manager
+			{
+				Name: instanceGroupManager,
+				Type: "compute.beta.regionInstanceGroupManager",
+				Properties: compute.InstanceGroupManager{
+					BaseInstanceName: fmt.Sprintf("%s-%s", appName, relName),
+					InstanceTemplate: deployments.SelfLink(instanceTemplate),
+					Region:           region,
+					NamedPorts: []*compute.NamedPort{
+						{
+							Name: "svc-https",
+							Port: 8443,
+						},
+					},
+					TargetSize: int64(release.InitialInstances),
+				},
+			},
+			{
+				Name: autoscaler,
+				Type: "compute.beta.regionAutoscaler",
+				Properties: compute.Autoscaler{
+					Name: fmt.Sprintf("%s-%s", appName, relName),
+					AutoscalingPolicy: &compute.AutoscalingPolicy{
+						LoadBalancingUtilization: &compute.AutoscalingPolicyLoadBalancingUtilization{
+							UtilizationTarget: release.UtilizationTarget,
+						},
+						MaxNumReplicas: int64(release.MaxInstances),
+						MinNumReplicas: int64(release.MinInstances),
+					},
+					Region: region,
+					Target: deployments.SelfLink(instanceGroupManager),
+				},
+			},
 		},
 	}
 

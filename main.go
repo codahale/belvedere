@@ -133,7 +133,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		if err != nil {
 			return err
 		}
-		return belvedere.CreateRelease(ctx, project, appName, relName, config, image)
+		return belvedere.CreateRelease(ctx, project, region, appName, relName, config, image)
 	case isCmd(opts, "releases", "enable"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")

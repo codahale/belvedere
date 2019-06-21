@@ -1,8 +1,8 @@
-machineType: n-standard-1
+machineType: n1-standard-1
 minInstances: 1
 maxInstances: 10
 initialInstances: 2
-targetCapacity: 0.8
+utilizationTarget: 0.8
 env:
   ONE: 1
   TWO: 2
