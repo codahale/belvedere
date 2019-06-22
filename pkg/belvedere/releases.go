@@ -202,10 +202,9 @@ func CreateRelease(ctx context.Context, project, region, appName, relName string
 
 	name := fmt.Sprintf("belvedere-%s-%s", appName, relName)
 	return deployments.Insert(ctx, project, name, config, map[string]string{
-		"belvedere-type":      "release",
-		"belvedere-app":       appName,
-		"belvedere-release":   relName,
-		"belvedere-image-url": imageURL,
+		"belvedere-type":    "release",
+		"belvedere-app":     appName,
+		"belvedere-release": relName,
 	})
 }
 
