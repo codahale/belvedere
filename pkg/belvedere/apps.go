@@ -226,8 +226,9 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 
 	name := fmt.Sprintf("belvedere-%s", appName)
 	return deployments.Insert(ctx, project, name, config, map[string]string{
-		"belvedere-type": "app",
-		"belvedere-app":  appName,
+		"belvedere-type":   "app",
+		"belvedere-app":    appName,
+		"belvedere-region": region,
 	})
 }
 

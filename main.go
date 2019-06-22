@@ -26,7 +26,7 @@ func main() {
 Usage:
   belvedere setup <dns zone> [options]
   belvedere apps list [options]
-  belvedere apps create <app> <config> [options]
+  belvedere apps create <app> <region> <config> [options]
   belvedere apps destroy <app> [options] 
   belvedere releases list <app> [options]
   belvedere releases create <app> <release> <config> <image> [options]
@@ -105,6 +105,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		return nil
 	case isCmd(opts, "apps", "create"):
 		appName, _ := opts.String("<app>")
+		region, _ := opts.String("<app>")
 		path, _ := opts.String("<config>")
 		config, err := belvedere.LoadAppConfig(ctx, path)
 		if err != nil {
