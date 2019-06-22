@@ -84,7 +84,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 	}
 	defer span.End()
 
-	project, _, err := config(ctx, opts)
+	project, err := config(ctx, opts)
 	if err != nil {
 		return err
 	}
@@ -161,27 +161,25 @@ func isCmd(opts docopt.Opts, commands ...string) bool {
 	return true
 }
 
-func config(ctx context.Context, opts docopt.Opts) (project, region string, err error) {
+func config(ctx context.Context, opts docopt.Opts) (project string, err error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.config")
 	defer func() {
 		span.AddAttributes(
 			trace.StringAttribute("project", project),
-			trace.StringAttribute("region", region),
 		)
 	}()
 	defer span.End()
 
 	project, _ = opts.String("--project")
-	region, _ = opts.String("--region")
 
-	if project != "" && region != "" {
-		return
+	if project != "" {
+		return project, nil
 	}
 
 	cmd := exec.Command("gcloud", "config", "config-helper", "--format=json")
 	b, err := cmd.Output()
 	if err != nil {
-		return
+		return "", err
 	}
 
 	var config struct {
@@ -190,31 +188,16 @@ func config(ctx context.Context, opts docopt.Opts) (project, region string, err 
 				Core struct {
 					Project string `json:"project"`
 				} `json:"core"`
-				Compute struct {
-					Region string `json:"region"`
-				} `json:"compute"`
 			} `json:"properties"`
 		} `json:"configuration"`
 	}
 	if err = json.Unmarshal(b, &config); err != nil {
-		return
+		return "", err
 	}
 
-	if project == "" {
-		project = config.Configuration.Properties.Core.Project
+	if config.Configuration.Properties.Core.Project != "" {
+		return config.Configuration.Properties.Core.Project, nil
 	}
 
-	if region == "" {
-		region = config.Configuration.Properties.Compute.Region
-	}
-
-	if project == "" {
-		return "", "", errors.New("project not found")
-	}
-
-	if region == "" {
-		return "", "", errors.New("region not found")
-	}
-
-	return
+	return "", errors.New("project not found")
 }
