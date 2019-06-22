@@ -1,0 +1,23 @@
+daemon off;
+
+events {}
+
+error_log "/dev/stdout" info;
+
+http {
+  server {
+    listen               8443 ssl;
+    ssl_certificate      /etc/tls/tmp.crt;
+    ssl_certificate_key  /etc/tls/tmp.key;
+    ssl_session_timeout  5m;
+    ssl_protocols        TLSv1.2;
+
+    location /healthz {
+      return 200 "OK\n";
+    }
+
+    location / {
+      return 200 "woop\n";
+    }
+  }
+}

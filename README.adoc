@@ -4,10 +4,9 @@ _A small lookout tower (usually square) on the roof of a house._
 
 == TODO
 
-- [ ] Create canned hello-world example app
-  * Use a dumb pre-loaded Nginx/HTTP2 server on 8443 to start
-- [ ] Figure out sidecar
+- [x] Create canned hello-world example app
 - [ ] Test enabling and disabling releases
+- [ ] Figure out sidecar
 - [ ] Automatically provision A records for apps
 - [ ] Provision managed TLS certs instead of self-signed ones
 - [ ] Lock down access to app instances
