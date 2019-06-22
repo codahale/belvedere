@@ -39,7 +39,7 @@ var (
 
 // EnableServices enables all required services for the given GCP project.
 func EnableServices(ctx context.Context, project string) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.internal.base.EnableServices")
+	ctx, span := trace.StartSpan(ctx, "belvedere.internal.setup.EnableServices")
 	defer span.End()
 
 	su, err := serviceusage.NewService(ctx)

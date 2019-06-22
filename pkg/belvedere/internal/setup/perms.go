@@ -12,7 +12,7 @@ import (
 // been so bound. This allows Deployment Manager to add IAM roles to service accounts per
 // https://cloud.google.com/deployment-manager/docs/configuration/set-access-control-resources#granting_deployment_manager_permission_to_set_iam_policies
 func SetDMPerms(ctx context.Context, project string) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.internal.base.SetDMPerms")
+	ctx, span := trace.StartSpan(ctx, "belvedere.internal.setup.SetDMPerms")
 	defer span.End()
 
 	crm, err := cloudresourcemanager.NewService(ctx)
