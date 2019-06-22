@@ -29,7 +29,7 @@ Usage:
   belvedere apps create <app> <region> <config> [options]
   belvedere apps destroy <app> [options] 
   belvedere releases list <app> [options]
-  belvedere releases create <app> <release> <config> <image> [options]
+  belvedere releases create <app> <release> <config> <sha256> [options]
   belvedere releases enable <app> <release> [options]
   belvedere releases disable <app> <release> [options]
   belvedere releases destroy <app> <release> [options]
@@ -128,13 +128,13 @@ func run(ctx context.Context, opts docopt.Opts) error {
 	case isCmd(opts, "releases", "create"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")
-		image, _ := opts.String("<image>")
+		imageSHA256, _ := opts.String("<sha256>")
 		path, _ := opts.String("<config>")
 		config, err := belvedere.LoadReleaseConfig(ctx, path)
 		if err != nil {
 			return err
 		}
-		return belvedere.CreateRelease(ctx, project, appName, relName, config, image)
+		return belvedere.CreateRelease(ctx, project, appName, relName, config, imageSHA256)
 	case isCmd(opts, "releases", "enable"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")

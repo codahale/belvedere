@@ -24,6 +24,7 @@ type ReleaseConfig struct {
 	InitialInstances  int               `yaml:"initialInstances"`
 	UtilizationTarget float64           `yaml:"utilizationTarget"`
 	Env               map[string]string `yaml:"env"`
+	ImageURL          string            `yaml:"imageURL"`
 }
 
 func LoadReleaseConfig(ctx context.Context, path string) (*ReleaseConfig, error) {
@@ -87,13 +88,13 @@ func ListReleases(ctx context.Context, project, appName string) ([]string, error
 	return names, nil
 }
 
-func CreateRelease(ctx context.Context, project, appName, relName string, release *ReleaseConfig, imageURL string) error {
+func CreateRelease(ctx context.Context, project, appName, relName string, release *ReleaseConfig, imageSHA256 string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", appName),
 		trace.StringAttribute("release", relName),
-		trace.StringAttribute("image_url", imageURL),
+		trace.StringAttribute("image_url", imageSHA256),
 	)
 	defer span.End()
 
@@ -136,7 +137,7 @@ func CreateRelease(ctx context.Context, project, appName, relName string, releas
 								metaData("google-logging-enable", "true"),
 								metaData(
 									"gce-container-declaration",
-									containerDeclaration(appName, relName, release, imageURL),
+									containerDeclaration(appName, relName, release, imageSHA256),
 								),
 							},
 						},
@@ -214,6 +215,7 @@ func CreateRelease(ctx context.Context, project, appName, relName string, releas
 		"belvedere-app":     appName,
 		"belvedere-release": relName,
 		"belvedere-region":  region,
+		"belvedere-hash":    imageSHA256[:32],
 	})
 }
 
@@ -293,7 +295,7 @@ func metaData(key, value string) *compute.MetadataItems {
 	}
 }
 
-func containerDeclaration(appName, relName string, release *ReleaseConfig, imageURL string) string {
+func containerDeclaration(appName, relName string, release *ReleaseConfig, imageSHA256 string) string {
 	var env []struct {
 		Name  string
 		Value string
@@ -311,7 +313,7 @@ func containerDeclaration(appName, relName string, release *ReleaseConfig, image
 			Containers: []types.Container{
 				{
 					Name:    fmt.Sprintf("%s-%s", appName, relName),
-					Image:   imageURL,
+					Image:   fmt.Sprintf("%s@sha256:%s", release.ImageURL, imageSHA256),
 					Command: []string{},
 					Env:     env,
 				},
