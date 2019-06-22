@@ -18,7 +18,8 @@ func Health(ctx context.Context, gce *compute.Service, project, region, backendS
 		defer span.End()
 
 		// Verify that the instance group manager exists and is stable.
-		igm, err := gce.RegionInstanceGroupManagers.Get(project, region, instanceGroup).Context(ctx).Do()
+		igm, err := gce.RegionInstanceGroupManagers.Get(project, region, instanceGroup).
+			Context(ctx).Fields("status").Do()
 		if err != nil {
 			return false, err
 		}
@@ -30,15 +31,16 @@ func Health(ctx context.Context, gce *compute.Service, project, region, backendS
 		}
 
 		// Find the number of running instances.
-		ig, err := gce.RegionInstanceGroups.Get(project, region, instanceGroup).Context(ctx).Do()
+		ig, err := gce.RegionInstanceGroups.Get(project, region, instanceGroup).
+			Context(ctx).Fields("selfLink", "size").Do()
 		if err != nil {
 			return false, err
 		}
 		span.AddAttributes(trace.Int64Attribute("instances", ig.Size))
 
 		// Find the health of the running instances.
-		health, err := gce.RegionBackendServices.GetHealth(project, region, backendService, &compute.ResourceGroupReference{
-			Group: igm.InstanceGroup,
+		health, err := gce.BackendServices.GetHealth(project, backendService, &compute.ResourceGroupReference{
+			Group: ig.SelfLink,
 		}).Context(ctx).Do()
 		if err != nil {
 			return false, err
@@ -53,6 +55,7 @@ func Health(ctx context.Context, gce *compute.Service, project, region, backendS
 		// Count the number of healthy instances.
 		var healthy int64
 		for _, h := range health.HealthStatus {
+			span.AddAttributes(trace.StringAttribute("health."+h.Instance, h.HealthState))
 			if h.HealthState == "HEALTHY" {
 				healthy++
 			}

@@ -20,15 +20,14 @@ func Add(ctx context.Context, gce *compute.Service, project, region, backendServ
 	)
 	defer span.End()
 
-	bes, err := gce.RegionBackendServices.
-		Get(project, region, backendService).
+	bes, err := gce.BackendServices.Get(project, backendService).
 		Context(ctx).Fields("backends", "fingerprint").Do()
 	if err != nil {
 		return err
 	}
 
-	ig, err := gce.RegionInstanceGroups.
-		Get(project, region, instanceGroup).Context(ctx).Fields("selfLink").Do()
+	ig, err := gce.RegionInstanceGroups.Get(project, region, instanceGroup).
+		Context(ctx).Fields("selfLink").Do()
 	if err != nil {
 		return err
 	}
@@ -43,12 +42,13 @@ func Add(ctx context.Context, gce *compute.Service, project, region, backendServ
 		Group: ig.SelfLink,
 	})
 
-	op, err := gce.RegionBackendServices.Patch(project, region, backendService,
+	op, err := gce.BackendServices.Patch(project, backendService,
 		&compute.BackendService{
-			Fingerprint: bes.Fingerprint,
-			Backends:    bes.Backends,
+			Backends:        bes.Backends,
+			Fingerprint:     bes.Fingerprint,
+			ForceSendFields: []string{"Backends", "Fingerprint"},
 		},
-	).Do()
+	).Context(ctx).Do()
 	if err != nil {
 		return err
 	}
@@ -67,15 +67,14 @@ func Remove(ctx context.Context, gce *compute.Service, project, region, backendS
 	)
 	defer span.End()
 
-	bes, err := gce.RegionBackendServices.
-		Get(project, region, backendService).
-		Context(ctx).Fields("backends", "fingerprint").Do()
+	ig, err := gce.RegionInstanceGroups.Get(project, region, instanceGroup).
+		Context(ctx).Fields("selfLink").Do()
 	if err != nil {
 		return err
 	}
 
-	ig, err := gce.RegionInstanceGroups.
-		Get(project, region, instanceGroup).Context(ctx).Do()
+	bes, err := gce.BackendServices.Get(project, backendService).
+		Context(ctx).Fields("backends", "fingerprint").Do()
 	if err != nil {
 		return err
 	}
@@ -91,12 +90,13 @@ func Remove(ctx context.Context, gce *compute.Service, project, region, backendS
 		span.AddAttributes(trace.BoolAttribute("modified", false))
 	}
 
-	op, err := gce.RegionBackendServices.Patch(project, region, backendService,
+	op, err := gce.BackendServices.Patch(project, backendService,
 		&compute.BackendService{
-			Fingerprint: bes.Fingerprint,
-			Backends:    bes.Backends,
+			Backends:        bes.Backends,
+			Fingerprint:     bes.Fingerprint,
+			ForceSendFields: []string{"Backends", "Fingerprint"},
 		},
-	).Do()
+	).Context(ctx).Do()
 	if err != nil {
 		return err
 	}
