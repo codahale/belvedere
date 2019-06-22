@@ -2,6 +2,7 @@ package belvedere
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 
@@ -230,6 +231,33 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 		"belvedere-app":    appName,
 		"belvedere-region": region,
 	})
+}
+
+func Region(ctx context.Context, project, appName string) (string, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.Region")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+		trace.StringAttribute("app", appName),
+	)
+	defer span.End()
+
+	dm, err := deploymentmanager.NewService(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	deployment, err := dm.Deployments.Get(project, fmt.Sprintf("belvedere-%s", appName)).Do()
+	if err != nil {
+		return "", err
+	}
+
+	for _, l := range deployment.Labels {
+		if l.Key == "belvedere.region" {
+			return l.Value, nil
+		}
+	}
+
+	return "", errors.New("no region found")
 }
 
 func DestroyApp(ctx context.Context, project, appName string) error {

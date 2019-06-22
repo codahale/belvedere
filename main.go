@@ -84,7 +84,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 	}
 	defer span.End()
 
-	project, region, err := config(ctx, opts)
+	project, _, err := config(ctx, opts)
 	if err != nil {
 		return err
 	}
@@ -134,15 +134,15 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		if err != nil {
 			return err
 		}
-		return belvedere.CreateRelease(ctx, project, region, appName, relName, config, image)
+		return belvedere.CreateRelease(ctx, project, appName, relName, config, image)
 	case isCmd(opts, "releases", "enable"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")
-		return belvedere.EnableRelease(ctx, project, region, appName, relName)
+		return belvedere.EnableRelease(ctx, project, appName, relName)
 	case isCmd(opts, "releases", "disable"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")
-		return belvedere.DisableRelease(ctx, project, region, appName, relName)
+		return belvedere.DisableRelease(ctx, project, appName, relName)
 	case isCmd(opts, "releases", "destroy"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")

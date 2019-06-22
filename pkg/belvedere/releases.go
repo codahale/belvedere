@@ -87,16 +87,20 @@ func ListReleases(ctx context.Context, project, appName string) ([]string, error
 	return names, nil
 }
 
-func CreateRelease(ctx context.Context, project, region, appName, relName string, release *ReleaseConfig, imageURL string) error {
+func CreateRelease(ctx context.Context, project, appName, relName string, release *ReleaseConfig, imageURL string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
-		trace.StringAttribute("region", region),
 		trace.StringAttribute("app", appName),
 		trace.StringAttribute("release", relName),
 		trace.StringAttribute("image_url", imageURL),
 	)
 	defer span.End()
+
+	region, err := Region(ctx, project, appName)
+	if err != nil {
+		return err
+	}
 
 	instanceTemplate := fmt.Sprintf("%s-%s-it", appName, relName)
 	instanceGroupManager := fmt.Sprintf("%s-%s-ig", appName, relName)
@@ -209,10 +213,11 @@ func CreateRelease(ctx context.Context, project, region, appName, relName string
 		"belvedere-type":    "release",
 		"belvedere-app":     appName,
 		"belvedere-release": relName,
+		"belvedere-region":  region,
 	})
 }
 
-func EnableRelease(ctx context.Context, project, region, appName, relName string) error {
+func EnableRelease(ctx context.Context, project, appName, relName string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.EnableRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -220,6 +225,11 @@ func EnableRelease(ctx context.Context, project, region, appName, relName string
 		trace.StringAttribute("release", relName),
 	)
 	defer span.End()
+
+	region, err := Region(ctx, project, appName)
+	if err != nil {
+		return err
+	}
 
 	gce, err := compute.NewService(ctx)
 	if err != nil {
@@ -236,7 +246,7 @@ func EnableRelease(ctx context.Context, project, region, appName, relName string
 	return wait.Poll(10*time.Second, 5*time.Minute, f)
 }
 
-func DisableRelease(ctx context.Context, project, region, appName, relName string) error {
+func DisableRelease(ctx context.Context, project, appName, relName string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DisableRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -244,6 +254,11 @@ func DisableRelease(ctx context.Context, project, region, appName, relName strin
 		trace.StringAttribute("release", relName),
 	)
 	defer span.End()
+
+	region, err := Region(ctx, project, appName)
+	if err != nil {
+		return err
+	}
 
 	gce, err := compute.NewService(ctx)
 	if err != nil {
