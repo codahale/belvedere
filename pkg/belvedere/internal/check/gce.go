@@ -2,6 +2,7 @@ package check
 
 import (
 	"context"
+	"errors"
 
 	"go.opencensus.io/trace"
 	compute "google.golang.org/api/compute/v0.beta"
@@ -19,6 +20,7 @@ func GCE(ctx context.Context, gce *compute.Service, project, operation string) w
 		if err != nil {
 			return false, err
 		}
+		span.AddAttributes(trace.StringAttribute("status", op.Status))
 
 		if op.Error != nil {
 			for _, e := range op.Error.Errors {
@@ -28,9 +30,10 @@ func GCE(ctx context.Context, gce *compute.Service, project, operation string) w
 					trace.StringAttribute("location", e.Location),
 				}, "Error")
 			}
-			span.SetStatus(trace.Status{Code: trace.StatusCodeAborted})
+			j, _ := op.Error.MarshalJSON()
+			return false, errors.New(string(j))
 		}
-		span.AddAttributes(trace.StringAttribute("status", op.Status))
+
 		return op.Status == "DONE", nil
 	}
 }

@@ -2,6 +2,7 @@ package check
 
 import (
 	"context"
+	"errors"
 
 	"go.opencensus.io/trace"
 	"google.golang.org/api/deploymentmanager/v2"
@@ -19,6 +20,7 @@ func DM(ctx context.Context, dm *deploymentmanager.Service, project string, oper
 		if err != nil {
 			return false, err
 		}
+		span.AddAttributes(trace.StringAttribute("status", op.Status))
 
 		if op.Error != nil {
 			for _, e := range op.Error.Errors {
@@ -28,9 +30,9 @@ func DM(ctx context.Context, dm *deploymentmanager.Service, project string, oper
 					trace.StringAttribute("location", e.Location),
 				}, "Error")
 			}
-			span.SetStatus(trace.Status{Code: trace.StatusCodeAborted})
+			j, _ := op.Error.MarshalJSON()
+			return false, errors.New(string(j))
 		}
-		span.AddAttributes(trace.StringAttribute("status", op.Status))
 		return op.Status == "DONE", nil
 	}
 }

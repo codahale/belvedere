@@ -2,6 +2,7 @@ package check
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"go.opencensus.io/trace"
@@ -20,15 +21,19 @@ func SU(ctx context.Context, su *serviceusage.Service, operation string) wait.Co
 			return false, err
 		}
 
+		span.AddAttributes(trace.BoolAttribute("done", op.Done))
+
 		if op.Error != nil {
 			span.Annotate([]trace.Attribute{
 				trace.Int64Attribute("error.code", op.Error.Code),
 				trace.StringAttribute("error.message", op.Error.Message),
 				trace.StringAttribute("error.details", fmt.Sprint(op.Error.Details)),
 			}, "Error")
-			span.SetStatus(trace.Status{Code: trace.StatusCodeAborted, Message: op.Error.Message})
+
+			j, _ := op.Error.MarshalJSON()
+			return false, errors.New(string(j))
 		}
-		span.AddAttributes(trace.BoolAttribute("done", op.Done))
+
 		return op.Done, nil
 	}
 }
