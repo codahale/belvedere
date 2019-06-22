@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"time"
 
+	"github.com/GoogleCloudPlatform/konlet/gce-containers-startup/types"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/backends"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
@@ -129,7 +130,10 @@ func CreateRelease(ctx context.Context, project, region, appName, relName string
 								metaData("disable-legacy-endpoints", "true"),
 								metaData("enable-os-login", "true"),
 								metaData("google-logging-enable", "true"),
-								// TODO inject cloud-init script
+								metaData(
+									"gce-container-declaration",
+									containerDeclaration(appName, relName, release, imageURL),
+								),
 							},
 						},
 						NetworkInterfaces: []*compute.NetworkInterface{
@@ -272,4 +276,33 @@ func metaData(key, value string) *compute.MetadataItems {
 		Key:   key,
 		Value: &value,
 	}
+}
+
+func containerDeclaration(appName, relName string, release *ReleaseConfig, imageURL string) string {
+	var env []struct {
+		Name  string
+		Value string
+	}
+
+	for k, v := range release.Env {
+		env = append(env, struct {
+			Name  string
+			Value string
+		}{Name: k, Value: v})
+	}
+
+	template := types.ContainerSpec{
+		Spec: types.ContainerSpecStruct{
+			Containers: []types.Container{
+				{
+					Name:    fmt.Sprintf("%s-%s", appName, relName),
+					Image:   imageURL,
+					Command: []string{},
+					Env:     env,
+				},
+			},
+		},
+	}
+	y, _ := yaml.Marshal(template)
+	return string(y)
 }
