@@ -88,11 +88,12 @@ func Remove(ctx context.Context, gce *compute.Service, project, region, backendS
 
 	if len(bes.Backends) == len(backends) {
 		span.AddAttributes(trace.BoolAttribute("modified", false))
+		return nil
 	}
 
 	op, err := gce.BackendServices.Patch(project, backendService,
 		&compute.BackendService{
-			Backends:        bes.Backends,
+			Backends:        backends,
 			Fingerprint:     bes.Fingerprint,
 			ForceSendFields: []string{"Backends", "Fingerprint"},
 		},
