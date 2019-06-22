@@ -7,6 +7,7 @@ _A small lookout tower (usually square) on the roof of a house._
 - [x] Create canned hello-world example app
 - [x] Test enabling and disabling releases
 - [x] Automatically provision A records for apps
+- [ ] Verify DNS stuff actually works
 - [ ] Add updating service account
 - [ ] Unify app and release config
 - [ ] Move from Konlet to multi-container specs
