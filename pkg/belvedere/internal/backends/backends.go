@@ -6,7 +6,7 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"go.opencensus.io/trace"
-	compute "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/compute/v0.beta"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
