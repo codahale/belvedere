@@ -6,12 +6,12 @@ _A small lookout tower (usually square) on the roof of a house._
 
 - [x] Create canned hello-world example app
 - [x] Test enabling and disabling releases
+- [x] Automatically provision A records for apps
 - [ ] Add updating service account
 - [ ] Unify app and release config
 - [ ] Move from Konlet to multi-container specs
 - [ ] Inject version and other metadata.
 - [ ] Figure out sidecar
-- [ ] Automatically provision A records for apps
 - [ ] Provision managed TLS certs instead of self-signed ones
 - [ ] Lock down access to app instances
 - [ ] Enable IAP tunneling to app instances

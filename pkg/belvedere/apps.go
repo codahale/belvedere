@@ -10,6 +10,7 @@ import (
 	"go.opencensus.io/trace"
 	"google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/deploymentmanager/v2"
+	"google.golang.org/api/dns/v1"
 	"gopkg.in/yaml.v2"
 	"k8s.io/client-go/util/cert"
 )
@@ -87,6 +88,16 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 	)
 	defer span.End()
 
+	d, err := dns.NewService(ctx)
+	if err != nil {
+		return err
+	}
+
+	managedZone, err := d.ManagedZones.Get(project, "belvedere").Do()
+	if err != nil {
+		return err
+	}
+
 	certPEM, keyPEM, err := cert.GenerateSelfSignedCertKey(fmt.Sprintf("belvedere-%s.blort", appName), nil, nil)
 	if err != nil {
 		return err
@@ -100,6 +111,7 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 	targetProxy := fmt.Sprintf("%s-tp", appName)
 	forwardingRule := fmt.Sprintf("%s-fr", appName)
 	serviceAccount := fmt.Sprintf("%s-sa", appName)
+	dnsRecord := fmt.Sprintf("%s-rrs", appName)
 
 	config := &deployments.Config{
 		Resources: []deployments.Resource{
@@ -218,6 +230,22 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 				Properties: map[string]string{
 					"accountId":   fmt.Sprintf("app-%s", appName),
 					"displayName": appName,
+				},
+			},
+			// A DNS record.
+			{
+				Name: dnsRecord,
+				Type: "gcp-types/dns-v1:resourceRecordSets",
+				Properties: map[string]interface{}{
+					"name":        fmt.Sprintf("%s.%s", appName, managedZone.DnsName),
+					"managedZone": managedZone.Name,
+					"records": []*dns.ResourceRecordSet{
+						{
+							Type:    "A",
+							Rrdatas: []string{deployments.Ref(forwardingRule, "IPAddress")},
+							Ttl:     50,
+						},
+					},
 				},
 			},
 		},
