@@ -97,7 +97,7 @@ func CreateRelease(ctx context.Context, project, appName, relName string, releas
 	)
 	defer span.End()
 
-	region, err := Region(ctx, project, appName)
+	region, err := findRegion(ctx, project, appName)
 	if err != nil {
 		return err
 	}
@@ -226,7 +226,7 @@ func EnableRelease(ctx context.Context, project, appName, relName string) error 
 	)
 	defer span.End()
 
-	region, err := Region(ctx, project, appName)
+	region, err := findRegion(ctx, project, appName)
 	if err != nil {
 		return err
 	}
@@ -255,7 +255,7 @@ func DisableRelease(ctx context.Context, project, appName, relName string) error
 	)
 	defer span.End()
 
-	region, err := Region(ctx, project, appName)
+	region, err := findRegion(ctx, project, appName)
 	if err != nil {
 		return err
 	}

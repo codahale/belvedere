@@ -105,7 +105,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		return nil
 	case isCmd(opts, "apps", "create"):
 		appName, _ := opts.String("<app>")
-		region, _ := opts.String("<app>")
+		region, _ := opts.String("<region>")
 		path, _ := opts.String("<config>")
 		config, err := belvedere.LoadAppConfig(ctx, path)
 		if err != nil {

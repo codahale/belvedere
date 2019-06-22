@@ -82,6 +82,7 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateApp")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
+		trace.StringAttribute("region", region),
 		trace.StringAttribute("app", appName),
 	)
 	defer span.End()
@@ -146,7 +147,6 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 					HealthChecks: []string{
 						deployments.SelfLink(healthcheck),
 					},
-					Region: region,
 				},
 			},
 			// A URL map directing requests to the backend service while blocking access to the
@@ -233,8 +233,8 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 	})
 }
 
-func Region(ctx context.Context, project, appName string) (string, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.Region")
+func findRegion(ctx context.Context, project, appName string) (string, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.findRegion")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", appName),
@@ -252,7 +252,7 @@ func Region(ctx context.Context, project, appName string) (string, error) {
 	}
 
 	for _, l := range deployment.Labels {
-		if l.Key == "belvedere.region" {
+		if l.Key == "belvedere-region" {
 			return l.Value, nil
 		}
 	}
