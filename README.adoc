@@ -9,6 +9,7 @@ _A small lookout tower (usually square) on the roof of a house._
 - [x] Automatically provision A records for apps
 - [x] Verify DNS stuff actually works
 - [x] Provision managed TLS certs instead of self-signed ones
+- [x] Build in instructions for name servers/registrars
 - [ ] Add updating service account
 - [ ] Unify app and release config
 - [ ] Move from Konlet to multi-container specs
@@ -20,4 +21,3 @@ _A small lookout tower (usually square) on the roof of a house._
 - [ ] Add create-and-enable for releases
 - [ ] Add disable-and-destroy for releases
 - [ ] Canary deploys
-- [ ] Build in instructions for name servers/registrars
