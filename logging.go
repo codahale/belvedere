@@ -4,15 +4,20 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"sync"
 	"time"
 
 	"go.opencensus.io/trace"
 )
 
 type traceLogger struct {
+	m sync.Mutex
 }
 
 func (l *traceLogger) ExportSpan(s *trace.SpanData) {
+	l.m.Lock()
+	defer l.m.Unlock()
+
 	_, _ = fmt.Fprintf(os.Stderr, "%s: %s (%s)", s.EndTime.Format(time.Stamp), s.Name, s.SpanID)
 	if s.Code != 0 {
 		_, _ = fmt.Fprintf(os.Stderr, " code=%d", s.Code)

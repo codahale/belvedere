@@ -27,6 +27,7 @@ Usage:
   belvedere setup <dns zone> [options]
   belvedere teardown [options]
   belvedere dns-servers [options]
+  belvedere instances [<app>] [<release>] [options]
   belvedere apps list [options]
   belvedere apps create <app> <region> <config> [options]
   belvedere apps update <app> <config> [options]
@@ -108,6 +109,19 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		}
 		for _, s := range servers {
 			fmt.Println(s)
+		}
+		return nil
+	case isCmd(opts, "instances"):
+		appName, _ := opts.String("<app>")
+		relName, _ := opts.String("<release>")
+
+		instances, err := belvedere.ListInstances(ctx, project, appName, relName)
+		if err != nil {
+			return err
+		}
+
+		for _, app := range instances {
+			fmt.Println(app)
 		}
 		return nil
 	case isCmd(opts, "apps", "list"):

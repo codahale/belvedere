@@ -16,12 +16,12 @@ _A small lookout tower (usually square) on the roof of a house._
 - [x] Enable IAP tunneling to app instances
 - [x] Lock down access to app instances
 - [x] Inject version and other metadata.
+- [x] Add easy instance listing
 - [ ] Figure out sidecar
 - [ ] Block external access to `/healthz`
 - [ ] Add create-and-enable for releases
 - [ ] Add disable-and-destroy for releases
 - [ ] Canary deploys
-- [ ] Add easy instance listing
 - [ ] Add easy SSH command w/ `--tunnel-through-iap`
 - [ ] Add easy log listing
 - [ ] Run containers as a non-root user
