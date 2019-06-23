@@ -20,3 +20,4 @@ _A small lookout tower (usually square) on the roof of a house._
 - [ ] Add create-and-enable for releases
 - [ ] Add disable-and-destroy for releases
 - [ ] Canary deploys
+- [ ] Build in instructions for name servers/registrars
