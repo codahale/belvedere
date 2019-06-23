@@ -34,7 +34,7 @@ Usage:
   belvedere apps update <app> <config> [options]
   belvedere apps destroy <app> [options] 
   belvedere releases list <app> [options]
-  belvedere releases create <app> <release> <config> <sha256> [options]
+  belvedere releases create <app> <release> <config> <sha256> [--enable] [options]
   belvedere releases enable <app> <release> [options]
   belvedere releases disable <app> <release> [options]
   belvedere releases destroy <app> <release> [options]
@@ -173,11 +173,21 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		relName, _ := opts.String("<release>")
 		imageSHA256, _ := opts.String("<sha256>")
 		path, _ := opts.String("<config>")
+		enable, _ := opts.Bool("--enable")
 		config, err := belvedere.LoadConfig(ctx, path)
 		if err != nil {
 			return err
 		}
-		return belvedere.CreateRelease(ctx, project, appName, relName, config, imageSHA256, dryRun)
+
+		if err := belvedere.CreateRelease(ctx, project, appName, relName, config, imageSHA256, dryRun); err != nil {
+			return err
+		}
+
+		if enable {
+			return belvedere.EnableRelease(ctx, project, appName, relName, dryRun)
+		}
+
+		return nil
 	case isCmd(opts, "releases", "enable"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")
@@ -189,6 +199,10 @@ func run(ctx context.Context, opts docopt.Opts) error {
 	case isCmd(opts, "releases", "destroy"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")
+
+		if err := belvedere.DisableRelease(ctx, project, appName, relName, dryRun); err != nil {
+			return err
+		}
 		return belvedere.DestroyRelease(ctx, project, appName, relName, dryRun)
 	default:
 		return fmt.Errorf("unimplemented: %v", opts)

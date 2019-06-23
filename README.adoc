@@ -18,10 +18,10 @@ _A small lookout tower (usually square) on the roof of a house._
 - [x] Inject version and other metadata.
 - [x] Add easy instance listing
 - [x] Add easy SSH command w/ `--tunnel-through-iap`
+- [x] Add create-and-enable for releases
+- [x] Add disable-and-destroy for releases
 - [ ] Figure out sidecar
 - [ ] Block external access to `/healthz`
-- [ ] Add create-and-enable for releases
-- [ ] Add disable-and-destroy for releases
 - [ ] Canary deploys
 - [ ] Add easy log listing
 - [ ] Run containers as a non-root user
