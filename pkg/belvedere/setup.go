@@ -89,13 +89,14 @@ func Setup(ctx context.Context, project, dnsZone string, dryRun bool) error {
 	return deployments.Insert(ctx, project, "belvedere", config, map[string]string{"belvedere-type": "base"}, dryRun)
 }
 
-func Teardown(ctx context.Context, project string, dryRun bool) error {
+func Teardown(ctx context.Context, project string, dryRun, async bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.Teardown")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.BoolAttribute("dry_run", dryRun),
+		trace.BoolAttribute("async", async),
 	)
 	defer span.End()
 
-	return deployments.Delete(ctx, project, "belvedere", dryRun)
+	return deployments.Delete(ctx, project, "belvedere", dryRun, async)
 }

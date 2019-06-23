@@ -92,15 +92,17 @@ func UpdateApp(ctx context.Context, project, appName string, config *Config, dry
 	return deployments.Update(ctx, project, name, resources, dryRun)
 }
 
-func DestroyApp(ctx context.Context, project, appName string, dryRun bool) error {
+func DestroyApp(ctx context.Context, project, appName string, dryRun, async bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DestroyApp")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", appName),
+		trace.BoolAttribute("dry_run", dryRun),
+		trace.BoolAttribute("async", async),
 	)
 	defer span.End()
 
-	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s", appName), dryRun)
+	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s", appName), dryRun, async)
 }
 
 func findManagedZone(ctx context.Context, project string) (*dns.ManagedZone, error) {

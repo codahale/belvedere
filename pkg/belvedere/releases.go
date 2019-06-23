@@ -238,17 +238,18 @@ func DisableRelease(ctx context.Context, project, appName, relName string, dryRu
 	return backends.Remove(ctx, gce, project, region, backendService, instanceGroup, dryRun)
 }
 
-func DestroyRelease(ctx context.Context, project, appName, relName string, dryRun bool) error {
+func DestroyRelease(ctx context.Context, project, appName, relName string, dryRun, async bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DestroyRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", appName),
 		trace.StringAttribute("release", relName),
 		trace.BoolAttribute("dry_run", dryRun),
+		trace.BoolAttribute("async", async),
 	)
 	defer span.End()
 
-	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s-%s", appName, relName), dryRun)
+	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s-%s", appName, relName), dryRun, async)
 }
 
 const (

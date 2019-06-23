@@ -134,7 +134,7 @@ func Update(ctx context.Context, project, name string, config *Config, dryRun bo
 
 	return wait.Poll(10*time.Second, 5*time.Minute, check.DM(ctx, dm, project, op.Name))
 }
-func Delete(ctx context.Context, project, name string, dryRun bool) error {
+func Delete(ctx context.Context, project, name string, dryRun, async bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Delete")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -155,6 +155,10 @@ func Delete(ctx context.Context, project, name string, dryRun bool) error {
 	op, err := dm.Deployments.Delete(project, name).Do()
 	if err != nil {
 		return err
+	}
+
+	if async {
+		return nil
 	}
 
 	return wait.Poll(10*time.Second, 5*time.Minute, check.DM(ctx, dm, project, op.Name))

@@ -25,19 +25,19 @@ func main() {
 
 Usage:
   belvedere setup <dns zone> [options]
-  belvedere teardown [options]
+  belvedere teardown [--async] [options]
   belvedere dns-servers [options]
   belvedere instances [<app>] [<release>] [options]
   belvedere ssh <instance> [options]
   belvedere apps list [options]
   belvedere apps create <app> <region> <config> [options]
   belvedere apps update <app> <config> [options]
-  belvedere apps destroy <app> [options] 
+  belvedere apps destroy <app> [--async] [options] 
   belvedere releases list <app> [options]
   belvedere releases create <app> <release> <config> <sha256> [--enable] [options]
   belvedere releases enable <app> <release> [options]
   belvedere releases disable <app> <release> [options]
-  belvedere releases destroy <app> <release> [options]
+  belvedere releases destroy <app> <release> [--async] [options]
   belvedere -h | --help
   belvedere --version
 
@@ -102,7 +102,8 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		dnsZone, _ := opts.String("<dns zone>")
 		return belvedere.Setup(ctx, project, dnsZone, dryRun)
 	case isCmd(opts, "teardown"):
-		return belvedere.Teardown(ctx, project, dryRun)
+		async, _ := opts.Bool("--async")
+		return belvedere.Teardown(ctx, project, dryRun, async)
 	case isCmd(opts, "dns-servers"):
 		servers, err := belvedere.DNSServers(ctx, project)
 		if err != nil {
@@ -157,7 +158,8 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		return belvedere.UpdateApp(ctx, project, appName, config, dryRun)
 	case isCmd(opts, "apps", "destroy"):
 		appName, _ := opts.String("<app>")
-		return belvedere.DestroyApp(ctx, project, appName, dryRun)
+		async, _ := opts.Bool("--async")
+		return belvedere.DestroyApp(ctx, project, appName, dryRun, async)
 	case isCmd(opts, "releases", "list"):
 		appName, _ := opts.String("<app>")
 		releases, err := belvedere.ListReleases(ctx, project, appName)
@@ -199,11 +201,12 @@ func run(ctx context.Context, opts docopt.Opts) error {
 	case isCmd(opts, "releases", "destroy"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")
+		async, _ := opts.Bool("--async")
 
 		if err := belvedere.DisableRelease(ctx, project, appName, relName, dryRun); err != nil {
 			return err
 		}
-		return belvedere.DestroyRelease(ctx, project, appName, relName, dryRun)
+		return belvedere.DestroyRelease(ctx, project, appName, relName, dryRun, async)
 	default:
 		return fmt.Errorf("unimplemented: %v", opts)
 	}
