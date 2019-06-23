@@ -29,6 +29,7 @@ Usage:
   belvedere dns-servers [options]
   belvedere instances [<app>] [<release>] [options]
   belvedere ssh <instance> [options]
+  belvedere logs <app> [<release>] [<instance>] [options]
   belvedere apps list [options]
   belvedere apps create <app> <region> <config> [options]
   belvedere apps update <app> <config> [options]
@@ -129,6 +130,20 @@ func run(ctx context.Context, opts docopt.Opts) error {
 	case isCmd(opts, "ssh"):
 		instance, _ := opts.String("<instance>")
 		return belvedere.SSH(ctx, project, instance)
+	case isCmd(opts, "logs"):
+		appName, _ := opts.String("<app>")
+		relName, _ := opts.String("<release>")
+		instance, _ := opts.String("<instance>")
+
+		logs, err := belvedere.Logs(ctx, project, appName, relName, instance)
+		if err != nil {
+			return err
+		}
+
+		for _, log := range logs {
+			fmt.Println(log)
+		}
+		return nil
 	case isCmd(opts, "apps", "list"):
 		apps, err := belvedere.ListApps(ctx, project)
 		if err != nil {

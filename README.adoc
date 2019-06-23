@@ -20,8 +20,8 @@ _A small lookout tower (usually square) on the roof of a house._
 - [x] Add easy SSH command w/ `--tunnel-through-iap`
 - [x] Add create-and-enable for releases
 - [x] Add disable-and-destroy for releases
+- [x] Add easy log listing
 - [ ] Figure out sidecar
 - [ ] Block external access to `/healthz`
 - [ ] Canary deploys
-- [ ] Add easy log listing
 - [ ] Run containers as a non-root user
