@@ -172,7 +172,6 @@ func appResources(project string, appName string, managedZone *dns.ManagedZone, 
 					SourceRanges: []string{
 						"130.211.0.0/22",
 						"35.191.0.0/16",
-						"0.0.0.0/0", // TODO lock down access to apps
 					},
 					TargetTags: []string{
 						fmt.Sprintf("belvedere-%s", appName),

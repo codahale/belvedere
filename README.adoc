@@ -14,9 +14,9 @@ _A small lookout tower (usually square) on the roof of a house._
 - [x] Unify app and release config
 - [x] Move from Konlet to multi-container specs
 - [x] Enable IAP tunneling to app instances
+- [x] Lock down access to app instances
 - [ ] Figure out sidecar
 - [ ] Inject version and other metadata.
-- [ ] Lock down access to app instances
 - [ ] Block external access to `/healthz`
 - [ ] Add create-and-enable for releases
 - [ ] Add disable-and-destroy for releases
