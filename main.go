@@ -25,6 +25,7 @@ func main() {
 
 Usage:
   belvedere setup <dns zone> [options]
+  belvedere teardown [options]
   belvedere dns-servers [options]
   belvedere apps list [options]
   belvedere apps create <app> <region> <config> [options]
@@ -98,6 +99,8 @@ func run(ctx context.Context, opts docopt.Opts) error {
 	case isCmd(opts, "setup"):
 		dnsZone, _ := opts.String("<dns zone>")
 		return belvedere.Setup(ctx, project, dnsZone, dryRun)
+	case isCmd(opts, "teardown"):
+		return belvedere.Teardown(ctx, project, dryRun)
 	case isCmd(opts, "dns-servers"):
 		servers, err := belvedere.DNSServers(ctx, project)
 		if err != nil {
