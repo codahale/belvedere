@@ -12,7 +12,7 @@ _A small lookout tower (usually square) on the roof of a house._
 - [x] Build in instructions for name servers/registrars
 - [x] Add updating service account
 - [x] Unify app and release config
-- [ ] Move from Konlet to multi-container specs
+- [x] Move from Konlet to multi-container specs
 - [ ] Figure out sidecar
 - [ ] Inject version and other metadata.
 - [ ] Lock down access to app instances

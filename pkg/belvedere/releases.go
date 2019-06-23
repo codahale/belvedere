@@ -3,16 +3,16 @@ package belvedere
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
-	"github.com/GoogleCloudPlatform/konlet/gce-containers-startup/types"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/backends"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/cloudinit"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/deploymentmanager/v2"
-	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -101,8 +101,8 @@ func CreateRelease(ctx context.Context, project, appName, relName string, config
 								metaData("enable-os-login", "true"),
 								metaData("google-logging-enable", "true"),
 								metaData(
-									"gce-container-declaration",
-									containerDeclaration(appName, relName, config, imageSHA256),
+									"user-data",
+									cloudConfig(appName, relName, config, imageSHA256),
 								),
 							},
 						},
@@ -263,31 +263,59 @@ func metaData(key, value string) *compute.MetadataItems {
 	}
 }
 
-func containerDeclaration(appName, relName string, config *Config, imageSHA256 string) string {
-	var env []struct {
-		Name  string
-		Value string
-	}
-
-	for k, v := range config.Env {
-		env = append(env, struct {
-			Name  string
-			Value string
-		}{Name: k, Value: v})
-	}
-
-	template := types.ContainerSpec{
-		Spec: types.ContainerSpecStruct{
-			Containers: []types.Container{
-				{
-					Name:    fmt.Sprintf("%s-%s", appName, relName),
-					Image:   fmt.Sprintf("%s@sha256:%s", config.ImageURL, imageSHA256),
-					Command: []string{},
-					Env:     env,
-				},
+func cloudConfig(appName, relName string, config *Config, imageSHA256 string) string {
+	cc := cloudinit.CloudConfig{
+		Files: []cloudinit.File{
+			{
+				Content: systemdService(appName,
+					config.Container.DockerArgs(appName, imageSHA256, map[string]string{
+						"app":     appName,
+						"release": relName,
+					}),
+				),
+				Owner:       "root",
+				Path:        fmt.Sprintf("/etc/systemd/system/docker-%s.service", appName),
+				Permissions: "0644",
 			},
 		},
+		Commands: []string{
+			"systemctl daemon-reload",
+			fmt.Sprintf("systemctl start docker-%s.service", appName),
+		},
 	}
-	y, _ := yaml.Marshal(template)
-	return string(y)
+
+	for name, sidecar := range config.Sidecars {
+		cc.Files = append(cc.Files, cloudinit.File{
+			Content: systemdService(name,
+				sidecar.DockerArgs(name, "", map[string]string{
+					"app":     appName,
+					"release": relName,
+					"sidecar": name,
+				}),
+			),
+			Owner:       "root",
+			Path:        fmt.Sprintf("/etc/systemd/system/docker-%s.service", name),
+			Permissions: "0644",
+		},
+		)
+	}
+
+	return cc.String()
+}
+
+const jobTemplate = `[Unit]
+Description=Start the %s container
+Wants=gcr-online.target
+After=gcr-online.target
+
+[Service]
+Environment="HOME=/var/lib/docker"
+ExecStartPre=/usr/bin/docker-credential-gcr configure-docker
+ExecStart=/usr/bin/docker run --rm %s
+ExecStop=/usr/bin/docker stop %s
+ExecStopPost=/usr/bin/docker rm %s
+`
+
+func systemdService(name string, dockerArgs []string) string {
+	return fmt.Sprintf(jobTemplate, name, strings.Join(dockerArgs, " "), name, name)
 }
