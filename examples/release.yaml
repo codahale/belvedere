@@ -1,5 +1,5 @@
 machineType: n1-standard-1
-imageURL: gcr.io/codahale-com/helloworld
+imageURL: gcr.io/cloudslap/helloworld
 minInstances: 1
 maxInstances: 10
 initialInstances: 2
