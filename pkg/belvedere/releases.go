@@ -85,7 +85,6 @@ func CreateRelease(ctx context.Context, project, appName, relName string, config
 								DeviceName: "boot",
 								Type:       "PERSISTENT",
 								InitializeParams: &compute.AttachedDiskInitializeParams{
-									DiskName:    "pd-standard",
 									SourceImage: cosStable,
 								},
 							},
