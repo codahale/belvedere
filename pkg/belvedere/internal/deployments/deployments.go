@@ -41,11 +41,12 @@ type Config struct {
 	Resources []Resource `json:"resources,omitempty"`
 }
 
-func Insert(ctx context.Context, project, name string, config *Config, labels map[string]string) error {
+func Insert(ctx context.Context, project, name string, config *Config, labels map[string]string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Insert")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("name", name),
+		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
@@ -60,6 +61,15 @@ func Insert(ctx context.Context, project, name string, config *Config, labels ma
 			Key:   k,
 			Value: v,
 		})
+	}
+
+	if dryRun {
+		b, err := json.MarshalIndent(config, "", "  ")
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(b))
+		return nil
 	}
 
 	j, err := json.Marshal(config)
@@ -83,17 +93,27 @@ func Insert(ctx context.Context, project, name string, config *Config, labels ma
 	return wait.Poll(10*time.Second, 5*time.Minute, check.DM(ctx, dm, project, op.Name))
 }
 
-func Update(ctx context.Context, project, name string, config *Config) error {
+func Update(ctx context.Context, project, name string, config *Config, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Update")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("name", name),
+		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
 	dm, err := deploymentmanager.NewService(ctx)
 	if err != nil {
 		return err
+	}
+
+	if dryRun {
+		b, err := json.MarshalIndent(config, "", "  ")
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(b))
+		return nil
 	}
 
 	j, err := json.Marshal(config)
@@ -114,17 +134,22 @@ func Update(ctx context.Context, project, name string, config *Config) error {
 
 	return wait.Poll(10*time.Second, 5*time.Minute, check.DM(ctx, dm, project, op.Name))
 }
-func Delete(ctx context.Context, project, name string) error {
+func Delete(ctx context.Context, project, name string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Delete")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("name", name),
+		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
 	dm, err := deploymentmanager.NewService(ctx)
 	if err != nil {
 		return err
+	}
+
+	if dryRun {
+		return nil
 	}
 
 	op, err := dm.Deployments.Delete(project, name).Do()

@@ -47,12 +47,13 @@ func ListApps(ctx context.Context, project string) ([]string, error) {
 	return names, nil
 }
 
-func CreateApp(ctx context.Context, project, region, appName string, config *Config) error {
+func CreateApp(ctx context.Context, project, region, appName string, config *Config, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateApp")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("region", region),
 		trace.StringAttribute("app", appName),
+		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
@@ -68,14 +69,15 @@ func CreateApp(ctx context.Context, project, region, appName string, config *Con
 		"belvedere-type":   "app",
 		"belvedere-app":    appName,
 		"belvedere-region": region,
-	})
+	}, dryRun)
 }
 
-func UpdateApp(ctx context.Context, project, appName string, config *Config) error {
+func UpdateApp(ctx context.Context, project, appName string, config *Config, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateApp")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", appName),
+		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
@@ -87,10 +89,10 @@ func UpdateApp(ctx context.Context, project, appName string, config *Config) err
 	resources := appResources(project, appName, managedZone, config)
 
 	name := fmt.Sprintf("belvedere-%s", appName)
-	return deployments.Update(ctx, project, name, resources)
+	return deployments.Update(ctx, project, name, resources, dryRun)
 }
 
-func DestroyApp(ctx context.Context, project, appName string) error {
+func DestroyApp(ctx context.Context, project, appName string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DestroyApp")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -98,7 +100,7 @@ func DestroyApp(ctx context.Context, project, appName string) error {
 	)
 	defer span.End()
 
-	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s", appName))
+	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s", appName), dryRun)
 }
 
 func findManagedZone(ctx context.Context, project string) (*dns.ManagedZone, error) {

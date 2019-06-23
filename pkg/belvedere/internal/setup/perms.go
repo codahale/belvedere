@@ -11,8 +11,12 @@ import (
 // SetDMPerms binds the Deployment Manager service account to the `owner` role if it has not already
 // been so bound. This allows Deployment Manager to add IAM roles to service accounts per
 // https://cloud.google.com/deployment-manager/docs/configuration/set-access-control-resources#granting_deployment_manager_permission_to_set_iam_policies
-func SetDMPerms(ctx context.Context, project string) error {
+func SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.setup.SetDMPerms")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+		trace.BoolAttribute("dry_run", dryRun),
+	)
 	defer span.End()
 
 	crm, err := cloudresourcemanager.NewService(ctx)
@@ -63,6 +67,11 @@ func SetDMPerms(ctx context.Context, project string) error {
 		Members: []string{crmMember},
 		Role:    owner,
 	})
+
+	if dryRun {
+		return nil
+	}
+
 	_, err = crm.Projects.SetIamPolicy(project, &cloudresourcemanager.SetIamPolicyRequest{
 		Policy: policy,
 	}).Do()

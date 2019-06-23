@@ -1,11 +1,21 @@
 iam_roles:
   - roles/cloudkms.cryptoKeyDecrypter
 machineType: n1-standard-1
-imageURL: gcr.io/cloudslap/helloworld
 minInstances: 1
 maxInstances: 10
 initialInstances: 2
 utilizationTarget: 0.8
+
+container:
+  image: gcr.io/cloudslap/helloworld
+  env:
+    ONE: 1
+    TWO: 2
+sidecars:
+  nginx:
+    image: gcr.io/cloudslap/helloworld:latest
+
+imageURL: gcr.io/cloudslap/helloworld
 env:
   ONE: 1
   TWO: 2

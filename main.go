@@ -43,6 +43,7 @@ Options:
   --version              Show version.
   --debug                Enable debug output.
   --quiet                Disable all log output.
+  --dry-run              Print modifications instead of performing them.
   --project=<project-id> Specify a project ID. Defaults to using gcloud's config.
 `
 
@@ -90,11 +91,13 @@ func run(ctx context.Context, opts docopt.Opts) error {
 	if err != nil {
 		return err
 	}
+	dryRun, _ := opts.Bool("--dry-run")
+	span.AddAttributes(trace.BoolAttribute("dry_run", dryRun))
 
 	switch {
 	case isCmd(opts, "setup"):
 		dnsZone, _ := opts.String("<dns zone>")
-		return belvedere.Setup(ctx, project, dnsZone)
+		return belvedere.Setup(ctx, project, dnsZone, dryRun)
 	case isCmd(opts, "dns-servers"):
 		servers, err := belvedere.DNSServers(ctx, project)
 		if err != nil {
@@ -122,7 +125,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		if err != nil {
 			return err
 		}
-		return belvedere.CreateApp(ctx, project, region, appName, config)
+		return belvedere.CreateApp(ctx, project, region, appName, config, dryRun)
 	case isCmd(opts, "apps", "update"):
 		appName, _ := opts.String("<app>")
 		path, _ := opts.String("<config>")
@@ -130,10 +133,10 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		if err != nil {
 			return err
 		}
-		return belvedere.UpdateApp(ctx, project, appName, config)
+		return belvedere.UpdateApp(ctx, project, appName, config, dryRun)
 	case isCmd(opts, "apps", "destroy"):
 		appName, _ := opts.String("<app>")
-		return belvedere.DestroyApp(ctx, project, appName)
+		return belvedere.DestroyApp(ctx, project, appName, dryRun)
 	case isCmd(opts, "releases", "list"):
 		appName, _ := opts.String("<app>")
 		releases, err := belvedere.ListReleases(ctx, project, appName)
@@ -153,19 +156,19 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		if err != nil {
 			return err
 		}
-		return belvedere.CreateRelease(ctx, project, appName, relName, config, imageSHA256)
+		return belvedere.CreateRelease(ctx, project, appName, relName, config, imageSHA256, dryRun)
 	case isCmd(opts, "releases", "enable"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")
-		return belvedere.EnableRelease(ctx, project, appName, relName)
+		return belvedere.EnableRelease(ctx, project, appName, relName, dryRun)
 	case isCmd(opts, "releases", "disable"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")
-		return belvedere.DisableRelease(ctx, project, appName, relName)
+		return belvedere.DisableRelease(ctx, project, appName, relName, dryRun)
 	case isCmd(opts, "releases", "destroy"):
 		appName, _ := opts.String("<app>")
 		relName, _ := opts.String("<release>")
-		return belvedere.DestroyRelease(ctx, project, appName, relName)
+		return belvedere.DestroyRelease(ctx, project, appName, relName, dryRun)
 	default:
 		return fmt.Errorf("unimplemented: %v", opts)
 	}

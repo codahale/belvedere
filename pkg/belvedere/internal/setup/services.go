@@ -38,8 +38,12 @@ var (
 )
 
 // EnableServices enables all required services for the given GCP project.
-func EnableServices(ctx context.Context, project string) error {
+func EnableServices(ctx context.Context, project string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.setup.EnableServices")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+		trace.BoolAttribute("dry_run", dryRun),
+	)
 	defer span.End()
 
 	su, err := serviceusage.NewService(ctx)
@@ -49,6 +53,11 @@ func EnableServices(ctx context.Context, project string) error {
 
 	// Divide the required services up into batches of at most 20 services.
 	for _, serviceIDs := range batchStrings(requiredServices, 20) {
+		if dryRun {
+			fmt.Printf("Enable %v\n", serviceIDs)
+			continue
+		}
+
 		// Enable the services.
 		op, err := su.Services.BatchEnable(
 			fmt.Sprintf("projects/%s", project),

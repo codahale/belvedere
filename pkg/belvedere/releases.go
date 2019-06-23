@@ -52,13 +52,14 @@ func ListReleases(ctx context.Context, project, appName string) ([]string, error
 	return names, nil
 }
 
-func CreateRelease(ctx context.Context, project, appName, relName string, config *Config, imageSHA256 string) error {
+func CreateRelease(ctx context.Context, project, appName, relName string, config *Config, imageSHA256 string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", appName),
 		trace.StringAttribute("release", relName),
 		trace.StringAttribute("image_url", imageSHA256),
+		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
@@ -180,15 +181,16 @@ func CreateRelease(ctx context.Context, project, appName, relName string, config
 		"belvedere-release": relName,
 		"belvedere-region":  region,
 		"belvedere-hash":    imageSHA256[:32],
-	})
+	}, dryRun)
 }
 
-func EnableRelease(ctx context.Context, project, appName, relName string) error {
+func EnableRelease(ctx context.Context, project, appName, relName string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.EnableRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", appName),
 		trace.StringAttribute("release", relName),
+		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
@@ -204,7 +206,7 @@ func EnableRelease(ctx context.Context, project, appName, relName string) error 
 
 	backendService := fmt.Sprintf("%s-bes", appName)
 	instanceGroup := fmt.Sprintf("%s-%s-ig", appName, relName)
-	if err := backends.Add(ctx, gce, project, region, backendService, instanceGroup); err != nil {
+	if err := backends.Add(ctx, gce, project, region, backendService, instanceGroup, dryRun); err != nil {
 		return err
 	}
 
@@ -212,12 +214,13 @@ func EnableRelease(ctx context.Context, project, appName, relName string) error 
 	return wait.Poll(10*time.Second, 5*time.Minute, f)
 }
 
-func DisableRelease(ctx context.Context, project, appName, relName string) error {
+func DisableRelease(ctx context.Context, project, appName, relName string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DisableRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", appName),
 		trace.StringAttribute("release", relName),
+		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
@@ -233,19 +236,20 @@ func DisableRelease(ctx context.Context, project, appName, relName string) error
 
 	backendService := fmt.Sprintf("%s-bes", appName)
 	instanceGroup := fmt.Sprintf("%s-%s-ig", appName, relName)
-	return backends.Remove(ctx, gce, project, region, backendService, instanceGroup)
+	return backends.Remove(ctx, gce, project, region, backendService, instanceGroup, dryRun)
 }
 
-func DestroyRelease(ctx context.Context, project, appName, relName string) error {
+func DestroyRelease(ctx context.Context, project, appName, relName string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DestroyRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", appName),
 		trace.StringAttribute("release", relName),
+		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
-	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s-%s", appName, relName))
+	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s-%s", appName, relName), dryRun)
 }
 
 const (

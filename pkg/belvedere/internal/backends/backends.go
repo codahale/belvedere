@@ -10,13 +10,14 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-func Add(ctx context.Context, gce *compute.Service, project, region, backendService, instanceGroup string) error {
+func Add(ctx context.Context, gce *compute.Service, project, region, backendService, instanceGroup string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Add")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("region", region),
 		trace.StringAttribute("backend_service", backendService),
 		trace.StringAttribute("instance_group", instanceGroup),
+		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
@@ -42,6 +43,10 @@ func Add(ctx context.Context, gce *compute.Service, project, region, backendServ
 		Group: ig.SelfLink,
 	})
 
+	if dryRun {
+		return nil
+	}
+
 	op, err := gce.BackendServices.Patch(project, backendService,
 		&compute.BackendService{
 			Backends:        bes.Backends,
@@ -57,13 +62,14 @@ func Add(ctx context.Context, gce *compute.Service, project, region, backendServ
 	return wait.Poll(10*time.Second, 5*time.Minute, check.GCE(ctx, gce, project, op.Name))
 }
 
-func Remove(ctx context.Context, gce *compute.Service, project, region, backendService, instanceGroup string) error {
+func Remove(ctx context.Context, gce *compute.Service, project, region, backendService, instanceGroup string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Remove")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("region", region),
 		trace.StringAttribute("backend_service", backendService),
 		trace.StringAttribute("instance_group", instanceGroup),
+		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
@@ -88,6 +94,10 @@ func Remove(ctx context.Context, gce *compute.Service, project, region, backendS
 
 	if len(bes.Backends) == len(backends) {
 		span.AddAttributes(trace.BoolAttribute("modified", false))
+		return nil
+	}
+
+	if dryRun {
 		return nil
 	}
 

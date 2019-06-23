@@ -14,21 +14,22 @@ import (
 // Setup enables all required GCP services, grants Deployment Manager the permissions required to
 // manage service accounts and IAM roles, and creates a deployment with the base resources needed
 // to use Belvedere.
-func Setup(ctx context.Context, project, dnsZone string) error {
+func Setup(ctx context.Context, project, dnsZone string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.Setup")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("dns_zone", dnsZone),
+		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
 	// Enable all required services.
-	if err := setup.EnableServices(ctx, project); err != nil {
+	if err := setup.EnableServices(ctx, project, dryRun); err != nil {
 		return err
 	}
 
 	// Grant Deployment Manager the required permissions to manage IAM roles.
-	if err := setup.SetDMPerms(ctx, project); err != nil {
+	if err := setup.SetDMPerms(ctx, project, dryRun); err != nil {
 		return err
 	}
 
@@ -85,5 +86,5 @@ func Setup(ctx context.Context, project, dnsZone string) error {
 		},
 	}
 
-	return deployments.Insert(ctx, project, "belvedere", config, map[string]string{"belvedere-type": "base"})
+	return deployments.Insert(ctx, project, "belvedere", config, map[string]string{"belvedere-type": "base"}, dryRun)
 }
