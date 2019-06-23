@@ -268,10 +268,11 @@ func cloudConfig(appName, relName string, config *Config, imageSHA256 string) st
 		Files: []cloudinit.File{
 			{
 				Content: systemdService(appName,
-					config.Container.DockerArgs(appName, imageSHA256, map[string]string{
-						"app":     appName,
-						"release": relName,
-					}),
+					config.Container.DockerArgs(appName, relName, imageSHA256,
+						map[string]string{
+							"app":     appName,
+							"release": relName,
+						}),
 				),
 				Owner:       "root",
 				Path:        fmt.Sprintf("/etc/systemd/system/docker-%s.service", appName),
@@ -287,11 +288,12 @@ func cloudConfig(appName, relName string, config *Config, imageSHA256 string) st
 	for name, sidecar := range config.Sidecars {
 		cc.Files = append(cc.Files, cloudinit.File{
 			Content: systemdService(name,
-				sidecar.DockerArgs(name, "", map[string]string{
-					"app":     appName,
-					"release": relName,
-					"sidecar": name,
-				}),
+				sidecar.DockerArgs(name, "", "",
+					map[string]string{
+						"app":     appName,
+						"release": relName,
+						"sidecar": name,
+					}),
 			),
 			Owner:       "root",
 			Path:        fmt.Sprintf("/etc/systemd/system/docker-%s.service", name),
