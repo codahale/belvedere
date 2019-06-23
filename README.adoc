@@ -24,3 +24,4 @@ _A small lookout tower (usually square) on the roof of a house._
 - [ ] Add easy instance listing
 - [ ] Add easy SSH command w/ `--tunnel-through-iap`
 - [ ] Add easy log listing
+- [ ] Run containers as a non-root user
