@@ -12,7 +12,6 @@ import (
 	"google.golang.org/api/deploymentmanager/v2"
 	"google.golang.org/api/dns/v1"
 	"gopkg.in/yaml.v2"
-	"k8s.io/client-go/util/cert"
 )
 
 type AppConfig struct {
@@ -98,11 +97,6 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 		return err
 	}
 
-	certPEM, keyPEM, err := cert.GenerateSelfSignedCertKey(fmt.Sprintf("belvedere-%s.blort", appName), nil, nil)
-	if err != nil {
-		return err
-	}
-
 	firewall := fmt.Sprintf("%s-fw", appName)
 	healthcheck := fmt.Sprintf("%s-hc", appName)
 	backendService := fmt.Sprintf("%s-bes", appName)
@@ -112,6 +106,7 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 	forwardingRule := fmt.Sprintf("%s-fr", appName)
 	serviceAccount := fmt.Sprintf("%s-sa", appName)
 	dnsRecord := fmt.Sprintf("%s-rrs", appName)
+	dnsName := fmt.Sprintf("%s.%s", appName, managedZone.DnsName)
 
 	config := &deployments.Config{
 		Resources: []deployments.Resource{
@@ -191,13 +186,13 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 			},
 			// A TLS certificate.
 			{
-				// TODO replace self-signed certs with managed certs
-				// https://cloud.google.com/load-balancing/docs/ssl-certificates#google-managed_ssl_certificate_renewal
 				Name: sslCertificate,
 				Type: "compute.beta.sslCertificate",
 				Properties: compute.SslCertificate{
-					Certificate: string(certPEM),
-					PrivateKey:  string(keyPEM),
+					Managed: &compute.SslCertificateManagedSslCertificate{
+						Domains: []string{dnsName},
+					},
+					Type: "MANAGED",
 				},
 			},
 			// A QUIC-enabled HTTPS target proxy using the app's TLS cert and directing requests to
@@ -237,7 +232,7 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 				Name: dnsRecord,
 				Type: "gcp-types/dns-v1:resourceRecordSets",
 				Properties: map[string]interface{}{
-					"name":        fmt.Sprintf("%s.%s", appName, managedZone.DnsName),
+					"name":        dnsName,
 					"managedZone": managedZone.Name,
 					"records": []*dns.ResourceRecordSet{
 						{

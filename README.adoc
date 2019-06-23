@@ -8,7 +8,7 @@ _A small lookout tower (usually square) on the roof of a house._
 - [x] Test enabling and disabling releases
 - [x] Automatically provision A records for apps
 - [x] Verify DNS stuff actually works
-- [ ] Provision managed TLS certs instead of self-signed ones
+- [x] Provision managed TLS certs instead of self-signed ones
 - [ ] Add updating service account
 - [ ] Unify app and release config
 - [ ] Move from Konlet to multi-container specs
