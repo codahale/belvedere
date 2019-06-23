@@ -20,8 +20,6 @@ func (c *Container) DockerArgs(name, sha256 string, labels map[string]string) []
 	}
 
 	args := []string{
-		// TODO sort out logging options
-		// https://docs.docker.com/config/containers/logging/gcplogs/
 		"--log-driver", "gcplogs",
 		"--log-opt", fmt.Sprintf("labels=%s", strings.Join(labelNames, ",")),
 		"--name", name,
