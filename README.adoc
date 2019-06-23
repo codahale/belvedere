@@ -17,3 +17,6 @@ _A small lookout tower (usually square) on the roof of a house._
 - [ ] Lock down access to app instances
 - [ ] Enable IAP tunneling to app instances
 - [ ] Block external access to `/healthz`
+- [ ] Add create-and-enable for releases
+- [ ] Add disable-and-destroy for releases
+- [ ] Canary deploys
