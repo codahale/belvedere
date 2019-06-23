@@ -279,6 +279,7 @@ func cloudConfig(appName, relName string, config *Config, imageSHA256 string) st
 			},
 		},
 		Commands: []string{
+			"iptables -w -A INPUT -p tcp --dport 8443 -j ACCEPT",
 			"systemctl daemon-reload",
 			fmt.Sprintf("systemctl start docker-%s.service", appName),
 		},
