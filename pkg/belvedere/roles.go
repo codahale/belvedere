@@ -29,12 +29,12 @@ func roleBinding(project, serviceAccount, role string) deployments.Resource {
 	}
 }
 
-func roleBindings(project, serviceAccount string, app *AppConfig) []deployments.Resource {
+func roleBindings(project, serviceAccount string, roles []string) []deployments.Resource {
 	var bindings []deployments.Resource
 	for _, role := range requiredRoles {
 		bindings = append(bindings, roleBinding(project, serviceAccount, role))
 	}
-	for _, role := range app.IAMRoles {
+	for _, role := range roles {
 		bindings = append(bindings, roleBinding(project, serviceAccount, role))
 	}
 	return bindings

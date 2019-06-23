@@ -118,7 +118,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		appName, _ := opts.String("<app>")
 		region, _ := opts.String("<region>")
 		path, _ := opts.String("<config>")
-		config, err := belvedere.LoadAppConfig(ctx, path)
+		config, err := belvedere.LoadConfig(ctx, path)
 		if err != nil {
 			return err
 		}
@@ -126,7 +126,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 	case isCmd(opts, "apps", "update"):
 		appName, _ := opts.String("<app>")
 		path, _ := opts.String("<config>")
-		config, err := belvedere.LoadAppConfig(ctx, path)
+		config, err := belvedere.LoadConfig(ctx, path)
 		if err != nil {
 			return err
 		}
@@ -149,7 +149,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		relName, _ := opts.String("<release>")
 		imageSHA256, _ := opts.String("<sha256>")
 		path, _ := opts.String("<config>")
-		config, err := belvedere.LoadReleaseConfig(ctx, path)
+		config, err := belvedere.LoadConfig(ctx, path)
 		if err != nil {
 			return err
 		}

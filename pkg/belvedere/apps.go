@@ -4,44 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/deploymentmanager/v2"
 	"google.golang.org/api/dns/v1"
-	"gopkg.in/yaml.v2"
 )
-
-type AppConfig struct {
-	IAMRoles []string `yaml:"iam_roles,omitempty"`
-}
-
-func LoadAppConfig(ctx context.Context, path string) (*AppConfig, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.LoadAppConfig")
-	span.AddAttributes(
-		trace.StringAttribute("path", path),
-	)
-	defer span.End()
-
-	r, err := openPath(path)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = r.Close() }()
-
-	b, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-
-	var config AppConfig
-	if err := yaml.Unmarshal(b, &config); err != nil {
-		return nil, err
-	}
-	return &config, nil
-}
 
 func ListApps(ctx context.Context, project string) ([]string, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.ListApps")
@@ -78,7 +47,7 @@ func ListApps(ctx context.Context, project string) ([]string, error) {
 	return names, nil
 }
 
-func CreateApp(ctx context.Context, project, region, appName string, app *AppConfig) error {
+func CreateApp(ctx context.Context, project, region, appName string, config *Config) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateApp")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -92,17 +61,17 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 		return err
 	}
 
-	config := appResources(project, appName, managedZone, app)
+	resources := appResources(project, appName, managedZone, config)
 
 	name := fmt.Sprintf("belvedere-%s", appName)
-	return deployments.Insert(ctx, project, name, config, map[string]string{
+	return deployments.Insert(ctx, project, name, resources, map[string]string{
 		"belvedere-type":   "app",
 		"belvedere-app":    appName,
 		"belvedere-region": region,
 	})
 }
 
-func UpdateApp(ctx context.Context, project, appName string, app *AppConfig) error {
+func UpdateApp(ctx context.Context, project, appName string, config *Config) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateApp")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -115,10 +84,10 @@ func UpdateApp(ctx context.Context, project, appName string, app *AppConfig) err
 		return err
 	}
 
-	config := appResources(project, appName, managedZone, app)
+	resources := appResources(project, appName, managedZone, config)
 
 	name := fmt.Sprintf("belvedere-%s", appName)
-	return deployments.Update(ctx, project, name, config)
+	return deployments.Update(ctx, project, name, resources)
 }
 
 func DestroyApp(ctx context.Context, project, appName string) error {
@@ -174,7 +143,7 @@ func findRegion(ctx context.Context, project, appName string) (string, error) {
 	return "", errors.New("no region found")
 }
 
-func appResources(project string, appName string, managedZone *dns.ManagedZone, app *AppConfig) *deployments.Config {
+func appResources(project string, appName string, managedZone *dns.ManagedZone, config *Config) *deployments.Config {
 	firewall := fmt.Sprintf("%s-fw", appName)
 	healthcheck := fmt.Sprintf("%s-hc", appName)
 	backendService := fmt.Sprintf("%s-bes", appName)
@@ -185,7 +154,7 @@ func appResources(project string, appName string, managedZone *dns.ManagedZone, 
 	serviceAccount := fmt.Sprintf("%s-sa", appName)
 	dnsRecord := fmt.Sprintf("%s-rrs", appName)
 	dnsName := fmt.Sprintf("%s.%s", appName, managedZone.DnsName)
-	config := &deployments.Config{
+	dmConfig := &deployments.Config{
 		Resources: []deployments.Resource{
 			// A firewall rule allowing access from the load balancer to app instances on port 8443.
 			{
@@ -322,6 +291,6 @@ func appResources(project string, appName string, managedZone *dns.ManagedZone, 
 			},
 		},
 	}
-	config.Resources = append(config.Resources, roleBindings(project, serviceAccount, app)...)
-	return config
+	dmConfig.Resources = append(dmConfig.Resources, roleBindings(project, serviceAccount, config.IAMRoles)...)
+	return dmConfig
 }

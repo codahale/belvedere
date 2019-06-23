@@ -11,7 +11,7 @@ _A small lookout tower (usually square) on the roof of a house._
 - [x] Provision managed TLS certs instead of self-signed ones
 - [x] Build in instructions for name servers/registrars
 - [x] Add updating service account
-- [ ] Unify app and release config
+- [x] Unify app and release config
 - [ ] Move from Konlet to multi-container specs
 - [ ] Inject version and other metadata.
 - [ ] Figure out sidecar

@@ -3,7 +3,6 @@ package belvedere
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"time"
 
 	"github.com/GoogleCloudPlatform/konlet/gce-containers-startup/types"
@@ -16,41 +15,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
-
-type ReleaseConfig struct {
-	MachineType       string            `yaml:"machineType"`
-	MinInstances      int               `yaml:"minInstances"`
-	MaxInstances      int               `yaml:"maxInstances"`
-	InitialInstances  int               `yaml:"initialInstances"`
-	UtilizationTarget float64           `yaml:"utilizationTarget"`
-	Env               map[string]string `yaml:"env"`
-	ImageURL          string            `yaml:"imageURL"`
-}
-
-func LoadReleaseConfig(ctx context.Context, path string) (*ReleaseConfig, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.LoadReleaseConfig")
-	span.AddAttributes(
-		trace.StringAttribute("path", path),
-	)
-	defer span.End()
-
-	r, err := openPath(path)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = r.Close() }()
-
-	b, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-
-	var config ReleaseConfig
-	if err := yaml.Unmarshal(b, &config); err != nil {
-		return nil, err
-	}
-	return &config, nil
-}
 
 func ListReleases(ctx context.Context, project, appName string) ([]string, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.ListReleases")
@@ -88,7 +52,7 @@ func ListReleases(ctx context.Context, project, appName string) ([]string, error
 	return names, nil
 }
 
-func CreateRelease(ctx context.Context, project, appName, relName string, release *ReleaseConfig, imageSHA256 string) error {
+func CreateRelease(ctx context.Context, project, appName, relName string, config *Config, imageSHA256 string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -106,7 +70,7 @@ func CreateRelease(ctx context.Context, project, appName, relName string, releas
 	instanceTemplate := fmt.Sprintf("%s-%s-it", appName, relName)
 	instanceGroupManager := fmt.Sprintf("%s-%s-ig", appName, relName)
 	autoscaler := fmt.Sprintf("%s-%s-as", appName, relName)
-	config := &deployments.Config{
+	dmConfig := &deployments.Config{
 		Resources: []deployments.Resource{
 			{
 				Name: instanceTemplate,
@@ -129,7 +93,7 @@ func CreateRelease(ctx context.Context, project, appName, relName string, releas
 							"belvedere-app":     appName,
 							"belvedere-release": relName,
 						},
-						MachineType: release.MachineType,
+						MachineType: config.MachineType,
 						Metadata: &compute.Metadata{
 							Items: []*compute.MetadataItems{
 								metaData("disable-legacy-endpoints", "true"),
@@ -137,7 +101,7 @@ func CreateRelease(ctx context.Context, project, appName, relName string, releas
 								metaData("google-logging-enable", "true"),
 								metaData(
 									"gce-container-declaration",
-									containerDeclaration(appName, relName, release, imageSHA256),
+									containerDeclaration(appName, relName, config, imageSHA256),
 								),
 							},
 						},
@@ -187,7 +151,7 @@ func CreateRelease(ctx context.Context, project, appName, relName string, releas
 							Port: 8443,
 						},
 					},
-					TargetSize: int64(release.InitialInstances),
+					TargetSize: int64(config.InitialInstances),
 				},
 			},
 			{
@@ -197,10 +161,10 @@ func CreateRelease(ctx context.Context, project, appName, relName string, releas
 					Name: fmt.Sprintf("%s-%s", appName, relName),
 					AutoscalingPolicy: &compute.AutoscalingPolicy{
 						LoadBalancingUtilization: &compute.AutoscalingPolicyLoadBalancingUtilization{
-							UtilizationTarget: release.UtilizationTarget,
+							UtilizationTarget: config.UtilizationTarget,
 						},
-						MaxNumReplicas: int64(release.MaxInstances),
-						MinNumReplicas: int64(release.MinInstances),
+						MaxNumReplicas: int64(config.MaxInstances),
+						MinNumReplicas: int64(config.MinInstances),
 					},
 					Region: region,
 					Target: deployments.SelfLink(instanceGroupManager),
@@ -210,7 +174,7 @@ func CreateRelease(ctx context.Context, project, appName, relName string, releas
 	}
 
 	name := fmt.Sprintf("belvedere-%s-%s", appName, relName)
-	return deployments.Insert(ctx, project, name, config, map[string]string{
+	return deployments.Insert(ctx, project, name, dmConfig, map[string]string{
 		"belvedere-type":    "release",
 		"belvedere-app":     appName,
 		"belvedere-release": relName,
@@ -295,13 +259,13 @@ func metaData(key, value string) *compute.MetadataItems {
 	}
 }
 
-func containerDeclaration(appName, relName string, release *ReleaseConfig, imageSHA256 string) string {
+func containerDeclaration(appName, relName string, config *Config, imageSHA256 string) string {
 	var env []struct {
 		Name  string
 		Value string
 	}
 
-	for k, v := range release.Env {
+	for k, v := range config.Env {
 		env = append(env, struct {
 			Name  string
 			Value string
@@ -313,7 +277,7 @@ func containerDeclaration(appName, relName string, release *ReleaseConfig, image
 			Containers: []types.Container{
 				{
 					Name:    fmt.Sprintf("%s-%s", appName, relName),
-					Image:   fmt.Sprintf("%s@sha256:%s", release.ImageURL, imageSHA256),
+					Image:   fmt.Sprintf("%s@sha256:%s", config.ImageURL, imageSHA256),
 					Command: []string{},
 					Env:     env,
 				},
