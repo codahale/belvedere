@@ -4,7 +4,9 @@ import (
 	"context"
 	"io"
 	"os"
+	"os/exec"
 	"sync"
+	"syscall"
 
 	"go.opencensus.io/trace"
 	"google.golang.org/api/compute/v0.beta"
@@ -82,6 +84,26 @@ func ListInstances(ctx context.Context, project, appName, relName string) ([]str
 	}
 
 	return instances, nil
+}
+
+func SSH(ctx context.Context, project, instance string) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.SSH")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+		trace.StringAttribute("instance", instance),
+	)
+	gcloud, err := exec.LookPath("gcloud")
+	if err != nil {
+		return err
+	}
+	span.AddAttributes(trace.StringAttribute("gcloud", gcloud))
+	span.End()
+
+	return syscall.Exec(
+		gcloud,
+		[]string{gcloud, "beta", "compute", "ssh", instance, "--tunnel-through-iap"},
+		os.Environ(),
+	)
 }
 
 func openPath(path string) (io.ReadCloser, error) {
