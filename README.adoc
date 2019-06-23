@@ -10,7 +10,7 @@ _A small lookout tower (usually square) on the roof of a house._
 - [x] Verify DNS stuff actually works
 - [x] Provision managed TLS certs instead of self-signed ones
 - [x] Build in instructions for name servers/registrars
-- [ ] Add updating service account
+- [x] Add updating service account
 - [ ] Unify app and release config
 - [ ] Move from Konlet to multi-container specs
 - [ ] Inject version and other metadata.

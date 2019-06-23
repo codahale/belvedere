@@ -83,6 +83,37 @@ func Insert(ctx context.Context, project, name string, config *Config, labels ma
 	return wait.Poll(10*time.Second, 5*time.Minute, check.DM(ctx, dm, project, op.Name))
 }
 
+func Update(ctx context.Context, project, name string, config *Config) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Update")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+		trace.StringAttribute("name", name),
+	)
+	defer span.End()
+
+	dm, err := deploymentmanager.NewService(ctx)
+	if err != nil {
+		return err
+	}
+
+	j, err := json.Marshal(config)
+	if err != nil {
+		return err
+	}
+
+	op, err := dm.Deployments.Patch(project, name, &deploymentmanager.Deployment{
+		Target: &deploymentmanager.TargetConfiguration{
+			Config: &deploymentmanager.ConfigFile{
+				Content: string(j),
+			},
+		},
+	}).Do()
+	if err != nil {
+		return err
+	}
+
+	return wait.Poll(10*time.Second, 5*time.Minute, check.DM(ctx, dm, project, op.Name))
+}
 func Delete(ctx context.Context, project, name string) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Delete")
 	span.AddAttributes(

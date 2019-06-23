@@ -28,6 +28,7 @@ Usage:
   belvedere dns-servers [options]
   belvedere apps list [options]
   belvedere apps create <app> <region> <config> [options]
+  belvedere apps update <app> <config> [options]
   belvedere apps destroy <app> [options] 
   belvedere releases list <app> [options]
   belvedere releases create <app> <release> <config> <sha256> [options]
@@ -122,6 +123,14 @@ func run(ctx context.Context, opts docopt.Opts) error {
 			return err
 		}
 		return belvedere.CreateApp(ctx, project, region, appName, config)
+	case isCmd(opts, "apps", "update"):
+		appName, _ := opts.String("<app>")
+		path, _ := opts.String("<config>")
+		config, err := belvedere.LoadAppConfig(ctx, path)
+		if err != nil {
+			return err
+		}
+		return belvedere.UpdateApp(ctx, project, appName, config)
 	case isCmd(opts, "apps", "destroy"):
 		appName, _ := opts.String("<app>")
 		return belvedere.DestroyApp(ctx, project, appName)

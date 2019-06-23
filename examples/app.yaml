@@ -1,1 +1,2 @@
-roles: []
+iam_roles:
+#  - roles/cloudkms.cryptoKeyDecrypter

@@ -87,16 +87,94 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 	)
 	defer span.End()
 
+	managedZone, err := findManagedZone(ctx, project)
+	if err != nil {
+		return err
+	}
+
+	config := appResources(project, appName, managedZone, app)
+
+	name := fmt.Sprintf("belvedere-%s", appName)
+	return deployments.Insert(ctx, project, name, config, map[string]string{
+		"belvedere-type":   "app",
+		"belvedere-app":    appName,
+		"belvedere-region": region,
+	})
+}
+
+func UpdateApp(ctx context.Context, project, appName string, app *AppConfig) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.CreateApp")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+		trace.StringAttribute("app", appName),
+	)
+	defer span.End()
+
+	managedZone, err := findManagedZone(ctx, project)
+	if err != nil {
+		return err
+	}
+
+	config := appResources(project, appName, managedZone, app)
+
+	name := fmt.Sprintf("belvedere-%s", appName)
+	return deployments.Update(ctx, project, name, config)
+}
+
+func DestroyApp(ctx context.Context, project, appName string) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.DestroyApp")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+		trace.StringAttribute("app", appName),
+	)
+	defer span.End()
+
+	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s", appName))
+}
+
+func findManagedZone(ctx context.Context, project string) (*dns.ManagedZone, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.findManagedZone")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+	)
+	defer span.End()
+
 	d, err := dns.NewService(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	managedZone, err := d.ManagedZones.Get(project, "belvedere").Do()
+	return d.ManagedZones.Get(project, "belvedere").Do()
+}
+
+func findRegion(ctx context.Context, project, appName string) (string, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.findRegion")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+		trace.StringAttribute("app", appName),
+	)
+	defer span.End()
+
+	dm, err := deploymentmanager.NewService(ctx)
 	if err != nil {
-		return err
+		return "", err
 	}
 
+	deployment, err := dm.Deployments.Get(project, fmt.Sprintf("belvedere-%s", appName)).Do()
+	if err != nil {
+		return "", err
+	}
+
+	for _, l := range deployment.Labels {
+		if l.Key == "belvedere-region" {
+			return l.Value, nil
+		}
+	}
+
+	return "", errors.New("no region found")
+}
+
+func appResources(project string, appName string, managedZone *dns.ManagedZone, app *AppConfig) *deployments.Config {
 	firewall := fmt.Sprintf("%s-fw", appName)
 	healthcheck := fmt.Sprintf("%s-hc", appName)
 	backendService := fmt.Sprintf("%s-bes", appName)
@@ -107,7 +185,6 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 	serviceAccount := fmt.Sprintf("%s-sa", appName)
 	dnsRecord := fmt.Sprintf("%s-rrs", appName)
 	dnsName := fmt.Sprintf("%s.%s", appName, managedZone.DnsName)
-
 	config := &deployments.Config{
 		Resources: []deployments.Resource{
 			// A firewall rule allowing access from the load balancer to app instances on port 8443.
@@ -245,51 +322,6 @@ func CreateApp(ctx context.Context, project, region, appName string, app *AppCon
 			},
 		},
 	}
-
 	config.Resources = append(config.Resources, roleBindings(project, serviceAccount, app)...)
-
-	name := fmt.Sprintf("belvedere-%s", appName)
-	return deployments.Insert(ctx, project, name, config, map[string]string{
-		"belvedere-type":   "app",
-		"belvedere-app":    appName,
-		"belvedere-region": region,
-	})
-}
-
-func findRegion(ctx context.Context, project, appName string) (string, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.findRegion")
-	span.AddAttributes(
-		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", appName),
-	)
-	defer span.End()
-
-	dm, err := deploymentmanager.NewService(ctx)
-	if err != nil {
-		return "", err
-	}
-
-	deployment, err := dm.Deployments.Get(project, fmt.Sprintf("belvedere-%s", appName)).Do()
-	if err != nil {
-		return "", err
-	}
-
-	for _, l := range deployment.Labels {
-		if l.Key == "belvedere-region" {
-			return l.Value, nil
-		}
-	}
-
-	return "", errors.New("no region found")
-}
-
-func DestroyApp(ctx context.Context, project, appName string) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.DestroyApp")
-	span.AddAttributes(
-		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", appName),
-	)
-	defer span.End()
-
-	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s", appName))
+	return config
 }
