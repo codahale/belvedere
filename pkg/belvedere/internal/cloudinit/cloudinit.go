@@ -18,6 +18,8 @@ type File struct {
 	Content     string `yaml:"content,omitempty"`
 }
 
+// A cloud-init YAML manifest.
+// https://cloudinit.readthedocs.io/en/latest/topics/examples.html
 type CloudConfig struct {
 	Files    []File   `yaml:"write_files,omitempty"`
 	Commands []string `yaml:"runcmd,omitempty"`
