@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"os/user"
 	"text/tabwriter"
+	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere"
 	"github.com/docopt/docopt-go"
@@ -30,7 +31,7 @@ Usage:
   belvedere dns-servers [options]
   belvedere instances [<app>] [<release>] [options]
   belvedere ssh <instance> [options]
-  belvedere logs <app> [<release>] [<instance>] [options]
+  belvedere logs <app> [<release>] [<instance>] [--filter=<s>...] [--freshness=<duration>] [options]
   belvedere apps list [options]
   belvedere apps create <app> <region> <config> [options]
   belvedere apps update <app> <config> [options]
@@ -135,8 +136,19 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		app, _ := opts.String("<app>")
 		release, _ := opts.String("<release>")
 		instance, _ := opts.String("<instance>")
+		freshness, _ := opts.String("--freshness")
+		if freshness == "" {
+			freshness = "5m"
+		}
 
-		logs, err := belvedere.Logs(ctx, project, app, release, instance)
+		d, err := time.ParseDuration(freshness)
+		if err != nil {
+			return err
+		}
+
+		filters := opts["--filter"].([]string)
+
+		logs, err := belvedere.Logs(ctx, project, app, release, instance, d, filters)
 		if err != nil {
 			return err
 		}
