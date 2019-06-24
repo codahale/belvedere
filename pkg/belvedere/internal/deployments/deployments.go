@@ -12,37 +12,27 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
+// Ref returns a reference to the named resource's property.
+// https://cloud.google.com/deployment-manager/docs/configuration/use-references
 func Ref(name, property string) string {
 	return fmt.Sprintf("$(ref.%s.%s)", name, property)
 }
 
+// SelfLink returns a reference to the named resource's SelfLink property.
 func SelfLink(name string) string {
 	return Ref(name, "selfLink")
 }
 
-type Metadata struct {
-	DependsOn []string `json:"dependsOn,omitempty"`
-}
-
-type Output struct {
-	Name  string `json:"name"`
-	Value string `json:"name"`
-}
-
+// Resource represents a Deployment Manager resource.
 type Resource struct {
 	Name       string      `json:"name"`
 	Type       string      `json:"type"`
 	Properties interface{} `json:"properties"`
-	Metadata   *Metadata   `json:"metadata,omitempty"`
-	Outputs    []Output    `json:"outputs,omitempty"`
 }
 
-type Config struct {
-	Resources []Resource `json:"resources,omitempty"`
-}
-
-func Insert(ctx context.Context, project, name string, config *Config, labels map[string]string, dryRun bool) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Insert")
+// Creates a new deployment with the given name, resources, and labels.
+func Create(ctx context.Context, project, name string, resources []Resource, labels map[string]string, dryRun bool) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Create")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("name", name),
@@ -63,8 +53,10 @@ func Insert(ctx context.Context, project, name string, config *Config, labels ma
 		})
 	}
 
+	d := map[string][]Resource{"resources": resources}
+
 	if dryRun {
-		b, err := json.MarshalIndent(config, "", "  ")
+		b, err := json.MarshalIndent(d, "", "  ")
 		if err != nil {
 			return err
 		}
@@ -72,7 +64,7 @@ func Insert(ctx context.Context, project, name string, config *Config, labels ma
 		return nil
 	}
 
-	j, err := json.Marshal(config)
+	j, err := json.Marshal(d)
 	if err != nil {
 		return err
 	}
@@ -93,7 +85,8 @@ func Insert(ctx context.Context, project, name string, config *Config, labels ma
 	return wait.Poll(10*time.Second, 5*time.Minute, check.DM(ctx, dm, project, op.Name))
 }
 
-func Update(ctx context.Context, project, name string, config *Config, dryRun bool) error {
+// Updates the given deployment to add, remove, or modify resources.
+func Update(ctx context.Context, project, name string, resources []Resource, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Update")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -107,8 +100,10 @@ func Update(ctx context.Context, project, name string, config *Config, dryRun bo
 		return err
 	}
 
+	d := map[string][]Resource{"resources": resources}
+
 	if dryRun {
-		b, err := json.MarshalIndent(config, "", "  ")
+		b, err := json.MarshalIndent(d, "", "  ")
 		if err != nil {
 			return err
 		}
@@ -116,7 +111,7 @@ func Update(ctx context.Context, project, name string, config *Config, dryRun bo
 		return nil
 	}
 
-	j, err := json.Marshal(config)
+	j, err := json.Marshal(d)
 	if err != nil {
 		return err
 	}
@@ -135,6 +130,7 @@ func Update(ctx context.Context, project, name string, config *Config, dryRun bo
 	return wait.Poll(10*time.Second, 5*time.Minute, check.DM(ctx, dm, project, op.Name))
 }
 
+// Deletes the given deployment.
 func Delete(ctx context.Context, project, name string, dryRun, async bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Delete")
 	span.AddAttributes(

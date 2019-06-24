@@ -35,58 +35,58 @@ func Setup(ctx context.Context, project, dnsZone string, dryRun bool) error {
 
 	// Create a deployment with a managed DNS zone and firewall rules which limit SSH to GCE
 	// instances to those tunneled over IAP.
-	config := &deployments.Config{
-		Resources: []deployments.Resource{
-			{
-				Name: "belvedere-managed-zone",
-				Type: "dns.v1.managedZone",
-				Properties: dns.ManagedZone{
-					Description: fmt.Sprintf("Belvedere managed zone for %s", dnsZone),
-					DnsName:     dnsZone,
-					Name:        "belvedere",
-				},
+	resources := []deployments.Resource{
+		{
+			Name: "belvedere-managed-zone",
+			Type: "dns.v1.managedZone",
+			Properties: dns.ManagedZone{
+				Description: fmt.Sprintf("Belvedere managed zone for %s", dnsZone),
+				DnsName:     dnsZone,
+				Name:        "belvedere",
 			},
-			{
-				Name: "belvedere-deny-ssh-firewall",
-				Type: "compute.beta.firewall",
-				Properties: compute.Firewall{
-					Denied: []*compute.FirewallDenied{
-						{
-							IPProtocol: "TCP",
-							Ports:      []string{"22"},
-						},
+		},
+		{
+			Name: "belvedere-deny-ssh-firewall",
+			Type: "compute.beta.firewall",
+			Properties: compute.Firewall{
+				Denied: []*compute.FirewallDenied{
+					{
+						IPProtocol: "TCP",
+						Ports:      []string{"22"},
 					},
-					Description:  "Deny all SSH to Belvedere apps by default",
-					Direction:    "INGRESS",
-					Name:         "belvedere-deny-ssh",
-					Priority:     65533, // higher than the 65534 of default-allow-ssh
-					SourceRanges: []string{"0.0.0.0/0"},
-					TargetTags:   []string{"belvedere"},
 				},
+				Description:  "Deny all SSH to Belvedere apps by default",
+				Direction:    "INGRESS",
+				Name:         "belvedere-deny-ssh",
+				Priority:     65533, // higher than the 65534 of default-allow-ssh
+				SourceRanges: []string{"0.0.0.0/0"},
+				TargetTags:   []string{"belvedere"},
 			},
-			{
-				Name: "belvedere-iap-tunneling-firewall",
-				Type: "compute.beta.firewall",
-				Properties: compute.Firewall{
-					Allowed: []*compute.FirewallAllowed{
-						{
-							IPProtocol: "TCP",
-							Ports:      []string{"0-65535"},
-						},
+		},
+		{
+			Name: "belvedere-iap-tunneling-firewall",
+			Type: "compute.beta.firewall",
+			Properties: compute.Firewall{
+				Allowed: []*compute.FirewallAllowed{
+					{
+						IPProtocol: "TCP",
+						Ports:      []string{"0-65535"},
 					},
-					Description: "Allow IAP tunneling to Belvedere apps",
-					Direction:   "INGRESS",
-					Name:        "belvedere-allow-iap",
-					Priority:    65532,
-					// per https://cloud.google.com/iap/docs/using-tcp-forwarding#starting_ssh
-					SourceRanges: []string{"35.235.240.0/20"},
-					TargetTags:   []string{"belvedere"},
 				},
+				Description: "Allow IAP tunneling to Belvedere apps",
+				Direction:   "INGRESS",
+				Name:        "belvedere-allow-iap",
+				Priority:    65532,
+				// per https://cloud.google.com/iap/docs/using-tcp-forwarding#starting_ssh
+				SourceRanges: []string{"35.235.240.0/20"},
+				TargetTags:   []string{"belvedere"},
 			},
 		},
 	}
 
-	return deployments.Insert(ctx, project, "belvedere", config, map[string]string{"belvedere-type": "base"}, dryRun)
+	return deployments.Create(ctx, project, "belvedere", resources, map[string]string{
+		"belvedere-type": "base",
+	}, dryRun)
 }
 
 func Teardown(ctx context.Context, project string, dryRun, async bool) error {

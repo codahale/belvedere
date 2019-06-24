@@ -75,110 +75,108 @@ func CreateRelease(ctx context.Context, project, app, release string, config *Co
 	instanceTemplate := fmt.Sprintf("%s-%s-it", app, release)
 	instanceGroupManager := fmt.Sprintf("%s-%s-ig", app, release)
 	autoscaler := fmt.Sprintf("%s-%s-as", app, release)
-	dmConfig := &deployments.Config{
-		Resources: []deployments.Resource{
-			{
-				Name: instanceTemplate,
-				Type: "compute.beta.instanceTemplate",
-				Properties: compute.InstanceTemplate{
-					Properties: &compute.InstanceProperties{
-						Disks: []*compute.AttachedDisk{
-							{
-								AutoDelete: true,
-								Boot:       true,
-								DeviceName: "boot",
-								Type:       "PERSISTENT",
-								InitializeParams: &compute.AttachedDiskInitializeParams{
-									SourceImage: cosStable,
-								},
-							},
-						},
-						Labels: map[string]string{
-							"belvedere-app":     app,
-							"belvedere-release": release,
-						},
-						MachineType: config.MachineType,
-						Metadata: &compute.Metadata{
-							Items: []*compute.MetadataItems{
-								metaData("disable-legacy-endpoints", "true"),
-								metaData("enable-os-login", "true"),
-								metaData("google-logging-enable", "true"),
-								metaData(
-									"user-data",
-									cloudConfig(app, release, config, imageSHA256),
-								),
-							},
-						},
-						NetworkInterfaces: []*compute.NetworkInterface{
-							{
-								Network: "global/networks/default",
-								AccessConfigs: []*compute.AccessConfig{
-									{
-										Name: "External NAT",
-										Type: "ONE_TO_ONE_NAT",
-									},
-								},
-							},
-						},
-						ServiceAccounts: []*compute.ServiceAccount{
-							{
-								Email: fmt.Sprintf("app-%s@%s.iam.gserviceaccount.com", app, project),
-								Scopes: []string{
-									compute.CloudPlatformScope,
-								},
-							},
-						},
-						ShieldedVmConfig: &compute.ShieldedVmConfig{
-							EnableIntegrityMonitoring: true,
-							EnableSecureBoot:          true,
-							EnableVtpm:                true,
-						},
-						Tags: &compute.Tags{
-							Items: []string{
-								"belvedere",
-								fmt.Sprintf("belvedere-%s", app),
-							},
-						},
-					},
-				},
-			},
-			{
-				Name: instanceGroupManager,
-				Type: "compute.beta.regionInstanceGroupManager",
-				Properties: compute.InstanceGroupManager{
-					BaseInstanceName: fmt.Sprintf("%s-%s", app, release),
-					InstanceTemplate: deployments.SelfLink(instanceTemplate),
-					Region:           region,
-					NamedPorts: []*compute.NamedPort{
+	resources := []deployments.Resource{
+		{
+			Name: instanceTemplate,
+			Type: "compute.beta.instanceTemplate",
+			Properties: compute.InstanceTemplate{
+				Properties: &compute.InstanceProperties{
+					Disks: []*compute.AttachedDisk{
 						{
-							Name: "svc-https",
-							Port: 8443,
+							AutoDelete: true,
+							Boot:       true,
+							DeviceName: "boot",
+							Type:       "PERSISTENT",
+							InitializeParams: &compute.AttachedDiskInitializeParams{
+								SourceImage: cosStable,
+							},
 						},
 					},
-					TargetSize: int64(config.InitialInstances),
+					Labels: map[string]string{
+						"belvedere-app":     app,
+						"belvedere-release": release,
+					},
+					MachineType: config.MachineType,
+					Metadata: &compute.Metadata{
+						Items: []*compute.MetadataItems{
+							metaData("disable-legacy-endpoints", "true"),
+							metaData("enable-os-login", "true"),
+							metaData("google-logging-enable", "true"),
+							metaData(
+								"user-data",
+								cloudConfig(app, release, config, imageSHA256),
+							),
+						},
+					},
+					NetworkInterfaces: []*compute.NetworkInterface{
+						{
+							Network: "global/networks/default",
+							AccessConfigs: []*compute.AccessConfig{
+								{
+									Name: "External NAT",
+									Type: "ONE_TO_ONE_NAT",
+								},
+							},
+						},
+					},
+					ServiceAccounts: []*compute.ServiceAccount{
+						{
+							Email: fmt.Sprintf("app-%s@%s.iam.gserviceaccount.com", app, project),
+							Scopes: []string{
+								compute.CloudPlatformScope,
+							},
+						},
+					},
+					ShieldedVmConfig: &compute.ShieldedVmConfig{
+						EnableIntegrityMonitoring: true,
+						EnableSecureBoot:          true,
+						EnableVtpm:                true,
+					},
+					Tags: &compute.Tags{
+						Items: []string{
+							"belvedere",
+							fmt.Sprintf("belvedere-%s", app),
+						},
+					},
 				},
 			},
-			{
-				Name: autoscaler,
-				Type: "compute.beta.regionAutoscaler",
-				Properties: compute.Autoscaler{
-					Name: fmt.Sprintf("%s-%s", app, release),
-					AutoscalingPolicy: &compute.AutoscalingPolicy{
-						LoadBalancingUtilization: &compute.AutoscalingPolicyLoadBalancingUtilization{
-							UtilizationTarget: config.UtilizationTarget,
-						},
-						MaxNumReplicas: int64(config.MaxInstances),
-						MinNumReplicas: int64(config.MinInstances),
+		},
+		{
+			Name: instanceGroupManager,
+			Type: "compute.beta.regionInstanceGroupManager",
+			Properties: compute.InstanceGroupManager{
+				BaseInstanceName: fmt.Sprintf("%s-%s", app, release),
+				InstanceTemplate: deployments.SelfLink(instanceTemplate),
+				Region:           region,
+				NamedPorts: []*compute.NamedPort{
+					{
+						Name: "svc-https",
+						Port: 8443,
 					},
-					Region: region,
-					Target: deployments.SelfLink(instanceGroupManager),
 				},
+				TargetSize: int64(config.InitialInstances),
+			},
+		},
+		{
+			Name: autoscaler,
+			Type: "compute.beta.regionAutoscaler",
+			Properties: compute.Autoscaler{
+				Name: fmt.Sprintf("%s-%s", app, release),
+				AutoscalingPolicy: &compute.AutoscalingPolicy{
+					LoadBalancingUtilization: &compute.AutoscalingPolicyLoadBalancingUtilization{
+						UtilizationTarget: config.UtilizationTarget,
+					},
+					MaxNumReplicas: int64(config.MaxInstances),
+					MinNumReplicas: int64(config.MinInstances),
+				},
+				Region: region,
+				Target: deployments.SelfLink(instanceGroupManager),
 			},
 		},
 	}
 
 	name := fmt.Sprintf("belvedere-%s-%s", app, release)
-	return deployments.Insert(ctx, project, name, dmConfig, map[string]string{
+	return deployments.Create(ctx, project, name, resources, map[string]string{
 		"belvedere-type":    "release",
 		"belvedere-app":     app,
 		"belvedere-release": release,
