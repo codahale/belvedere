@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
+	"text/tabwriter"
 
 	"github.com/codahale/belvedere/pkg/belvedere"
 	"github.com/docopt/docopt-go"
@@ -150,10 +151,12 @@ func run(ctx context.Context, opts docopt.Opts) error {
 			return err
 		}
 
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		_, _ = fmt.Fprintln(w, "Project\tRegion\tApp")
 		for _, app := range apps {
-			fmt.Println(app)
+			_, _ = fmt.Fprintf(w, "%s\t%s\t%s\n", app.Project, app.Region, app.Name)
 		}
-		return nil
+		return w.Flush()
 	case isCmd(opts, "apps", "create"):
 		app, _ := opts.String("<app>")
 		region, _ := opts.String("<region>")

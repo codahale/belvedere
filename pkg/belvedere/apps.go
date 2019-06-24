@@ -12,7 +12,13 @@ import (
 	"google.golang.org/api/dns/v1"
 )
 
-func ListApps(ctx context.Context, project string) ([]string, error) {
+type App struct {
+	Project string
+	Region  string
+	Name    string
+}
+
+func ListApps(ctx context.Context, project string) ([]App, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.ListApps")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -29,22 +35,27 @@ func ListApps(ctx context.Context, project string) ([]string, error) {
 		return nil, err
 	}
 
-	var names []string
-	for _, d := range resp.Deployments {
-		var app bool
-		var name string
-		for _, l := range d.Labels {
-			if l.Key == "belvedere-app" {
-				name = l.Value
-			} else if l.Key == "belvedere-type" && l.Value == "app" {
-				app = true
-			}
+	collect := func(labels []*deploymentmanager.DeploymentLabelEntry) map[string]string {
+		m := make(map[string]string)
+		for _, e := range labels {
+			m[e.Key] = e.Value
 		}
-		if app {
-			names = append(names, name)
+		return m
+	}
+
+	var apps []App
+	for _, d := range resp.Deployments {
+		labels := collect(d.Labels)
+
+		if labels["belvedere-type"] == "app" {
+			apps = append(apps, App{
+				Project: project,
+				Region:  labels["belvedere-region"],
+				Name:    labels["belvedere-app"],
+			})
 		}
 	}
-	return names, nil
+	return apps, nil
 }
 
 func CreateApp(ctx context.Context, project, region, app string, config *Config, dryRun bool) error {
