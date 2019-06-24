@@ -16,13 +16,24 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-func ListReleases(ctx context.Context, project, app string) ([]string, error) {
+type Release struct {
+	Project string
+	Region  string
+	App     string
+	Release string
+	Hash    string
+}
+
+func ListReleases(ctx context.Context, project, app string) ([]Release, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.ListReleases")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", app),
 	)
 	defer span.End()
+
+	if app != "" {
+		span.AddAttributes(trace.StringAttribute("app", app))
+	}
 
 	dm, err := deploymentmanager.NewService(ctx)
 	if err != nil {
@@ -34,22 +45,20 @@ func ListReleases(ctx context.Context, project, app string) ([]string, error) {
 		return nil, err
 	}
 
-	var names []string
+	var releases []Release
 	for _, d := range resp.Deployments {
-		var app bool
-		var name string
-		for _, l := range d.Labels {
-			if l.Key == "belvedere-release" {
-				name = l.Value
-			} else if l.Key == "belvedere-type" && l.Value == "release" {
-				app = true
-			}
-		}
-		if app {
-			names = append(names, name)
+		labels := deployments.Labels(d.Labels)
+		if (labels["belvedere-type"] == "release") && (app == "" || labels["belvedere-app"] == app) {
+			releases = append(releases, Release{
+				Project: project,
+				Region:  labels["belvedere-region"],
+				App:     labels["belvedere-app"],
+				Release: labels["belvedere-release"],
+				Hash:    labels["belvedere-hash"],
+			})
 		}
 	}
-	return names, nil
+	return releases, nil
 }
 
 func CreateRelease(ctx context.Context, project, app, release string, config *Config, imageSHA256 string, dryRun bool) error {

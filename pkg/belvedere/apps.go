@@ -35,17 +35,9 @@ func ListApps(ctx context.Context, project string) ([]App, error) {
 		return nil, err
 	}
 
-	collect := func(labels []*deploymentmanager.DeploymentLabelEntry) map[string]string {
-		m := make(map[string]string)
-		for _, e := range labels {
-			m[e.Key] = e.Value
-		}
-		return m
-	}
-
 	var apps []App
 	for _, d := range resp.Deployments {
-		labels := collect(d.Labels)
+		labels := deployments.Labels(d.Labels)
 
 		if labels["belvedere-type"] == "app" {
 			apps = append(apps, App{

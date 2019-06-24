@@ -35,7 +35,7 @@ Usage:
   belvedere apps create <app> <region> <config> [options]
   belvedere apps update <app> <config> [options]
   belvedere apps delete <app> [--async] [options] 
-  belvedere releases list <app> [options]
+  belvedere releases list [<app>] [options]
   belvedere releases create <app> <release> <config> <sha256> [--enable] [options]
   belvedere releases enable <app> <release> [options]
   belvedere releases disable <app> <release> [options]
@@ -184,10 +184,14 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		if err != nil {
 			return err
 		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		_, _ = fmt.Fprintln(w, "Project\tRegion\tApp\tRelease\tHash")
 		for _, release := range releases {
-			fmt.Println(release)
+			_, _ = fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
+				release.Project, release.Region, release.App, release.Release, release.Hash)
 		}
-		return nil
+		return w.Flush()
 	case isCmd(opts, "releases", "create"):
 		app, _ := opts.String("<app>")
 		release, _ := opts.String("<release>")

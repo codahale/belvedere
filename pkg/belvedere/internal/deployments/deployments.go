@@ -160,3 +160,11 @@ func Delete(ctx context.Context, project, name string, dryRun, async bool) error
 
 	return wait.Poll(10*time.Second, 5*time.Minute, check.DM(ctx, dm, project, op.Name))
 }
+
+func Labels(labels []*deploymentmanager.DeploymentLabelEntry) map[string]string {
+	m := make(map[string]string)
+	for _, e := range labels {
+		m[e.Key] = e.Value
+	}
+	return m
+}
