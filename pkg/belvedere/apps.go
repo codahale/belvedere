@@ -57,6 +57,10 @@ func CreateApp(ctx context.Context, project, region, appName string, config *Con
 	)
 	defer span.End()
 
+	if err := validateRFC1035(appName); err != nil {
+		return err
+	}
+
 	managedZone, err := findManagedZone(ctx, project)
 	if err != nil {
 		return err

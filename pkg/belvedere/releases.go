@@ -63,6 +63,10 @@ func CreateRelease(ctx context.Context, project, appName, relName string, config
 	)
 	defer span.End()
 
+	if err := validateRFC1035(relName); err != nil {
+		return err
+	}
+
 	region, err := findRegion(ctx, project, appName)
 	if err != nil {
 		return err
