@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
+// GCE returns a ConditionFunc which checks the progress of a global GCE operation.
 func GCE(ctx context.Context, gce *compute.Service, project, operation string) wait.ConditionFunc {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.GCE")
@@ -16,13 +17,17 @@ func GCE(ctx context.Context, gce *compute.Service, project, operation string) w
 		span.AddAttributes(trace.StringAttribute("operation", operation))
 		defer span.End()
 
-		op, err := gce.GlobalOperations.Get(project, operation).Context(ctx).Do()
+		// Fetch the operation's status and any errors.
+		op, err := gce.GlobalOperations.Get(project, operation).Context(ctx).
+			Fields("status", "error").Do()
 		if err != nil {
 			return false, err
 		}
 		span.AddAttributes(trace.StringAttribute("status", op.Status))
 
+		// Check for errors in the operation.
 		if op.Error != nil {
+			// Record all errors as annotations.
 			for _, e := range op.Error.Errors {
 				span.Annotate([]trace.Attribute{
 					trace.StringAttribute("code", e.Code),
@@ -30,10 +35,12 @@ func GCE(ctx context.Context, gce *compute.Service, project, operation string) w
 					trace.StringAttribute("location", e.Location),
 				}, "Error")
 			}
+			// Exit with a maximally descriptive error.
 			j, _ := op.Error.MarshalJSON()
 			return false, errors.New(string(j))
 		}
 
+		// Keep waiting unless the operation is done.
 		return op.Status == "DONE", nil
 	}
 }

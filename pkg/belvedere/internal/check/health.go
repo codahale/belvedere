@@ -8,6 +8,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
+// Health returns a ConditionFunc which checks if all instances of an instance group are registered
+// and healthy.
 func Health(ctx context.Context, gce *compute.Service, project, region, backendService, instanceGroup string) wait.ConditionFunc {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.Health")
