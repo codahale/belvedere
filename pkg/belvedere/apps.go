@@ -96,8 +96,8 @@ func UpdateApp(ctx context.Context, project, app string, config *Config, dryRun 
 	return deployments.Update(ctx, project, name, resources, dryRun)
 }
 
-func DestroyApp(ctx context.Context, project, app string, dryRun, async bool) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.DestroyApp")
+func DeleteApp(ctx context.Context, project, app string, dryRun, async bool) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.DeleteApp")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", app),

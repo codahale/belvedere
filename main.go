@@ -33,12 +33,12 @@ Usage:
   belvedere apps list [options]
   belvedere apps create <app> <region> <config> [options]
   belvedere apps update <app> <config> [options]
-  belvedere apps destroy <app> [--async] [options] 
+  belvedere apps delete <app> [--async] [options] 
   belvedere releases list <app> [options]
   belvedere releases create <app> <release> <config> <sha256> [--enable] [options]
   belvedere releases enable <app> <release> [options]
   belvedere releases disable <app> <release> [options]
-  belvedere releases destroy <app> <release> [--async] [options]
+  belvedere releases delete <app> <release> [--async] [options]
   belvedere -h | --help
   belvedere --version
 
@@ -171,10 +171,10 @@ func run(ctx context.Context, opts docopt.Opts) error {
 			return err
 		}
 		return belvedere.UpdateApp(ctx, project, app, config, dryRun)
-	case isCmd(opts, "apps", "destroy"):
+	case isCmd(opts, "apps", "delete"):
 		app, _ := opts.String("<app>")
 		async, _ := opts.Bool("--async")
-		return belvedere.DestroyApp(ctx, project, app, dryRun, async)
+		return belvedere.DeleteApp(ctx, project, app, dryRun, async)
 	case isCmd(opts, "releases", "list"):
 		app, _ := opts.String("<app>")
 		releases, err := belvedere.ListReleases(ctx, project, app)
@@ -213,7 +213,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		app, _ := opts.String("<app>")
 		release, _ := opts.String("<release>")
 		return belvedere.DisableRelease(ctx, project, app, release, dryRun)
-	case isCmd(opts, "releases", "destroy"):
+	case isCmd(opts, "releases", "delete"):
 		app, _ := opts.String("<app>")
 		release, _ := opts.String("<release>")
 		async, _ := opts.Bool("--async")
@@ -221,7 +221,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		if err := belvedere.DisableRelease(ctx, project, app, release, dryRun); err != nil {
 			return err
 		}
-		return belvedere.DestroyRelease(ctx, project, app, release, dryRun, async)
+		return belvedere.DeleteRelease(ctx, project, app, release, dryRun, async)
 	default:
 		return fmt.Errorf("unimplemented: %v", opts)
 	}
