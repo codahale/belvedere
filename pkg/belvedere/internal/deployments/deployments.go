@@ -161,10 +161,31 @@ func Delete(ctx context.Context, project, name string, dryRun, async bool) error
 	return wait.Poll(10*time.Second, 5*time.Minute, check.DM(ctx, dm, project, op.Name))
 }
 
-func Labels(labels []*deploymentmanager.DeploymentLabelEntry) map[string]string {
-	m := make(map[string]string)
-	for _, e := range labels {
-		m[e.Key] = e.Value
+// Lists the deployments for the project, returning the name and labels for each.
+func List(ctx context.Context, project string) ([]map[string]string, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.List")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+	)
+	defer span.End()
+
+	dm, err := deploymentmanager.NewService(ctx)
+	if err != nil {
+		return nil, err
 	}
-	return m
+
+	list, err := dm.Deployments.List(project).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	var results []map[string]string
+	for _, d := range list.Deployments {
+		m := map[string]string{"name": d.Name}
+		for _, e := range d.Labels {
+			m[e.Key] = e.Value
+		}
+		results = append(results, m)
+	}
+	return results, nil
 }

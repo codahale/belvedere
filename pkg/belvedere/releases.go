@@ -12,7 +12,6 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/compute/v0.beta"
-	"google.golang.org/api/deploymentmanager/v2"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -35,19 +34,13 @@ func ListReleases(ctx context.Context, project, app string) ([]Release, error) {
 		span.AddAttributes(trace.StringAttribute("app", app))
 	}
 
-	dm, err := deploymentmanager.NewService(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := dm.Deployments.List(project).Do()
+	list, err := deployments.List(ctx, project)
 	if err != nil {
 		return nil, err
 	}
 
 	var releases []Release
-	for _, d := range resp.Deployments {
-		labels := deployments.Labels(d.Labels)
+	for _, labels := range list {
 		if (labels["belvedere-type"] == "release") && (app == "" || labels["belvedere-app"] == app) {
 			releases = append(releases, Release{
 				Project: project,

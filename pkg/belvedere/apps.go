@@ -25,20 +25,13 @@ func ListApps(ctx context.Context, project string) ([]App, error) {
 	)
 	defer span.End()
 
-	dm, err := deploymentmanager.NewService(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := dm.Deployments.List(project).Do()
+	list, err := deployments.List(ctx, project)
 	if err != nil {
 		return nil, err
 	}
 
 	var apps []App
-	for _, d := range resp.Deployments {
-		labels := deployments.Labels(d.Labels)
-
+	for _, labels := range list {
 		if labels["belvedere-type"] == "app" {
 			apps = append(apps, App{
 				Project: project,
