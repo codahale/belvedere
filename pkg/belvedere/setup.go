@@ -25,7 +25,7 @@ func Setup(ctx context.Context, project, dnsZone string, dryRun bool) error {
 	defer span.End()
 
 	// Enable all required services.
-	if err := setup.EnableServices(ctx, project, dryRun); err != nil {
+	if err := setup.EnableAPIs(ctx, project, dryRun); err != nil {
 		return err
 	}
 

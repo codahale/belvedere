@@ -37,9 +37,9 @@ var (
 	}
 )
 
-// EnableServices enables all required services for the given GCP project.
-func EnableServices(ctx context.Context, project string, dryRun bool) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.internal.setup.EnableServices")
+// EnableAPIs enables all required services for the given GCP project.
+func EnableAPIs(ctx context.Context, project string, dryRun bool) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.internal.setup.EnableAPIs")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.BoolAttribute("dry_run", dryRun),
