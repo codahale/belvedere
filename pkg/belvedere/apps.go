@@ -18,6 +18,7 @@ type App struct {
 	Name    string
 }
 
+// ListApps returns a list of apps which have been created in the given project.
 func ListApps(ctx context.Context, project string) ([]App, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.ListApps")
 	span.AddAttributes(
@@ -43,6 +44,8 @@ func ListApps(ctx context.Context, project string) ([]App, error) {
 	return apps, nil
 }
 
+// CreateApp creates an application in the given project and region with the given name and
+// configuration.
 func CreateApp(ctx context.Context, project, region, app string, config *Config, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateApp")
 	span.AddAttributes(
@@ -72,6 +75,7 @@ func CreateApp(ctx context.Context, project, region, app string, config *Config,
 	}, dryRun)
 }
 
+// UpdateApp updates the resources for the given app to match the given configuration.
 func UpdateApp(ctx context.Context, project, app string, config *Config, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateApp")
 	span.AddAttributes(
@@ -92,6 +96,7 @@ func UpdateApp(ctx context.Context, project, app string, config *Config, dryRun 
 	return deployments.Update(ctx, project, name, resources, dryRun)
 }
 
+// DeleteApp deletes all the resources associated with the given app.
 func DeleteApp(ctx context.Context, project, app string, dryRun, async bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DeleteApp")
 	span.AddAttributes(

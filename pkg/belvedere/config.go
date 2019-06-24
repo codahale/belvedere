@@ -2,7 +2,9 @@ package belvedere
 
 import (
 	"context"
+	"io"
 	"io/ioutil"
+	"os"
 
 	"go.opencensus.io/trace"
 	"gopkg.in/yaml.v2"
@@ -21,6 +23,7 @@ type Config struct {
 	Sidecars          map[string]Container `yaml:"sidecars"`
 }
 
+// LoadConfig loads the YAML configuration at the given path. If path is `-`, STDIN is used.
 func LoadConfig(ctx context.Context, path string) (*Config, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.LoadConfig")
 	span.AddAttributes(
@@ -28,9 +31,16 @@ func LoadConfig(ctx context.Context, path string) (*Config, error) {
 	)
 	defer span.End()
 
-	r, err := openPath(path)
-	if err != nil {
-		return nil, err
+	var r io.ReadCloser
+	if path == "-" {
+		r = os.Stdin
+	} else {
+		f, err := os.Open(path)
+		if err != nil {
+			return nil, err
+		}
+
+		r = f
 	}
 	defer func() { _ = r.Close() }()
 

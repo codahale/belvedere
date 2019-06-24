@@ -3,7 +3,6 @@ package belvedere
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"regexp"
@@ -106,13 +105,6 @@ func SSH(ctx context.Context, project, instance string) error {
 		[]string{gcloud, "beta", "compute", "ssh", instance, "--tunnel-through-iap"},
 		os.Environ(),
 	)
-}
-
-func openPath(path string) (io.ReadCloser, error) {
-	if path == "-" {
-		return os.Stdin, nil
-	}
-	return os.Open(path)
 }
 
 var (
