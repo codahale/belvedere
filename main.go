@@ -115,10 +115,10 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		}
 		return nil
 	case isCmd(opts, "instances"):
-		appName, _ := opts.String("<app>")
-		relName, _ := opts.String("<release>")
+		app, _ := opts.String("<app>")
+		release, _ := opts.String("<release>")
 
-		instances, err := belvedere.ListInstances(ctx, project, appName, relName)
+		instances, err := belvedere.ListInstances(ctx, project, app, release)
 		if err != nil {
 			return err
 		}
@@ -131,11 +131,11 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		instance, _ := opts.String("<instance>")
 		return belvedere.SSH(ctx, project, instance)
 	case isCmd(opts, "logs"):
-		appName, _ := opts.String("<app>")
-		relName, _ := opts.String("<release>")
+		app, _ := opts.String("<app>")
+		release, _ := opts.String("<release>")
 		instance, _ := opts.String("<instance>")
 
-		logs, err := belvedere.Logs(ctx, project, appName, relName, instance)
+		logs, err := belvedere.Logs(ctx, project, app, release, instance)
 		if err != nil {
 			return err
 		}
@@ -155,29 +155,29 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		}
 		return nil
 	case isCmd(opts, "apps", "create"):
-		appName, _ := opts.String("<app>")
+		app, _ := opts.String("<app>")
 		region, _ := opts.String("<region>")
 		path, _ := opts.String("<config>")
 		config, err := belvedere.LoadConfig(ctx, path)
 		if err != nil {
 			return err
 		}
-		return belvedere.CreateApp(ctx, project, region, appName, config, dryRun)
+		return belvedere.CreateApp(ctx, project, region, app, config, dryRun)
 	case isCmd(opts, "apps", "update"):
-		appName, _ := opts.String("<app>")
+		app, _ := opts.String("<app>")
 		path, _ := opts.String("<config>")
 		config, err := belvedere.LoadConfig(ctx, path)
 		if err != nil {
 			return err
 		}
-		return belvedere.UpdateApp(ctx, project, appName, config, dryRun)
+		return belvedere.UpdateApp(ctx, project, app, config, dryRun)
 	case isCmd(opts, "apps", "destroy"):
-		appName, _ := opts.String("<app>")
+		app, _ := opts.String("<app>")
 		async, _ := opts.Bool("--async")
-		return belvedere.DestroyApp(ctx, project, appName, dryRun, async)
+		return belvedere.DestroyApp(ctx, project, app, dryRun, async)
 	case isCmd(opts, "releases", "list"):
-		appName, _ := opts.String("<app>")
-		releases, err := belvedere.ListReleases(ctx, project, appName)
+		app, _ := opts.String("<app>")
+		releases, err := belvedere.ListReleases(ctx, project, app)
 		if err != nil {
 			return err
 		}
@@ -186,8 +186,8 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		}
 		return nil
 	case isCmd(opts, "releases", "create"):
-		appName, _ := opts.String("<app>")
-		relName, _ := opts.String("<release>")
+		app, _ := opts.String("<app>")
+		release, _ := opts.String("<release>")
 		imageSHA256, _ := opts.String("<sha256>")
 		path, _ := opts.String("<config>")
 		enable, _ := opts.Bool("--enable")
@@ -196,32 +196,32 @@ func run(ctx context.Context, opts docopt.Opts) error {
 			return err
 		}
 
-		if err := belvedere.CreateRelease(ctx, project, appName, relName, config, imageSHA256, dryRun); err != nil {
+		if err := belvedere.CreateRelease(ctx, project, app, release, config, imageSHA256, dryRun); err != nil {
 			return err
 		}
 
 		if enable {
-			return belvedere.EnableRelease(ctx, project, appName, relName, dryRun)
+			return belvedere.EnableRelease(ctx, project, app, release, dryRun)
 		}
 
 		return nil
 	case isCmd(opts, "releases", "enable"):
-		appName, _ := opts.String("<app>")
-		relName, _ := opts.String("<release>")
-		return belvedere.EnableRelease(ctx, project, appName, relName, dryRun)
+		app, _ := opts.String("<app>")
+		release, _ := opts.String("<release>")
+		return belvedere.EnableRelease(ctx, project, app, release, dryRun)
 	case isCmd(opts, "releases", "disable"):
-		appName, _ := opts.String("<app>")
-		relName, _ := opts.String("<release>")
-		return belvedere.DisableRelease(ctx, project, appName, relName, dryRun)
+		app, _ := opts.String("<app>")
+		release, _ := opts.String("<release>")
+		return belvedere.DisableRelease(ctx, project, app, release, dryRun)
 	case isCmd(opts, "releases", "destroy"):
-		appName, _ := opts.String("<app>")
-		relName, _ := opts.String("<release>")
+		app, _ := opts.String("<app>")
+		release, _ := opts.String("<release>")
 		async, _ := opts.Bool("--async")
 
-		if err := belvedere.DisableRelease(ctx, project, appName, relName, dryRun); err != nil {
+		if err := belvedere.DisableRelease(ctx, project, app, release, dryRun); err != nil {
 			return err
 		}
-		return belvedere.DestroyRelease(ctx, project, appName, relName, dryRun, async)
+		return belvedere.DestroyRelease(ctx, project, app, release, dryRun, async)
 	default:
 		return fmt.Errorf("unimplemented: %v", opts)
 	}

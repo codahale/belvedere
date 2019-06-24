@@ -47,17 +47,17 @@ func ListApps(ctx context.Context, project string) ([]string, error) {
 	return names, nil
 }
 
-func CreateApp(ctx context.Context, project, region, appName string, config *Config, dryRun bool) error {
+func CreateApp(ctx context.Context, project, region, app string, config *Config, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateApp")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("region", region),
-		trace.StringAttribute("app", appName),
+		trace.StringAttribute("app", app),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
-	if err := validateRFC1035(appName); err != nil {
+	if err := validateRFC1035(app); err != nil {
 		return err
 	}
 
@@ -66,21 +66,21 @@ func CreateApp(ctx context.Context, project, region, appName string, config *Con
 		return err
 	}
 
-	resources := appResources(project, appName, managedZone, config)
+	resources := appResources(project, app, managedZone, config)
 
-	name := fmt.Sprintf("belvedere-%s", appName)
+	name := fmt.Sprintf("belvedere-%s", app)
 	return deployments.Insert(ctx, project, name, resources, map[string]string{
 		"belvedere-type":   "app",
-		"belvedere-app":    appName,
+		"belvedere-app":    app,
 		"belvedere-region": region,
 	}, dryRun)
 }
 
-func UpdateApp(ctx context.Context, project, appName string, config *Config, dryRun bool) error {
+func UpdateApp(ctx context.Context, project, app string, config *Config, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateApp")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", appName),
+		trace.StringAttribute("app", app),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
@@ -90,23 +90,23 @@ func UpdateApp(ctx context.Context, project, appName string, config *Config, dry
 		return err
 	}
 
-	resources := appResources(project, appName, managedZone, config)
+	resources := appResources(project, app, managedZone, config)
 
-	name := fmt.Sprintf("belvedere-%s", appName)
+	name := fmt.Sprintf("belvedere-%s", app)
 	return deployments.Update(ctx, project, name, resources, dryRun)
 }
 
-func DestroyApp(ctx context.Context, project, appName string, dryRun, async bool) error {
+func DestroyApp(ctx context.Context, project, app string, dryRun, async bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DestroyApp")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", appName),
+		trace.StringAttribute("app", app),
 		trace.BoolAttribute("dry_run", dryRun),
 		trace.BoolAttribute("async", async),
 	)
 	defer span.End()
 
-	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s", appName), dryRun, async)
+	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s", app), dryRun, async)
 }
 
 func findManagedZone(ctx context.Context, project string) (*dns.ManagedZone, error) {
@@ -124,11 +124,11 @@ func findManagedZone(ctx context.Context, project string) (*dns.ManagedZone, err
 	return d.ManagedZones.Get(project, "belvedere").Do()
 }
 
-func findRegion(ctx context.Context, project, appName string) (string, error) {
+func findRegion(ctx context.Context, project, app string) (string, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.findRegion")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", appName),
+		trace.StringAttribute("app", app),
 	)
 	defer span.End()
 
@@ -137,7 +137,7 @@ func findRegion(ctx context.Context, project, appName string) (string, error) {
 		return "", err
 	}
 
-	deployment, err := dm.Deployments.Get(project, fmt.Sprintf("belvedere-%s", appName)).Do()
+	deployment, err := dm.Deployments.Get(project, fmt.Sprintf("belvedere-%s", app)).Do()
 	if err != nil {
 		return "", err
 	}
@@ -151,17 +151,17 @@ func findRegion(ctx context.Context, project, appName string) (string, error) {
 	return "", errors.New("no region found")
 }
 
-func appResources(project string, appName string, managedZone *dns.ManagedZone, config *Config) *deployments.Config {
-	firewall := fmt.Sprintf("%s-fw", appName)
-	healthcheck := fmt.Sprintf("%s-hc", appName)
-	backendService := fmt.Sprintf("%s-bes", appName)
-	urlMap := fmt.Sprintf("%s-urlmap", appName)
-	sslCertificate := fmt.Sprintf("%s-cert", appName)
-	targetProxy := fmt.Sprintf("%s-tp", appName)
-	forwardingRule := fmt.Sprintf("%s-fr", appName)
-	serviceAccount := fmt.Sprintf("%s-sa", appName)
-	dnsRecord := fmt.Sprintf("%s-rrs", appName)
-	dnsName := fmt.Sprintf("%s.%s", appName, managedZone.DnsName)
+func appResources(project string, app string, managedZone *dns.ManagedZone, config *Config) *deployments.Config {
+	firewall := fmt.Sprintf("%s-fw", app)
+	healthcheck := fmt.Sprintf("%s-hc", app)
+	backendService := fmt.Sprintf("%s-bes", app)
+	urlMap := fmt.Sprintf("%s-urlmap", app)
+	sslCertificate := fmt.Sprintf("%s-cert", app)
+	targetProxy := fmt.Sprintf("%s-tp", app)
+	forwardingRule := fmt.Sprintf("%s-fr", app)
+	serviceAccount := fmt.Sprintf("%s-sa", app)
+	dnsRecord := fmt.Sprintf("%s-rrs", app)
+	dnsName := fmt.Sprintf("%s.%s", app, managedZone.DnsName)
 	dmConfig := &deployments.Config{
 		Resources: []deployments.Resource{
 			// A firewall rule allowing access from the load balancer to app instances on port 8443.
@@ -180,7 +180,7 @@ func appResources(project string, appName string, managedZone *dns.ManagedZone, 
 						"35.191.0.0/16",
 					},
 					TargetTags: []string{
-						fmt.Sprintf("belvedere-%s", appName),
+						fmt.Sprintf("belvedere-%s", app),
 					},
 				},
 			},
@@ -276,8 +276,8 @@ func appResources(project string, appName string, managedZone *dns.ManagedZone, 
 				Name: serviceAccount,
 				Type: "iam.v1.serviceAccount",
 				Properties: map[string]string{
-					"accountId":   fmt.Sprintf("app-%s", appName),
-					"displayName": appName,
+					"accountId":   fmt.Sprintf("app-%s", app),
+					"displayName": app,
 				},
 			},
 			// A DNS record.

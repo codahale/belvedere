@@ -13,7 +13,7 @@ type Container struct {
 	DockerOptions []string          `yaml:"dockerOptions"`
 }
 
-func (c *Container) DockerArgs(appName, relName, sha256 string, labels map[string]string) []string {
+func (c *Container) DockerArgs(app, release, sha256 string, labels map[string]string) []string {
 	var labelNames []string
 	for k := range labels {
 		labelNames = append(labelNames, k)
@@ -22,7 +22,7 @@ func (c *Container) DockerArgs(appName, relName, sha256 string, labels map[strin
 	args := []string{
 		"--log-driver", "gcplogs",
 		"--log-opt", fmt.Sprintf("labels=%s", strings.Join(labelNames, ",")),
-		"--name", appName,
+		"--name", app,
 		"--network", "host",
 		"--oom-kill-disable",
 	}
@@ -33,9 +33,9 @@ func (c *Container) DockerArgs(appName, relName, sha256 string, labels map[strin
 		}...)
 	}
 
-	if relName != "" {
+	if release != "" {
 		args = append(args, []string{
-			"--env", fmt.Sprintf("RELEASE=%s", relName),
+			"--env", fmt.Sprintf("RELEASE=%s", release),
 		}...)
 	}
 

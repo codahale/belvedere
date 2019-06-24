@@ -37,12 +37,12 @@ func DNSServers(ctx context.Context, project string) ([]string, error) {
 	return dnsServers, nil
 }
 
-func ListInstances(ctx context.Context, project, appName, relName string) ([]string, error) {
+func ListInstances(ctx context.Context, project, app, release string) ([]string, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.ListInstances")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", appName),
-		trace.StringAttribute("release", relName),
+		trace.StringAttribute("app", app),
+		trace.StringAttribute("release", release),
 	)
 	defer span.End()
 
@@ -69,8 +69,8 @@ func ListInstances(ctx context.Context, project, appName, relName string) ([]str
 			}
 
 			for _, i := range zi.Items {
-				if s, ok := i.Labels["belvedere-app"]; ok && (s == appName || appName == "") {
-					if s, ok := i.Labels["belvedere-release"]; ok && (s == relName || relName == "") {
+				if s, ok := i.Labels["belvedere-app"]; ok && (s == app || app == "") {
+					if s, ok := i.Labels["belvedere-release"]; ok && (s == release || release == "") {
 						c <- i.Name
 					}
 				}

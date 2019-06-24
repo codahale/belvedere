@@ -16,11 +16,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-func ListReleases(ctx context.Context, project, appName string) ([]string, error) {
+func ListReleases(ctx context.Context, project, app string) ([]string, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.ListReleases")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", appName),
+		trace.StringAttribute("app", app),
 	)
 	defer span.End()
 
@@ -52,29 +52,29 @@ func ListReleases(ctx context.Context, project, appName string) ([]string, error
 	return names, nil
 }
 
-func CreateRelease(ctx context.Context, project, appName, relName string, config *Config, imageSHA256 string, dryRun bool) error {
+func CreateRelease(ctx context.Context, project, app, release string, config *Config, imageSHA256 string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", appName),
-		trace.StringAttribute("release", relName),
+		trace.StringAttribute("app", app),
+		trace.StringAttribute("release", release),
 		trace.StringAttribute("image_url", imageSHA256),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
-	if err := validateRFC1035(relName); err != nil {
+	if err := validateRFC1035(release); err != nil {
 		return err
 	}
 
-	region, err := findRegion(ctx, project, appName)
+	region, err := findRegion(ctx, project, app)
 	if err != nil {
 		return err
 	}
 
-	instanceTemplate := fmt.Sprintf("%s-%s-it", appName, relName)
-	instanceGroupManager := fmt.Sprintf("%s-%s-ig", appName, relName)
-	autoscaler := fmt.Sprintf("%s-%s-as", appName, relName)
+	instanceTemplate := fmt.Sprintf("%s-%s-it", app, release)
+	instanceGroupManager := fmt.Sprintf("%s-%s-ig", app, release)
+	autoscaler := fmt.Sprintf("%s-%s-as", app, release)
 	dmConfig := &deployments.Config{
 		Resources: []deployments.Resource{
 			{
@@ -94,8 +94,8 @@ func CreateRelease(ctx context.Context, project, appName, relName string, config
 							},
 						},
 						Labels: map[string]string{
-							"belvedere-app":     appName,
-							"belvedere-release": relName,
+							"belvedere-app":     app,
+							"belvedere-release": release,
 						},
 						MachineType: config.MachineType,
 						Metadata: &compute.Metadata{
@@ -105,7 +105,7 @@ func CreateRelease(ctx context.Context, project, appName, relName string, config
 								metaData("google-logging-enable", "true"),
 								metaData(
 									"user-data",
-									cloudConfig(appName, relName, config, imageSHA256),
+									cloudConfig(app, release, config, imageSHA256),
 								),
 							},
 						},
@@ -122,7 +122,7 @@ func CreateRelease(ctx context.Context, project, appName, relName string, config
 						},
 						ServiceAccounts: []*compute.ServiceAccount{
 							{
-								Email: fmt.Sprintf("app-%s@%s.iam.gserviceaccount.com", appName, project),
+								Email: fmt.Sprintf("app-%s@%s.iam.gserviceaccount.com", app, project),
 								Scopes: []string{
 									compute.CloudPlatformScope,
 								},
@@ -136,7 +136,7 @@ func CreateRelease(ctx context.Context, project, appName, relName string, config
 						Tags: &compute.Tags{
 							Items: []string{
 								"belvedere",
-								fmt.Sprintf("belvedere-%s", appName),
+								fmt.Sprintf("belvedere-%s", app),
 							},
 						},
 					},
@@ -146,7 +146,7 @@ func CreateRelease(ctx context.Context, project, appName, relName string, config
 				Name: instanceGroupManager,
 				Type: "compute.beta.regionInstanceGroupManager",
 				Properties: compute.InstanceGroupManager{
-					BaseInstanceName: fmt.Sprintf("%s-%s", appName, relName),
+					BaseInstanceName: fmt.Sprintf("%s-%s", app, release),
 					InstanceTemplate: deployments.SelfLink(instanceTemplate),
 					Region:           region,
 					NamedPorts: []*compute.NamedPort{
@@ -162,7 +162,7 @@ func CreateRelease(ctx context.Context, project, appName, relName string, config
 				Name: autoscaler,
 				Type: "compute.beta.regionAutoscaler",
 				Properties: compute.Autoscaler{
-					Name: fmt.Sprintf("%s-%s", appName, relName),
+					Name: fmt.Sprintf("%s-%s", app, release),
 					AutoscalingPolicy: &compute.AutoscalingPolicy{
 						LoadBalancingUtilization: &compute.AutoscalingPolicyLoadBalancingUtilization{
 							UtilizationTarget: config.UtilizationTarget,
@@ -177,27 +177,27 @@ func CreateRelease(ctx context.Context, project, appName, relName string, config
 		},
 	}
 
-	name := fmt.Sprintf("belvedere-%s-%s", appName, relName)
+	name := fmt.Sprintf("belvedere-%s-%s", app, release)
 	return deployments.Insert(ctx, project, name, dmConfig, map[string]string{
 		"belvedere-type":    "release",
-		"belvedere-app":     appName,
-		"belvedere-release": relName,
+		"belvedere-app":     app,
+		"belvedere-release": release,
 		"belvedere-region":  region,
 		"belvedere-hash":    imageSHA256[:32],
 	}, dryRun)
 }
 
-func EnableRelease(ctx context.Context, project, appName, relName string, dryRun bool) error {
+func EnableRelease(ctx context.Context, project, app, release string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.EnableRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", appName),
-		trace.StringAttribute("release", relName),
+		trace.StringAttribute("app", app),
+		trace.StringAttribute("release", release),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
-	region, err := findRegion(ctx, project, appName)
+	region, err := findRegion(ctx, project, app)
 	if err != nil {
 		return err
 	}
@@ -207,8 +207,8 @@ func EnableRelease(ctx context.Context, project, appName, relName string, dryRun
 		return err
 	}
 
-	backendService := fmt.Sprintf("%s-bes", appName)
-	instanceGroup := fmt.Sprintf("%s-%s-ig", appName, relName)
+	backendService := fmt.Sprintf("%s-bes", app)
+	instanceGroup := fmt.Sprintf("%s-%s-ig", app, release)
 	if err := backends.Add(ctx, gce, project, region, backendService, instanceGroup, dryRun); err != nil {
 		return err
 	}
@@ -217,17 +217,17 @@ func EnableRelease(ctx context.Context, project, appName, relName string, dryRun
 	return wait.Poll(10*time.Second, 5*time.Minute, f)
 }
 
-func DisableRelease(ctx context.Context, project, appName, relName string, dryRun bool) error {
+func DisableRelease(ctx context.Context, project, app, release string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DisableRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", appName),
-		trace.StringAttribute("release", relName),
+		trace.StringAttribute("app", app),
+		trace.StringAttribute("release", release),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
-	region, err := findRegion(ctx, project, appName)
+	region, err := findRegion(ctx, project, app)
 	if err != nil {
 		return err
 	}
@@ -237,23 +237,23 @@ func DisableRelease(ctx context.Context, project, appName, relName string, dryRu
 		return err
 	}
 
-	backendService := fmt.Sprintf("%s-bes", appName)
-	instanceGroup := fmt.Sprintf("%s-%s-ig", appName, relName)
+	backendService := fmt.Sprintf("%s-bes", app)
+	instanceGroup := fmt.Sprintf("%s-%s-ig", app, release)
 	return backends.Remove(ctx, gce, project, region, backendService, instanceGroup, dryRun)
 }
 
-func DestroyRelease(ctx context.Context, project, appName, relName string, dryRun, async bool) error {
+func DestroyRelease(ctx context.Context, project, app, release string, dryRun, async bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DestroyRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", appName),
-		trace.StringAttribute("release", relName),
+		trace.StringAttribute("app", app),
+		trace.StringAttribute("release", release),
 		trace.BoolAttribute("dry_run", dryRun),
 		trace.BoolAttribute("async", async),
 	)
 	defer span.End()
 
-	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s-%s", appName, relName), dryRun, async)
+	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s-%s", app, release), dryRun, async)
 }
 
 const (
@@ -267,26 +267,26 @@ func metaData(key, value string) *compute.MetadataItems {
 	}
 }
 
-func cloudConfig(appName, relName string, config *Config, imageSHA256 string) string {
+func cloudConfig(app, release string, config *Config, imageSHA256 string) string {
 	cc := cloudinit.CloudConfig{
 		Files: []cloudinit.File{
 			{
-				Content: systemdService(appName,
-					config.Container.DockerArgs(appName, relName, imageSHA256,
+				Content: systemdService(app,
+					config.Container.DockerArgs(app, release, imageSHA256,
 						map[string]string{
-							"app":     appName,
-							"release": relName,
+							"app":     app,
+							"release": release,
 						}),
 				),
 				Owner:       "root",
-				Path:        fmt.Sprintf("/etc/systemd/system/docker-%s.service", appName),
+				Path:        fmt.Sprintf("/etc/systemd/system/docker-%s.service", app),
 				Permissions: "0644",
 			},
 		},
 		Commands: []string{
 			"iptables -w -A INPUT -p tcp --dport 8443 -j ACCEPT",
 			"systemctl daemon-reload",
-			fmt.Sprintf("systemctl start docker-%s.service", appName),
+			fmt.Sprintf("systemctl start docker-%s.service", app),
 		},
 	}
 
@@ -296,8 +296,8 @@ func cloudConfig(appName, relName string, config *Config, imageSHA256 string) st
 				Content: systemdService(name,
 					sidecar.DockerArgs(name, "", "",
 						map[string]string{
-							"app":     appName,
-							"release": relName,
+							"app":     app,
+							"release": release,
 							"sidecar": name,
 						}),
 				),

@@ -11,11 +11,11 @@ import (
 	"google.golang.org/api/logging/v2"
 )
 
-func Logs(ctx context.Context, project, appName, relName, instance string) ([]string, error) {
+func Logs(ctx context.Context, project, app, release, instance string) ([]string, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.Logs")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", appName),
+		trace.StringAttribute("app", app),
 	)
 	defer span.End()
 
@@ -29,13 +29,13 @@ func Logs(ctx context.Context, project, appName, relName, instance string) ([]st
 
 	filter := []string{
 		fmt.Sprintf(`timestamp>=%q`, time.Now().Add(-5*time.Minute).Format(time.RFC3339Nano)),
-		fmt.Sprintf(`jsonPayload.container.metadata.app=%q`, appName),
+		fmt.Sprintf(`jsonPayload.container.metadata.app=%q`, app),
 	}
 
-	if relName != "" {
-		span.AddAttributes(trace.StringAttribute("release", relName))
+	if release != "" {
+		span.AddAttributes(trace.StringAttribute("release", release))
 		filter = append(filter,
-			fmt.Sprintf(`jsonPayload.container.metadata.release=%q`, relName),
+			fmt.Sprintf(`jsonPayload.container.metadata.release=%q`, release),
 		)
 	}
 
