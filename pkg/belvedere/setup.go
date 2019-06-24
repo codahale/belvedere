@@ -3,6 +3,7 @@ package belvedere
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/setup"
@@ -31,6 +32,11 @@ func Setup(ctx context.Context, project, dnsZone string, dryRun bool) error {
 	// Grant Deployment Manager the required permissions to manage IAM roles.
 	if err := setup.SetDMPerms(ctx, project, dryRun); err != nil {
 		return err
+	}
+
+	// Ensure the DNS zone ends with a period.
+	if !strings.HasSuffix(dnsZone, ".") {
+		dnsZone = dnsZone + "."
 	}
 
 	// Create a deployment with a managed DNS zone and firewall rules which limit SSH to GCE
