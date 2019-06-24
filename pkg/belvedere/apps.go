@@ -275,19 +275,19 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 		{
 			Name: serviceAccount,
 			Type: "iam.v1.serviceAccount",
-			Properties: map[string]string{
-				"accountId":   fmt.Sprintf("app-%s", app),
-				"displayName": app,
+			Properties: deployments.ServiceAccount{
+				AccountID:   fmt.Sprintf("app-%s", app),
+				DisplayName: app,
 			},
 		},
 		// A DNS record.
 		{
 			Name: dnsRecord,
 			Type: "gcp-types/dns-v1:resourceRecordSets",
-			Properties: map[string]interface{}{
-				"name":        dnsName,
-				"managedZone": managedZone.Name,
-				"records": []*dns.ResourceRecordSet{
+			Properties: deployments.ResourceRecordSets{
+				Name:        dnsName,
+				ManagedZone: managedZone.Name,
+				Records: []*dns.ResourceRecordSet{
 					{
 						Type:    "A",
 						Rrdatas: []string{deployments.Ref(forwardingRule, "IPAddress")},

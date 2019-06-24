@@ -74,6 +74,19 @@ func CreateRelease(ctx context.Context, project, app, release string, config *Co
 		return err
 	}
 
+	resources := releaseResources(project, region, app, release, imageSHA256, config)
+
+	name := fmt.Sprintf("belvedere-%s-%s", app, release)
+	return deployments.Create(ctx, project, name, resources, map[string]string{
+		"belvedere-type":    "release",
+		"belvedere-app":     app,
+		"belvedere-release": release,
+		"belvedere-region":  region,
+		"belvedere-hash":    imageSHA256[:32],
+	}, dryRun)
+}
+
+func releaseResources(project string, region string, app string, release string, imageSHA256 string, config *Config) []deployments.Resource {
 	instanceTemplate := fmt.Sprintf("%s-%s-it", app, release)
 	instanceGroupManager := fmt.Sprintf("%s-%s-ig", app, release)
 	autoscaler := fmt.Sprintf("%s-%s-as", app, release)
@@ -176,15 +189,7 @@ func CreateRelease(ctx context.Context, project, app, release string, config *Co
 			},
 		},
 	}
-
-	name := fmt.Sprintf("belvedere-%s-%s", app, release)
-	return deployments.Create(ctx, project, name, resources, map[string]string{
-		"belvedere-type":    "release",
-		"belvedere-app":     app,
-		"belvedere-release": release,
-		"belvedere-region":  region,
-		"belvedere-hash":    imageSHA256[:32],
-	}, dryRun)
+	return resources
 }
 
 func EnableRelease(ctx context.Context, project, app, release string, dryRun bool) error {

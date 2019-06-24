@@ -17,8 +17,6 @@ type Config struct {
 	MaxInstances      int                  `yaml:"maxInstances"`
 	MinInstances      int                  `yaml:"minInstances"`
 	UtilizationTarget float64              `yaml:"utilizationTarget"`
-	Env               map[string]string    `yaml:"env"`
-	ImageURL          string               `yaml:"imageURL"`
 	Container         Container            `yaml:"container"`
 	Sidecars          map[string]Container `yaml:"sidecars"`
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/deploymentmanager/v2"
+	"google.golang.org/api/dns/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -28,6 +29,17 @@ type Resource struct {
 	Name       string      `json:"name"`
 	Type       string      `json:"type"`
 	Properties interface{} `json:"properties"`
+}
+
+type ServiceAccount struct {
+	AccountID   string `json:"accountId"`
+	DisplayName string `json:"displayName"`
+}
+
+type ResourceRecordSets struct {
+	Name        string                   `json:"name"`
+	ManagedZone string                   `json:"managedZone"`
+	Records     []*dns.ResourceRecordSet `json:"records"`
 }
 
 // Creates a new deployment with the given name, resources, and labels.

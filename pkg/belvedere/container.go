@@ -2,6 +2,7 @@ package belvedere
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -18,6 +19,7 @@ func (c *Container) DockerArgs(app, release, sha256 string, labels map[string]st
 	for k := range labels {
 		labelNames = append(labelNames, k)
 	}
+	sort.Stable(sort.StringSlice(labelNames))
 
 	args := []string{
 		"--log-driver", "gcplogs",
@@ -27,9 +29,9 @@ func (c *Container) DockerArgs(app, release, sha256 string, labels map[string]st
 		"--oom-kill-disable",
 	}
 
-	for k, v := range labels {
+	for _, k := range labelNames {
 		args = append(args, []string{
-			"--label", fmt.Sprintf("%s=%s", k, v),
+			"--label", fmt.Sprintf("%s=%s", k, labels[k]),
 		}...)
 	}
 
@@ -39,9 +41,15 @@ func (c *Container) DockerArgs(app, release, sha256 string, labels map[string]st
 		}...)
 	}
 
-	for k, v := range c.Env {
+	var envNames []string
+	for k := range c.Env {
+		envNames = append(envNames, k)
+	}
+	sort.Stable(sort.StringSlice(envNames))
+
+	for _, k := range envNames {
 		args = append(args, []string{
-			"--env", fmt.Sprintf("%s=%s", k, v),
+			"--env", fmt.Sprintf("%s=%s", k, c.Env[k]),
 		}...)
 	}
 
