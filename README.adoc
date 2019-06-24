@@ -21,7 +21,7 @@ _A small lookout tower (usually square) on the roof of a house._
 - [x] Add create-and-enable for releases
 - [x] Add disable-and-destroy for releases
 - [x] Add easy log listing
-- [ ] Figure out sidecar
+- [x] Figure out sidecar
 - [ ] Block external access to `/healthz`
 - [ ] Canary deploys
 - [ ] Run containers as a non-root user

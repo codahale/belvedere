@@ -1,10 +1,10 @@
-FROM nginx:latest
-RUN set -x \
-  && apt-get update \
-	&& apt-get install --no-install-recommends --no-install-suggests -y openssl curl ca-certificates \
-	&& curl -o /usr/bin/self-signed-tls https://raw.githubusercontent.com/loganstellway/self-signed-ssl/master/self-signed-tls \
-	&& apt-get remove --purge --auto-remove -y curl ca-certificates && rm -rf /var/lib/apt/lists/* \
-	&& chmod +x /usr/bin/self-signed-tls
-COPY helloworld.nginx /etc/nginx/
-COPY nginx.sh .
-CMD ["./nginx.sh"]
+FROM golang:1.12 AS build
+WORKDIR /go/src/helloworld
+COPY helloworld.go .
+RUN go install .
+RUN ls -al /go/bin/
+
+FROM gcr.io/distroless/base
+WORKDIR /app
+COPY --from=build /go/bin/helloworld /app/helloworld
+ENTRYPOINT ["/app/helloworld"]

@@ -11,3 +11,6 @@ container:
   args: []
   env: {}
   dockerOptions: []
+sidecars:
+  nginx-frontend:
+    image: gcr.io/cloudslap/nginx-frontend
