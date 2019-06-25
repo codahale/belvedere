@@ -1,7 +1,7 @@
 {
   "resources": [
     {
-      "name": "my-app-fw",
+      "name": "belvedere-allow-my-app-lb",
       "type": "compute.beta.firewall",
       "properties": {
         "allowed": [

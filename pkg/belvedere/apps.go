@@ -153,7 +153,7 @@ func findRegion(ctx context.Context, project, app string) (string, error) {
 }
 
 func appResources(project string, app string, managedZone *dns.ManagedZone, config *Config) []deployments.Resource {
-	firewall := fmt.Sprintf("%s-fw", app)
+	firewall := fmt.Sprintf("belvedere-allow-%s-lb", app)
 	healthcheck := fmt.Sprintf("%s-hc", app)
 	backendService := fmt.Sprintf("%s-bes", app)
 	urlMap := fmt.Sprintf("%s-urlmap", app)
