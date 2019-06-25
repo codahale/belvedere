@@ -6,11 +6,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type User struct {
-	Name string `yaml:"name,omitempty"`
-	UID  int    `yaml:"uid,omitempty"`
-}
-
 type File struct {
 	Path        string `yaml:"path,omitempty"`
 	Permissions string `yaml:"permissions,omitempty"`

@@ -1,0 +1,17 @@
+#cloud-configs
+write_files:
+- path: /etc/password/
+  permissions: "0666"
+  content: |
+    one
+    two
+    three
+- path: /etc/init
+  permissions: "0888"
+  content: |-
+    four
+    five
+    six
+runcmd:
+- say moo moo moo moo
+- reboot
