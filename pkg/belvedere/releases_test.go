@@ -13,7 +13,7 @@ func TestReleaseResources(t *testing.T) {
 	config := &Config{
 		Container: Container{
 			Image:   "gcr.io/example/helloworld",
-			Command: []string{"/usr/bin/helloworld"},
+			Command: "/usr/bin/helloworld",
 			Args:    []string{"one", "two"},
 			Env: map[string]string{
 				"ONE": "1",
@@ -24,7 +24,7 @@ func TestReleaseResources(t *testing.T) {
 		Sidecars: map[string]Container{
 			"nginx": {
 				Image:   "gcr.io/example/nginx",
-				Command: []string{"/usr/bin/nginx"},
+				Command: "/usr/bin/nginx",
 				Args:    []string{"three", "four"},
 				Env: map[string]string{
 					"THREE": "3",

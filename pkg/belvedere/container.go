@@ -8,7 +8,7 @@ import (
 
 type Container struct {
 	Image         string            `yaml:"image"`
-	Command       []string          `yaml:"command"`
+	Command       string            `yaml:"command"`
 	Args          []string          `yaml:"args"`
 	Env           map[string]string `yaml:"env"`
 	DockerOptions []string          `yaml:"dockerOptions"`
@@ -59,7 +59,7 @@ func (c *Container) DockerArgs(app, release, sha256 string, labels map[string]st
 		url = fmt.Sprintf("%s@sha256:%s", url, sha256)
 	}
 	args = append(args, url)
-	args = append(args, c.Command...)
+	args = append(args, c.Command)
 	args = append(args, c.Args...)
 
 	return args

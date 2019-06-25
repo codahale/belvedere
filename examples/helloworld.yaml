@@ -7,7 +7,7 @@ initialInstances: 2
 utilizationTarget: 0.8
 container:
   image: gcr.io/cloudslap/helloworld
-  command: []
+  command: ""
   args: []
   env: {}
   dockerOptions: []
