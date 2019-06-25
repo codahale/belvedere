@@ -152,7 +152,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 
 		filters := opts["--filter"].([]string)
 
-		logs, err := belvedere.Logs(ctx, project, app, release, instance, d, filters)
+		logs, err := belvedere.Logs(ctx, project, app, release, instance, time.Now().Add(-d), filters)
 		if err != nil {
 			return err
 		}

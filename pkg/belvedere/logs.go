@@ -12,7 +12,7 @@ import (
 	"google.golang.org/api/logging/v2"
 )
 
-func Logs(ctx context.Context, project, app, release, instance string, freshness time.Duration, filters []string) ([]string, error) {
+func Logs(ctx context.Context, project, app, release, instance string, minTimestamp time.Time, filters []string) ([]string, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.Logs")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -29,7 +29,7 @@ func Logs(ctx context.Context, project, app, release, instance string, freshness
 	}
 
 	filter := []string{
-		fmt.Sprintf(`timestamp>=%q`, time.Now().Add(-freshness).Format(time.RFC3339Nano)),
+		fmt.Sprintf(`timestamp>=%q`, minTimestamp.Format(time.RFC3339Nano)),
 		fmt.Sprintf(`jsonPayload.container.metadata.app=%q`, app),
 	}
 
