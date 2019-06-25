@@ -37,6 +37,6 @@ func TestAppResources(t *testing.T) {
 	}
 
 	if !bytes.Equal(actual, expected) {
-		t.Error(cmp.Diff(string(expected), string(actual)))
+		t.Error(cmp.Diff(string(actual), string(expected)))
 	}
 }

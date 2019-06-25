@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
+	"github.com/google/go-cmp/cmp"
 	compute "google.golang.org/api/compute/v0.beta"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -78,6 +79,6 @@ func TestGCEError(t *testing.T) {
 
 	expected := "{\"errors\":[{\"code\":\"ERR_MAGIC_HAT\",\"location\":\"/great-hall\",\"message\":\"Bad personality test\"}]}"
 	if actual := err.Error(); actual != expected {
-		t.Errorf("Expected %q but got %q", expected, actual)
+		t.Error(cmp.Diff(actual, expected))
 	}
 }

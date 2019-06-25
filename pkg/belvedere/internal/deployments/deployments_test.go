@@ -170,7 +170,7 @@ func TestList(t *testing.T) {
 		{"name": "two", "two-a": "a", "two-b": "b"},
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Errorf("Mis-match: %s", cmp.Diff(expected, actual))
+	if !cmp.Equal(actual, expected) {
+		t.Error(cmp.Diff(actual, expected))
 	}
 }

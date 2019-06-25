@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
+	"github.com/google/go-cmp/cmp"
 	"google.golang.org/api/deploymentmanager/v2"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -78,6 +79,6 @@ func TestDMError(t *testing.T) {
 
 	expected := "{\"errors\":[{\"code\":\"ERR_BAD_NEWS\",\"location\":\"/downtown\",\"message\":\"here comes Mongo\"}]}"
 	if actual := err.Error(); actual != expected {
-		t.Errorf("Expected %q but got %q", expected, actual)
+		t.Error(cmp.Diff(actual, expected))
 	}
 }

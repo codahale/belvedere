@@ -56,6 +56,6 @@ func TestReleaseResources(t *testing.T) {
 	}
 
 	if !bytes.Equal(actual, expected) {
-		t.Fatal(cmp.Diff(string(expected), string(actual)))
+		t.Fatal(cmp.Diff(string(actual), string(expected)))
 	}
 }

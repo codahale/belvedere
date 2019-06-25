@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
+	"github.com/google/go-cmp/cmp"
 	"google.golang.org/api/serviceusage/v1"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -73,7 +74,7 @@ func TestSUError(t *testing.T) {
 
 	expected := "{\"code\":500,\"message\":\"nope\"}"
 	if actual := err.Error(); actual != expected {
-		t.Errorf("Expected %q but got %q", expected, actual)
+		t.Error(cmp.Diff(actual, expected))
 	}
 
 }
