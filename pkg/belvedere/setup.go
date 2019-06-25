@@ -49,6 +49,7 @@ func Setup(ctx context.Context, project, dnsZone string, dryRun bool) error {
 
 func setupResources(dnsZone string) []deployments.Resource {
 	resources := []deployments.Resource{
+		// A managed DNS zone for all the app A records.
 		{
 			Name: "belvedere-managed-zone",
 			Type: "dns.v1.managedZone",
@@ -58,8 +59,9 @@ func setupResources(dnsZone string) []deployments.Resource {
 				Name:        "belvedere",
 			},
 		},
+		// A firewall rule which denies all SSH traffic to belvedere-managed instances.
 		{
-			Name: "belvedere-deny-ssh-firewall",
+			Name: "belvedere-deny-ssh",
 			Type: "compute.beta.firewall",
 			Properties: compute.Firewall{
 				Denied: []*compute.FirewallDenied{
@@ -70,14 +72,14 @@ func setupResources(dnsZone string) []deployments.Resource {
 				},
 				Description:  "Deny all SSH to Belvedere apps by default",
 				Direction:    "INGRESS",
-				Name:         "belvedere-deny-ssh",
 				Priority:     65533, // higher than the 65534 of default-allow-ssh
 				SourceRanges: []string{"0.0.0.0/0"},
 				TargetTags:   []string{"belvedere"},
 			},
 		},
+		// A firewall rule which allows all IAP tunnel traffic to belvedere-managed instances.
 		{
-			Name: "belvedere-iap-tunneling-firewall",
+			Name: "belvedere-allow-iap-tunneling",
 			Type: "compute.beta.firewall",
 			Properties: compute.Firewall{
 				Allowed: []*compute.FirewallAllowed{
@@ -88,7 +90,6 @@ func setupResources(dnsZone string) []deployments.Resource {
 				},
 				Description: "Allow IAP tunneling to Belvedere apps",
 				Direction:   "INGRESS",
-				Name:        "belvedere-allow-iap",
 				Priority:    65532,
 				// per https://cloud.google.com/iap/docs/using-tcp-forwarding#starting_ssh
 				SourceRanges: []string{"35.235.240.0/20"},
@@ -99,6 +100,8 @@ func setupResources(dnsZone string) []deployments.Resource {
 	return resources
 }
 
+// Teardown deletes the shared firewall rules and managed zone created by Setup.
+// It does not disable services or downgrade Deployment Manager's permissions.
 func Teardown(ctx context.Context, project string, dryRun, async bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.Teardown")
 	span.AddAttributes(

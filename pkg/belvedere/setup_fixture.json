@@ -10,7 +10,7 @@
       }
     },
     {
-      "name": "belvedere-deny-ssh-firewall",
+      "name": "belvedere-deny-ssh",
       "type": "compute.beta.firewall",
       "properties": {
         "denied": [
@@ -23,7 +23,6 @@
         ],
         "description": "Deny all SSH to Belvedere apps by default",
         "direction": "INGRESS",
-        "name": "belvedere-deny-ssh",
         "priority": 65533,
         "sourceRanges": [
           "0.0.0.0/0"
@@ -34,7 +33,7 @@
       }
     },
     {
-      "name": "belvedere-iap-tunneling-firewall",
+      "name": "belvedere-allow-iap-tunneling",
       "type": "compute.beta.firewall",
       "properties": {
         "allowed": [
@@ -47,7 +46,6 @@
         ],
         "description": "Allow IAP tunneling to Belvedere apps",
         "direction": "INGRESS",
-        "name": "belvedere-allow-iap",
         "priority": 65532,
         "sourceRanges": [
           "35.235.240.0/20"
