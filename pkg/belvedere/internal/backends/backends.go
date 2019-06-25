@@ -4,13 +4,14 @@ import (
 	"context"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/compute/v0.beta"
 )
 
 // Adds an instance group to a backend service.
-func Add(ctx context.Context, gce *compute.Service, project, region, backendService, instanceGroup string, dryRun bool) error {
+func Add(ctx context.Context, project, region, backendService, instanceGroup string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Add")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -20,6 +21,11 @@ func Add(ctx context.Context, gce *compute.Service, project, region, backendServ
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
+
+	ctx, gce, err := gcp.Compute(ctx)
+	if err != nil {
+		return err
+	}
 
 	// Get the current backends.
 	bes, err := gce.BackendServices.Get(project, backendService).
@@ -65,11 +71,11 @@ func Add(ctx context.Context, gce *compute.Service, project, region, backendServ
 	}
 
 	// Return patch operation.
-	return waiter.Poll(ctx, check.GCE(ctx, gce, project, op.Name))
+	return waiter.Poll(ctx, check.GCE(ctx, project, op.Name))
 }
 
 // Removes an instance group from a backend service.
-func Remove(ctx context.Context, gce *compute.Service, project, region, backendService, instanceGroup string, dryRun bool) error {
+func Remove(ctx context.Context, project, region, backendService, instanceGroup string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Remove")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -79,6 +85,11 @@ func Remove(ctx context.Context, gce *compute.Service, project, region, backendS
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
+
+	ctx, gce, err := gcp.Compute(ctx)
+	if err != nil {
+		return err
+	}
 
 	// Get the current backends.
 	bes, err := gce.BackendServices.Get(project, backendService).
@@ -129,5 +140,5 @@ func Remove(ctx context.Context, gce *compute.Service, project, region, backendS
 	}
 
 	// Return the patch operation.
-	return waiter.Poll(ctx, check.GCE(ctx, gce, project, op.Name))
+	return waiter.Poll(ctx, check.GCE(ctx, project, op.Name))
 }

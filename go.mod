@@ -3,6 +3,7 @@ module github.com/codahale/belvedere
 go 1.12
 
 require (
+	github.com/alessio/shellescape v0.0.0-20190409004728-b115ca0f9053 // indirect
 	github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815
 	github.com/google/go-cmp v0.3.0
 	go.opencensus.io v0.21.0

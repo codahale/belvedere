@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/deploymentmanager/v2"
@@ -51,7 +52,7 @@ func Create(ctx context.Context, project, name string, resources []Resource, lab
 	)
 	defer span.End()
 
-	dm, err := deploymentmanager.NewService(ctx)
+	ctx, dm, err := gcp.DeploymentManager(ctx)
 	if err != nil {
 		return err
 	}
@@ -93,7 +94,7 @@ func Create(ctx context.Context, project, name string, resources []Resource, lab
 		return err
 	}
 
-	return waiter.Poll(ctx, check.DM(ctx, dm, project, op.Name))
+	return waiter.Poll(ctx, check.DM(ctx, project, op.Name))
 }
 
 // Updates the given deployment to add, remove, or modify resources.
@@ -106,7 +107,7 @@ func Update(ctx context.Context, project, name string, resources []Resource, dry
 	)
 	defer span.End()
 
-	dm, err := deploymentmanager.NewService(ctx)
+	ctx, dm, err := gcp.DeploymentManager(ctx)
 	if err != nil {
 		return err
 	}
@@ -138,7 +139,7 @@ func Update(ctx context.Context, project, name string, resources []Resource, dry
 		return err
 	}
 
-	return waiter.Poll(ctx, check.DM(ctx, dm, project, op.Name))
+	return waiter.Poll(ctx, check.DM(ctx, project, op.Name))
 }
 
 // Deletes the given deployment.
@@ -151,7 +152,7 @@ func Delete(ctx context.Context, project, name string, dryRun, async bool) error
 	)
 	defer span.End()
 
-	dm, err := deploymentmanager.NewService(ctx)
+	ctx, dm, err := gcp.DeploymentManager(ctx)
 	if err != nil {
 		return err
 	}
@@ -169,7 +170,7 @@ func Delete(ctx context.Context, project, name string, dryRun, async bool) error
 		return nil
 	}
 
-	return waiter.Poll(ctx, check.DM(ctx, dm, project, op.Name))
+	return waiter.Poll(ctx, check.DM(ctx, project, op.Name))
 }
 
 // Lists the deployments for the project, returning the name and labels for each.
@@ -180,7 +181,7 @@ func List(ctx context.Context, project string) ([]map[string]string, error) {
 	)
 	defer span.End()
 
-	dm, err := deploymentmanager.NewService(ctx)
+	ctx, dm, err := gcp.DeploymentManager(ctx)
 	if err != nil {
 		return nil, err
 	}

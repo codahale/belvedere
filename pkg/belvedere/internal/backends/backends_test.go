@@ -57,12 +57,7 @@ func TestAdd(t *testing.T) {
 		})
 
 	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	gce, err := compute.NewService(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := Add(ctx, gce, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
+	if err := Add(ctx, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -89,12 +84,7 @@ func TestAddExisting(t *testing.T) {
 		})
 
 	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	gce, err := compute.NewService(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := Add(ctx, gce, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
+	if err := Add(ctx, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -121,12 +111,7 @@ func TestAddDryRun(t *testing.T) {
 		})
 
 	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	gce, err := compute.NewService(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := Add(ctx, gce, "my-project", "us-central1", "bes-1", "ig-1", true); err != nil {
+	if err := Add(ctx, "my-project", "us-central1", "bes-1", "ig-1", true); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -176,12 +161,7 @@ func TestRemove(t *testing.T) {
 		})
 
 	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	gce, err := compute.NewService(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := Remove(ctx, gce, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
+	if err := Remove(ctx, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -221,12 +201,7 @@ func TestRemoveLast(t *testing.T) {
 		})
 
 	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	gce, err := compute.NewService(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := Remove(ctx, gce, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
+	if err := Remove(ctx, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -253,12 +228,7 @@ func TestRemoveMissing(t *testing.T) {
 		})
 
 	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	gce, err := compute.NewService(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := Remove(ctx, gce, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
+	if err := Remove(ctx, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
 		t.Fatal(err)
 	}
 }

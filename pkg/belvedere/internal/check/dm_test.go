@@ -19,12 +19,7 @@ func TestDMRunning(t *testing.T) {
 			Status: "RUNNING",
 		})
 
-	dm, err := deploymentmanager.NewService(context.TODO())
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	f := DM(context.TODO(), dm, "example", "op1")
+	f := DM(context.TODO(), "example", "op1")
 	done, err := f()
 	if err != nil {
 		t.Fatal(err)
@@ -45,12 +40,7 @@ func TestDMDone(t *testing.T) {
 			Status: "DONE",
 		})
 
-	dm, err := deploymentmanager.NewService(context.TODO())
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	f := DM(context.TODO(), dm, "example", "op1")
+	f := DM(context.TODO(), "example", "op1")
 	done, err := f()
 	if err != nil {
 		t.Fatal(err)
@@ -80,13 +70,8 @@ func TestDMError(t *testing.T) {
 			},
 		})
 
-	dm, err := deploymentmanager.NewService(context.TODO())
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	f := DM(context.TODO(), dm, "example", "op1")
-	_, err = f()
+	f := DM(context.TODO(), "example", "op1")
+	_, err := f()
 	if err == nil {
 		t.Fatal("no error, but should have returned one")
 	}

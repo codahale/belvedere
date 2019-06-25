@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/logging/v2"
 )
@@ -22,7 +23,7 @@ func Logs(ctx context.Context, project, app, release, instance string, freshness
 	if instance != "" {
 	}
 
-	logs, err := logging.NewService(ctx)
+	ctx, logs, err := gcp.Logging(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -19,7 +20,7 @@ func SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 	)
 	defer span.End()
 
-	crm, err := cloudresourcemanager.NewService(ctx)
+	ctx, crm, err := gcp.CloudResourceManager(ctx)
 	if err != nil {
 		return err
 	}

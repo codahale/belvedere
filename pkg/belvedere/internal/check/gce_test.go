@@ -13,18 +13,13 @@ func TestGCERunning(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gce, err := compute.NewService(context.TODO())
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	gock.New("https://www.googleapis.com/compute/beta/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 		Reply(200).
 		JSON(compute.Operation{
 			Status: "RUNNING",
 		})
 
-	f := GCE(context.TODO(), gce, "example", "op1")
+	f := GCE(context.TODO(), "example", "op1")
 	done, err := f()
 	if err != nil {
 		t.Fatal(err)
@@ -39,18 +34,13 @@ func TestGCEDone(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gce, err := compute.NewService(context.TODO())
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	gock.New("https://www.googleapis.com/compute/beta/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 		Reply(200).
 		JSON(compute.Operation{
 			Status: "DONE",
 		})
 
-	f := GCE(context.TODO(), gce, "example", "op1")
+	f := GCE(context.TODO(), "example", "op1")
 	done, err := f()
 	if err != nil {
 		t.Fatal(err)
@@ -64,11 +54,6 @@ func TestGCEDone(t *testing.T) {
 func TestGCEError(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
-
-	gce, err := compute.NewService(context.TODO())
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	gock.New("https://www.googleapis.com/compute/beta/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 		Reply(200).
@@ -85,8 +70,8 @@ func TestGCEError(t *testing.T) {
 			},
 		})
 
-	f := GCE(context.TODO(), gce, "example", "op1")
-	_, err = f()
+	f := GCE(context.TODO(), "example", "op1")
+	_, err := f()
 	if err == nil {
 		t.Fatal("should have returned an error")
 	}

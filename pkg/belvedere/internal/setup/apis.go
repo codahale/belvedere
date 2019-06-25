@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/serviceusage/v1"
@@ -45,7 +46,7 @@ func EnableAPIs(ctx context.Context, project string, dryRun bool) error {
 	)
 	defer span.End()
 
-	su, err := serviceusage.NewService(ctx)
+	ctx, su, err := gcp.ServiceUsage(ctx)
 	if err != nil {
 		return err
 	}
@@ -77,7 +78,7 @@ func EnableAPIs(ctx context.Context, project string, dryRun bool) error {
 		}
 
 		// Poll for the services to be enabled.
-		if err := waiter.Poll(ctx, check.SU(ctx, su, op.Name)); err != nil {
+		if err := waiter.Poll(ctx, check.SU(ctx, op.Name)); err != nil {
 			return err
 		}
 	}

@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/compute/v0.beta"
-	"google.golang.org/api/deploymentmanager/v2"
 	"google.golang.org/api/dns/v1"
 )
 
@@ -117,7 +117,7 @@ func findManagedZone(ctx context.Context, project string) (*dns.ManagedZone, err
 	)
 	defer span.End()
 
-	d, err := dns.NewService(ctx)
+	ctx, d, err := gcp.DNS(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func findRegion(ctx context.Context, project, app string) (string, error) {
 	)
 	defer span.End()
 
-	dm, err := deploymentmanager.NewService(ctx)
+	ctx, dm, err := gcp.DeploymentManager(ctx)
 	if err != nil {
 		return "", err
 	}

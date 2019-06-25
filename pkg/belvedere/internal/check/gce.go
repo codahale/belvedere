@@ -4,18 +4,23 @@ import (
 	"context"
 	"errors"
 
+	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
-	"google.golang.org/api/compute/v0.beta"
 )
 
 // GCE returns a handle for a global GCE operation.
-func GCE(ctx context.Context, gce *compute.Service, project, operation string) waiter.Condition {
+func GCE(ctx context.Context, project, operation string) waiter.Condition {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.GCE")
 		span.AddAttributes(trace.StringAttribute("project", project))
 		span.AddAttributes(trace.StringAttribute("operation", operation))
 		defer span.End()
+
+		ctx, gce, err := gcp.Compute(ctx)
+		if err != nil {
+			return false, err
+		}
 
 		// Fetch the operation's status and any errors.
 		op, err := gce.GlobalOperations.Get(project, operation).Context(ctx).

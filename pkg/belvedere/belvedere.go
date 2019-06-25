@@ -10,10 +10,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
-	"google.golang.org/api/compute/v0.beta"
-	"google.golang.org/api/dns/v1"
 )
 
 func WithInterval(ctx context.Context, interval time.Duration) context.Context {
@@ -25,7 +24,7 @@ func DNSServers(ctx context.Context, project string) ([]string, error) {
 	span.AddAttributes(trace.StringAttribute("project", project))
 	defer span.End()
 
-	d, err := dns.NewService(ctx)
+	ctx, d, err := gcp.DNS(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +50,7 @@ func ListInstances(ctx context.Context, project, app, release string) ([]string,
 	)
 	defer span.End()
 
-	gce, err := compute.NewService(ctx)
+	ctx, gce, err := gcp.Compute(ctx)
 	if err != nil {
 		return nil, err
 	}
