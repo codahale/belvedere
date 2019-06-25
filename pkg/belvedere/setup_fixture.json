@@ -1,0 +1,61 @@
+{
+  "resources": [
+    {
+      "name": "belvedere-managed-zone",
+      "type": "dns.v1.managedZone",
+      "properties": {
+        "description": "Belvedere managed zone for cornbread.club",
+        "dnsName": "cornbread.club",
+        "name": "belvedere"
+      }
+    },
+    {
+      "name": "belvedere-deny-ssh-firewall",
+      "type": "compute.beta.firewall",
+      "properties": {
+        "denied": [
+          {
+            "IPProtocol": "TCP",
+            "ports": [
+              "22"
+            ]
+          }
+        ],
+        "description": "Deny all SSH to Belvedere apps by default",
+        "direction": "INGRESS",
+        "name": "belvedere-deny-ssh",
+        "priority": 65533,
+        "sourceRanges": [
+          "0.0.0.0/0"
+        ],
+        "targetTags": [
+          "belvedere"
+        ]
+      }
+    },
+    {
+      "name": "belvedere-iap-tunneling-firewall",
+      "type": "compute.beta.firewall",
+      "properties": {
+        "allowed": [
+          {
+            "IPProtocol": "TCP",
+            "ports": [
+              "0-65535"
+            ]
+          }
+        ],
+        "description": "Allow IAP tunneling to Belvedere apps",
+        "direction": "INGRESS",
+        "name": "belvedere-allow-iap",
+        "priority": 65532,
+        "sourceRanges": [
+          "35.235.240.0/20"
+        ],
+        "targetTags": [
+          "belvedere"
+        ]
+      }
+    }
+  ]
+}
