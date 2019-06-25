@@ -10,7 +10,6 @@ import (
 func TestPoll(t *testing.T) {
 	var n uint64
 	op := func() (bool, error) {
-		t.Log("checking")
 		return atomic.AddUint64(&n, 1) == 10, nil
 	}
 
