@@ -9,7 +9,7 @@ import (
 	"go.opencensus.io/trace"
 )
 
-// DM returns a handle for a Deployment Manager operation.
+// GCE returns a waiter.Condition for the given Deployment Manager operation completing.
 func DM(ctx context.Context, project string, operation string) waiter.Condition {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.DM")

@@ -10,7 +10,7 @@ import (
 	"go.opencensus.io/trace"
 )
 
-// GCE returns a handle for a Service Usage operation.
+// SU returns a waiter.Condition for the given Service Usage operation completing.
 func SU(ctx context.Context, operation string) waiter.Condition {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.SU")

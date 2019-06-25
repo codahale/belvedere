@@ -9,8 +9,8 @@ import (
 	"google.golang.org/api/compute/v0.beta"
 )
 
-// Health returns a handle which checks if all instances of an instance group are registered and
-// healthy.
+// Health returns a waiter.Condition for the given instance group being stable and for all its
+// instances registering as healthy with the given backend service.
 func Health(ctx context.Context, project, region, backendService, instanceGroup string) waiter.Condition {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.Health")

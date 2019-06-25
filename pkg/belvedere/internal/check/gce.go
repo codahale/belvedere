@@ -9,7 +9,7 @@ import (
 	"go.opencensus.io/trace"
 )
 
-// GCE returns a handle for a global GCE operation.
+// GCE returns a waiter.Condition for the given Compute Engine operation completing.
 func GCE(ctx context.Context, project, operation string) waiter.Condition {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.GCE")
