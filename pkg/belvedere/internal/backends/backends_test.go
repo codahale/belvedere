@@ -232,3 +232,33 @@ func TestRemoveMissing(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestRemoveDryRun(t *testing.T) {
+	defer gock.Off()
+	it.MockTokenSource()
+
+	gock.New("https://www.googleapis.com/compute/beta/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
+		Reply(200).
+		JSON(compute.BackendService{
+			Backends: []*compute.Backend{
+				{
+					Group: "http://ig-1",
+				},
+				{
+					Group: "http://ig-2",
+				},
+			},
+			Fingerprint: "fp",
+		})
+
+	gock.New("https://www.googleapis.com/compute/beta/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
+		Reply(200).
+		JSON(compute.InstanceGroup{
+			SelfLink: "http://ig-1",
+		})
+
+	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
+	if err := Remove(ctx, "my-project", "us-central1", "bes-1", "ig-1", true); err != nil {
+		t.Fatal(err)
+	}
+}
