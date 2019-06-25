@@ -214,7 +214,13 @@ func EnableRelease(ctx context.Context, project, app, release string, dryRun boo
 
 	backendService := fmt.Sprintf("%s-bes", app)
 	instanceGroup := fmt.Sprintf("%s-%s-ig", app, release)
-	if err := backends.Add(ctx, gce, project, region, backendService, instanceGroup, dryRun); err != nil {
+	add, err := backends.Add(ctx, gce, project, region, backendService, instanceGroup, dryRun)
+	if err != nil {
+		return err
+	}
+
+	waiter := check.Waiter{Interval: 10 * time.Second, Timeout: 5 * time.Minute}
+	if err := waiter.Wait(add); err != nil {
 		return err
 	}
 
@@ -244,7 +250,12 @@ func DisableRelease(ctx context.Context, project, app, release string, dryRun bo
 
 	backendService := fmt.Sprintf("%s-bes", app)
 	instanceGroup := fmt.Sprintf("%s-%s-ig", app, release)
-	return backends.Remove(ctx, gce, project, region, backendService, instanceGroup, dryRun)
+	waiter := check.Waiter{Interval: 10 * time.Second, Timeout: 5 * time.Minute}
+	op, err := backends.Remove(ctx, gce, project, region, backendService, instanceGroup, dryRun)
+	if err != nil {
+		return err
+	}
+	return waiter.Wait(op)
 }
 
 func DeleteRelease(ctx context.Context, project, app, release string, dryRun, async bool) error {

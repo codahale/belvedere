@@ -6,11 +6,10 @@ import (
 
 	"go.opencensus.io/trace"
 	"google.golang.org/api/compute/v0.beta"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // GCE returns a ConditionFunc which checks the progress of a global GCE operation.
-func GCE(ctx context.Context, gce *compute.Service, project, operation string) wait.ConditionFunc {
+func GCE(ctx context.Context, gce *compute.Service, project, operation string) Operation {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.GCE")
 		span.AddAttributes(trace.StringAttribute("project", project))
