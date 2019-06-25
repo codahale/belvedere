@@ -14,8 +14,9 @@ import (
 
 type Log struct {
 	Timestamp time.Time
-	Instance  string
 	Release   string
+	Instance  string
+	Container string
 	Message   string
 }
 
@@ -69,6 +70,7 @@ func Logs(ctx context.Context, project, app, release, instance string, minTimest
 	results := make([]Log, len(entries.Entries))
 	var payload struct {
 		Container struct {
+			Name     string `json:"name"`
 			Metadata struct {
 				Release string `json:"release"`
 			} `json:"metadata"`
@@ -88,8 +90,9 @@ func Logs(ctx context.Context, project, app, release, instance string, minTimest
 		}
 		results[i] = Log{
 			Timestamp: ts,
-			Instance:  payload.Instance.Name,
 			Release:   payload.Container.Metadata.Release,
+			Instance:  payload.Instance.Name,
+			Container: strings.TrimPrefix(payload.Container.Name, "/"), // Docker prefixes this with a slash
 			Message:   payload.Message,
 		}
 	}

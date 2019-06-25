@@ -158,9 +158,10 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		_, _ = fmt.Fprintln(w, "Timestamp\tRelease\tInstance\tMessage")
+		_, _ = fmt.Fprintln(w, "Timestamp\tRelease\tInstance\tContainer\tMessage")
 		for _, log := range logs {
-			_, _ = fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", log.Timestamp.Format(time.Stamp), log.Release, log.Instance, log.Message)
+			_, _ = fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
+				log.Timestamp.Format(time.Stamp), log.Release, log.Instance, log.Container, log.Message)
 		}
 		return w.Flush()
 	case isCmd(opts, "apps", "list"):

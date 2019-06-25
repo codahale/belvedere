@@ -30,7 +30,7 @@ func TestLogs(t *testing.T) {
 			Entries: []*logging.LogEntry{
 				{
 					Timestamp:   "2019-06-25T14:55:01.000000000Z",
-					JsonPayload: googleapi.RawMessage(`{"message": "woo","instance":{"name":"example-v2-abcd"},"container":{"metadata":{"release":"v2"}}}`),
+					JsonPayload: googleapi.RawMessage(`{"message": "woo","instance":{"name":"example-v2-abcd"},"container":{"name":"/nginx","metadata":{"release":"v2"}}}`),
 				},
 			},
 		})
@@ -44,8 +44,9 @@ func TestLogs(t *testing.T) {
 	expected := []Log{
 		{
 			Timestamp: time.Date(2019, 6, 25, 14, 55, 1, 0, time.UTC),
-			Instance:  "example-v2-abcd",
 			Release:   "v2",
+			Instance:  "example-v2-abcd",
+			Container: "nginx",
 			Message:   "woo",
 		},
 	}
