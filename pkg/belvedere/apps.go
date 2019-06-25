@@ -44,8 +44,7 @@ func ListApps(ctx context.Context, project string) ([]App, error) {
 	return apps, nil
 }
 
-// CreateApp creates an application in the given project and region with the given name and
-// configuration.
+// CreateApp creates an app in the given project and region with the given name and configuration.
 func CreateApp(ctx context.Context, project, region, app string, config *Config, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateApp")
 	span.AddAttributes(

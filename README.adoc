@@ -2,7 +2,7 @@
 
 _A small lookout tower (usually square) on the roof of a house._
 
-Belvedere is a small, opinionated tool for deploying HTTP2-based applications on GCP in an operationally friendly manner.
+Belvedere is a small, opinionated tool for deploying HTTP2-based apps on GCP in an operationally friendly manner.
 It handles load balancing, DNS, TLS certificates, autoscaling, deploys, logging, metrics, tracing, permissions, and more.
 
 == Setup
@@ -11,14 +11,14 @@ First, create a GCP project for your environment and set it as the default using
 (Or pass the `--project` flag everywhere.)
 Make sure you've configured a billing account for it.
 
-Once you have a project in place, pick a DNS zone for your applications that you control.
+Once you have a project in place, pick a DNS zone for your apps that you control.
 Let's say you've recently registered the domain `cornbread.club`.
 
 ----
 belvedere setup cornbread.club
 ----
 
-This will enable all the required GCP APIs, grant Deployment Manager permissions to manage IAM roles, and create a Deployment Manager deployment with a managed zone for `cornbread.club` plus a few firewall rules for securing your applications.
+This will enable all the required GCP APIs, grant Deployment Manager permissions to manage IAM roles, and create a Deployment Manager deployment with a managed zone for `cornbread.club` plus a few firewall rules for securing your apps.
 (Don't worry, they won't affect anything else in the project.)
 
 Once you've set it up, you'll need to configure the DNS settings for your domain name with your registrar.
@@ -28,22 +28,41 @@ To get a list of the DNS servers to use, run:
 belvedere dns-servers
 ----
 
-== Applications
+== Apps
 
-Belvedere apps are HTTP2 applications packaged as containers in a registry, running on virtual machines with optional sidecars.
-It's required that either your application (or a sidecar proxy) listen on port 8443 for HTTP2 requests.
-Your application can use self-signed certs, but it must use TLS.
-Your application must return a `200 OK` response to `GET` requests for `/healthz`
+Belvedere apps are HTTP2 apps packaged as containers in a registry, running on virtual machines with optional sidecars.
+Belvedere requires that the app (or a sidecar reverse proxy) listen on port `8443` for HTTP2 requests.
+The app can use self-signed certs, but it must use TLS.
+The app must return a `200 OK` response to `GET` requests for `/healthz`
+
+=== Building An App
+
+This repository has an example "Hello, world!" app in the `examples` directory.
+It consists of an HTTP/1.1 Go app and an Nginx-based frontend proxy.
+
+To build the app using Google Cloud Build, run:
+
+----
+gcloud builds submit --config ./examples/helloworld/cloudbuild.yaml ./examples/helloworld/
+----
+
+To build the Nginx frontend using Google Cloud Build, run:
+
+----
+gcloud builds submit --config ./examples/nginx-frontend/cloudbuild.yaml ./examples/nginx-frontend/
+----
+
+This will result in images for the app and the frontend proxy being built and pushed to Google Container Registry in your GCP project.
 
 === Configuration
 
 App configuration lives in a YAML file.
-You can check out `examples/helloworld.yaml` for an example.
-You need to specify a Compute Engine machine type and the image for your main container.
+Check out `examples/helloworld.yaml` for an example.
+Belvedere requires a Google Compute Engine machine type and a Docker image URL for the app's main container.
 
-=== Creating An Application
+=== Creating An App
 
-To create an application, pick a GCE region (e.g. `us-central1`) and run:
+To create an app, pick a GCE region (e.g. `us-central1`) and run:
 
 ----
 belevedere apps create my-app us-central1 ./my-app.yaml
@@ -60,7 +79,7 @@ The load balancer and DNS stuff will take 10-30 minutes to fully provision.
 
 === Creating A Release
 
-To create a release for an application, get the SHA256 hash of the container image and run:
+To create a release for an app, get the SHA256 hash of the container image and run:
 
 ----
 belvedere releases create my-app v1 ./my-app.yaml 93433e08c1065c0fe8ebd151a329e2f8733495e7e6ef2a23249a6f12600de103
@@ -104,7 +123,7 @@ To delete all of the resources associated with a release, including the instance
 belvedere releases delete my-app v1
 ----
 
-=== Deleting An Application
+=== Deleting An App
 
 To delete all of the resources associated with an app, run:
 
