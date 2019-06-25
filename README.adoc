@@ -14,7 +14,6 @@ Make sure you've configured a billing account for it.
 Once you have a project in place, pick a DNS zone for your applications that you control.
 Let's say you've recently registered the domain `cornbread.club`.
 
-[source,bash]
 ----
 belvedere setup cornbread.club
 ----
@@ -25,7 +24,6 @@ This will enable all the required GCP APIs, grant Deployment Manager permissions
 Once you've set it up, you'll need to configure the DNS settings for your domain name with your registrar.
 To get a list of the DNS servers to use, run:
 
-[source,bash]
 ----
 belvedere dns-servers
 ----
@@ -47,7 +45,6 @@ You need to specify a Compute Engine machine type and the image for your main co
 
 To create an application, pick a GCE region (e.g. `us-central1`) and run:
 
-[source,bash]
 ----
 belevedere apps create my-app us-central1 ./my-app.yaml
 ----
@@ -65,7 +62,6 @@ The load balancer and DNS stuff will take 10-30 minutes to fully provision.
 
 To create a release for an application, get the SHA256 hash of the container image and run:
 
-[source,bash]
 ----
 belvedere releases create my-app v1 ./my-app.yaml 93433e08c1065c0fe8ebd151a329e2f8733495e7e6ef2a23249a6f12600de103
 ----
@@ -82,7 +78,6 @@ Once this is done, the release has been created but is not in service.
 
 To direct traffic to the instances in a release, enable the release by running:
 
-[source,bash]
 ----
 belvedere releases enable my-app v1
 ----
@@ -95,7 +90,6 @@ pass health checks, and go into service. If the instances aren't healthy after 5
 
 To remove a release from service, disable it by running:
 
-[source,bash]
 ----
 belvedere releases disable my-app v1
 ----
@@ -106,7 +100,6 @@ This will remove the app from service and drain any existing connections.
 
 To delete all of the resources associated with a release, including the instances, run:
 
-[source,bash]
 ----
 belvedere releases delete my-app v1
 ----
@@ -115,7 +108,6 @@ belvedere releases delete my-app v1
 
 To delete all of the resources associated with an app, run:
 
-[source,bash]
 ----
 belvedere apps delete my-app
 ----
@@ -126,7 +118,6 @@ belvedere apps delete my-app
 
 To list all the apps in your project, run:
 
-[source,bash]
 ----
 belvedere apps list
 ----
@@ -135,7 +126,6 @@ belvedere apps list
 
 To list all the releases in your project, run:
 
-[source,bash]
 ----
 belvedere releases list
 belvedere releases list my-app
@@ -145,7 +135,6 @@ belvedere releases list my-app
 
 To list all the running instances in your project, run:
 
-[source,bash]
 ----
 belvedere instances
 belvedere instance my-app
@@ -156,7 +145,6 @@ belvedere instance my-app v43
 
 To SSH into a particular instance, run:
 
-[source,bash]
 ----
 belvedere ssh my-app-v43-hxht
 ----
@@ -169,7 +157,6 @@ Only IAP tunnels are allowed, and IAP tunnels require that the initiator be an a
 
 To view the logs for your app and its sidecar containers, run:
 
-[source,bash]
 ----
 belvedere logs my-app
 belvedere logs my-app v43
