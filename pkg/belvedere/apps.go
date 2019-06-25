@@ -117,7 +117,7 @@ func findManagedZone(ctx context.Context, project string) (*dns.ManagedZone, err
 	)
 	defer span.End()
 
-	ctx, d, err := gcp.DNS(ctx)
+	d, err := gcp.DNS(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func findRegion(ctx context.Context, project, app string) (string, error) {
 	)
 	defer span.End()
 
-	ctx, dm, err := gcp.DeploymentManager(ctx)
+	dm, err := gcp.DeploymentManager(ctx)
 	if err != nil {
 		return "", err
 	}

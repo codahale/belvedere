@@ -17,7 +17,7 @@ func GCE(ctx context.Context, project, operation string) waiter.Condition {
 		span.AddAttributes(trace.StringAttribute("operation", operation))
 		defer span.End()
 
-		ctx, gce, err := gcp.Compute(ctx)
+		gce, err := gcp.Compute(ctx)
 		if err != nil {
 			return false, err
 		}

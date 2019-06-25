@@ -24,7 +24,7 @@ func DNSServers(ctx context.Context, project string) ([]string, error) {
 	span.AddAttributes(trace.StringAttribute("project", project))
 	defer span.End()
 
-	ctx, d, err := gcp.DNS(ctx)
+	d, err := gcp.DNS(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func ListInstances(ctx context.Context, project, app, release string) ([]string,
 	)
 	defer span.End()
 
-	ctx, gce, err := gcp.Compute(ctx)
+	gce, err := gcp.Compute(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -46,7 +46,7 @@ func EnableAPIs(ctx context.Context, project string, dryRun bool) error {
 	)
 	defer span.End()
 
-	ctx, su, err := gcp.ServiceUsage(ctx)
+	su, err := gcp.ServiceUsage(ctx)
 	if err != nil {
 		return err
 	}

@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"sync"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
 	compute "google.golang.org/api/compute/v0.beta"
@@ -11,92 +12,102 @@ import (
 	"google.golang.org/api/serviceusage/v1"
 )
 
-type gceKey struct{}
+var (
+	gceService     *compute.Service
+	dmService      *deploymentmanager.Service
+	suService      *serviceusage.Service
+	crmService     *cloudresourcemanager.Service
+	dnsService     *dns.Service
+	loggingService *logging.Service
+	m              sync.Mutex
+)
 
-func Compute(ctx context.Context) (context.Context, *compute.Service, error) {
-	if service, ok := ctx.Value(gceKey{}).(*compute.Service); ok {
-		return ctx, service, nil
+func Compute(ctx context.Context) (*compute.Service, error) {
+	m.Lock()
+	defer m.Unlock()
+
+	if gceService == nil {
+		service, err := compute.NewService(ctx)
+		if err != nil {
+			return nil, err
+		}
+		gceService = service
 	}
 
-	service, err := compute.NewService(ctx)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return context.WithValue(ctx, gceKey{}, service), service, nil
+	return gceService, nil
 }
 
-type dmKey struct{}
+func DeploymentManager(ctx context.Context) (*deploymentmanager.Service, error) {
+	m.Lock()
+	defer m.Unlock()
 
-func DeploymentManager(ctx context.Context) (context.Context, *deploymentmanager.Service, error) {
-	if service, ok := ctx.Value(dmKey{}).(*deploymentmanager.Service); ok {
-		return ctx, service, nil
+	if dmService == nil {
+		service, err := deploymentmanager.NewService(ctx)
+		if err != nil {
+			return nil, err
+		}
+		dmService = service
 	}
 
-	service, err := deploymentmanager.NewService(ctx)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return context.WithValue(ctx, dmKey{}, service), service, nil
+	return dmService, nil
 }
 
-type suKey struct{}
+func ServiceUsage(ctx context.Context) (*serviceusage.Service, error) {
+	m.Lock()
+	defer m.Unlock()
 
-func ServiceUsage(ctx context.Context) (context.Context, *serviceusage.Service, error) {
-	if service, ok := ctx.Value(suKey{}).(*serviceusage.Service); ok {
-		return ctx, service, nil
+	if suService == nil {
+		service, err := serviceusage.NewService(ctx)
+		if err != nil {
+			return nil, err
+		}
+		suService = service
 	}
 
-	service, err := serviceusage.NewService(ctx)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return context.WithValue(ctx, suKey{}, service), service, nil
+	return suService, nil
 }
 
-type crmKey struct{}
+func CloudResourceManager(ctx context.Context) (*cloudresourcemanager.Service, error) {
+	m.Lock()
+	defer m.Unlock()
 
-func CloudResourceManager(ctx context.Context) (context.Context, *cloudresourcemanager.Service, error) {
-	if service, ok := ctx.Value(crmKey{}).(*cloudresourcemanager.Service); ok {
-		return ctx, service, nil
+	if crmService == nil {
+		service, err := cloudresourcemanager.NewService(ctx)
+		if err != nil {
+			return nil, err
+		}
+		crmService = service
 	}
 
-	service, err := cloudresourcemanager.NewService(ctx)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return context.WithValue(ctx, crmKey{}, service), service, nil
+	return crmService, nil
 }
 
-type dnsKey struct{}
+func DNS(ctx context.Context) (*dns.Service, error) {
+	m.Lock()
+	defer m.Unlock()
 
-func DNS(ctx context.Context) (context.Context, *dns.Service, error) {
-	if service, ok := ctx.Value(dnsKey{}).(*dns.Service); ok {
-		return ctx, service, nil
+	if dnsService == nil {
+		service, err := dns.NewService(ctx)
+		if err != nil {
+			return nil, err
+		}
+		dnsService = service
 	}
 
-	service, err := dns.NewService(ctx)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return context.WithValue(ctx, dnsKey{}, service), service, nil
+	return dnsService, nil
 }
 
-type logKey struct{}
+func Logging(ctx context.Context) (*logging.Service, error) {
+	m.Lock()
+	defer m.Unlock()
 
-func Logging(ctx context.Context) (context.Context, *logging.Service, error) {
-	if service, ok := ctx.Value(logKey{}).(*logging.Service); ok {
-		return ctx, service, nil
+	if loggingService == nil {
+		service, err := logging.NewService(ctx)
+		if err != nil {
+			return nil, err
+		}
+		loggingService = service
 	}
 
-	service, err := logging.NewService(ctx)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return context.WithValue(ctx, logKey{}, service), service, nil
+	return loggingService, nil
 }

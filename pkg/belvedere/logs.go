@@ -23,7 +23,7 @@ func Logs(ctx context.Context, project, app, release, instance string, freshness
 	if instance != "" {
 	}
 
-	ctx, logs, err := gcp.Logging(ctx)
+	logs, err := gcp.Logging(ctx)
 	if err != nil {
 		return nil, err
 	}

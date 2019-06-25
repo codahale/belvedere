@@ -17,7 +17,7 @@ func DM(ctx context.Context, project string, operation string) waiter.Condition 
 		span.AddAttributes(trace.StringAttribute("operation", operation))
 		defer span.End()
 
-		ctx, dm, err := gcp.DeploymentManager(ctx)
+		dm, err := gcp.DeploymentManager(ctx)
 		if err != nil {
 			return false, err
 		}

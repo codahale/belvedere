@@ -52,7 +52,7 @@ func Create(ctx context.Context, project, name string, resources []Resource, lab
 	)
 	defer span.End()
 
-	ctx, dm, err := gcp.DeploymentManager(ctx)
+	dm, err := gcp.DeploymentManager(ctx)
 	if err != nil {
 		return err
 	}
@@ -107,7 +107,7 @@ func Update(ctx context.Context, project, name string, resources []Resource, dry
 	)
 	defer span.End()
 
-	ctx, dm, err := gcp.DeploymentManager(ctx)
+	dm, err := gcp.DeploymentManager(ctx)
 	if err != nil {
 		return err
 	}
@@ -152,7 +152,7 @@ func Delete(ctx context.Context, project, name string, dryRun, async bool) error
 	)
 	defer span.End()
 
-	ctx, dm, err := gcp.DeploymentManager(ctx)
+	dm, err := gcp.DeploymentManager(ctx)
 	if err != nil {
 		return err
 	}
@@ -181,7 +181,7 @@ func List(ctx context.Context, project string) ([]map[string]string, error) {
 	)
 	defer span.End()
 
-	ctx, dm, err := gcp.DeploymentManager(ctx)
+	dm, err := gcp.DeploymentManager(ctx)
 	if err != nil {
 		return nil, err
 	}

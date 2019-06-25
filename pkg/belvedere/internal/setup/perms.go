@@ -20,7 +20,7 @@ func SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 	)
 	defer span.End()
 
-	ctx, crm, err := gcp.CloudResourceManager(ctx)
+	crm, err := gcp.CloudResourceManager(ctx)
 	if err != nil {
 		return err
 	}
