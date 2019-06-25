@@ -12,102 +12,65 @@ import (
 	"google.golang.org/api/serviceusage/v1"
 )
 
-var (
-	gceService     *compute.Service
-	dmService      *deploymentmanager.Service
-	suService      *serviceusage.Service
-	crmService     *cloudresourcemanager.Service
-	dnsService     *dns.Service
-	loggingService *logging.Service
-	m              sync.Mutex
-)
-
 func Compute(ctx context.Context) (*compute.Service, error) {
-	m.Lock()
-	defer m.Unlock()
-
-	if gceService == nil {
-		service, err := compute.NewService(ctx)
-		if err != nil {
-			return nil, err
-		}
-		gceService = service
-	}
-
-	return gceService, nil
+	gceOnce.Do(func() {
+		gceService, gceErr = compute.NewService(ctx)
+	})
+	return gceService, gceErr
 }
 
 func DeploymentManager(ctx context.Context) (*deploymentmanager.Service, error) {
-	m.Lock()
-	defer m.Unlock()
-
-	if dmService == nil {
-		service, err := deploymentmanager.NewService(ctx)
-		if err != nil {
-			return nil, err
-		}
-		dmService = service
-	}
-
-	return dmService, nil
+	dmOnce.Do(func() {
+		dmService, dmErr = deploymentmanager.NewService(ctx)
+	})
+	return dmService, dmErr
 }
 
 func ServiceUsage(ctx context.Context) (*serviceusage.Service, error) {
-	m.Lock()
-	defer m.Unlock()
-
-	if suService == nil {
-		service, err := serviceusage.NewService(ctx)
-		if err != nil {
-			return nil, err
-		}
-		suService = service
-	}
-
-	return suService, nil
+	suOnce.Do(func() {
+		suService, suErr = serviceusage.NewService(ctx)
+	})
+	return suService, suErr
 }
 
 func CloudResourceManager(ctx context.Context) (*cloudresourcemanager.Service, error) {
-	m.Lock()
-	defer m.Unlock()
-
-	if crmService == nil {
-		service, err := cloudresourcemanager.NewService(ctx)
-		if err != nil {
-			return nil, err
-		}
-		crmService = service
-	}
-
-	return crmService, nil
+	crmOnce.Do(func() {
+		crmService, crmErr = cloudresourcemanager.NewService(ctx)
+	})
+	return crmService, crmErr
 }
 
 func DNS(ctx context.Context) (*dns.Service, error) {
-	m.Lock()
-	defer m.Unlock()
-
-	if dnsService == nil {
-		service, err := dns.NewService(ctx)
-		if err != nil {
-			return nil, err
-		}
-		dnsService = service
-	}
-
-	return dnsService, nil
+	dnsOnce.Do(func() {
+		dnsService, dnsErr = dns.NewService(ctx)
+	})
+	return dnsService, dnsErr
 }
 
 func Logging(ctx context.Context) (*logging.Service, error) {
-	m.Lock()
-	defer m.Unlock()
-
-	if loggingService == nil {
-		service, err := logging.NewService(ctx)
-		if err != nil {
-			return nil, err
-		}
-		loggingService = service
-	}
-
-	return loggingService, nil
+	loggingOnce.Do(func() {
+		loggingService, loggingErr = logging.NewService(ctx)
+	})
+	return loggingService, loggingErr
 }
+
+var (
+	gceService     *compute.Service
+	gceErr         error
+	gceOnce        sync.Once
+	dmService      *deploymentmanager.Service
+	dmErr          error
+	dmOnce         sync.Once
+	suService      *serviceusage.Service
+	suErr          error
+	suOnce         sync.Once
+	crmService     *cloudresourcemanager.Service
+	crmErr         error
+	crmOnce        sync.Once
+	dnsService     *dns.Service
+	dnsErr         error
+	dnsOnce        sync.Once
+	loggingService *logging.Service
+	loggingErr     error
+	loggingOnce    sync.Once
+)
