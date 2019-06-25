@@ -12,6 +12,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/compute/v0.beta"
+	"gopkg.in/alessio/shellescape.v1"
 )
 
 type Release struct {
@@ -328,5 +329,9 @@ ExecStopPost=/usr/bin/docker rm %s
 `
 
 func systemdService(name string, dockerArgs []string) string {
-	return fmt.Sprintf(jobTemplate, name, strings.Join(dockerArgs, " "), name, name)
+	args := make([]string, len(dockerArgs))
+	for i, s := range dockerArgs {
+		args[i] = shellescape.Quote(s)
+	}
+	return fmt.Sprintf(jobTemplate, name, strings.Join(args, " "), name, name)
 }

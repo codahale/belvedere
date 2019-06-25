@@ -16,8 +16,8 @@ func TestReleaseResources(t *testing.T) {
 			Command: "/usr/bin/helloworld",
 			Args:    []string{"one", "two"},
 			Env: map[string]string{
-				"ONE": "1",
-				"TWO": "2",
+				"ONE": "1 or 2",
+				"TWO": "2 or 3",
 			},
 			DockerOptions: []string{"--turbo"},
 		},
@@ -27,8 +27,8 @@ func TestReleaseResources(t *testing.T) {
 				Command: "/usr/bin/nginx",
 				Args:    []string{"three", "four"},
 				Env: map[string]string{
-					"THREE": "3",
-					"FOUR":  "4",
+					"THREE": "3 or 4",
+					"FOUR":  "4 or 5",
 				},
 				DockerOptions: []string{"--slow"},
 			},
@@ -56,6 +56,6 @@ func TestReleaseResources(t *testing.T) {
 	}
 
 	if !bytes.Equal(actual, expected) {
-		t.Fatal(cmp.Diff(string(expected), string(expected)))
+		t.Fatal(cmp.Diff(string(expected), string(actual)))
 	}
 }
