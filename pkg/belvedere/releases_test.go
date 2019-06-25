@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/sergi/go-diff/diffmatchpatch"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestReleaseResources(t *testing.T) {
@@ -41,25 +41,21 @@ func TestReleaseResources(t *testing.T) {
 	}
 	resources := releaseResources("my-project", "us-central1", "my-app", "v43", "abcdef0123456789", config)
 
-	have, err := json.MarshalIndent(map[string]interface{}{
+	actual, err := json.MarshalIndent(map[string]interface{}{
 		"resources": resources,
 	}, "", "  ")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	//_ = ioutil.WriteFile("release_fixture.json", have, 0644)
+	//_ = ioutil.WriteFile("release_fixture.json", actual, 0644)
 
-	want, err := ioutil.ReadFile("release_fixture.json")
+	expected, err := ioutil.ReadFile("release_fixture.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if !bytes.Equal(have, want) {
-		dmp := diffmatchpatch.New()
-		diffs := dmp.DiffMain(string(want), string(have), false)
-		if len(diffs) > 0 {
-			t.Fatal(dmp.DiffPrettyText(diffs))
-		}
+	if !bytes.Equal(actual, expected) {
+		t.Fatal(cmp.Diff(string(expected), string(expected)))
 	}
 }

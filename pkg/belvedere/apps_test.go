@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/sergi/go-diff/diffmatchpatch"
+	"github.com/google/go-cmp/cmp"
 	"google.golang.org/api/dns/v1"
 )
 
@@ -22,25 +22,21 @@ func TestAppResources(t *testing.T) {
 	}
 	resources := appResources("my-project", "my-app", zone, config)
 
-	have, err := json.MarshalIndent(map[string]interface{}{
+	actual, err := json.MarshalIndent(map[string]interface{}{
 		"resources": resources,
 	}, "", "  ")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	//_ = ioutil.WriteFile("app_fixture.json", have, 0644)
+	//_ = ioutil.WriteFile("app_fixture.json", actual, 0644)
 
-	want, err := ioutil.ReadFile("app_fixture.json")
+	expected, err := ioutil.ReadFile("app_fixture.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if !bytes.Equal(have, want) {
-		dmp := diffmatchpatch.New()
-		diffs := dmp.DiffMain(string(want), string(have), false)
-		if len(diffs) > 0 {
-			t.Fatal(dmp.DiffPrettyText(diffs))
-		}
+	if !bytes.Equal(actual, expected) {
+		t.Error(cmp.Diff(string(expected), string(actual)))
 	}
 }
