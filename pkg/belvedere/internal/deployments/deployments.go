@@ -4,13 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/deploymentmanager/v2"
 	"google.golang.org/api/dns/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // Ref returns a reference to the named resource's property.
@@ -94,7 +93,7 @@ func Create(ctx context.Context, project, name string, resources []Resource, lab
 		return err
 	}
 
-	return wait.Poll(10*time.Second, 5*time.Minute, check.DM(ctx, dm, project, op.Name))
+	return waiter.Poll(ctx, check.DM(ctx, dm, project, op.Name))
 }
 
 // Updates the given deployment to add, remove, or modify resources.
@@ -139,7 +138,7 @@ func Update(ctx context.Context, project, name string, resources []Resource, dry
 		return err
 	}
 
-	return wait.Poll(10*time.Second, 5*time.Minute, check.DM(ctx, dm, project, op.Name))
+	return waiter.Poll(ctx, check.DM(ctx, dm, project, op.Name))
 }
 
 // Deletes the given deployment.
@@ -170,7 +169,7 @@ func Delete(ctx context.Context, project, name string, dryRun, async bool) error
 		return nil
 	}
 
-	return wait.Poll(10*time.Second, 5*time.Minute, check.DM(ctx, dm, project, op.Name))
+	return waiter.Poll(ctx, check.DM(ctx, dm, project, op.Name))
 }
 
 // Lists the deployments for the project, returning the name and labels for each.

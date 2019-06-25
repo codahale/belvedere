@@ -10,5 +10,4 @@ require (
 	google.golang.org/api v0.6.0
 	gopkg.in/h2non/gock.v1 v1.0.14
 	gopkg.in/yaml.v2 v2.2.2
-	k8s.io/apimachinery v0.0.0-20190620073744-d16981aedf33
 )

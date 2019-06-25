@@ -4,12 +4,13 @@ import (
 	"context"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/compute/v0.beta"
 )
 
 // Adds an instance group to a backend service.
-func Add(ctx context.Context, gce *compute.Service, project, region, backendService, instanceGroup string, dryRun bool) (check.Operation, error) {
+func Add(ctx context.Context, gce *compute.Service, project, region, backendService, instanceGroup string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Add")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -24,28 +25,28 @@ func Add(ctx context.Context, gce *compute.Service, project, region, backendServ
 	bes, err := gce.BackendServices.Get(project, backendService).
 		Context(ctx).Fields("backends", "fingerprint").Do()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Get the instance group's full URL.
 	ig, err := gce.RegionInstanceGroups.Get(project, region, instanceGroup).
 		Context(ctx).Fields("selfLink").Do()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Check to see if the instance group is already in service.
 	for _, be := range bes.Backends {
 		if be.Group == ig.SelfLink {
 			span.AddAttributes(trace.BoolAttribute("modified", false))
-			return check.Noop(), nil
+			return nil
 		}
 	}
 	span.AddAttributes(trace.BoolAttribute("modified", true))
 
 	// Early exit if we don't want side effects.
 	if dryRun {
-		return check.Noop(), nil
+		return nil
 	}
 
 	// Patch the backend service to include the instance group as a backend.
@@ -60,15 +61,15 @@ func Add(ctx context.Context, gce *compute.Service, project, region, backendServ
 		},
 	).Context(ctx).Do()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Return patch operation.
-	return check.GCE(ctx, gce, project, op.Name), nil
+	return waiter.Poll(ctx, check.GCE(ctx, gce, project, op.Name))
 }
 
 // Removes an instance group from a backend service.
-func Remove(ctx context.Context, gce *compute.Service, project, region, backendService, instanceGroup string, dryRun bool) (check.Operation, error) {
+func Remove(ctx context.Context, gce *compute.Service, project, region, backendService, instanceGroup string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Remove")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -83,14 +84,14 @@ func Remove(ctx context.Context, gce *compute.Service, project, region, backendS
 	bes, err := gce.BackendServices.Get(project, backendService).
 		Context(ctx).Fields("backends", "fingerprint").Do()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Get the instance group's full URL.
 	ig, err := gce.RegionInstanceGroups.Get(project, region, instanceGroup).
 		Context(ctx).Fields("selfLink").Do()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Copy all backends except for the instance group in question.
@@ -104,13 +105,13 @@ func Remove(ctx context.Context, gce *compute.Service, project, region, backendS
 	// Early exit if the instance group isn't in service and doesn't need to be removed.
 	if len(bes.Backends) == len(backends) {
 		span.AddAttributes(trace.BoolAttribute("modified", false))
-		return check.Noop(), nil
+		return nil
 	}
 	span.AddAttributes(trace.BoolAttribute("modified", true))
 
 	// Early exit if we don't want side effects.
 	if dryRun {
-		return check.Noop(), nil
+		return nil
 	}
 
 	// Patch the backend service to remove the instance group as a backend.
@@ -124,9 +125,9 @@ func Remove(ctx context.Context, gce *compute.Service, project, region, backendS
 		},
 	).Context(ctx).Do()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Return the patch operation.
-	return check.GCE(ctx, gce, project, op.Name), nil
+	return waiter.Poll(ctx, check.GCE(ctx, gce, project, op.Name))
 }

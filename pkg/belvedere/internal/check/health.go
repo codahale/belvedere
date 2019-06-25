@@ -3,14 +3,14 @@ package check
 import (
 	"context"
 
+	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/compute/v0.beta"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-// Health returns a ConditionFunc which checks if all instances of an instance group are registered
-// and healthy.
-func Health(ctx context.Context, gce *compute.Service, project, region, backendService, instanceGroup string) wait.ConditionFunc {
+// Health returns a handle which checks if all instances of an instance group are registered and
+// healthy.
+func Health(ctx context.Context, gce *compute.Service, project, region, backendService, instanceGroup string) waiter.Condition {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.Health")
 		span.AddAttributes(trace.StringAttribute("project", project))

@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 
+	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/deploymentmanager/v2"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-// DM returns a ConditionFunc which checks the progress of a Deployment Manager operation.
-func DM(ctx context.Context, dm *deploymentmanager.Service, project string, operation string) wait.ConditionFunc {
+// DM returns a handle for a Deployment Manager operation.
+func DM(ctx context.Context, dm *deploymentmanager.Service, project string, operation string) waiter.Condition {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.DM")
 		span.AddAttributes(trace.StringAttribute("project", project))

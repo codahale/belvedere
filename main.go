@@ -51,6 +51,8 @@ Options:
   --quiet                Disable all log output.
   --dry-run              Print modifications instead of performing them.
   --project=<project-id> Specify a project ID. Defaults to using gcloud's config.
+  --interval=<duration>  Specify a polling interval for long-running operations [default: 10s].
+  --timeout=<duration>   Specify a timeout for long-running operations [default: 5m].
 `
 
 	// Parse arguments and options.
@@ -75,8 +77,10 @@ Options:
 		trace.RegisterExporter(&traceLogger{})
 	}
 
+	ctx := pollingContext(context.Background(), opts)
+
 	// Run commands.
-	if err := run(context.Background(), opts); err != nil {
+	if err := run(ctx, opts); err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(-1)
 	}
@@ -294,4 +298,20 @@ func config(ctx context.Context, opts docopt.Opts) (project string, err error) {
 	}
 
 	return "", errors.New("project not found")
+}
+
+func pollingContext(ctx context.Context, opts docopt.Opts) context.Context {
+	interval, err := time.ParseDuration(opts["--interval"].(string))
+	if err != nil {
+		panic(err)
+	}
+	ctx = belvedere.WithInterval(ctx, interval)
+
+	timeout, err := time.ParseDuration(opts["--timeout"].(string))
+	if err != nil {
+		panic(err)
+	}
+	ctx, _ = context.WithTimeout(ctx, timeout)
+
+	return ctx
 }

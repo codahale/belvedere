@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	compute "google.golang.org/api/compute/v0.beta"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -54,23 +56,14 @@ func TestAdd(t *testing.T) {
 			Status: "DONE",
 		})
 
-	gce, err := compute.NewService(context.TODO())
+	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
+	gce, err := compute.NewService(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	op, err := Add(context.TODO(), gce, "my-project", "us-central1", "bes-1", "ig-1", false)
-	if err != nil {
+	if err := Add(ctx, gce, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
 		t.Fatal(err)
-	}
-
-	done, err := op()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !done {
-		t.Fatal("should have been done")
 	}
 }
 
@@ -95,23 +88,14 @@ func TestAddExisting(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	gce, err := compute.NewService(context.TODO())
+	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
+	gce, err := compute.NewService(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	op, err := Add(context.TODO(), gce, "my-project", "us-central1", "bes-1", "ig-1", false)
-	if err != nil {
+	if err := Add(ctx, gce, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
 		t.Fatal(err)
-	}
-
-	done, err := op()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !done {
-		t.Fatal("should have been done")
 	}
 }
 
@@ -136,23 +120,14 @@ func TestAddDryRun(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	gce, err := compute.NewService(context.TODO())
+	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
+	gce, err := compute.NewService(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	op, err := Add(context.TODO(), gce, "my-project", "us-central1", "bes-1", "ig-1", true)
-	if err != nil {
+	if err := Add(ctx, gce, "my-project", "us-central1", "bes-1", "ig-1", true); err != nil {
 		t.Fatal(err)
-	}
-
-	done, err := op()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !done {
-		t.Fatal("should have been done")
 	}
 }
 
@@ -200,23 +175,14 @@ func TestRemove(t *testing.T) {
 			Status: "DONE",
 		})
 
-	gce, err := compute.NewService(context.TODO())
+	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
+	gce, err := compute.NewService(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	op, err := Remove(context.TODO(), gce, "my-project", "us-central1", "bes-1", "ig-1", false)
-	if err != nil {
+	if err := Remove(ctx, gce, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
 		t.Fatal(err)
-	}
-
-	done, err := op()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !done {
-		t.Fatal("should have been done")
 	}
 }
 
@@ -254,23 +220,14 @@ func TestRemoveLast(t *testing.T) {
 			Status: "DONE",
 		})
 
-	gce, err := compute.NewService(context.TODO())
+	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
+	gce, err := compute.NewService(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	op, err := Remove(context.TODO(), gce, "my-project", "us-central1", "bes-1", "ig-1", false)
-	if err != nil {
+	if err := Remove(ctx, gce, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
 		t.Fatal(err)
-	}
-
-	done, err := op()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !done {
-		t.Fatal("should have been done")
 	}
 }
 
@@ -295,22 +252,13 @@ func TestRemoveMissing(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	gce, err := compute.NewService(context.TODO())
+	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
+	gce, err := compute.NewService(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	op, err := Remove(context.TODO(), gce, "my-project", "us-central1", "bes-1", "ig-1", false)
-	if err != nil {
+	if err := Remove(ctx, gce, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
 		t.Fatal(err)
-	}
-
-	done, err := op()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !done {
-		t.Fatal("should have been done")
 	}
 }

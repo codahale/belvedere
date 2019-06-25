@@ -8,11 +8,17 @@ import (
 	"regexp"
 	"sync"
 	"syscall"
+	"time"
 
+	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/dns/v1"
 )
+
+func WithInterval(ctx context.Context, interval time.Duration) context.Context {
+	return waiter.WithInterval(ctx, interval)
+}
 
 func DNSServers(ctx context.Context, project string) ([]string, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DNSServers")

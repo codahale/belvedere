@@ -5,13 +5,13 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/serviceusage/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-// GCE returns a ConditionFunc which checks the progress of a Service Usage operation.
-func SU(ctx context.Context, su *serviceusage.Service, operation string) wait.ConditionFunc {
+// GCE returns a handle for a Service Usage operation.
+func SU(ctx context.Context, su *serviceusage.Service, operation string) waiter.Condition {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.SU")
 		span.AddAttributes(trace.StringAttribute("operation", operation))

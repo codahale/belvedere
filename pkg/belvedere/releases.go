@@ -4,15 +4,14 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/backends"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/cloudinit"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/compute/v0.beta"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 type Release struct {
@@ -214,18 +213,11 @@ func EnableRelease(ctx context.Context, project, app, release string, dryRun boo
 
 	backendService := fmt.Sprintf("%s-bes", app)
 	instanceGroup := fmt.Sprintf("%s-%s-ig", app, release)
-	add, err := backends.Add(ctx, gce, project, region, backendService, instanceGroup, dryRun)
-	if err != nil {
+	if err := backends.Add(ctx, gce, project, region, backendService, instanceGroup, dryRun); err != nil {
 		return err
 	}
 
-	waiter := check.Waiter{Interval: 10 * time.Second, Timeout: 5 * time.Minute}
-	if err := waiter.Wait(add); err != nil {
-		return err
-	}
-
-	f := check.Health(ctx, gce, project, region, backendService, instanceGroup)
-	return wait.Poll(10*time.Second, 5*time.Minute, f)
+	return waiter.Poll(ctx, check.Health(ctx, gce, project, region, backendService, instanceGroup))
 }
 
 func DisableRelease(ctx context.Context, project, app, release string, dryRun bool) error {
@@ -250,12 +242,7 @@ func DisableRelease(ctx context.Context, project, app, release string, dryRun bo
 
 	backendService := fmt.Sprintf("%s-bes", app)
 	instanceGroup := fmt.Sprintf("%s-%s-ig", app, release)
-	waiter := check.Waiter{Interval: 10 * time.Second, Timeout: 5 * time.Minute}
-	op, err := backends.Remove(ctx, gce, project, region, backendService, instanceGroup, dryRun)
-	if err != nil {
-		return err
-	}
-	return waiter.Wait(op)
+	return backends.Remove(ctx, gce, project, region, backendService, instanceGroup, dryRun)
 }
 
 func DeleteRelease(ctx context.Context, project, app, release string, dryRun, async bool) error {

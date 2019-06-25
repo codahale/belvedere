@@ -3,12 +3,11 @@ package setup
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/serviceusage/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 var (
@@ -77,8 +76,8 @@ func EnableAPIs(ctx context.Context, project string, dryRun bool) error {
 			}, "Service enabled")
 		}
 
-		// Wait for the services to be enabled.
-		if err := wait.Poll(10*time.Second, 5*time.Minute, check.SU(ctx, su, op.Name)); err != nil {
+		// Poll for the services to be enabled.
+		if err := waiter.Poll(ctx, check.SU(ctx, su, op.Name)); err != nil {
 			return err
 		}
 	}
