@@ -86,6 +86,64 @@ func CreateRelease(ctx context.Context, project, app, release string, config *Co
 	}, dryRun)
 }
 
+func EnableRelease(ctx context.Context, project, app, release string, dryRun bool) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.EnableRelease")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+		trace.StringAttribute("app", app),
+		trace.StringAttribute("release", release),
+		trace.BoolAttribute("dry_run", dryRun),
+	)
+	defer span.End()
+
+	region, err := findRegion(ctx, project, app)
+	if err != nil {
+		return err
+	}
+
+	backendService := fmt.Sprintf("%s-bes", app)
+	instanceGroup := fmt.Sprintf("%s-%s-ig", app, release)
+	if err := backends.Add(ctx, project, region, backendService, instanceGroup, dryRun); err != nil {
+		return err
+	}
+
+	return waiter.Poll(ctx, check.Health(ctx, project, region, backendService, instanceGroup))
+}
+
+func DisableRelease(ctx context.Context, project, app, release string, dryRun bool) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.DisableRelease")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+		trace.StringAttribute("app", app),
+		trace.StringAttribute("release", release),
+		trace.BoolAttribute("dry_run", dryRun),
+	)
+	defer span.End()
+
+	region, err := findRegion(ctx, project, app)
+	if err != nil {
+		return err
+	}
+
+	backendService := fmt.Sprintf("%s-bes", app)
+	instanceGroup := fmt.Sprintf("%s-%s-ig", app, release)
+	return backends.Remove(ctx, project, region, backendService, instanceGroup, dryRun)
+}
+
+func DeleteRelease(ctx context.Context, project, app, release string, dryRun, async bool) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.DeleteRelease")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+		trace.StringAttribute("app", app),
+		trace.StringAttribute("release", release),
+		trace.BoolAttribute("dry_run", dryRun),
+		trace.BoolAttribute("async", async),
+	)
+	defer span.End()
+
+	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s-%s", app, release), dryRun, async)
+}
+
 func releaseResources(project string, region string, app string, release string, imageSHA256 string, config *Config) []deployments.Resource {
 	instanceTemplate := fmt.Sprintf("%s-%s-it", app, release)
 	instanceGroupManager := fmt.Sprintf("%s-%s-ig", app, release)
@@ -190,64 +248,6 @@ func releaseResources(project string, region string, app string, release string,
 		},
 	}
 	return resources
-}
-
-func EnableRelease(ctx context.Context, project, app, release string, dryRun bool) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.EnableRelease")
-	span.AddAttributes(
-		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", app),
-		trace.StringAttribute("release", release),
-		trace.BoolAttribute("dry_run", dryRun),
-	)
-	defer span.End()
-
-	region, err := findRegion(ctx, project, app)
-	if err != nil {
-		return err
-	}
-
-	backendService := fmt.Sprintf("%s-bes", app)
-	instanceGroup := fmt.Sprintf("%s-%s-ig", app, release)
-	if err := backends.Add(ctx, project, region, backendService, instanceGroup, dryRun); err != nil {
-		return err
-	}
-
-	return waiter.Poll(ctx, check.Health(ctx, project, region, backendService, instanceGroup))
-}
-
-func DisableRelease(ctx context.Context, project, app, release string, dryRun bool) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.DisableRelease")
-	span.AddAttributes(
-		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", app),
-		trace.StringAttribute("release", release),
-		trace.BoolAttribute("dry_run", dryRun),
-	)
-	defer span.End()
-
-	region, err := findRegion(ctx, project, app)
-	if err != nil {
-		return err
-	}
-
-	backendService := fmt.Sprintf("%s-bes", app)
-	instanceGroup := fmt.Sprintf("%s-%s-ig", app, release)
-	return backends.Remove(ctx, project, region, backendService, instanceGroup, dryRun)
-}
-
-func DeleteRelease(ctx context.Context, project, app, release string, dryRun, async bool) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.DeleteRelease")
-	span.AddAttributes(
-		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", app),
-		trace.StringAttribute("release", release),
-		trace.BoolAttribute("dry_run", dryRun),
-		trace.BoolAttribute("async", async),
-	)
-	defer span.End()
-
-	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s-%s", app, release), dryRun, async)
 }
 
 const (

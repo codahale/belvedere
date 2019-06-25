@@ -12,7 +12,14 @@ import (
 	"google.golang.org/api/logging/v2"
 )
 
-func Logs(ctx context.Context, project, app, release, instance string, minTimestamp time.Time, filters []string) ([]string, error) {
+type Log struct {
+	Timestamp time.Time
+	Instance  string
+	Release   string
+	Message   string
+}
+
+func Logs(ctx context.Context, project, app, release, instance string, minTimestamp time.Time, filters []string) ([]Log, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.Logs")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -59,7 +66,7 @@ func Logs(ctx context.Context, project, app, release, instance string, minTimest
 		return nil, err
 	}
 
-	results := make([]string, len(entries.Entries))
+	results := make([]Log, len(entries.Entries))
 	var payload struct {
 		Container struct {
 			Metadata struct {
@@ -75,8 +82,16 @@ func Logs(ctx context.Context, project, app, release, instance string, minTimest
 		if err := json.Unmarshal(e.JsonPayload, &payload); err != nil {
 			return nil, err
 		}
-		results[i] = fmt.Sprintf("%s (%s/%s) %s",
-			e.Timestamp, payload.Container.Metadata.Release, payload.Instance.Name, payload.Message)
+		ts, err := time.Parse(time.RFC3339Nano, e.Timestamp)
+		if err != nil {
+			return nil, err
+		}
+		results[i] = Log{
+			Timestamp: ts,
+			Instance:  payload.Instance.Name,
+			Release:   payload.Container.Metadata.Release,
+			Message:   payload.Message,
+		}
 	}
 	return results, nil
 }

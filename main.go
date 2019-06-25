@@ -157,10 +157,12 @@ func run(ctx context.Context, opts docopt.Opts) error {
 			return err
 		}
 
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		_, _ = fmt.Fprintln(w, "Timestamp\tRelease\tInstance\tMessage")
 		for _, log := range logs {
-			fmt.Println(log)
+			_, _ = fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", log.Timestamp.Format(time.Stamp), log.Release, log.Instance, log.Message)
 		}
-		return nil
+		return w.Flush()
 	case isCmd(opts, "apps", "list"):
 		apps, err := belvedere.ListApps(ctx, project)
 		if err != nil {

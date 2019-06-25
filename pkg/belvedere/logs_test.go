@@ -41,8 +41,13 @@ func TestLogs(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := []string{
-		"2019-06-25T14:55:01.000000000Z (v2/example-v2-abcd) woo",
+	expected := []Log{
+		{
+			Timestamp: time.Date(2019, 6, 25, 14, 55, 1, 0, time.UTC),
+			Instance:  "example-v2-abcd",
+			Release:   "v2",
+			Message:   "woo",
+		},
 	}
 
 	if !cmp.Equal(actual, expected) {
