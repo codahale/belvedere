@@ -2,26 +2,183 @@
 
 _A small lookout tower (usually square) on the roof of a house._
 
+Belvedere is a small, opinionated tool for deploying HTTP2-based applications on GCP in an operationally friendly manner.
+It handles load balancing, DNS, TLS certificates, autoscaling, deploys, logging, metrics, tracing, permissions, and more.
+
+== Setup
+
+First, create a GCP project for your environment and set it as the default using `gcloud config set core/project $BLAH`.
+(Or pass the `--project` flag everywhere.)
+Make sure you've configured a billing account for it.
+
+Once you have a project in place, pick a DNS zone for your applications that you control.
+Let's say you've recently registered the domain `cornbread.club`.
+
+[source,bash]
+----
+belvedere setup cornbread.club
+----
+
+This will enable all the required GCP APIs, grant Deployment Manager permissions to manage IAM roles, and create a Deployment Manager deployment with a managed zone for `cornbread.club` plus a few firewall rules for securing your applications.
+(Don't worry, they won't affect anything else in the project.)
+
+Once you've set it up, you'll need to configure the DNS settings for your domain name with your registrar.
+To get a list of the DNS servers to use, run:
+
+[source,bash]
+----
+belvedere dns-servers
+----
+
+== Applications
+
+Belvedere apps are HTTP2 applications packaged as containers in a registry, running on virtual machines with optional sidecars.
+It's required that either your application (or a sidecar proxy) listen on port 8443 for HTTP2 requests.
+Your application can use self-signed certs, but it must use TLS.
+Your application must return a `200 OK` response to `GET` requests for `/healthz`
+
+=== Configuration
+
+App configuration lives in a YAML file.
+You can check out `examples/helloworld.yaml` for an example.
+You need to specify a Compute Engine machine type and the image for your main container.
+
+=== Creating An Application
+
+To create an application, pick a GCE region (e.g. `us-central1`) and run:
+
+[source,bash]
+----
+belevedere apps create my-app us-central1 ./my-app.yaml
+----
+
+This will create a Deployment Manager deployment with a bunch of goodies:
+
+* a global, HTTP2 load balancing stack, with support for QUIC
+* a DNS A record for `my-app.cornbread.club` pointing to the load balancer
+* a Let's Encrypt-provided, Google-managed TLS certificate for `my-app.cornbread.club`
+* a service account with the IAM roles you specified
+
+The load balancer and DNS stuff will take 10-30 minutes to fully provision.
+
+=== Creating A Release
+
+To create a release for an application, get the SHA256 hash of the container image and run:
+
+[source,bash]
+----
+belvedere releases create my-app v1 ./my-app.yaml 93433e08c1065c0fe8ebd151a329e2f8733495e7e6ef2a23249a6f12600de103
+----
+
+This will create a Deployment Manager deployment with some more goodies:
+
+* an instance template for creating instance running your apps on Google Container-Optimized OS
+* an instance group manager for manging those instances
+* an autoscaler for scaling the number of app instances up or down based on load balancer utilization
+
+Once this is done, the release has been created but is not in service.
+
+=== Enabling A Release
+
+To direct traffic to the instances in a release, enable the release by running:
+
+[source,bash]
+----
+belvedere releases enable my-app v1
+----
+
+This will add the `v1` instance group to the load balancer and wait for the instances to register,
+pass health checks, and go into service. If the instances aren't healthy after 5 minutes,
+`belvedere` will exit with a non-zero status.
+
+=== Disabling A Release
+
+To remove a release from service, disable it by running:
+
+[source,bash]
+----
+belvedere releases disable my-app v1
+----
+
+This will remove the app from service and drain any existing connections.
+
+=== Deleting A Release
+
+To delete all of the resources associated with a release, including the instances, run:
+
+[source,bash]
+----
+belvedere releases delete my-app v1
+----
+
+=== Deleting An Application
+
+To delete all of the resources associated with an app, run:
+
+[source,bash]
+----
+belvedere apps delete my-app
+----
+
+== Operational Amenities
+
+=== Listing Apps
+
+To list all the apps in your project, run:
+
+[source,bash]
+----
+belvedere apps list
+----
+
+=== Listing Releases
+
+To list all the releases in your project, run:
+
+[source,bash]
+----
+belvedere releases list
+belvedere releases list my-app
+----
+
+=== Listing Instances
+
+To list all the running instances in your project, run:
+
+[source,bash]
+----
+belvedere instances
+belvedere instance my-app
+belvedere instance my-app v43
+----
+
+=== SSH Access
+
+To SSH into a particular instance, run:
+
+[source,bash]
+----
+belvedere ssh my-app-v43-hxht
+----
+
+This will use `gcloud` to automatically configure an SSH key, inject it into the instance, and tunnel an SSH connection over GCP's Identity-Aware Proxy (IAP) to the instance.
+IAP tunneling is used because it allows for public SSH access to your instances to be disabled.
+Only IAP tunnels are allowed, and IAP tunnels require that the initiator be an authenticated member of your GCP project.
+
+=== Viewing Logs
+
+To view the logs for your app and its sidecar containers, run:
+
+[source,bash]
+----
+belvedere logs my-app
+belvedere logs my-app v43
+belvedere logs my-app v43 --freshness=1h
+belvedere logs my-app v43 --freshness=1h --filter="/login/"
+----
+
 == TODO
 
-- [x] Create canned hello-world example app
-- [x] Test enabling and disabling releases
-- [x] Automatically provision A records for apps
-- [x] Verify DNS stuff actually works
-- [x] Provision managed TLS certs instead of self-signed ones
-- [x] Build in instructions for name servers/registrars
-- [x] Add updating service account
-- [x] Unify app and release config
-- [x] Move from Konlet to multi-container specs
-- [x] Enable IAP tunneling to app instances
-- [x] Lock down access to app instances
-- [x] Inject version and other metadata.
-- [x] Add easy instance listing
-- [x] Add easy SSH command w/ `--tunnel-through-iap`
-- [x] Add create-and-enable for releases
-- [x] Add disable-and-destroy for releases
-- [x] Add easy log listing
-- [x] Figure out sidecar
 - [ ] Block external access to `/healthz`
 - [ ] Canary deploys
 - [ ] Run containers as a non-root user
