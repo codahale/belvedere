@@ -1,16 +1,25 @@
-iamRoles:
-  - roles/cloudkms.cryptoKeyDecrypter
 machineType: n1-standard-1
 numReplicas: 2
+# https://cloud.google.com/compute/docs/reference/rest/v1/autoscalers
 #autoscalingPolicy:
 #  minNumReplicas: 1
 #  maxNumReplicas: 10
 #  loadBalancingUtilization:
 #    utilizationTarget: 0.8
+# https://cloud.google.com/compute/docs/reference/rest/v1/backendServices
 #identityAwareProxy:
 #  enabled: false
 #  oauth2ClientID: ""
 #  oauth2ClientSecret: ""
+#cdnPolicy:
+#  cacheKeyPolicy:
+#    includeProtocol: true
+#    includeHost: true
+#    includeQueryString: false
+#    queryStringWhitelist: []
+#    queryStringBlacklist: []
+#  signedUrlKeyNames: []
+#  signedUrlCacheMaxAgeSec: 200
 container:
   image: gcr.io/cloudslap/helloworld
 #  command: ""
@@ -20,3 +29,5 @@ container:
 sidecars:
   nginx-frontend:
     image: gcr.io/cloudslap/nginx-frontend
+iamRoles:
+  - roles/cloudkms.cryptoKeyDecrypter

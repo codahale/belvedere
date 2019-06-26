@@ -17,7 +17,7 @@ func TestAppResources(t *testing.T) {
 		DnsName: "horse.club",
 	}
 	config := &Config{
-		CDN: &CDNConfig{
+		CDNPolicy: &CDNConfig{
 			Enabled: true,
 			BackendServiceCdnPolicy: compute.BackendServiceCdnPolicy{
 				SignedUrlCacheMaxAgeSec: 200,

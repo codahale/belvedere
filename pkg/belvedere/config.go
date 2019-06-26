@@ -19,18 +19,18 @@ type Config struct {
 	Sidecars          map[string]Container       `json:"sidecars"`
 	IAP               *compute.BackendServiceIAP `json:"identityAwareProxy"`
 	AutoscalingPolicy *compute.AutoscalingPolicy `json:"autoscalingPolicy"`
-	CDN               *CDNConfig                 `json:"contentDeliveryNetwork"`
+	CDNPolicy         *CDNConfig                 `json:"cdnPolicy"`
 }
 
 func (c *Config) cdnEnabled() bool {
-	return c.CDN != nil && c.CDN.Enabled
+	return c.CDNPolicy != nil && c.CDNPolicy.Enabled
 }
 
 func (c *Config) cdnPolicy() *compute.BackendServiceCdnPolicy {
-	if c.CDN == nil {
+	if c.CDNPolicy == nil {
 		return nil
 	}
-	return &c.CDN.BackendServiceCdnPolicy
+	return &c.CDNPolicy.BackendServiceCdnPolicy
 }
 
 type CDNConfig struct {
