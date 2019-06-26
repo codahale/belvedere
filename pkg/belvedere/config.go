@@ -19,6 +19,13 @@ type Config struct {
 	UtilizationTarget float64              `yaml:"utilizationTarget"`
 	Container         Container            `yaml:"container"`
 	Sidecars          map[string]Container `yaml:"sidecars"`
+	IAP               IAPConfig            `yaml:"identityAwareProxy"`
+}
+
+type IAPConfig struct {
+	Enabled            bool   `yaml:"enabled"`
+	OAuth2ClientID     string `yaml:"oauth2ClientID"`
+	OAuth2ClientSecret string `yaml:"oauth2ClientSecret"`
 }
 
 // LoadConfig loads the YAML configuration at the given path. If path is `-`, STDIN is used.

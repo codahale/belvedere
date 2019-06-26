@@ -5,6 +5,10 @@ minInstances: 1
 maxInstances: 10
 initialInstances: 2
 utilizationTarget: 0.8
+identityAwareProxy:
+  enabled: false
+  oauth2ClientID: ""
+  oauth2ClientSecret: ""
 container:
   image: gcr.io/cloudslap/helloworld
   command: ""
