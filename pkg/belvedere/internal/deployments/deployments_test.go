@@ -170,7 +170,7 @@ func TestList(t *testing.T) {
 		{"name": "two", "two-a": "a", "two-b": "b"},
 	}
 
-	if !cmp.Equal(actual, expected) {
-		t.Error(cmp.Diff(actual, expected))
+	if !cmp.Equal(expected, actual) {
+		t.Error(cmp.Diff(expected, actual))
 	}
 }

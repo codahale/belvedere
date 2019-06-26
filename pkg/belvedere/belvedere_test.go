@@ -71,7 +71,7 @@ func TestMachineTypes(t *testing.T) {
 		},
 	}
 
-	if !cmp.Equal(actual, expected) {
-		t.Error(cmp.Diff(actual, expected))
+	if !cmp.Equal(expected, actual) {
+		t.Error(cmp.Diff(expected, actual))
 	}
 }

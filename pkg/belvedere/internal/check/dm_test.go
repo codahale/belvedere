@@ -78,7 +78,7 @@ func TestDMError(t *testing.T) {
 	}
 
 	expected := "{\"errors\":[{\"code\":\"ERR_BAD_NEWS\",\"location\":\"/downtown\",\"message\":\"here comes Mongo\"}]}"
-	if actual := err.Error(); actual != expected {
-		t.Error(cmp.Diff(actual, expected))
+	if actual := err.Error(); expected != actual {
+		t.Error(cmp.Diff(expected, actual))
 	}
 }

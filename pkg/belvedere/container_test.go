@@ -38,7 +38,7 @@ func TestContainer_DockerArgs(t *testing.T) {
 		"alphabet": "latin",
 	})
 
-	if !cmp.Equal(actual, expected) {
-		t.Fatal(cmp.Diff(actual, expected))
+	if !cmp.Equal(expected, actual) {
+		t.Fatal(cmp.Diff(expected, actual))
 	}
 }

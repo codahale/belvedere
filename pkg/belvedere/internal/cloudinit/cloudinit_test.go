@@ -37,7 +37,7 @@ func TestCloudConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !bytes.Equal(actual, expected) {
-		t.Error(cmp.Diff(string(actual), string(expected)))
+	if !bytes.Equal(expected, actual) {
+		t.Error(cmp.Diff(string(expected), string(actual)))
 	}
 }

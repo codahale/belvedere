@@ -73,8 +73,7 @@ func TestSUError(t *testing.T) {
 	}
 
 	expected := "{\"code\":500,\"message\":\"nope\"}"
-	if actual := err.Error(); actual != expected {
-		t.Error(cmp.Diff(actual, expected))
+	if actual := err.Error(); expected != actual {
+		t.Error(cmp.Diff(expected, actual))
 	}
-
 }

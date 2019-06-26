@@ -78,7 +78,7 @@ func TestGCEError(t *testing.T) {
 	}
 
 	expected := "{\"errors\":[{\"code\":\"ERR_MAGIC_HAT\",\"location\":\"/great-hall\",\"message\":\"Bad personality test\"}]}"
-	if actual := err.Error(); actual != expected {
-		t.Error(cmp.Diff(actual, expected))
+	if actual := err.Error(); expected != actual {
+		t.Error(cmp.Diff(expected, actual))
 	}
 }
