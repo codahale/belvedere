@@ -204,6 +204,9 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 				ConnectionDraining: &compute.ConnectionDraining{
 					DrainingTimeoutSec: 60,
 				},
+				LogConfig: &compute.BackendServiceLogConfig{
+					Enable: true,
+				},
 				Protocol: "HTTP2",
 				PortName: "svc-https",
 				HealthChecks: []string{

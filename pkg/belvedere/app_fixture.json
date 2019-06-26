@@ -42,6 +42,9 @@
         "healthChecks": [
           "$(ref.my-app-hc.selfLink)"
         ],
+        "logConfig": {
+          "enable": true
+        },
         "portName": "svc-https",
         "protocol": "HTTP2"
       }
