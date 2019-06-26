@@ -26,9 +26,9 @@ func SelfLink(name string) string {
 
 // Resource represents a Deployment Manager resource.
 type Resource struct {
-	Name       string      `json:"name"`
-	Type       string      `json:"type"`
-	Properties interface{} `json:"properties"`
+	Name       string         `json:"name"`
+	Type       string         `json:"type"`
+	Properties json.Marshaler `json:"properties"`
 }
 
 type ServiceAccount struct {
@@ -36,11 +36,41 @@ type ServiceAccount struct {
 	DisplayName string `json:"displayName"`
 }
 
+func (s *ServiceAccount) MarshalJSON() ([]byte, error) {
+	type NoMethod ServiceAccount
+	raw := NoMethod(*s)
+	return json.Marshal(raw)
+}
+
+var _ json.Marshaler = &ServiceAccount{}
+
 type ResourceRecordSets struct {
 	Name        string                   `json:"name"`
 	ManagedZone string                   `json:"managedZone"`
 	Records     []*dns.ResourceRecordSet `json:"records"`
 }
+
+func (rrs *ResourceRecordSets) MarshalJSON() ([]byte, error) {
+	type NoMethod ResourceRecordSets
+	raw := NoMethod(*rrs)
+	return json.Marshal(raw)
+}
+
+var _ json.Marshaler = &ResourceRecordSets{}
+
+type IAMMemberBinding struct {
+	Resource string `json:"resource"`
+	Role     string `json:"role"`
+	Member   string `json:"member"`
+}
+
+func (b *IAMMemberBinding) MarshalJSON() ([]byte, error) {
+	type NoMethod IAMMemberBinding
+	raw := NoMethod(*b)
+	return json.Marshal(raw)
+}
+
+var _ json.Marshaler = &IAMMemberBinding{}
 
 // Creates a new deployment with the given name, resources, and labels.
 func Create(ctx context.Context, project, name string, resources []Resource, labels map[string]string, dryRun bool) error {

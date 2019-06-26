@@ -167,7 +167,7 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 		{
 			Name: firewall,
 			Type: "compute.beta.firewall",
-			Properties: compute.Firewall{
+			Properties: &compute.Firewall{
 				Allowed: []*compute.FirewallAllowed{
 					{
 						IPProtocol: "TCP",
@@ -188,7 +188,7 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 		{
 			Name: healthcheck,
 			Type: "compute.beta.healthCheck",
-			Properties: compute.HealthCheck{
+			Properties: &compute.HealthCheck{
 				Type: "HTTP2",
 				Http2HealthCheck: &compute.HTTP2HealthCheck{
 					PortName:    "svc-https",
@@ -200,7 +200,7 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 		{
 			Name: backendService,
 			Type: "compute.beta.backendService",
-			Properties: compute.BackendService{
+			Properties: &compute.BackendService{
 				ConnectionDraining: &compute.ConnectionDraining{
 					DrainingTimeoutSec: 60,
 				},
@@ -220,7 +220,7 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 		{
 			Name: urlMap,
 			Type: "compute.beta.urlMap",
-			Properties: compute.UrlMap{
+			Properties: &compute.UrlMap{
 				DefaultService: deployments.SelfLink(backendService),
 				// TODO add WAF rule turning /healthz from external sources into 404
 				//PathMatchers: []*compute.PathMatcher{
@@ -247,7 +247,7 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 		{
 			Name: sslCertificate,
 			Type: "compute.beta.sslCertificate",
-			Properties: compute.SslCertificate{
+			Properties: &compute.SslCertificate{
 				Managed: &compute.SslCertificateManagedSslCertificate{
 					Domains: []string{dnsName},
 				},
@@ -259,7 +259,7 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 		{
 			Name: targetProxy,
 			Type: "compute.beta.targetHttpsProxy",
-			Properties: compute.TargetHttpsProxy{
+			Properties: &compute.TargetHttpsProxy{
 				SslCertificates: []string{
 					deployments.SelfLink(sslCertificate),
 				},
@@ -271,7 +271,7 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 		{
 			Name: forwardingRule,
 			Type: "compute.beta.globalForwardingRule",
-			Properties: compute.ForwardingRule{
+			Properties: &compute.ForwardingRule{
 				IPProtocol: "TCP",
 				PortRange:  "443",
 				Target:     deployments.SelfLink(targetProxy),
@@ -281,7 +281,7 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 		{
 			Name: serviceAccount,
 			Type: "iam.v1.serviceAccount",
-			Properties: deployments.ServiceAccount{
+			Properties: &deployments.ServiceAccount{
 				AccountID:   fmt.Sprintf("app-%s", app),
 				DisplayName: app,
 			},
@@ -290,7 +290,7 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 		{
 			Name: dnsRecord,
 			Type: "gcp-types/dns-v1:resourceRecordSets",
-			Properties: deployments.ResourceRecordSets{
+			Properties: &deployments.ResourceRecordSets{
 				Name:        dnsName,
 				ManagedZone: managedZone.Name,
 				Records: []*dns.ResourceRecordSet{
@@ -330,10 +330,10 @@ func roleBinding(project, serviceAccount, role string) deployments.Resource {
 	return deployments.Resource{
 		Name: fmt.Sprintf("%s-%s", serviceAccount, role),
 		Type: "gcp-types/cloudresourcemanager-v1:virtual.projects.iamMemberBinding",
-		Properties: map[string]string{
-			"resource": project,
-			"role":     role,
-			"member":   fmt.Sprintf("serviceAccount:%s", deployments.Ref(serviceAccount, "email")),
+		Properties: &deployments.IAMMemberBinding{
+			Resource: project,
+			Role:     role,
+			Member:   fmt.Sprintf("serviceAccount:%s", deployments.Ref(serviceAccount, "email")),
 		},
 	}
 }

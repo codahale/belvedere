@@ -49,7 +49,7 @@ func TestCreate(t *testing.T) {
 			{
 				Name: "my-instance",
 				Type: "compute.beta.instance",
-				Properties: compute.Instance{
+				Properties: &compute.Instance{
 					MachineType: "n1-standard-1",
 				},
 			},
@@ -91,7 +91,7 @@ func TestUpdate(t *testing.T) {
 			{
 				Name: "my-instance",
 				Type: "compute.beta.instance",
-				Properties: compute.Instance{
+				Properties: &compute.Instance{
 					MachineType: "n1-standard-1",
 				},
 			},

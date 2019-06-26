@@ -122,81 +122,81 @@
       "name": "my-app-sa-roles/clouddebugger.agent",
       "type": "gcp-types/cloudresourcemanager-v1:virtual.projects.iamMemberBinding",
       "properties": {
-        "member": "serviceAccount:$(ref.my-app-sa.email)",
         "resource": "my-project",
-        "role": "roles/clouddebugger.agent"
+        "role": "roles/clouddebugger.agent",
+        "member": "serviceAccount:$(ref.my-app-sa.email)"
       }
     },
     {
       "name": "my-app-sa-roles/cloudprofiler.agent",
       "type": "gcp-types/cloudresourcemanager-v1:virtual.projects.iamMemberBinding",
       "properties": {
-        "member": "serviceAccount:$(ref.my-app-sa.email)",
         "resource": "my-project",
-        "role": "roles/cloudprofiler.agent"
+        "role": "roles/cloudprofiler.agent",
+        "member": "serviceAccount:$(ref.my-app-sa.email)"
       }
     },
     {
       "name": "my-app-sa-roles/cloudtrace.agent",
       "type": "gcp-types/cloudresourcemanager-v1:virtual.projects.iamMemberBinding",
       "properties": {
-        "member": "serviceAccount:$(ref.my-app-sa.email)",
         "resource": "my-project",
-        "role": "roles/cloudtrace.agent"
+        "role": "roles/cloudtrace.agent",
+        "member": "serviceAccount:$(ref.my-app-sa.email)"
       }
     },
     {
       "name": "my-app-sa-roles/errorreporting.writer",
       "type": "gcp-types/cloudresourcemanager-v1:virtual.projects.iamMemberBinding",
       "properties": {
-        "member": "serviceAccount:$(ref.my-app-sa.email)",
         "resource": "my-project",
-        "role": "roles/errorreporting.writer"
+        "role": "roles/errorreporting.writer",
+        "member": "serviceAccount:$(ref.my-app-sa.email)"
       }
     },
     {
       "name": "my-app-sa-roles/logging.logWriter",
       "type": "gcp-types/cloudresourcemanager-v1:virtual.projects.iamMemberBinding",
       "properties": {
-        "member": "serviceAccount:$(ref.my-app-sa.email)",
         "resource": "my-project",
-        "role": "roles/logging.logWriter"
+        "role": "roles/logging.logWriter",
+        "member": "serviceAccount:$(ref.my-app-sa.email)"
       }
     },
     {
       "name": "my-app-sa-roles/monitoring.metricWriter",
       "type": "gcp-types/cloudresourcemanager-v1:virtual.projects.iamMemberBinding",
       "properties": {
-        "member": "serviceAccount:$(ref.my-app-sa.email)",
         "resource": "my-project",
-        "role": "roles/monitoring.metricWriter"
+        "role": "roles/monitoring.metricWriter",
+        "member": "serviceAccount:$(ref.my-app-sa.email)"
       }
     },
     {
       "name": "my-app-sa-roles/stackdriver.resourceMetadata.writer",
       "type": "gcp-types/cloudresourcemanager-v1:virtual.projects.iamMemberBinding",
       "properties": {
-        "member": "serviceAccount:$(ref.my-app-sa.email)",
         "resource": "my-project",
-        "role": "roles/stackdriver.resourceMetadata.writer"
+        "role": "roles/stackdriver.resourceMetadata.writer",
+        "member": "serviceAccount:$(ref.my-app-sa.email)"
       }
     },
     {
       "name": "my-app-sa-roles/storage.objectViewer",
       "type": "gcp-types/cloudresourcemanager-v1:virtual.projects.iamMemberBinding",
       "properties": {
-        "member": "serviceAccount:$(ref.my-app-sa.email)",
         "resource": "my-project",
-        "role": "roles/storage.objectViewer"
+        "role": "roles/storage.objectViewer",
+        "member": "serviceAccount:$(ref.my-app-sa.email)"
       }
     },
     {
       "name": "my-app-sa-roles/dogWalker.dog",
       "type": "gcp-types/cloudresourcemanager-v1:virtual.projects.iamMemberBinding",
       "properties": {
-        "member": "serviceAccount:$(ref.my-app-sa.email)",
         "resource": "my-project",
-        "role": "roles/dogWalker.dog"
+        "role": "roles/dogWalker.dog",
+        "member": "serviceAccount:$(ref.my-app-sa.email)"
       }
     }
   ]

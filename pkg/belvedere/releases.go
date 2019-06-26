@@ -160,7 +160,7 @@ func releaseResources(project string, region string, app string, release string,
 		{
 			Name: instanceTemplate,
 			Type: "compute.beta.instanceTemplate",
-			Properties: compute.InstanceTemplate{
+			Properties: &compute.InstanceTemplate{
 				Properties: &compute.InstanceProperties{
 					Disks: []*compute.AttachedDisk{
 						{
@@ -225,7 +225,7 @@ func releaseResources(project string, region string, app string, release string,
 		{
 			Name: instanceGroupManager,
 			Type: "compute.beta.regionInstanceGroupManager",
-			Properties: compute.InstanceGroupManager{
+			Properties: &compute.InstanceGroupManager{
 				BaseInstanceName: fmt.Sprintf("%s-%s", app, release),
 				InstanceTemplate: deployments.SelfLink(instanceTemplate),
 				Region:           region,
@@ -244,7 +244,7 @@ func releaseResources(project string, region string, app string, release string,
 		resources = append(resources, deployments.Resource{
 			Name: autoscaler,
 			Type: "compute.beta.regionAutoscaler",
-			Properties: compute.Autoscaler{
+			Properties: &compute.Autoscaler{
 				Name:              fmt.Sprintf("%s-%s", app, release),
 				AutoscalingPolicy: config.AutoscalingPolicy,
 				Region:            region,

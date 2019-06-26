@@ -53,7 +53,7 @@ func setupResources(dnsZone string) []deployments.Resource {
 		{
 			Name: "belvedere-managed-zone",
 			Type: "dns.v1.managedZone",
-			Properties: dns.ManagedZone{
+			Properties: &dns.ManagedZone{
 				Description: fmt.Sprintf("Belvedere managed zone for %s", dnsZone),
 				DnsName:     dnsZone,
 				Name:        "belvedere",
@@ -63,7 +63,7 @@ func setupResources(dnsZone string) []deployments.Resource {
 		{
 			Name: "belvedere-deny-ssh",
 			Type: "compute.beta.firewall",
-			Properties: compute.Firewall{
+			Properties: &compute.Firewall{
 				Denied: []*compute.FirewallDenied{
 					{
 						IPProtocol: "TCP",
@@ -81,7 +81,7 @@ func setupResources(dnsZone string) []deployments.Resource {
 		{
 			Name: "belvedere-allow-iap-tunneling",
 			Type: "compute.beta.firewall",
-			Properties: compute.Firewall{
+			Properties: &compute.Firewall{
 				Allowed: []*compute.FirewallAllowed{
 					{
 						IPProtocol: "TCP",
