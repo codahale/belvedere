@@ -21,6 +21,6 @@ type CloudConfig struct {
 }
 
 func (c *CloudConfig) String() string {
-	y, _ := yaml.Marshal(c)
+	y, _ := yaml.Marshal(c) // we explicitly use gopkg.in/yaml.v2 b/c it preserves ordering
 	return fmt.Sprintf("#cloud-config\n\n%s", string(y))
 }

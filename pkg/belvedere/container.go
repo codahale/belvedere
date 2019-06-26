@@ -7,11 +7,11 @@ import (
 )
 
 type Container struct {
-	Image         string            `yaml:"image"`
-	Command       string            `yaml:"command"`
-	Args          []string          `yaml:"args"`
-	Env           map[string]string `yaml:"env"`
-	DockerOptions []string          `yaml:"dockerOptions"`
+	Image         string            `json:"image"`
+	Command       string            `json:"command"`
+	Args          []string          `json:"args"`
+	Env           map[string]string `json:"env"`
+	DockerOptions []string          `json:"dockerOptions"`
 }
 
 func (c *Container) DockerArgs(app, release, sha256 string, labels map[string]string) []string {

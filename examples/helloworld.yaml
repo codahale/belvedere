@@ -1,14 +1,14 @@
-iam_roles:
+iamRoles:
   - roles/cloudkms.cryptoKeyDecrypter
 machineType: n1-standard-1
 minInstances: 1
 maxInstances: 10
 initialInstances: 2
 utilizationTarget: 0.8
-identityAwareProxy:
-  enabled: false
-  oauth2ClientID: ""
-  oauth2ClientSecret: ""
+#identityAwareProxy:
+#  enabled: false
+#  oauth2ClientID: ""
+#  oauth2ClientSecret: ""
 container:
   image: gcr.io/cloudslap/helloworld
   command: ""

@@ -204,11 +204,7 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 				ConnectionDraining: &compute.ConnectionDraining{
 					DrainingTimeoutSec: 60,
 				},
-				Iap: &compute.BackendServiceIAP{
-					Enabled:            config.IAP.Enabled,
-					Oauth2ClientId:     config.IAP.OAuth2ClientID,
-					Oauth2ClientSecret: config.IAP.OAuth2ClientSecret,
-				},
+				Iap: config.IAP,
 				LogConfig: &compute.BackendServiceLogConfig{
 					Enable: true,
 				},

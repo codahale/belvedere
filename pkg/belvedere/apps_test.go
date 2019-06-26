@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/dns/v1"
 )
 
@@ -19,10 +20,10 @@ func TestAppResources(t *testing.T) {
 		IAMRoles: []string{
 			"roles/dogWalker.dog",
 		},
-		IAP: IAPConfig{
+		IAP: &compute.BackendServiceIAP{
 			Enabled:            true,
-			OAuth2ClientID:     "hello",
-			OAuth2ClientSecret: "world",
+			Oauth2ClientId:     "hello",
+			Oauth2ClientSecret: "world",
 		},
 	}
 	resources := appResources("my-project", "my-app", zone, config)

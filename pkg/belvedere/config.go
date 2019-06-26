@@ -6,26 +6,21 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/ghodss/yaml"
 	"go.opencensus.io/trace"
-	"gopkg.in/yaml.v2"
+	compute "google.golang.org/api/compute/v0.beta"
 )
 
 type Config struct {
-	IAMRoles          []string             `yaml:"iam_roles,omitempty"`
-	InitialInstances  int                  `yaml:"initialInstances"`
-	MachineType       string               `yaml:"machineType"`
-	MaxInstances      int                  `yaml:"maxInstances"`
-	MinInstances      int                  `yaml:"minInstances"`
-	UtilizationTarget float64              `yaml:"utilizationTarget"`
-	Container         Container            `yaml:"container"`
-	Sidecars          map[string]Container `yaml:"sidecars"`
-	IAP               IAPConfig            `yaml:"identityAwareProxy"`
-}
-
-type IAPConfig struct {
-	Enabled            bool   `yaml:"enabled"`
-	OAuth2ClientID     string `yaml:"oauth2ClientID"`
-	OAuth2ClientSecret string `yaml:"oauth2ClientSecret"`
+	IAMRoles          []string                   `json:"iamRoles,omitempty"`
+	InitialInstances  int                        `json:"initialInstances"`
+	MachineType       string                     `json:"machineType"`
+	MaxInstances      int                        `json:"maxInstances"`
+	MinInstances      int                        `json:"minInstances"`
+	UtilizationTarget float64                    `json:"utilizationTarget"`
+	Container         Container                  `json:"container"`
+	Sidecars          map[string]Container       `json:"sidecars"`
+	IAP               *compute.BackendServiceIAP `json:"identityAwareProxy"`
 }
 
 // LoadConfig loads the YAML configuration at the given path. If path is `-`, STDIN is used.
