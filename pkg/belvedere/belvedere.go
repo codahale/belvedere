@@ -152,9 +152,10 @@ func MachineTypes(ctx context.Context, project, region string) ([]MachineType, e
 
 	// Aggregate across zones.
 	mtMap := map[string]*compute.MachineType{}
-	for _, items := range list.Items {
-		for _, mt := range items.MachineTypes {
-			if strings.HasSuffix(mt.Zone, region) {
+	region = "zones/" + region
+	for zone, items := range list.Items {
+		if strings.HasPrefix(zone, region) {
+			for _, mt := range items.MachineTypes {
 				mtMap[mt.Name] = mt
 			}
 		}

@@ -29,7 +29,7 @@ Usage:
   belvedere setup <dns zone> [options]
   belvedere teardown [--async] [options]
   belvedere dns-servers [options]
-  belvedere machine-types [options]
+  belvedere machine-types [<region>] [options]
   belvedere instances [<app>] [<release>] [options]
   belvedere ssh <instance> [options]
   belvedere logs <app> [<release>] [<instance>] [--filter=<s>...] [--freshness=<duration>] [options]
@@ -122,7 +122,8 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		}
 		return nil
 	case isCmd(opts, "machine-types"):
-		machineTypes, err := belvedere.MachineTypes(ctx, project, "")
+		region, _ := opts.String("<region>")
+		machineTypes, err := belvedere.MachineTypes(ctx, project, region)
 		if err != nil {
 			return err
 		}
