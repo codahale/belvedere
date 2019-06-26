@@ -19,6 +19,11 @@ func TestAppResources(t *testing.T) {
 		IAMRoles: []string{
 			"roles/dogWalker.dog",
 		},
+		IAP: IAPConfig{
+			Enabled:            true,
+			OAuth2ClientID:     "hello",
+			OAuth2ClientSecret: "world",
+		},
 	}
 	resources := appResources("my-project", "my-app", zone, config)
 
@@ -36,7 +41,7 @@ func TestAppResources(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !bytes.Equal(actual, expected) {
-		t.Error(cmp.Diff(string(actual), string(expected)))
+	if !bytes.Equal(expected, actual) {
+		t.Error(cmp.Diff(string(expected), string(actual)))
 	}
 }

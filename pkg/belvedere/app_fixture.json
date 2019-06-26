@@ -42,6 +42,11 @@
         "healthChecks": [
           "$(ref.my-app-hc.selfLink)"
         ],
+        "iap": {
+          "enabled": true,
+          "oauth2ClientId": "hello",
+          "oauth2ClientSecret": "world"
+        },
         "logConfig": {
           "enable": true
         },
