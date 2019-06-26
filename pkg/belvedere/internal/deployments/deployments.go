@@ -179,6 +179,7 @@ func Delete(ctx context.Context, project, name string, dryRun, async bool) error
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("name", name),
 		trace.BoolAttribute("dry_run", dryRun),
+		trace.BoolAttribute("async", async),
 	)
 	defer span.End()
 

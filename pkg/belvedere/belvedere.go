@@ -140,6 +140,10 @@ func MachineTypes(ctx context.Context, project, region string) ([]MachineType, e
 	)
 	defer span.End()
 
+	if region != "" {
+		span.AddAttributes(trace.StringAttribute("region", region))
+	}
+
 	gce, err := gcp.Compute(ctx)
 	if err != nil {
 		return nil, err

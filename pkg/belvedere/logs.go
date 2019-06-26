@@ -25,10 +25,12 @@ func Logs(ctx context.Context, project, app, release, instance string, minTimest
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", app),
+		trace.StringAttribute("min_timestamp", minTimestamp.Format(time.RFC3339)),
 	)
 	defer span.End()
 
-	if instance != "" {
+	for i, f := range filters {
+		span.AddAttributes(trace.StringAttribute(fmt.Sprintf("filter.%d", i), f))
 	}
 
 	logs, err := gcp.Logging(ctx)
