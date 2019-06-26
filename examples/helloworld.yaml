@@ -1,20 +1,22 @@
 iamRoles:
   - roles/cloudkms.cryptoKeyDecrypter
 machineType: n1-standard-1
-minInstances: 1
-maxInstances: 10
-initialInstances: 2
-utilizationTarget: 0.8
+numReplicas: 2
+#autoscalingPolicy:
+#  minNumReplicas: 1
+#  maxNumReplicas: 10
+#  loadBalancingUtilization:
+#    utilizationTarget: 0.8
 #identityAwareProxy:
 #  enabled: false
 #  oauth2ClientID: ""
 #  oauth2ClientSecret: ""
 container:
   image: gcr.io/cloudslap/helloworld
-  command: ""
-  args: []
-  env: {}
-  dockerOptions: []
+#  command: ""
+#  args: []
+#  env: {}
+#  dockerOptions: []
 sidecars:
   nginx-frontend:
     image: gcr.io/cloudslap/nginx-frontend

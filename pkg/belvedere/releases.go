@@ -235,26 +235,24 @@ func releaseResources(project string, region string, app string, release string,
 						Port: 8443,
 					},
 				},
-				TargetSize: int64(config.InitialInstances),
-			},
-		},
-		{
-			Name: autoscaler,
-			Type: "compute.beta.regionAutoscaler",
-			Properties: compute.Autoscaler{
-				Name: fmt.Sprintf("%s-%s", app, release),
-				AutoscalingPolicy: &compute.AutoscalingPolicy{
-					LoadBalancingUtilization: &compute.AutoscalingPolicyLoadBalancingUtilization{
-						UtilizationTarget: config.UtilizationTarget,
-					},
-					MaxNumReplicas: int64(config.MaxInstances),
-					MinNumReplicas: int64(config.MinInstances),
-				},
-				Region: region,
-				Target: deployments.SelfLink(instanceGroupManager),
+				TargetSize: int64(config.NumReplicas),
 			},
 		},
 	}
+
+	if config.AutoscalingPolicy != nil {
+		resources = append(resources, deployments.Resource{
+			Name: autoscaler,
+			Type: "compute.beta.regionAutoscaler",
+			Properties: compute.Autoscaler{
+				Name:              fmt.Sprintf("%s-%s", app, release),
+				AutoscalingPolicy: config.AutoscalingPolicy,
+				Region:            region,
+				Target:            deployments.SelfLink(instanceGroupManager),
+			},
+		})
+	}
+
 	return resources
 }
 

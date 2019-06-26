@@ -13,14 +13,12 @@ import (
 
 type Config struct {
 	IAMRoles          []string                   `json:"iamRoles,omitempty"`
-	InitialInstances  int                        `json:"initialInstances"`
+	NumReplicas       int                        `json:"numReplicas"`
 	MachineType       string                     `json:"machineType"`
-	MaxInstances      int                        `json:"maxInstances"`
-	MinInstances      int                        `json:"minInstances"`
-	UtilizationTarget float64                    `json:"utilizationTarget"`
 	Container         Container                  `json:"container"`
 	Sidecars          map[string]Container       `json:"sidecars"`
 	IAP               *compute.BackendServiceIAP `json:"identityAwareProxy"`
+	AutoscalingPolicy *compute.AutoscalingPolicy `json:"autoscalingPolicy"`
 }
 
 // LoadConfig loads the YAML configuration at the given path. If path is `-`, STDIN is used.

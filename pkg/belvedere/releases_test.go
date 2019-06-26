@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	compute "google.golang.org/api/compute/v0.beta"
 )
 
 func TestReleaseResources(t *testing.T) {
@@ -33,11 +34,15 @@ func TestReleaseResources(t *testing.T) {
 				DockerOptions: []string{"--slow"},
 			},
 		},
-		MinInstances:      10,
-		MaxInstances:      100,
-		InitialInstances:  20,
-		UtilizationTarget: 0.6,
-		MachineType:       "n1-standard-1",
+		NumReplicas: 20,
+		MachineType: "n1-standard-1",
+		AutoscalingPolicy: &compute.AutoscalingPolicy{
+			MinNumReplicas: 10,
+			MaxNumReplicas: 100,
+			LoadBalancingUtilization: &compute.AutoscalingPolicyLoadBalancingUtilization{
+				UtilizationTarget: 0.6,
+			},
+		},
 	}
 	resources := releaseResources("my-project", "us-central1", "my-app", "v43", "abcdef0123456789", config)
 
