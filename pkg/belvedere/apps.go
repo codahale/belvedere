@@ -121,7 +121,7 @@ func findManagedZone(ctx context.Context, project string) (*dns.ManagedZone, err
 		return nil, err
 	}
 
-	return d.ManagedZones.Get(project, "belvedere").Do()
+	return d.ManagedZones.Get(project, "belvedere").Context(ctx).Do()
 }
 
 func findRegion(ctx context.Context, project, app string) (string, error) {
@@ -137,7 +137,8 @@ func findRegion(ctx context.Context, project, app string) (string, error) {
 		return "", err
 	}
 
-	deployment, err := dm.Deployments.Get(project, fmt.Sprintf("belvedere-%s", app)).Do()
+	deployment, err := dm.Deployments.Get(project, fmt.Sprintf("belvedere-%s", app)).
+		Context(ctx).Do()
 	if err != nil {
 		return "", err
 	}

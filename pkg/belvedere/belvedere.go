@@ -33,7 +33,7 @@ func DNSServers(ctx context.Context, project string) ([]string, error) {
 		return nil, err
 	}
 
-	mz, err := d.ManagedZones.Get(project, "belvedere").Do()
+	mz, err := d.ManagedZones.Get(project, "belvedere").Context(ctx).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func ListInstances(ctx context.Context, project, app, release string) ([]string,
 		return nil, err
 	}
 
-	zones, err := gce.Zones.List(project).Do()
+	zones, err := gce.Zones.List(project).Context(ctx).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func ListInstances(ctx context.Context, project, app, release string) ([]string,
 		wg.Add(1)
 		go func(zoneName string) {
 			defer wg.Done()
-			zi, err := gce.Instances.List(project, zoneName).Do()
+			zi, err := gce.Instances.List(project, zoneName).Context(ctx).Do()
 			if err != nil {
 				return
 			}

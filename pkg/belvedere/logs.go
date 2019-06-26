@@ -64,7 +64,7 @@ func Logs(ctx context.Context, project, app, release, instance string, minTimest
 		OrderBy:       "timestamp desc",
 		ResourceNames: []string{fmt.Sprintf("projects/%s", project)},
 		PageSize:      1000,
-	}).Do()
+	}).Context(ctx).Do()
 	if err != nil {
 		return nil, err
 	}

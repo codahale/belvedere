@@ -64,7 +64,7 @@ func EnableAPIs(ctx context.Context, project string, dryRun bool) error {
 			&serviceusage.BatchEnableServicesRequest{
 				ServiceIds: serviceIDs,
 			},
-		).Do()
+		).Context(ctx).Do()
 		if err != nil {
 			return err
 		}

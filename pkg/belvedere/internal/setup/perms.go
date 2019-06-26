@@ -26,13 +26,14 @@ func SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 	}
 
 	// Resolve the project's numeric ID.
-	p, err := crm.Projects.Get(project).Fields("projectNumber").Do()
+	p, err := crm.Projects.Get(project).Fields("projectNumber").Context(ctx).Do()
 	if err != nil {
 		return err
 	}
 
 	// Get the project's IAM policy.
-	policy, err := crm.Projects.GetIamPolicy(project, &cloudresourcemanager.GetIamPolicyRequest{}).Do()
+	policy, err := crm.Projects.GetIamPolicy(project, &cloudresourcemanager.GetIamPolicyRequest{}).
+		Context(ctx).Do()
 	if err != nil {
 		return err
 	}
@@ -75,6 +76,6 @@ func SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 
 	_, err = crm.Projects.SetIamPolicy(project, &cloudresourcemanager.SetIamPolicyRequest{
 		Policy: policy,
-	}).Do()
+	}).Context(ctx).Do()
 	return err
 }

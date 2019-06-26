@@ -119,7 +119,7 @@ func Create(ctx context.Context, project, name string, resources []Resource, lab
 				Content: string(j),
 			},
 		},
-	}).Do()
+	}).Context(ctx).Do()
 	if err != nil {
 		return err
 	}
@@ -164,7 +164,7 @@ func Update(ctx context.Context, project, name string, resources []Resource, dry
 				Content: string(j),
 			},
 		},
-	}).Do()
+	}).Context(ctx).Do()
 	if err != nil {
 		return err
 	}
@@ -192,7 +192,7 @@ func Delete(ctx context.Context, project, name string, dryRun, async bool) error
 		return nil
 	}
 
-	op, err := dm.Deployments.Delete(project, name).Do()
+	op, err := dm.Deployments.Delete(project, name).Context(ctx).Do()
 	if err != nil {
 		return err
 	}
@@ -217,7 +217,7 @@ func List(ctx context.Context, project string) ([]map[string]string, error) {
 		return nil, err
 	}
 
-	list, err := dm.Deployments.List(project).Do()
+	list, err := dm.Deployments.List(project).Context(ctx).Do()
 	if err != nil {
 		return nil, err
 	}
