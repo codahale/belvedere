@@ -188,3 +188,7 @@ belvedere logs my-app v43 --freshness=1h --filter="/login/"
 - [ ] Block external access to `/healthz`
 - [ ] Canary deploys
 - [ ] Run containers as a non-root user
+- [ ] CDN policies
+- [ ] IAP support
+- [ ] Session affinity
+- [ ] GPU accelerator support

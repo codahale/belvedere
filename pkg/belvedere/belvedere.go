@@ -6,6 +6,9 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"sort"
+	"strconv"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -13,6 +16,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
+	compute "google.golang.org/api/compute/v0.beta"
 )
 
 func WithInterval(ctx context.Context, interval time.Duration) context.Context {
@@ -110,6 +114,81 @@ func SSH(ctx context.Context, project, instance string) error {
 		[]string{gcloud, "beta", "compute", "ssh", instance, "--tunnel-through-iap"},
 		os.Environ(),
 	)
+}
+
+type MachineType struct {
+	Name   string
+	CPU    int
+	Memory int
+}
+
+func (mt MachineType) lexical() string {
+	parts := strings.SplitN(mt.Name, "-", 3)
+	var n int
+	if len(parts) > 2 {
+		n, _ = strconv.Atoi(parts[2])
+	}
+	return fmt.Sprintf("%10s%10s%010d", parts[0], parts[1], n)
+}
+
+// MachineTypes returns a list of GCE machine types which are available for the given project or
+// region, if one is provided.
+func MachineTypes(ctx context.Context, project, region string) ([]MachineType, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.MachineTypes")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+	)
+	defer span.End()
+
+	gce, err := gcp.Compute(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	list, err := gce.MachineTypes.AggregatedList(project).Context(ctx).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	// Aggregate across zones.
+	mtMap := map[string]*compute.MachineType{}
+	for _, items := range list.Items {
+		for _, mt := range items.MachineTypes {
+			if strings.HasSuffix(mt.Zone, region) {
+				mtMap[mt.Name] = mt
+			}
+		}
+	}
+
+	// Convert to our type in a sortable structure.
+	var machineTypes machineTypeSlice
+	for _, v := range mtMap {
+		machineTypes = append(machineTypes, MachineType{
+			Name:   v.Name,
+			CPU:    int(v.GuestCpus),
+			Memory: int(v.MemoryMb),
+		})
+	}
+
+	// Sort the machine types and return.
+	sort.Stable(machineTypes)
+	return machineTypes, nil
+}
+
+type machineTypeSlice []MachineType
+
+func (m machineTypeSlice) Len() int {
+	return len(m)
+}
+
+func (m machineTypeSlice) Less(i, j int) bool {
+	return m[i].lexical() < m[j].lexical()
+}
+
+func (m machineTypeSlice) Swap(i, j int) {
+	tmp := m[i]
+	m[i] = m[j]
+	m[j] = tmp
 }
 
 var (

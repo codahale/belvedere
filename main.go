@@ -29,6 +29,7 @@ Usage:
   belvedere setup <dns zone> [options]
   belvedere teardown [--async] [options]
   belvedere dns-servers [options]
+  belvedere machine-types [options]
   belvedere instances [<app>] [<release>] [options]
   belvedere ssh <instance> [options]
   belvedere logs <app> [<release>] [<instance>] [--filter=<s>...] [--freshness=<duration>] [options]
@@ -120,6 +121,18 @@ func run(ctx context.Context, opts docopt.Opts) error {
 			fmt.Println(s)
 		}
 		return nil
+	case isCmd(opts, "machine-types"):
+		machineTypes, err := belvedere.MachineTypes(ctx, project, "")
+		if err != nil {
+			return err
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		_, _ = fmt.Fprintln(w, "Name\tvCPUs\tMemory (MiB)")
+		for _, mt := range machineTypes {
+			_, _ = fmt.Fprintf(w, "%s\t%4d\t%10d\n", mt.Name, mt.CPU, mt.Memory)
+		}
+		return w.Flush()
 	case isCmd(opts, "instances"):
 		app, _ := opts.String("<app>")
 		release, _ := opts.String("<release>")
