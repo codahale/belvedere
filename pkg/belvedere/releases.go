@@ -15,6 +15,7 @@ import (
 	"gopkg.in/alessio/shellescape.v1"
 )
 
+// A Release describes a specific release of an app.
 type Release struct {
 	Project string
 	Region  string
@@ -23,6 +24,7 @@ type Release struct {
 	Hash    string
 }
 
+// ListReleases returns a list of releases in the given project for the given app, if any is passed.
 func ListReleases(ctx context.Context, project, app string) ([]Release, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.ListReleases")
 	span.AddAttributes(
@@ -54,13 +56,14 @@ func ListReleases(ctx context.Context, project, app string) ([]Release, error) {
 	return releases, nil
 }
 
+// CreateRelease creates a deployment containing release resources for the given app.
 func CreateRelease(ctx context.Context, project, app, release string, config *Config, imageSHA256 string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", app),
 		trace.StringAttribute("release", release),
-		trace.StringAttribute("image_url", imageSHA256),
+		trace.StringAttribute("image_sha256", imageSHA256),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
@@ -86,6 +89,8 @@ func CreateRelease(ctx context.Context, project, app, release string, config *Co
 	}, dryRun)
 }
 
+// EnableRelease adds the release's instance group to the app's backend service and waits for the
+// instances to go fully into service.
 func EnableRelease(ctx context.Context, project, app, release string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.EnableRelease")
 	span.AddAttributes(
@@ -110,6 +115,7 @@ func EnableRelease(ctx context.Context, project, app, release string, dryRun boo
 	return waiter.Poll(ctx, check.Health(ctx, project, region, backendService, instanceGroup))
 }
 
+// DisableRelease removes the release's instance group from the app's backend service.
 func DisableRelease(ctx context.Context, project, app, release string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DisableRelease")
 	span.AddAttributes(
@@ -130,6 +136,8 @@ func DisableRelease(ctx context.Context, project, app, release string, dryRun bo
 	return backends.Remove(ctx, project, region, backendService, instanceGroup, dryRun)
 }
 
+// DeleteRelease deletes the release's deployment and waits for all underlying resources to be
+// deleted.
 func DeleteRelease(ctx context.Context, project, app, release string, dryRun, async bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DeleteRelease")
 	span.AddAttributes(
