@@ -263,7 +263,7 @@ func metaData(key, value string) *compute.MetadataItems {
 
 func cloudConfig(app, release string, config *Config, imageSHA256 string) string {
 	cc := cloudinit.CloudConfig{
-		Files: []cloudinit.File{
+		WriteFiles: []cloudinit.File{
 			{
 				Content: systemdService(app,
 					config.Container.DockerArgs(app, release, imageSHA256,
@@ -277,7 +277,7 @@ func cloudConfig(app, release string, config *Config, imageSHA256 string) string
 				Permissions: "0644",
 			},
 		},
-		Commands: []string{
+		RunCommands: []string{
 			"iptables -w -A INPUT -p tcp --dport 8443 -j ACCEPT",
 			"systemctl daemon-reload",
 			fmt.Sprintf("systemctl start docker-%s.service", app),
@@ -285,7 +285,7 @@ func cloudConfig(app, release string, config *Config, imageSHA256 string) string
 	}
 
 	for name, sidecar := range config.Sidecars {
-		cc.Files = append(cc.Files,
+		cc.WriteFiles = append(cc.WriteFiles,
 			cloudinit.File{
 				Content: systemdService(name,
 					sidecar.DockerArgs(name, "", "",
@@ -299,7 +299,7 @@ func cloudConfig(app, release string, config *Config, imageSHA256 string) string
 				Path:        fmt.Sprintf("/etc/systemd/system/docker-%s.service", name),
 				Permissions: "0644",
 			})
-		cc.Commands = append(cc.Commands, fmt.Sprintf("systemctl start docker-%s.service", name))
+		cc.RunCommands = append(cc.RunCommands, fmt.Sprintf("systemctl start docker-%s.service", name))
 	}
 
 	return cc.String()

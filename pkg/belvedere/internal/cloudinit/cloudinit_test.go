@@ -10,7 +10,7 @@ import (
 
 func TestCloudConfig(t *testing.T) {
 	config := CloudConfig{
-		Files: []File{
+		WriteFiles: []File{
 			{
 				Path:        "/etc/password/",
 				Content:     "one\ntwo\nthree\n",
@@ -22,7 +22,7 @@ func TestCloudConfig(t *testing.T) {
 				Permissions: "0888",
 			},
 		},
-		Commands: []string{
+		RunCommands: []string{
 			"say moo moo moo moo",
 			"reboot",
 		},

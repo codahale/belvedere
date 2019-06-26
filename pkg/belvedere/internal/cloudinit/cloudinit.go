@@ -16,11 +16,11 @@ type File struct {
 // A cloud-init YAML manifest.
 // https://cloudinit.readthedocs.io/en/latest/topics/examples.html
 type CloudConfig struct {
-	Files    []File   `yaml:"write_files,omitempty"`
-	Commands []string `yaml:"runcmd,omitempty"`
+	WriteFiles  []File   `yaml:"write_files,omitempty"`
+	RunCommands []string `yaml:"runcmd,omitempty"`
 }
 
 func (c *CloudConfig) String() string {
 	y, _ := yaml.Marshal(c)
-	return fmt.Sprintf("#cloud-configs\n%s", string(y))
+	return fmt.Sprintf("#cloud-config\n\n%s", string(y))
 }

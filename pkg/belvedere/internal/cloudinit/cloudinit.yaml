@@ -1,4 +1,5 @@
-#cloud-configs
+#cloud-config
+
 write_files:
 - path: /etc/password/
   permissions: "0666"
