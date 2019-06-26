@@ -36,6 +36,9 @@
       "name": "my-app-bes",
       "type": "compute.beta.backendService",
       "properties": {
+        "connectionDraining": {
+          "drainingTimeoutSec": 60
+        },
         "healthChecks": [
           "$(ref.my-app-hc.selfLink)"
         ],
