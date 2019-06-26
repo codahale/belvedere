@@ -19,6 +19,23 @@ type Config struct {
 	Sidecars          map[string]Container       `json:"sidecars"`
 	IAP               *compute.BackendServiceIAP `json:"identityAwareProxy"`
 	AutoscalingPolicy *compute.AutoscalingPolicy `json:"autoscalingPolicy"`
+	CDN               *CDNConfig                 `json:"contentDeliveryNetwork"`
+}
+
+func (c *Config) cdnEnabled() bool {
+	return c.CDN != nil && c.CDN.Enabled
+}
+
+func (c *Config) cdnPolicy() *compute.BackendServiceCdnPolicy {
+	if c.CDN == nil {
+		return nil
+	}
+	return &c.CDN.BackendServiceCdnPolicy
+}
+
+type CDNConfig struct {
+	Enabled bool `json:"enabled"`
+	compute.BackendServiceCdnPolicy
 }
 
 // LoadConfig loads the YAML configuration at the given path. If path is `-`, STDIN is used.

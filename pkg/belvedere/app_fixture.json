@@ -36,9 +36,13 @@
       "name": "my-app-bes",
       "type": "compute.beta.backendService",
       "properties": {
+        "cdnPolicy": {
+          "signedUrlCacheMaxAgeSec": "200"
+        },
         "connectionDraining": {
           "drainingTimeoutSec": 60
         },
+        "enableCDN": true,
         "healthChecks": [
           "$(ref.my-app-hc.selfLink)"
         ],
