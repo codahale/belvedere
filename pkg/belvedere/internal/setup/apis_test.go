@@ -24,7 +24,7 @@ func TestEnableAPIs(t *testing.T) {
 			Name: "op1",
 		})
 
-	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
+	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&prettyPrint=false").
 		Reply(200).
 		JSON(serviceusage.Operation{
 			Done: true,

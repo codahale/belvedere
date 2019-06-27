@@ -24,8 +24,7 @@ func SU(ctx context.Context, operation string) waiter.Condition {
 		}
 
 		// Fetch the operation's status and any errors.
-		op, err := su.Operations.Get(operation).Context(ctx).
-			Fields("status", "error").Do()
+		op, err := su.Operations.Get(operation).Context(ctx).Do()
 		if err != nil {
 			return false, xerrors.Errorf("error getting operation: %w", err)
 		}

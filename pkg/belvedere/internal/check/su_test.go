@@ -14,7 +14,7 @@ func TestSURunning(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
+	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&prettyPrint=false").
 		Reply(200).
 		JSON(serviceusage.Operation{
 			Done: false,
@@ -35,7 +35,7 @@ func TestSUDone(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
+	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&prettyPrint=false").
 		Reply(200).
 		JSON(serviceusage.Operation{
 			Done: true,
@@ -56,7 +56,7 @@ func TestSUError(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
+	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&prettyPrint=false").
 		Reply(200).
 		JSON(serviceusage.Operation{
 			Done: true,
