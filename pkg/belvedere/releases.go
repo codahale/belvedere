@@ -156,6 +156,10 @@ func releaseResources(project string, region string, app string, release string,
 	instanceTemplate := fmt.Sprintf("%s-%s-it", app, release)
 	instanceGroupManager := fmt.Sprintf("%s-%s-ig", app, release)
 	autoscaler := fmt.Sprintf("%s-%s-as", app, release)
+	network := "global/networks/default"
+	if config.Network != "" {
+		network = config.Network
+	}
 	resources := []deployments.Resource{
 		{
 			Name: instanceTemplate,
@@ -191,7 +195,8 @@ func releaseResources(project string, region string, app string, release string,
 					},
 					NetworkInterfaces: []*compute.NetworkInterface{
 						{
-							Network: "global/networks/default",
+							Network:    network,
+							Subnetwork: config.Subnetwork,
 							AccessConfigs: []*compute.AccessConfig{
 								{
 									Name: "External NAT",

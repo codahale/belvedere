@@ -63,3 +63,8 @@ sidecars:
 # Optionally, a list of IAM roles to be bound to your app's service account.
 iamRoles:
   - roles/cloudkms.cryptoKeyDecrypter
+
+# Optionally, the URL of a specific VPC network and subnetwork. If not specified, the app instances
+# will be automatically placed in the default network.
+#network: projects/project/global/networks/network
+#subnetwork: regions/region/subnetworks/subnetwork

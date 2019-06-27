@@ -20,6 +20,8 @@ type Config struct {
 	IAP               *compute.BackendServiceIAP       `json:"identityAwareProxy"`
 	AutoscalingPolicy *compute.AutoscalingPolicy       `json:"autoscalingPolicy"`
 	CDNPolicy         *compute.BackendServiceCdnPolicy `json:"cdnPolicy"`
+	Network           string                           `json:"network"`
+	Subnetwork        string                           `json:"subnetwork"`
 }
 
 // LoadConfig loads the YAML configuration at the given path. If path is `-`, STDIN is used.
