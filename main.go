@@ -1,5 +1,7 @@
 package main
 
+//go:generate bash ./version.sh
+
 import (
 	"context"
 	"encoding/json"
@@ -19,7 +21,7 @@ import (
 )
 
 var (
-	buildVersion = "unknown"
+	version = "unknown"
 )
 
 func main() {
@@ -57,7 +59,7 @@ Options:
 `
 
 	// Parse arguments and options.
-	opts, err := docopt.ParseArgs(usage, nil, buildVersion)
+	opts, err := docopt.ParseArgs(usage, nil, version)
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(-1)
