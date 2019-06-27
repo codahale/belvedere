@@ -8,6 +8,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
+	"golang.org/x/xerrors"
 	"google.golang.org/api/serviceusage/v1"
 )
 
@@ -67,7 +68,7 @@ func EnableAPIs(ctx context.Context, project string, dryRun bool) error {
 			},
 		).Context(ctx).Do()
 		if err != nil {
-			return err
+			return xerrors.Errorf("error batch enabling: %w", err)
 		}
 
 		// Record which services we enabled.

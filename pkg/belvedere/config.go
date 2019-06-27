@@ -8,6 +8,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"go.opencensus.io/trace"
+	"golang.org/x/xerrors"
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
@@ -49,7 +50,7 @@ func LoadConfig(ctx context.Context, name string) (*Config, error) {
 	} else {
 		f, err := os.Open(name)
 		if err != nil {
-			return nil, err
+			return nil, xerrors.Errorf("error opening %s: %w", name, err)
 		}
 
 		r = f
@@ -59,14 +60,14 @@ func LoadConfig(ctx context.Context, name string) (*Config, error) {
 	// Read the entire input.
 	b, err := ioutil.ReadAll(r)
 	if err != nil {
-		return nil, err
+		return nil, xerrors.Errorf("error reading from %s: %w", name, err)
 	}
 
 	// Unmarshal from YAML using the YAML->JSON route. This allows us to embed GCP API structs in
 	// our Config struct.
 	var config Config
 	if err := yaml.Unmarshal(b, &config); err != nil {
-		return nil, err
+		return nil, xerrors.Errorf("error parsing %s: %w", err)
 	}
 	return &config, nil
 }

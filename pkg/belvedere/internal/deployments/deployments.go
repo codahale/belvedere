@@ -9,6 +9,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
+	"golang.org/x/xerrors"
 	"google.golang.org/api/deploymentmanager/v2"
 	"google.golang.org/api/dns/v1"
 )
@@ -121,7 +122,7 @@ func Create(ctx context.Context, project, name string, resources []Resource, lab
 	if dryRun {
 		b, err := json.MarshalIndent(d, "", "  ")
 		if err != nil {
-			return err
+			return xerrors.Errorf("error generating JSON: %w", err)
 		}
 		fmt.Println(string(b))
 		return nil
@@ -130,7 +131,7 @@ func Create(ctx context.Context, project, name string, resources []Resource, lab
 	// Marshal the config target as JSON, since that's parsable by Deployment Manager.
 	j, err := json.Marshal(d)
 	if err != nil {
-		return err
+		return xerrors.Errorf("error generating JSON: %w", err)
 	}
 
 	// Insert the new deployment.
@@ -144,7 +145,7 @@ func Create(ctx context.Context, project, name string, resources []Resource, lab
 		},
 	}).Context(ctx).Do()
 	if err != nil {
-		return err
+		return xerrors.Errorf("error inserting deployment: %w", err)
 	}
 
 	// Wait for the deployment to be created or fail.
@@ -174,7 +175,7 @@ func Update(ctx context.Context, project, name string, resources []Resource, dry
 	if dryRun {
 		b, err := json.MarshalIndent(d, "", "  ")
 		if err != nil {
-			return err
+			return xerrors.Errorf("error generating JSON: %w", err)
 		}
 		fmt.Println(string(b))
 		return nil
@@ -183,7 +184,7 @@ func Update(ctx context.Context, project, name string, resources []Resource, dry
 	// Marshal the config target as JSON, since that's parsable by Deployment Manager.
 	j, err := json.Marshal(d)
 	if err != nil {
-		return err
+		return xerrors.Errorf("error generating JSON: %w", err)
 	}
 
 	// Update the deployment.
@@ -195,7 +196,7 @@ func Update(ctx context.Context, project, name string, resources []Resource, dry
 		},
 	}).Context(ctx).Do()
 	if err != nil {
-		return err
+		return xerrors.Errorf("error patching deployment: %w", err)
 	}
 
 	// Wait for the deployment to be updated or fail.
@@ -227,7 +228,7 @@ func Delete(ctx context.Context, project, name string, dryRun, async bool) error
 	// Delete the deployment.
 	op, err := dm.Deployments.Delete(project, name).Context(ctx).Do()
 	if err != nil {
-		return err
+		return xerrors.Errorf("error deleting deployment: %w", err)
 	}
 
 	// Early exit if we don't care about results.
@@ -256,7 +257,7 @@ func List(ctx context.Context, project string) ([]map[string]string, error) {
 	// List all of the deployments.
 	list, err := dm.Deployments.List(project).Context(ctx).Do()
 	if err != nil {
-		return nil, err
+		return nil, xerrors.Errorf("error listing deployments: %w", err)
 	}
 
 	// Convert labels to maps and return.

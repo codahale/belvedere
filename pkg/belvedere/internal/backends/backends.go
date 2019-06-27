@@ -7,6 +7,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
+	"golang.org/x/xerrors"
 	"google.golang.org/api/compute/v0.beta"
 )
 
@@ -33,14 +34,14 @@ func Add(ctx context.Context, project, region, backendService, instanceGroup str
 	bes, err := gce.BackendServices.Get(project, backendService).
 		Context(ctx).Fields("backends", "fingerprint").Do()
 	if err != nil {
-		return err
+		return xerrors.Errorf("error getting backend service: %w", err)
 	}
 
 	// Get the instance group's full URL.
 	ig, err := gce.RegionInstanceGroups.Get(project, region, instanceGroup).
 		Context(ctx).Fields("selfLink").Do()
 	if err != nil {
-		return err
+		return xerrors.Errorf("error getting instance group: %w", err)
 	}
 
 	// Check to see if the instance group is already in service.
@@ -69,7 +70,7 @@ func Add(ctx context.Context, project, region, backendService, instanceGroup str
 		},
 	).Context(ctx).Do()
 	if err != nil {
-		return err
+		return xerrors.Errorf("error patching backend service: %w", err)
 	}
 
 	// Return patch operation.
@@ -99,14 +100,14 @@ func Remove(ctx context.Context, project, region, backendService, instanceGroup 
 	bes, err := gce.BackendServices.Get(project, backendService).
 		Context(ctx).Fields("backends", "fingerprint").Do()
 	if err != nil {
-		return err
+		return xerrors.Errorf("error getting backend service: %w", err)
 	}
 
 	// Get the instance group's full URL.
 	ig, err := gce.RegionInstanceGroups.Get(project, region, instanceGroup).
 		Context(ctx).Fields("selfLink").Do()
 	if err != nil {
-		return err
+		return xerrors.Errorf("error getting instance group: %w", err)
 	}
 
 	// Copy all backends except for the instance group in question.
@@ -140,7 +141,7 @@ func Remove(ctx context.Context, project, region, backendService, instanceGroup 
 		},
 	).Context(ctx).Do()
 	if err != nil {
-		return err
+		return xerrors.Errorf("error patching backend service: %w", err)
 	}
 
 	// Return the patch operation.

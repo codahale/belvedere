@@ -9,6 +9,7 @@ require (
 	github.com/google/go-cmp v0.3.0
 	go.opencensus.io v0.21.0
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
+	golang.org/x/xerrors v0.0.0-20190513163551-3ee3066db522
 	google.golang.org/api v0.6.0
 	gopkg.in/alessio/shellescape.v1 v1.0.0-20170105083845-52074bc9df61
 	gopkg.in/h2non/gock.v1 v1.0.14

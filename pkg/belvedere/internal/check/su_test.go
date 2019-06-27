@@ -72,7 +72,7 @@ func TestSUError(t *testing.T) {
 		t.Fatal("should have returned an error")
 	}
 
-	expected := "{\"code\":500,\"message\":\"nope\"}"
+	expected := "operation failed: {\"code\":500,\"message\":\"nope\"}"
 	if actual := err.Error(); expected != actual {
 		t.Error(cmp.Diff(expected, actual))
 	}

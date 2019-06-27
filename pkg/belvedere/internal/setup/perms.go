@@ -6,6 +6,7 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"go.opencensus.io/trace"
+	"golang.org/x/xerrors"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -29,14 +30,14 @@ func SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 	// Resolve the project's numeric ID.
 	p, err := crm.Projects.Get(project).Fields("projectNumber").Context(ctx).Do()
 	if err != nil {
-		return err
+		return xerrors.Errorf("error getting project: %w", err)
 	}
 
 	// Get the project's IAM policy.
 	policy, err := crm.Projects.GetIamPolicy(project, &cloudresourcemanager.GetIamPolicyRequest{}).
 		Context(ctx).Do()
 	if err != nil {
-		return err
+		return xerrors.Errorf("error getting IAM policy: %w", err)
 	}
 
 	crmMember := fmt.Sprintf("serviceAccount:%d@cloudservices.gserviceaccount.com", p.ProjectNumber)
@@ -80,5 +81,8 @@ func SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 	_, err = crm.Projects.SetIamPolicy(project, &cloudresourcemanager.SetIamPolicyRequest{
 		Policy: policy,
 	}).Context(ctx).Do()
-	return err
+	if err != nil {
+		return xerrors.Errorf("error setting IAM policy: %w", err)
+	}
+	return nil
 }

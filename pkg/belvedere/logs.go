@@ -9,6 +9,7 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"go.opencensus.io/trace"
+	"golang.org/x/xerrors"
 	"google.golang.org/api/logging/v2"
 )
 
@@ -76,7 +77,7 @@ func Logs(ctx context.Context, project, app, release, instance string, minTimest
 		PageSize:      1000, // cap at 1000 entries
 	}).Context(ctx).Do()
 	if err != nil {
-		return nil, err
+		return nil, xerrors.Errorf("error listing log entries: %w", err)
 	}
 
 	// Parse the resulting log entries to return structured data.
@@ -95,11 +96,11 @@ func Logs(ctx context.Context, project, app, release, instance string, minTimest
 	}
 	for i, e := range entries.Entries {
 		if err := json.Unmarshal(e.JsonPayload, &payload); err != nil {
-			return nil, err
+			return nil, xerrors.Errorf("error parsing log entry %s: %w", e.InsertId, err)
 		}
 		ts, err := time.Parse(time.RFC3339Nano, e.Timestamp)
 		if err != nil {
-			return nil, err
+			return nil, xerrors.Errorf("error parsing timestamp in %s: %w", e.InsertId, err)
 		}
 		results[i] = LogEntry{
 			Timestamp: ts,

@@ -77,7 +77,7 @@ func TestDMError(t *testing.T) {
 		t.Fatal("no error, but should have returned one")
 	}
 
-	expected := "{\"errors\":[{\"code\":\"ERR_BAD_NEWS\",\"location\":\"/downtown\",\"message\":\"here comes Mongo\"}]}"
+	expected := "operation failed: {\"errors\":[{\"code\":\"ERR_BAD_NEWS\",\"location\":\"/downtown\",\"message\":\"here comes Mongo\"}]}"
 	if actual := err.Error(); expected != actual {
 		t.Error(cmp.Diff(expected, actual))
 	}

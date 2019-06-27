@@ -2,11 +2,11 @@ package check
 
 import (
 	"context"
-	"errors"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
+	"golang.org/x/xerrors"
 )
 
 // GCE returns a waiter.Condition for the given Compute Engine operation completing.
@@ -27,7 +27,7 @@ func GCE(ctx context.Context, project, operation string) waiter.Condition {
 		op, err := gce.GlobalOperations.Get(project, operation).Context(ctx).
 			Fields("status", "error").Do()
 		if err != nil {
-			return false, err
+			return false, xerrors.Errorf("error getting operation: %w", err)
 		}
 		span.AddAttributes(trace.StringAttribute("status", op.Status))
 
@@ -43,7 +43,7 @@ func GCE(ctx context.Context, project, operation string) waiter.Condition {
 			}
 			// Exit with a maximally descriptive error.
 			j, _ := op.Error.MarshalJSON()
-			return false, errors.New(string(j))
+			return false, xerrors.Errorf("operation failed: %s", j)
 		}
 
 		// Keep waiting unless the operation is done.

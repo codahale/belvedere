@@ -77,16 +77,16 @@ func CreateRelease(ctx context.Context, project, app, release string, config *Co
 		return err
 	}
 
-	resources := releaseResources(project, region, app, release, imageSHA256, config)
-
 	name := fmt.Sprintf("belvedere-%s-%s", app, release)
-	return deployments.Create(ctx, project, name, resources, map[string]string{
-		"belvedere-type":    "release",
-		"belvedere-app":     app,
-		"belvedere-release": release,
-		"belvedere-region":  region,
-		"belvedere-hash":    imageSHA256[:32],
-	}, dryRun)
+	return deployments.Create(ctx, project, name,
+		releaseResources(project, region, app, release, imageSHA256, config),
+		map[string]string{
+			"belvedere-type":    "release",
+			"belvedere-app":     app,
+			"belvedere-release": release,
+			"belvedere-region":  region,
+			"belvedere-hash":    imageSHA256[:32],
+		}, dryRun)
 }
 
 // EnableRelease adds the release's instance group to the app's backend service and waits for the
