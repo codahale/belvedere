@@ -32,7 +32,7 @@ func Poll(ctx context.Context, c Condition) error {
 				return nil
 			}
 		case <-ctx.Done():
-			return fmt.Errorf("wait cancelled")
+			return ctx.Err()
 		}
 	}
 }
