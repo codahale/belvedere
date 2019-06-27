@@ -1,11 +1,11 @@
 # The machine type the app will run on. Use `belvedere machine-types` to see a list.
 machineType: n1-standard-1
 
-# The number of app instances to keep running. If you specify an autoscaling policy below, this will
-# be the number of instances initially started.
+# The number of app instances to keep running. If an autoscaling policy is specified below, this
+# will be the number of instances initially started.
 numReplicas: 2
 
-# Your app's container. Releases of this container will be pinned to specific builds using the
+# The app's container. Releases of this container will be pinned to specific builds using the
 # build's SHA256 hash.
 container:
   image: gcr.io/cloudslap/helloworld
@@ -14,13 +14,13 @@ container:
 #  env: {}
 #  dockerOptions: []
 
-# Optionally, sidecar containers to be run alongside your app on the instance. These can be used for
+# Optionally, sidecar containers to be run alongside the app on the instance. These can be used for
 # TLS termination, etc.
 sidecars:
   nginx-frontend:
     image: gcr.io/cloudslap/nginx-frontend
 
-# Optionally, an autoscaling policy. If specified, your app will be equipped with an autoscaler with
+# Optionally, an autoscaling policy. If specified, the app will be equipped with an autoscaler with
 # the given policy. Full documentation on the parameters can be found here:
 #   https://cloud.google.com/compute/docs/reference/rest/v1/autoscalers
 #
@@ -37,7 +37,7 @@ sidecars:
 #  loadBalancingUtilization:
 #    utilizationTarget: 0.6
 
-# Optionally, an Identity-Aware Proxy configuration. If specified, your app's load balancer will be
+# Optionally, an Identity-Aware Proxy configuration. If specified, the app's load balancer will be
 # configured with IAP (https://cloud.google.com/iap/), which enforces authorization using Google
 # Auth and OAuth. Full documentation on the parameters can be found here:
 #   https://cloud.google.com/compute/docs/reference/rest/v1/backendServices
@@ -46,7 +46,7 @@ sidecars:
 #  oauth2ClientID: ""
 #  oauth2ClientSecret: ""
 
-# Optionally, a CDN policy configuration. If specified, your app's load balancer will be placed
+# Optionally, a CDN policy configuration. If specified, the app's load balancer will be placed
 # behind Google's CDN, and responses will be cached according to the given policy.
 # Full documentation on the parameters can be found here:
 #   https://cloud.google.com/compute/docs/reference/rest/v1/backendServices
@@ -60,7 +60,7 @@ sidecars:
 #  signedUrlKeyNames: []
 #  signedUrlCacheMaxAgeSec: 200
 
-# Optionally, a list of IAM roles to be bound to your app's service account.
+# Optionally, a list of IAM roles to be bound to the app's service account.
 iamRoles:
   - roles/cloudkms.cryptoKeyDecrypter
 

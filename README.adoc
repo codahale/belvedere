@@ -7,21 +7,21 @@ It handles load balancing, DNS, TLS certificates, autoscaling, deploys, logging,
 
 == Setup
 
-First, create a GCP project for your environment and set it as the default using `gcloud config set core/project $BLAH`.
+First, create a GCP project and set it as the default using `gcloud config set core/project $BLAH`.
 (Or pass the `--project` flag everywhere.)
-Make sure you've configured a billing account for it.
+Make sure it has a billing account associated with it.
 
-Once you have a project in place, pick a DNS zone for your apps that you control.
+Once the project is created, pick a DNS zone in which the apps will live.
 Let's say you've recently registered the domain `cornbread.club`.
 
 ----
 belvedere setup cornbread.club
 ----
 
-This will enable all the required GCP APIs, grant Deployment Manager permissions to manage IAM roles, and create a Deployment Manager deployment with a managed zone for `cornbread.club` plus a few firewall rules for securing your apps.
+This will enable all the required GCP APIs, grant Deployment Manager permissions to manage IAM roles, and create a Deployment Manager deployment with a managed zone for `cornbread.club` plus a few firewall rules for securing Belvedere-managed apps.
 (Don't worry, they won't affect anything else in the project.)
 
-Once you've set it up, you'll need to configure the DNS settings for your domain name with your registrar.
+Once `setup` has been run, the domain's DNS settings will need to be configured at the register.
 To get a list of the DNS servers to use, run:
 
 ----
@@ -52,7 +52,7 @@ To build the Nginx frontend using Google Cloud Build, run:
 gcloud builds submit --config ./examples/nginx-frontend/cloudbuild.yaml ./examples/nginx-frontend/
 ----
 
-This will result in images for the app and the frontend proxy being built and pushed to Google Container Registry in your GCP project.
+This will result in images for the app and the frontend proxy being built and pushed to Google Container Registry in the GCP project.
 
 === Configuration
 
@@ -73,7 +73,13 @@ This will create a Deployment Manager deployment with a bunch of goodies:
 * a global, HTTP2 load balancing stack, with support for QUIC
 * a DNS A record for `my-app.cornbread.club` pointing to the load balancer
 * a Let's Encrypt-provided, Google-managed TLS certificate for `my-app.cornbread.club`
-* a service account with the IAM roles you specified
+* a service account with the specified IAM roles, plus baked in access to key services:
+  - Stackdriver Metrics
+  - Stackdriver Logging
+  - Google Container Registry
+  - Cloud Debugger
+  - Cloud Profiler
+  - Stackdriver Error Reporting
 
 The load balancer and DNS stuff will take 10-30 minutes to fully provision.
 
@@ -87,7 +93,7 @@ belvedere releases create my-app v1 ./my-app.yaml 93433e08c1065c0fe8ebd151a329e2
 
 This will create a Deployment Manager deployment with some more goodies:
 
-* an instance template for creating instance running your apps on Google Container-Optimized OS
+* an instance template for creating instances running the app inside Docker on Google Container-Optimized OS
 * an instance group manager for manging those instances
 * an autoscaler for scaling the number of app instances up or down based on load balancer utilization
 
@@ -135,7 +141,7 @@ belvedere apps delete my-app
 
 === Listing Apps
 
-To list all the apps in your project, run:
+To list all the apps in the project, run:
 
 ----
 belvedere apps list
@@ -143,7 +149,7 @@ belvedere apps list
 
 === Listing Releases
 
-To list all the releases in your project, run:
+To list all the releases in the project, run:
 
 ----
 belvedere releases list
@@ -152,7 +158,7 @@ belvedere releases list my-app
 
 === Listing Instances
 
-To list all the running instances in your project, run:
+To list all the running instances in the project, run:
 
 ----
 belvedere instances
@@ -169,12 +175,12 @@ belvedere ssh my-app-v43-hxht
 ----
 
 This will use `gcloud` to automatically configure an SSH key, inject it into the instance, and tunnel an SSH connection over GCP's Identity-Aware Proxy (IAP) to the instance.
-IAP tunneling is used because it allows for public SSH access to your instances to be disabled.
-Only IAP tunnels are allowed, and IAP tunnels require that the initiator be an authenticated member of your GCP project.
+IAP tunneling is used because it allows for public SSH access to app instances to be disabled.
+Only IAP tunnels are allowed, and IAP tunnels require that the initiator be an authenticated member of the GCP project.
 
 === Viewing Logs
 
-To view the logs for your app and its sidecar containers, run:
+To view the logs for an app and its sidecar containers, run:
 
 ----
 belvedere logs my-app
