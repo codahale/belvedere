@@ -25,7 +25,8 @@ var (
 )
 
 func main() {
-	usage := `Belvedere: A fine place from which to survey your estate.
+	usage := `
+Belvedere: A fine place from which to survey your estate.
 
 Usage:
   belvedere setup <dns zone> [options]
