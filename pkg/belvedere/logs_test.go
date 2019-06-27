@@ -18,7 +18,8 @@ func TestLogs(t *testing.T) {
 
 	gock.New("https://logging.googleapis.com/v2/entries:list?alt=json&prettyPrint=false").
 		JSON(logging.ListLogEntriesRequest{
-			Filter: `timestamp>="2019-06-25T13:18:33.000000043Z" ` +
+			Filter: `resource.type="gce_instance" ` +
+				`timestamp>="2019-06-25T13:18:33.000000043Z" ` +
 				`jsonPayload.container.metadata.app="my-app" ` +
 				`health`,
 			OrderBy:       "timestamp desc",
