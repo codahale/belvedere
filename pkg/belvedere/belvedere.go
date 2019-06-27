@@ -60,35 +60,44 @@ func ListInstances(ctx context.Context, project, app, release string) ([]string,
 		return nil, err
 	}
 
-	c := make(chan string, 100)
+	// Create a wait group for the zones.
 	var wg sync.WaitGroup
+	wg.Add(len(zones.Items))
 
+	// Create a slice and mutex for aggregating results.
+	var instances []string
+	var m sync.Mutex
+
+	// For each zone, start a goroutine to find instances.
 	for _, zone := range zones.Items {
-		wg.Add(1)
 		go func(zoneName string) {
 			defer wg.Done()
+
+			// List all instances in the zone.
 			zi, err := gce.Instances.List(project, zoneName).Context(ctx).Do()
 			if err != nil {
-				return
+				return // ignore errors b/c concurrency sucks
 			}
 
+			// Filter instances by app and release. Only return belvedere-managed instances,
+			// regardless of criteria.
 			for _, i := range zi.Items {
 				if s, ok := i.Labels["belvedere-app"]; ok && (s == app || app == "") {
 					if s, ok := i.Labels["belvedere-release"]; ok && (s == release || release == "") {
-						c <- i.Name
+						// Aggregate instance names.
+						m.Lock()
+						instances = append(instances, i.Name)
+						m.Unlock()
 					}
 				}
 			}
 		}(zone.Name)
 	}
+
+	// Wait for all zones to complete.
 	wg.Wait()
-	close(c)
 
-	var instances []string
-	for s := range c {
-		instances = append(instances, s)
-	}
-
+	// Return results.
 	return instances, nil
 }
 
