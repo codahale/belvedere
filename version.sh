@@ -2,13 +2,13 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-COMMIT="$(git rev-parse --short HEAD)"
+COMMIT="$(git describe --tags --long --always --dirty --broken)"
 TIME="$(date -u +"%Y%m%d%H%M%S")"
 
 cat << EOF > version.go
 package main
 
 func init() {
-  version = "${TIME}-${COMMIT}"
+  version = "${COMMIT}-${TIME}"
 }
 EOF
