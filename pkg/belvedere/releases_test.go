@@ -24,9 +24,8 @@ func TestReleaseResources(t *testing.T) {
 		},
 		Sidecars: map[string]Container{
 			"nginx": {
-				Image:   "gcr.io/example/nginx",
-				Command: "/usr/bin/nginx",
-				Args:    []string{"three", "four"},
+				Image: "gcr.io/example/nginx",
+				Args:  []string{"three", "four"},
 				Env: map[string]string{
 					"THREE": "3 or 4",
 					"FOUR":  "4 or 5",

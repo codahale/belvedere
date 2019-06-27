@@ -52,7 +52,9 @@ func dockerArgs(c *Container, app, release, sha256 string, labels map[string]str
 		url = fmt.Sprintf("%s@sha256:%s", url, sha256)
 	}
 	args = append(args, url)
-	args = append(args, c.Command)
+	if c.Command != "" {
+		args = append(args, c.Command)
+	}
 	args = append(args, c.Args...)
 
 	return args
