@@ -87,7 +87,16 @@ Options:
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(-1)
 	}
+
+	if callback != nil {
+		if err := callback(); err != nil {
+			_, _ = fmt.Fprintln(os.Stderr, err)
+			os.Exit(-1)
+		}
+	}
 }
+
+var callback func() error
 
 func run(ctx context.Context, opts docopt.Opts) error {
 	// Create a root span with some common attributes.
@@ -151,7 +160,12 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		return nil
 	case isCmd(opts, "ssh"):
 		instance, _ := opts.String("<instance>")
-		return belvedere.SSH(ctx, project, instance)
+		ssh, err := belvedere.SSH(ctx, project, instance)
+		if err != nil {
+			return err
+		}
+		callback = ssh
+		return nil
 	case isCmd(opts, "logs"):
 		app, _ := opts.String("<app>")
 		release, _ := opts.String("<release>")

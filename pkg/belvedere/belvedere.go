@@ -101,24 +101,28 @@ func ListInstances(ctx context.Context, project, app, release string) ([]string,
 	return instances, nil
 }
 
-func SSH(ctx context.Context, project, instance string) error {
+// SSH returns a function which execs to a Google Cloud SDK gcloud process which tunnels an SSH
+// connection over IAP to the given instance.
+func SSH(ctx context.Context, project, instance string) (func() error, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.SSH")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("instance", instance),
 	)
+	defer span.End()
+
+	// Find gcloud on the path.
 	gcloud, err := exec.LookPath("gcloud")
 	if err != nil {
-		return err
+		return nil, err
 	}
 	span.AddAttributes(trace.StringAttribute("gcloud", gcloud))
-	span.End()
 
-	return syscall.Exec(
-		gcloud,
-		[]string{gcloud, "beta", "compute", "ssh", instance, "--tunnel-through-iap"},
-		os.Environ(),
-	)
+	return func() error {
+		// Exec to gcloud.
+		args := []string{gcloud, "beta", "compute", "ssh", instance, "--tunnel-through-iap"}
+		return syscall.Exec(gcloud, args, os.Environ())
+	}, nil
 }
 
 type MachineType struct {
