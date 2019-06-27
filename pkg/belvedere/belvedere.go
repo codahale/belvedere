@@ -28,12 +28,8 @@ func DNSServers(ctx context.Context, project string) ([]string, error) {
 	span.AddAttributes(trace.StringAttribute("project", project))
 	defer span.End()
 
-	d, err := gcp.DNS(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	mz, err := d.ManagedZones.Get(project, "belvedere").Context(ctx).Do()
+	// Find the project's managed zone.
+	mz, err := findManagedZone(ctx, project)
 	if err != nil {
 		return nil, err
 	}
