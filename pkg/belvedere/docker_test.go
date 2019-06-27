@@ -33,10 +33,11 @@ func TestContainer_DockerArgs(t *testing.T) {
 		"gcr.io/example/example@sha256:123456",
 		"/usr/bin/example", "-h", "-y",
 	}
-	actual := container.DockerArgs("my-example", "v3", "123456", map[string]string{
-		"env":      "qa",
-		"alphabet": "latin",
-	})
+	actual := dockerArgs(&container, "my-example", "v3", "123456",
+		map[string]string{
+			"env":      "qa",
+			"alphabet": "latin",
+		})
 
 	if !cmp.Equal(expected, actual) {
 		t.Fatal(cmp.Diff(expected, actual))

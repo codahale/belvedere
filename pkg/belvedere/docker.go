@@ -6,15 +6,8 @@ import (
 	"strings"
 )
 
-type Container struct {
-	Image         string            `json:"image"`
-	Command       string            `json:"command"`
-	Args          []string          `json:"args"`
-	Env           map[string]string `json:"env"`
-	DockerOptions []string          `json:"dockerOptions"`
-}
-
-func (c *Container) DockerArgs(app, release, sha256 string, labels map[string]string) []string {
+// dockerArgs returns a list of arguments to `docker run` for running the given container.
+func dockerArgs(c *Container, app, release, sha256 string, labels map[string]string) []string {
 	var labelNames []string
 	for k := range labels {
 		labelNames = append(labelNames, k)

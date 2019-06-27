@@ -24,6 +24,15 @@ type Config struct {
 	Subnetwork        string                           `json:"subnetwork"`
 }
 
+// A Container describes all the elements of an app or sidecar container.
+type Container struct {
+	Image         string            `json:"image"`
+	Command       string            `json:"command"`
+	Args          []string          `json:"args"`
+	Env           map[string]string `json:"env"`
+	DockerOptions []string          `json:"dockerOptions"`
+}
+
 // LoadConfig loads the YAML configuration at the given path. If path is `-`, STDIN is used.
 func LoadConfig(ctx context.Context, path string) (*Config, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.LoadConfig")

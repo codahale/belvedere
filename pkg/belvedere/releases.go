@@ -277,7 +277,7 @@ func cloudConfig(app, release string, config *Config, imageSHA256 string) string
 		WriteFiles: []cloudinit.File{
 			{
 				Content: systemdService(app,
-					config.Container.DockerArgs(app, release, imageSHA256,
+					dockerArgs(&config.Container, app, release, imageSHA256,
 						map[string]string{
 							"app":     app,
 							"release": release,
@@ -299,7 +299,7 @@ func cloudConfig(app, release string, config *Config, imageSHA256 string) string
 		cc.WriteFiles = append(cc.WriteFiles,
 			cloudinit.File{
 				Content: systemdService(name,
-					sidecar.DockerArgs(name, "", "",
+					dockerArgs(&sidecar, name, "", "",
 						map[string]string{
 							"app":     app,
 							"release": release,
