@@ -47,6 +47,21 @@ func Setup(ctx context.Context, project, dnsZone string, dryRun bool) error {
 		}, dryRun)
 }
 
+// Teardown deletes the shared firewall rules and managed zone created by Setup.
+// It does not disable services or downgrade Deployment Manager's permissions.
+func Teardown(ctx context.Context, project string, dryRun, async bool) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.Teardown")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+		trace.BoolAttribute("dry_run", dryRun),
+		trace.BoolAttribute("async", async),
+	)
+	defer span.End()
+
+	// Delete the shared deployment.
+	return deployments.Delete(ctx, project, "belvedere", dryRun, async)
+}
+
 func setupResources(dnsZone string) []deployments.Resource {
 	resources := []deployments.Resource{
 		// A managed DNS zone for all the app A records.
@@ -98,18 +113,4 @@ func setupResources(dnsZone string) []deployments.Resource {
 		},
 	}
 	return resources
-}
-
-// Teardown deletes the shared firewall rules and managed zone created by Setup.
-// It does not disable services or downgrade Deployment Manager's permissions.
-func Teardown(ctx context.Context, project string, dryRun, async bool) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.Teardown")
-	span.AddAttributes(
-		trace.StringAttribute("project", project),
-		trace.BoolAttribute("dry_run", dryRun),
-		trace.BoolAttribute("async", async),
-	)
-	defer span.End()
-
-	return deployments.Delete(ctx, project, "belvedere", dryRun, async)
 }

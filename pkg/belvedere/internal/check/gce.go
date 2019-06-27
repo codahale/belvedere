@@ -17,6 +17,7 @@ func GCE(ctx context.Context, project, operation string) waiter.Condition {
 		span.AddAttributes(trace.StringAttribute("operation", operation))
 		defer span.End()
 
+		// Get or create our GCE client.
 		gce, err := gcp.Compute(ctx)
 		if err != nil {
 			return false, err

@@ -41,7 +41,7 @@ func TestLogs(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := []Log{
+	expected := []LogEntry{
 		{
 			Timestamp: time.Date(2019, 6, 25, 14, 55, 1, 0, time.UTC),
 			Release:   "v2",

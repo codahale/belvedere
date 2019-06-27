@@ -12,7 +12,8 @@ import (
 	"google.golang.org/api/logging/v2"
 )
 
-type Log struct {
+// LogEntry represents an app log entry.
+type LogEntry struct {
 	Timestamp time.Time
 	Release   string
 	Instance  string
@@ -20,7 +21,9 @@ type Log struct {
 	Message   string
 }
 
-func Logs(ctx context.Context, project, app, release, instance string, minTimestamp time.Time, filters []string) ([]Log, error) {
+// Logs returns log entries from the given app which match the other optional criteria. minTimestamp
+// is required.
+func Logs(ctx context.Context, project, app, release, instance string, minTimestamp time.Time, filters []string) ([]LogEntry, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.Logs")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -33,16 +36,20 @@ func Logs(ctx context.Context, project, app, release, instance string, minTimest
 		span.AddAttributes(trace.StringAttribute(fmt.Sprintf("filter.%d", i), f))
 	}
 
+	// Get our Logging client.
 	logs, err := gcp.Logging(ctx)
 	if err != nil {
 		return nil, err
 	}
 
+	// Always filter by resource type, time, and app.
 	filter := []string{
+		`resource.type="gce_instance"`,
 		fmt.Sprintf(`timestamp>=%q`, minTimestamp.Format(time.RFC3339Nano)),
 		fmt.Sprintf(`jsonPayload.container.metadata.app=%q`, app),
 	}
 
+	// Include an optional release filter.
 	if release != "" {
 		span.AddAttributes(trace.StringAttribute("release", release))
 		filter = append(filter,
@@ -50,6 +57,7 @@ func Logs(ctx context.Context, project, app, release, instance string, minTimest
 		)
 	}
 
+	// Include an optional instance filter.
 	if instance != "" {
 		span.AddAttributes(trace.StringAttribute("instance", instance))
 		filter = append(filter,
@@ -57,19 +65,22 @@ func Logs(ctx context.Context, project, app, release, instance string, minTimest
 		)
 	}
 
+	// Include any other given filters.
 	filter = append(filter, filters...)
 
+	// List log entries which match the full set of filters.
 	entries, err := logs.Entries.List(&logging.ListLogEntriesRequest{
 		Filter:        strings.Join(filter, " "),
-		OrderBy:       "timestamp desc",
+		OrderBy:       "timestamp desc", // reverse chronological order
 		ResourceNames: []string{fmt.Sprintf("projects/%s", project)},
-		PageSize:      1000,
+		PageSize:      1000, // cap at 1000 entries
 	}).Context(ctx).Do()
 	if err != nil {
 		return nil, err
 	}
 
-	results := make([]Log, len(entries.Entries))
+	// Parse the resulting log entries to return structured data.
+	results := make([]LogEntry, len(entries.Entries))
 	var payload struct {
 		Container struct {
 			Name     string `json:"name"`
@@ -90,7 +101,7 @@ func Logs(ctx context.Context, project, app, release, instance string, minTimest
 		if err != nil {
 			return nil, err
 		}
-		results[i] = Log{
+		results[i] = LogEntry{
 			Timestamp: ts,
 			Release:   payload.Container.Metadata.Release,
 			Instance:  payload.Instance.Name,

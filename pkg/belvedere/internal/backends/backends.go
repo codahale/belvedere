@@ -23,6 +23,7 @@ func Add(ctx context.Context, project, region, backendService, instanceGroup str
 	)
 	defer span.End()
 
+	// Get or create our GCE client.
 	gce, err := gcp.Compute(ctx)
 	if err != nil {
 		return err
@@ -88,6 +89,7 @@ func Remove(ctx context.Context, project, region, backendService, instanceGroup 
 	)
 	defer span.End()
 
+	// Get or create our GCE client.
 	gce, err := gcp.Compute(ctx)
 	if err != nil {
 		return err

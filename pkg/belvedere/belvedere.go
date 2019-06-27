@@ -19,10 +19,13 @@ import (
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
+// WithInterval returns a new context with the given polling interval. This is required for using
+// most methods in this package.
 func WithInterval(ctx context.Context, interval time.Duration) context.Context {
 	return waiter.WithInterval(ctx, interval)
 }
 
+// DNSServers returns a list of DNS servers which handle the project's managed zone.
 func DNSServers(ctx context.Context, project string) ([]string, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DNSServers")
 	span.AddAttributes(trace.StringAttribute("project", project))
@@ -34,6 +37,7 @@ func DNSServers(ctx context.Context, project string) ([]string, error) {
 		return nil, err
 	}
 
+	// Return the DNS servers.
 	var dnsServers []string
 	for _, s := range mz.NameServers {
 		dnsServers = append(dnsServers, s)
@@ -41,6 +45,8 @@ func DNSServers(ctx context.Context, project string) ([]string, error) {
 	return dnsServers, nil
 }
 
+// ListInstances returns a list of running instances in the project. If an app or release are
+// provided, limits the results to instances running the given app or release.
 func ListInstances(ctx context.Context, project, app, release string) ([]string, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.ListInstances")
 	span.AddAttributes(
@@ -50,11 +56,13 @@ func ListInstances(ctx context.Context, project, app, release string) ([]string,
 	)
 	defer span.End()
 
+	// Get our GCE client.
 	gce, err := gcp.Compute(ctx)
 	if err != nil {
 		return nil, err
 	}
 
+	// List all zones in the project.
 	zones, err := gce.Zones.List(project).Context(ctx).Do()
 	if err != nil {
 		return nil, err
@@ -125,6 +133,7 @@ func SSH(ctx context.Context, project, instance string) (func() error, error) {
 	}, nil
 }
 
+// MachineType is a GCE machine type which can run VMs.
 type MachineType struct {
 	Name   string
 	CPU    int
@@ -209,6 +218,7 @@ var (
 	rfc1035 = regexp.MustCompile(`^[[:alnum:]][[:alnum:]\-]{0,61}[[:alnum:]]|[[:alpha:]]$`)
 )
 
+// validateRFC1035 returns an error if the given name is not a valid RFC1305 DNS name.
 func validateRFC1035(name string) error {
 	if !rfc1035.MatchString(name) {
 		return fmt.Errorf("invalid name: %s", name)

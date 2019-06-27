@@ -20,6 +20,7 @@ func Health(ctx context.Context, project, region, backendService, instanceGroup 
 		span.AddAttributes(trace.StringAttribute("instance_group", instanceGroup))
 		defer span.End()
 
+		// Get or create our GCE client.
 		gce, err := gcp.Compute(ctx)
 		if err != nil {
 			return false, err

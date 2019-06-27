@@ -17,6 +17,7 @@ func SU(ctx context.Context, operation string) waiter.Condition {
 		span.AddAttributes(trace.StringAttribute("operation", operation))
 		defer span.End()
 
+		// Get or create our SU client.
 		su, err := gcp.ServiceUsage(ctx)
 		if err != nil {
 			return false, err

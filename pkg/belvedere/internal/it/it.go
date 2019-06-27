@@ -7,6 +7,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
+// MockTokenSource mocks the GCP SDK's default token source endpoint with a stub token.
 func MockTokenSource() {
 	gock.New("https://oauth2.googleapis/token").
 		Reply(200).

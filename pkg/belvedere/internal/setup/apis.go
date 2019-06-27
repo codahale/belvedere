@@ -46,6 +46,7 @@ func EnableAPIs(ctx context.Context, project string, dryRun bool) error {
 	)
 	defer span.End()
 
+	// Get our SU client.
 	su, err := gcp.ServiceUsage(ctx)
 	if err != nil {
 		return err

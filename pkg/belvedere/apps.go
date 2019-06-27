@@ -26,11 +26,13 @@ func ListApps(ctx context.Context, project string) ([]App, error) {
 	)
 	defer span.End()
 
+	// List all deployments in the project.
 	list, err := deployments.List(ctx, project)
 	if err != nil {
 		return nil, err
 	}
 
+	// Filter the app deployments and pull their metadata from the labels.
 	var apps []App
 	for _, labels := range list {
 		if labels["belvedere-type"] == "app" {
@@ -55,23 +57,27 @@ func CreateApp(ctx context.Context, project, region, app string, config *Config,
 	)
 	defer span.End()
 
+	// Validate the app name.
 	if err := validateRFC1035(app); err != nil {
 		return err
 	}
 
+	// Find the project's managed zone.
 	managedZone, err := findManagedZone(ctx, project)
 	if err != nil {
 		return err
 	}
 
-	resources := appResources(project, app, managedZone, config)
-
+	// Create a deployment with all the app resources.
 	name := fmt.Sprintf("belvedere-%s", app)
-	return deployments.Create(ctx, project, name, resources, map[string]string{
-		"belvedere-type":   "app",
-		"belvedere-app":    app,
-		"belvedere-region": region,
-	}, dryRun)
+	return deployments.Create(ctx, project, name,
+		appResources(project, app, managedZone, config),
+		map[string]string{
+			"belvedere-type":   "app",
+			"belvedere-app":    app,
+			"belvedere-region": region,
+		},
+		dryRun)
 }
 
 // UpdateApp updates the resources for the given app to match the given configuration.
@@ -84,15 +90,17 @@ func UpdateApp(ctx context.Context, project, app string, config *Config, dryRun 
 	)
 	defer span.End()
 
+	// Find the project's managed zone.
 	managedZone, err := findManagedZone(ctx, project)
 	if err != nil {
 		return err
 	}
 
-	resources := appResources(project, app, managedZone, config)
-
+	// Update the deployment with the new app resources.
 	name := fmt.Sprintf("belvedere-%s", app)
-	return deployments.Update(ctx, project, name, resources, dryRun)
+	return deployments.Update(ctx, project, name,
+		appResources(project, app, managedZone, config),
+		dryRun)
 }
 
 // DeleteApp deletes all the resources associated with the given app.
@@ -106,9 +114,11 @@ func DeleteApp(ctx context.Context, project, app string, dryRun, async bool) err
 	)
 	defer span.End()
 
+	// Delete the app deployment.
 	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s", app), dryRun, async)
 }
 
+// findManagedZone returns the Cloud DNS managed zone created via Setup.
 func findManagedZone(ctx context.Context, project string) (*dns.ManagedZone, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.findManagedZone")
 	span.AddAttributes(
@@ -116,14 +126,17 @@ func findManagedZone(ctx context.Context, project string) (*dns.ManagedZone, err
 	)
 	defer span.End()
 
+	// Get our DNS client.
 	d, err := gcp.DNS(ctx)
 	if err != nil {
 		return nil, err
 	}
 
+	// Find the managed zone.
 	return d.ManagedZones.Get(project, "belvedere").Context(ctx).Do()
 }
 
+// findRegion returns the region the app was created in.
 func findRegion(ctx context.Context, project, app string) (string, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.findRegion")
 	span.AddAttributes(
@@ -132,26 +145,31 @@ func findRegion(ctx context.Context, project, app string) (string, error) {
 	)
 	defer span.End()
 
+	// Get our DM client.
 	dm, err := gcp.DeploymentManager(ctx)
 	if err != nil {
 		return "", err
 	}
 
+	// Find the app deployment.
 	deployment, err := dm.Deployments.Get(project, fmt.Sprintf("belvedere-%s", app)).
 		Context(ctx).Do()
 	if err != nil {
 		return "", err
 	}
 
+	// Return the app's region given the label.
 	for _, l := range deployment.Labels {
 		if l.Key == "belvedere-region" {
 			return l.Value, nil
 		}
 	}
 
+	// Handle missing labels.
 	return "", errors.New("no region found")
 }
 
+// appResources returns a list of Deployment Manager resources for an app.
 func appResources(project string, app string, managedZone *dns.ManagedZone, config *Config) []deployments.Resource {
 	firewall := fmt.Sprintf("belvedere-allow-%s-lb", app)
 	healthcheck := fmt.Sprintf("%s-hc", app)
@@ -318,6 +336,7 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 	return resources
 }
 
+// requiresRoles is a list of IAM role which are added to app service accounts by default.
 var requiredRoles = []string{
 	"roles/clouddebugger.agent",
 	"roles/cloudprofiler.agent",
@@ -329,6 +348,8 @@ var requiredRoles = []string{
 	"roles/storage.objectViewer",
 }
 
+// roleBinding returns a Deployment Manager IAM member binding for the given service account and
+// role.
 func roleBinding(project, serviceAccount, role string) deployments.Resource {
 	return deployments.Resource{
 		Name: fmt.Sprintf("%s-%s", serviceAccount, role),

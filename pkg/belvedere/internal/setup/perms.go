@@ -20,6 +20,7 @@ func SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 	)
 	defer span.End()
 
+	// Get our CRM client.
 	crm, err := gcp.CloudResourceManager(ctx)
 	if err != nil {
 		return err
@@ -70,10 +71,12 @@ func SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 		Role:    owner,
 	})
 
+	// Early exit if we don't want side effects.
 	if dryRun {
 		return nil
 	}
 
+	// Set the modified policy.
 	_, err = crm.Projects.SetIamPolicy(project, &cloudresourcemanager.SetIamPolicyRequest{
 		Policy: policy,
 	}).Context(ctx).Do()

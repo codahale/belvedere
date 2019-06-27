@@ -152,6 +152,7 @@ func DeleteRelease(ctx context.Context, project, app, release string, dryRun, as
 	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s-%s", app, release), dryRun, async)
 }
 
+// releaseResources returns a list of Deployment Manager resources for the given release.
 func releaseResources(project string, region string, app string, release string, imageSHA256 string, config *Config) []deployments.Resource {
 	instanceTemplate := fmt.Sprintf("%s-%s-it", app, release)
 	instanceGroupManager := fmt.Sprintf("%s-%s-ig", app, release)
@@ -161,11 +162,13 @@ func releaseResources(project string, region string, app string, release string,
 		network = config.Network
 	}
 	resources := []deployments.Resource{
+		// An instance template for creating release instances.
 		{
 			Name: instanceTemplate,
 			Type: "compute.beta.instanceTemplate",
 			Properties: &compute.InstanceTemplate{
 				Properties: &compute.InstanceProperties{
+					// Use Google Container-Optimized OS with a default disk size.
 					Disks: []*compute.AttachedDisk{
 						{
 							AutoDelete: true,
@@ -184,15 +187,17 @@ func releaseResources(project string, region string, app string, release string,
 					MachineType: config.MachineType,
 					Metadata: &compute.Metadata{
 						Items: []*compute.MetadataItems{
+							// https://cloud.google.com/compute/docs/storing-retrieving-metadata#querying
 							metaData("disable-legacy-endpoints", "true"),
+							// https://cloud.google.com/compute/docs/instances/managing-instance-access
 							metaData("enable-os-login", "true"),
+							// Enable the Stackdriver Logging Agent for the instance.
 							metaData("google-logging-enable", "true"),
-							metaData(
-								"user-data",
-								cloudConfig(app, release, config, imageSHA256),
-							),
+							// Inject the cloud-init metadata.
+							metaData("user-data", cloudConfig(app, release, config, imageSHA256)),
 						},
 					},
+					// Enable outbound internet access for the instances.
 					NetworkInterfaces: []*compute.NetworkInterface{
 						{
 							Network:    network,
@@ -205,6 +210,8 @@ func releaseResources(project string, region string, app string, release string,
 							},
 						},
 					},
+					// Bind the instances to the app's service account and use IAM roles to handle
+					// permissions.
 					ServiceAccounts: []*compute.ServiceAccount{
 						{
 							Email: fmt.Sprintf("app-%s@%s.iam.gserviceaccount.com", app, project),
@@ -213,11 +220,13 @@ func releaseResources(project string, region string, app string, release string,
 							},
 						},
 					},
+					// Enable all Shielded VM options.
 					ShieldedVmConfig: &compute.ShieldedVmConfig{
 						EnableIntegrityMonitoring: true,
 						EnableSecureBoot:          true,
 						EnableVtpm:                true,
 					},
+					// Tag the instance to disable SSH access and enable IAP tunneling.
 					Tags: &compute.Tags{
 						Items: []string{
 							"belvedere",
@@ -227,6 +236,7 @@ func releaseResources(project string, region string, app string, release string,
 				},
 			},
 		},
+		// An instance manager to start and stop instances as needed.
 		{
 			Name: instanceGroupManager,
 			Type: "compute.beta.regionInstanceGroupManager",
@@ -245,6 +255,7 @@ func releaseResources(project string, region string, app string, release string,
 		},
 	}
 
+	// An optional autoscaler.
 	if config.AutoscalingPolicy != nil {
 		resources = append(resources, deployments.Resource{
 			Name: autoscaler,
@@ -262,9 +273,11 @@ func releaseResources(project string, region string, app string, release string,
 }
 
 const (
+	// https://cloud.google.com/container-optimized-os/docs/
 	cosStable = "https://www.googleapis.com/compute/v1/projects/gce-uefi-images/global/images/family/cos-stable"
 )
 
+// metaData returns a GCE metadata item with the given key and value.
 func metaData(key, value string) *compute.MetadataItems {
 	return &compute.MetadataItems{
 		Key:   key,
@@ -272,9 +285,11 @@ func metaData(key, value string) *compute.MetadataItems {
 	}
 }
 
+// cloudConfig returns a cloud-config manifest for the given release.
 func cloudConfig(app, release string, config *Config, imageSHA256 string) string {
 	cc := cloudinit.CloudConfig{
 		WriteFiles: []cloudinit.File{
+			// Write a systemd service for running the app's container in Docker.
 			{
 				Content: systemdService(app,
 					dockerArgs(&config.Container, app, release, imageSHA256,
@@ -289,13 +304,17 @@ func cloudConfig(app, release string, config *Config, imageSHA256 string) string
 			},
 		},
 		RunCommands: []string{
+			// Enable service traffic through the host firewall.
 			"iptables -w -A INPUT -p tcp --dport 8443 -j ACCEPT",
+			// Load all new systemd services.
 			"systemctl daemon-reload",
+			// Start the app's systemd service.
 			fmt.Sprintf("systemctl start docker-%s.service", app),
 		},
 	}
 
 	for name, sidecar := range config.Sidecars {
+		// Add a systemd service for running the sidecar in Docker.
 		cc.WriteFiles = append(cc.WriteFiles,
 			cloudinit.File{
 				Content: systemdService(name,
@@ -310,13 +329,17 @@ func cloudConfig(app, release string, config *Config, imageSHA256 string) string
 				Path:        fmt.Sprintf("/etc/systemd/system/docker-%s.service", name),
 				Permissions: "0644",
 			})
+		// Start the sidecar's systemd service.
 		cc.RunCommands = append(cc.RunCommands, fmt.Sprintf("systemctl start docker-%s.service", name))
 	}
 
 	return cc.String()
 }
 
-const jobTemplate = `[Unit]
+// systemdTemplate is a template for starting a container in Docker. It includes authenticating
+// Docker with GCR, which needs to be done here b/c the credentials are not preserved across
+// instance reboots.
+const systemdTemplate = `[Unit]
 Description=Start the %s container
 Wants=gcr-online.target
 After=gcr-online.target
@@ -329,10 +352,12 @@ ExecStop=/usr/bin/docker stop %s
 ExecStopPost=/usr/bin/docker rm %s
 `
 
+// systemdService returns a systemd service file with the given Docker arguments. All Docker
+// arguments are escaped, if necessary.
 func systemdService(name string, dockerArgs []string) string {
 	args := make([]string, len(dockerArgs))
 	for i, s := range dockerArgs {
 		args[i] = shellescape.Quote(s)
 	}
-	return fmt.Sprintf(jobTemplate, name, strings.Join(args, " "), name, name)
+	return fmt.Sprintf(systemdTemplate, name, strings.Join(args, " "), name, name)
 }

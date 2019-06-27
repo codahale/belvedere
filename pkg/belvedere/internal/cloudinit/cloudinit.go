@@ -6,6 +6,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// File represents a file to be created on instance boot.
 type File struct {
 	Path        string `yaml:"path,omitempty"`
 	Permissions string `yaml:"permissions,omitempty"`
@@ -13,7 +14,7 @@ type File struct {
 	Content     string `yaml:"content,omitempty"`
 }
 
-// A cloud-init YAML manifest.
+// CloudConfig contains a subset of cloud-init's cloud-config manifest properties.
 // https://cloudinit.readthedocs.io/en/latest/topics/examples.html
 type CloudConfig struct {
 	WriteFiles  []File   `yaml:"write_files,omitempty"`

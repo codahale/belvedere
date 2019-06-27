@@ -31,12 +31,16 @@ type Resource struct {
 	Properties json.Marshaler `json:"properties"`
 }
 
+// ServiceAccount represents an IAM service account. This is its own type because Deployment Manager
+// doesn't accept the standard API representation.
 type ServiceAccount struct {
 	AccountID   string `json:"accountId"`
 	DisplayName string `json:"displayName"`
 }
 
 func (s *ServiceAccount) MarshalJSON() ([]byte, error) {
+	// Cast from a pointer to a raw type to avoid infinite recursion while reusing the standard JSON
+	// marshalling code.
 	type NoMethod ServiceAccount
 	raw := NoMethod(*s)
 	return json.Marshal(raw)
@@ -44,6 +48,8 @@ func (s *ServiceAccount) MarshalJSON() ([]byte, error) {
 
 var _ json.Marshaler = &ServiceAccount{}
 
+// ResourceRecordSets represents a DNS resource record sets. This is its own type because Deployment
+// Manager doesn't accept the standard API representation.
 type ResourceRecordSets struct {
 	Name        string                   `json:"name"`
 	ManagedZone string                   `json:"managedZone"`
@@ -51,6 +57,8 @@ type ResourceRecordSets struct {
 }
 
 func (rrs *ResourceRecordSets) MarshalJSON() ([]byte, error) {
+	// Cast from a pointer to a raw type to avoid infinite recursion while reusing the standard JSON
+	// marshalling code.
 	type NoMethod ResourceRecordSets
 	raw := NoMethod(*rrs)
 	return json.Marshal(raw)
@@ -58,6 +66,8 @@ func (rrs *ResourceRecordSets) MarshalJSON() ([]byte, error) {
 
 var _ json.Marshaler = &ResourceRecordSets{}
 
+// IAMMemberBinding represents the binding of an IAM role to a project member. This is its own type
+// because Deployment Manager doesn't accept the standard API representation.
 type IAMMemberBinding struct {
 	Resource string `json:"resource"`
 	Role     string `json:"role"`
@@ -65,12 +75,19 @@ type IAMMemberBinding struct {
 }
 
 func (b *IAMMemberBinding) MarshalJSON() ([]byte, error) {
+	// Cast from a pointer to a raw type to avoid infinite recursion while reusing the standard JSON
+	// marshalling code.
 	type NoMethod IAMMemberBinding
 	raw := NoMethod(*b)
 	return json.Marshal(raw)
 }
 
 var _ json.Marshaler = &IAMMemberBinding{}
+
+// deploymentConfig is a configuration target for Deployment Manager.
+type deploymentConfig struct {
+	Resources []Resource `json:"resources"`
+}
 
 // Creates a new deployment with the given name, resources, and labels.
 func Create(ctx context.Context, project, name string, resources []Resource, labels map[string]string, dryRun bool) error {
@@ -82,11 +99,13 @@ func Create(ctx context.Context, project, name string, resources []Resource, lab
 	)
 	defer span.End()
 
+	// Get or create our DM client.
 	dm, err := gcp.DeploymentManager(ctx)
 	if err != nil {
 		return err
 	}
 
+	// Convert labels from a map to a list.
 	var l []*deploymentmanager.DeploymentLabelEntry
 	for k, v := range labels {
 		l = append(l, &deploymentmanager.DeploymentLabelEntry{
@@ -95,8 +114,10 @@ func Create(ctx context.Context, project, name string, resources []Resource, lab
 		})
 	}
 
-	d := map[string][]Resource{"resources": resources}
+	// Create our config target.
+	d := deploymentConfig{Resources: resources}
 
+	// Pretty-print the config and early exit if we don't want side effects.
 	if dryRun {
 		b, err := json.MarshalIndent(d, "", "  ")
 		if err != nil {
@@ -106,11 +127,13 @@ func Create(ctx context.Context, project, name string, resources []Resource, lab
 		return nil
 	}
 
+	// Marshal the config target as JSON, since that's parsable by Deployment Manager.
 	j, err := json.Marshal(d)
 	if err != nil {
 		return err
 	}
 
+	// Insert the new deployment.
 	op, err := dm.Deployments.Insert(project, &deploymentmanager.Deployment{
 		Labels: l,
 		Name:   name,
@@ -124,6 +147,7 @@ func Create(ctx context.Context, project, name string, resources []Resource, lab
 		return err
 	}
 
+	// Wait for the deployment to be created or fail.
 	return waiter.Poll(ctx, check.DM(ctx, project, op.Name))
 }
 
@@ -137,13 +161,16 @@ func Update(ctx context.Context, project, name string, resources []Resource, dry
 	)
 	defer span.End()
 
+	// Get or create our DM client.
 	dm, err := gcp.DeploymentManager(ctx)
 	if err != nil {
 		return err
 	}
 
-	d := map[string][]Resource{"resources": resources}
+	// Create our config target.
+	d := deploymentConfig{Resources: resources}
 
+	// Pretty-print the config and early exit if we don't want side effects.
 	if dryRun {
 		b, err := json.MarshalIndent(d, "", "  ")
 		if err != nil {
@@ -153,11 +180,13 @@ func Update(ctx context.Context, project, name string, resources []Resource, dry
 		return nil
 	}
 
+	// Marshal the config target as JSON, since that's parsable by Deployment Manager.
 	j, err := json.Marshal(d)
 	if err != nil {
 		return err
 	}
 
+	// Update the deployment.
 	op, err := dm.Deployments.Patch(project, name, &deploymentmanager.Deployment{
 		Target: &deploymentmanager.TargetConfiguration{
 			Config: &deploymentmanager.ConfigFile{
@@ -169,6 +198,7 @@ func Update(ctx context.Context, project, name string, resources []Resource, dry
 		return err
 	}
 
+	// Wait for the deployment to be updated or fail.
 	return waiter.Poll(ctx, check.DM(ctx, project, op.Name))
 }
 
@@ -183,24 +213,29 @@ func Delete(ctx context.Context, project, name string, dryRun, async bool) error
 	)
 	defer span.End()
 
+	// Get or create our DM client.
 	dm, err := gcp.DeploymentManager(ctx)
 	if err != nil {
 		return err
 	}
 
+	// Early exit if we don't want side effects.
 	if dryRun {
 		return nil
 	}
 
+	// Delete the deployment.
 	op, err := dm.Deployments.Delete(project, name).Context(ctx).Do()
 	if err != nil {
 		return err
 	}
 
+	// Early exit if we don't care about results.
 	if async {
 		return nil
 	}
 
+	// Wait for the deployment to be deleted or fail.
 	return waiter.Poll(ctx, check.DM(ctx, project, op.Name))
 }
 
@@ -212,16 +247,19 @@ func List(ctx context.Context, project string) ([]map[string]string, error) {
 	)
 	defer span.End()
 
+	// Get or create our DM client.
 	dm, err := gcp.DeploymentManager(ctx)
 	if err != nil {
 		return nil, err
 	}
 
+	// List all of the deployments.
 	list, err := dm.Deployments.List(project).Context(ctx).Do()
 	if err != nil {
 		return nil, err
 	}
 
+	// Convert labels to maps and return.
 	var results []map[string]string
 	for _, d := range list.Deployments {
 		m := map[string]string{"name": d.Name}
