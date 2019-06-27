@@ -17,11 +17,8 @@ func TestAppResources(t *testing.T) {
 		DnsName: "horse.club",
 	}
 	config := &Config{
-		CDNPolicy: &CDNConfig{
-			Enabled: true,
-			BackendServiceCdnPolicy: compute.BackendServiceCdnPolicy{
-				SignedUrlCacheMaxAgeSec: 200,
-			},
+		CDNPolicy: &compute.BackendServiceCdnPolicy{
+			SignedUrlCacheMaxAgeSec: 200,
 		},
 		IAMRoles: []string{
 			"roles/dogWalker.dog",

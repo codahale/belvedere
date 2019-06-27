@@ -12,30 +12,14 @@ import (
 )
 
 type Config struct {
-	IAMRoles          []string                   `json:"iamRoles,omitempty"`
-	NumReplicas       int                        `json:"numReplicas"`
-	MachineType       string                     `json:"machineType"`
-	Container         Container                  `json:"container"`
-	Sidecars          map[string]Container       `json:"sidecars"`
-	IAP               *compute.BackendServiceIAP `json:"identityAwareProxy"`
-	AutoscalingPolicy *compute.AutoscalingPolicy `json:"autoscalingPolicy"`
-	CDNPolicy         *CDNConfig                 `json:"cdnPolicy"`
-}
-
-func (c *Config) cdnEnabled() bool {
-	return c.CDNPolicy != nil && c.CDNPolicy.Enabled
-}
-
-func (c *Config) cdnPolicy() *compute.BackendServiceCdnPolicy {
-	if c.CDNPolicy == nil {
-		return nil
-	}
-	return &c.CDNPolicy.BackendServiceCdnPolicy
-}
-
-type CDNConfig struct {
-	Enabled bool `json:"enabled"`
-	compute.BackendServiceCdnPolicy
+	IAMRoles          []string                         `json:"iamRoles,omitempty"`
+	NumReplicas       int                              `json:"numReplicas"`
+	MachineType       string                           `json:"machineType"`
+	Container         Container                        `json:"container"`
+	Sidecars          map[string]Container             `json:"sidecars"`
+	IAP               *compute.BackendServiceIAP       `json:"identityAwareProxy"`
+	AutoscalingPolicy *compute.AutoscalingPolicy       `json:"autoscalingPolicy"`
+	CDNPolicy         *compute.BackendServiceCdnPolicy `json:"cdnPolicy"`
 }
 
 // LoadConfig loads the YAML configuration at the given path. If path is `-`, STDIN is used.

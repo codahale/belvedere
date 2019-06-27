@@ -202,8 +202,8 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 			Name: backendService,
 			Type: "compute.beta.backendService",
 			Properties: &compute.BackendService{
-				EnableCDN: config.cdnEnabled(),
-				CdnPolicy: config.cdnPolicy(),
+				EnableCDN: config.CDNPolicy != nil,
+				CdnPolicy: config.CDNPolicy,
 				ConnectionDraining: &compute.ConnectionDraining{
 					DrainingTimeoutSec: 60,
 				},
