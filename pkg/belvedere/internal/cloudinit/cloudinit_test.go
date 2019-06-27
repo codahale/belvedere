@@ -30,9 +30,9 @@ func TestCloudConfig(t *testing.T) {
 
 	actual := []byte(config.String())
 
-	//_ = ioutil.WriteFile("cloudinit.yaml", actual, 0644)
+	//_ = ioutil.WriteFile("cloudinit_fixture.yaml", actual, 0644)
 
-	expected, err := ioutil.ReadFile("cloudinit.yaml")
+	expected, err := ioutil.ReadFile("cloudinit_fixture.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}
