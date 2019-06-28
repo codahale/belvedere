@@ -28,6 +28,11 @@ To get a list of the DNS servers to use, run:
 belvedere dns-servers
 ----
 
+It's important that you do this before creating any apps, as creating an app involves provisioning a Google-managed TLS certificate.
+In order for that provisioning to be successful, the hostname associated with the app (e.g. `my-app.cornbread.club`) must resolve to the load balancer's IP address.
+In order to do that, the domain registration needs to provide the servers listed via `dns-servers` as the DNS servers for that hostname.
+If this isn't the case when an app is created, the certificate will take much longer to provision.
+
 == Apps
 
 Belvedere apps are HTTP2 apps packaged as containers in a registry, running on virtual machines with optional sidecars.
