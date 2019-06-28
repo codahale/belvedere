@@ -13,7 +13,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestCreate(t *testing.T) {
+func TestInsert(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -44,7 +44,7 @@ func TestCreate(t *testing.T) {
 		})
 
 	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := Create(ctx, "my-project", "my-deployment",
+	if err := Insert(ctx, "my-project", "my-deployment",
 		[]Resource{
 			{
 				Name: "my-instance",

@@ -90,9 +90,9 @@ type deploymentConfig struct {
 	Resources []Resource `json:"resources"`
 }
 
-// Creates a new deployment with the given name, resources, and labels.
-func Create(ctx context.Context, project, name string, resources []Resource, labels map[string]string, dryRun bool) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Create")
+// Insert inserts a new deployment with the given name, resources, and labels.
+func Insert(ctx context.Context, project, name string, resources []Resource, labels map[string]string, dryRun bool) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Insert")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("name", name),
@@ -152,7 +152,7 @@ func Create(ctx context.Context, project, name string, resources []Resource, lab
 	return waiter.Poll(ctx, check.DM(ctx, project, op.Name))
 }
 
-// Updates the given deployment to add, remove, or modify resources.
+// Update patches the given deployment to add, remove, or modify resources.
 func Update(ctx context.Context, project, name string, resources []Resource, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Update")
 	span.AddAttributes(
@@ -203,7 +203,7 @@ func Update(ctx context.Context, project, name string, resources []Resource, dry
 	return waiter.Poll(ctx, check.DM(ctx, project, op.Name))
 }
 
-// Deletes the given deployment.
+// Delete deletes the given deployment.
 func Delete(ctx context.Context, project, name string, dryRun, async bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Delete")
 	span.AddAttributes(
@@ -240,7 +240,7 @@ func Delete(ctx context.Context, project, name string, dryRun, async bool) error
 	return waiter.Poll(ctx, check.DM(ctx, project, op.Name))
 }
 
-// Lists the deployments for the project, returning the name and labels for each.
+// List returns the names and labels for all deployments in the project.
 func List(ctx context.Context, project string) ([]map[string]string, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.List")
 	span.AddAttributes(

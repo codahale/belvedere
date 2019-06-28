@@ -71,7 +71,7 @@ func CreateApp(ctx context.Context, project, region, app string, config *Config,
 
 	// Create a deployment with all the app resources.
 	name := fmt.Sprintf("belvedere-%s", app)
-	return deployments.Create(ctx, project, name,
+	return deployments.Insert(ctx, project, name,
 		appResources(project, app, managedZone, config),
 		map[string]string{
 			"belvedere-type":   "app",

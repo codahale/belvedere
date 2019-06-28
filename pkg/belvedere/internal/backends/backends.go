@@ -11,7 +11,7 @@ import (
 	"google.golang.org/api/compute/v0.beta"
 )
 
-// Adds an instance group to a backend service. If the instance group is already registered as a
+// Add adds an instance group to a backend service. If the instance group is already registered as a
 // backend, exits early.
 func Add(ctx context.Context, project, region, backendService, instanceGroup string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Add")
@@ -77,8 +77,8 @@ func Add(ctx context.Context, project, region, backendService, instanceGroup str
 	return waiter.Poll(ctx, check.GCE(ctx, project, op.Name))
 }
 
-// Removes an instance group from a backend service. If the instance group is not registered as a
-// backend, exits early.
+// Remove removes an instance group from a backend service. If the instance group is not registered
+// as a backend, exits early.
 func Remove(ctx context.Context, project, region, backendService, instanceGroup string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Remove")
 	span.AddAttributes(
