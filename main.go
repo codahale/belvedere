@@ -295,7 +295,7 @@ func isCmd(opts docopt.Opts, commands ...string) bool {
 }
 
 func config(ctx context.Context, opts docopt.Opts) (project string, err error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.config")
+	_, span := trace.StartSpan(ctx, "belvedere.config")
 	defer func() {
 		span.AddAttributes(
 			trace.StringAttribute("project", project),

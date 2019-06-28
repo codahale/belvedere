@@ -113,7 +113,7 @@ func ListInstances(ctx context.Context, project, app, release string) ([]string,
 // SSH returns a function which execs to a Google Cloud SDK gcloud process which tunnels an SSH
 // connection over IAP to the given instance.
 func SSH(ctx context.Context, project, instance string) (func() error, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.SSH")
+	_, span := trace.StartSpan(ctx, "belvedere.SSH")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("instance", instance),

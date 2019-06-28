@@ -37,7 +37,7 @@ type Container struct {
 
 // LoadConfig loads the YAML configuration at the given path. If path is `-`, STDIN is used.
 func LoadConfig(ctx context.Context, name string) (*Config, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.LoadConfig")
+	_, span := trace.StartSpan(ctx, "belvedere.LoadConfig")
 	span.AddAttributes(
 		trace.StringAttribute("name", name),
 	)
