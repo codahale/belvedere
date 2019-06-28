@@ -39,11 +39,7 @@ func DNSServers(ctx context.Context, project string) ([]string, error) {
 	}
 
 	// Return the DNS servers.
-	var dnsServers []string
-	for _, s := range mz.NameServers {
-		dnsServers = append(dnsServers, s)
-	}
-	return dnsServers, nil
+	return mz.NameServers, nil
 }
 
 // ListInstances returns a list of running instances in the project. If an app or release are
