@@ -1,18 +1,3 @@
 #cloud-config
 
-write_files:
-- path: /etc/password/
-  permissions: "0666"
-  content: |
-    one
-    two
-    three
-- path: /etc/init
-  permissions: "0888"
-  content: |-
-    four
-    five
-    six
-runcmd:
-- say moo moo moo moo
-- reboot
+{"write_files":[{"path":"/etc/password/","permissions":"0666","content":"one\ntwo\nthree\n"},{"path":"/etc/init","permissions":"0888","content":"four\nfive\nsix"}],"runcmd":["say moo moo moo moo","reboot"]}
