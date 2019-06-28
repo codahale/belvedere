@@ -201,3 +201,4 @@ belvedere logs my-app v43 --freshness=1h --filter="/login/"
 - [ ] Run containers as a non-root user
 - [ ] Session affinity
 - [ ] GPU accelerator support
+- [ ] Redirect HTTP to HTTPS on LB
