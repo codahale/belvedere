@@ -86,23 +86,27 @@ Options:
 
 	// Run commands.
 	if err := run(ctx, opts); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
-		os.Exit(-1)
+		die(err)
 	}
 
-	if callback != nil {
-		if err := callback(); err != nil {
-			_, _ = fmt.Fprintln(os.Stderr, err)
-			os.Exit(-1)
+	// Run all exit handlers.
+	for _, handler := range exitHandlers {
+		if err := handler(); err != nil {
+			die(err)
 		}
 	}
 }
 
-var callback func() error
+func die(err error) {
+	_, _ = fmt.Fprintln(os.Stderr, err)
+	os.Exit(-1)
+}
+
+var exitHandlers []func() error
 
 func run(ctx context.Context, opts docopt.Opts) error {
 	// Create a root span with some common attributes.
-	ctx, span := trace.StartSpan(ctx, "belvedere")
+	ctx, span := trace.StartSpan(ctx, "belvedere.run")
 	if hostname, err := os.Hostname(); err == nil {
 		span.AddAttributes(trace.StringAttribute("hostname", hostname))
 	}
@@ -166,7 +170,8 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		if err != nil {
 			return err
 		}
-		callback = ssh
+		// exec to gcloud after this method has exited
+		exitHandlers = append(exitHandlers, ssh)
 		return nil
 	case isCmd(opts, "logs"):
 		app, _ := opts.String("<app>")
