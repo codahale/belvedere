@@ -81,7 +81,8 @@ Options:
 		trace.RegisterExporter(&traceLogger{})
 	}
 
-	ctx := pollingContext(context.Background(), opts)
+	ctx, cancel := pollingContext(context.Background(), opts)
+	defer cancel()
 
 	// Run commands.
 	if err := run(ctx, opts); err != nil {
@@ -334,7 +335,7 @@ func config(ctx context.Context, opts docopt.Opts) (project string, err error) {
 	return "", errors.New("project not found")
 }
 
-func pollingContext(ctx context.Context, opts docopt.Opts) context.Context {
+func pollingContext(ctx context.Context, opts docopt.Opts) (context.Context, context.CancelFunc) {
 	interval, err := time.ParseDuration(opts["--interval"].(string))
 	if err != nil {
 		panic(err)
@@ -345,7 +346,7 @@ func pollingContext(ctx context.Context, opts docopt.Opts) context.Context {
 	if err != nil {
 		panic(err)
 	}
-	ctx, _ = context.WithTimeout(ctx, timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 
-	return ctx
+	return ctx, cancel
 }
