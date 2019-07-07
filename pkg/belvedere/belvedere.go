@@ -42,9 +42,16 @@ func DNSServers(ctx context.Context, project string) ([]string, error) {
 	return mz.NameServers, nil
 }
 
+type Instance struct {
+	Name        string
+	MachineType string
+	Zone        string
+	Status      string
+}
+
 // ListInstances returns a list of running instances in the project. If an app or release are
 // provided, limits the results to instances running the given app or release.
-func ListInstances(ctx context.Context, project, app, release string) ([]string, error) {
+func ListInstances(ctx context.Context, project, app, release string) ([]Instance, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.ListInstances")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -70,7 +77,7 @@ func ListInstances(ctx context.Context, project, app, release string) ([]string,
 	wg.Add(len(zones.Items))
 
 	// Create a slice and mutex for aggregating results.
-	var instances []string
+	var instances []Instance
 	var m sync.Mutex
 
 	// For each zone, start a goroutine to find instances.
@@ -91,7 +98,16 @@ func ListInstances(ctx context.Context, project, app, release string) ([]string,
 					if s, ok := i.Labels["belvedere-release"]; ok && (s == release || release == "") {
 						// Aggregate instance names.
 						m.Lock()
-						instances = append(instances, i.Name)
+						mt := i.MachineType
+						mt = mt[strings.LastIndex(mt, "/")+1:]
+						zone := i.Zone
+						zone = zone[strings.LastIndex(zone, "/")+1:]
+						instances = append(instances, Instance{
+							Name:        i.Name,
+							MachineType: mt,
+							Zone:        zone,
+							Status:      i.Status,
+						})
 						m.Unlock()
 					}
 				}

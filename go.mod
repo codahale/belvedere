@@ -9,6 +9,8 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.3.0
 	github.com/kr/pretty v0.1.0 // indirect
+	github.com/mattn/go-runewidth v0.0.4 // indirect
+	github.com/olekukonko/tablewriter v0.0.1
 	go.opencensus.io v0.22.0
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7 // indirect
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45

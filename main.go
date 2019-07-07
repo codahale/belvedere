@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
+	"strconv"
 	"text/tabwriter"
 	"time"
 
@@ -134,9 +135,12 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		if err != nil {
 			return err
 		}
+
+		var rows [][]string
 		for _, s := range servers {
-			fmt.Println(s)
+			rows = append(rows, []string{s})
 		}
+		_, _ = fmt.Fprint(os.Stdout, formatTable([]string{"Server"}, rows))
 		return nil
 	case isCmd(opts, "machine-types"):
 		region, _ := opts.String("<region>")
@@ -145,12 +149,12 @@ func run(ctx context.Context, opts docopt.Opts) error {
 			return err
 		}
 
-		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		_, _ = fmt.Fprintln(w, "Name\tvCPUs\tMemory (MiB)")
+		var rows [][]string
 		for _, mt := range machineTypes {
-			_, _ = fmt.Fprintf(w, "%s\t%4d\t%10d\n", mt.Name, mt.CPU, mt.Memory)
+			rows = append(rows, []string{mt.Name, strconv.Itoa(mt.CPU), strconv.Itoa(mt.Memory)})
 		}
-		return w.Flush()
+		_, _ = fmt.Fprint(os.Stdout, formatTable([]string{"Name", "vCPUs", "Memory (MiB)"}, rows))
+		return nil
 	case isCmd(opts, "instances"):
 		app, _ := opts.String("<app>")
 		release, _ := opts.String("<release>")
@@ -160,9 +164,11 @@ func run(ctx context.Context, opts docopt.Opts) error {
 			return err
 		}
 
-		for _, app := range instances {
-			fmt.Println(app)
+		var rows [][]string
+		for _, i := range instances {
+			rows = append(rows, []string{i.Name, i.MachineType, i.Zone, i.Status})
 		}
+		_, _ = fmt.Fprint(os.Stdout, formatTable([]string{"Name", "Machine Type", "Zone", "Status"}, rows))
 		return nil
 	case isCmd(opts, "ssh"):
 		instance, _ := opts.String("<instance>")
@@ -207,12 +213,12 @@ func run(ctx context.Context, opts docopt.Opts) error {
 			return err
 		}
 
-		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		_, _ = fmt.Fprintln(w, "Project\tRegion\tApp")
+		var rows [][]string
 		for _, app := range apps {
-			_, _ = fmt.Fprintf(w, "%s\t%s\t%s\n", app.Project, app.Region, app.Name)
+			rows = append(rows, []string{app.Project, app.Region, app.Name})
 		}
-		return w.Flush()
+		_, _ = fmt.Fprint(os.Stdout, formatTable([]string{"Project", "Region", "Name"}, rows))
+		return nil
 	case isCmd(opts, "apps", "create"):
 		app, _ := opts.String("<app>")
 		region, _ := opts.String("<region>")
@@ -241,13 +247,12 @@ func run(ctx context.Context, opts docopt.Opts) error {
 			return err
 		}
 
-		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		_, _ = fmt.Fprintln(w, "Project\tRegion\tApp\tRelease\tHash")
-		for _, release := range releases {
-			_, _ = fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
-				release.Project, release.Region, release.App, release.Release, release.Hash)
+		var rows [][]string
+		for _, p := range releases {
+			rows = append(rows, []string{p.Project, p.Region, p.App, p.Release, p.Hash})
 		}
-		return w.Flush()
+		_, _ = fmt.Fprint(os.Stdout, formatTable([]string{"Project", "Region", "App", "Release", "Hash"}, rows))
+		return nil
 	case isCmd(opts, "releases", "create"):
 		app, _ := opts.String("<app>")
 		release, _ := opts.String("<release>")
