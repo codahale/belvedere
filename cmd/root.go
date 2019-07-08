@@ -29,19 +29,13 @@ var (
 	timeout      time.Duration
 	exitHandlers []func() error
 	rootCtx      context.Context
-	rootCancel   context.CancelFunc
 	rootCmd      = &cobra.Command{
 		Use:   "belvedere",
 		Short: "A fine place from which to survey your estate.",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			rootCtx = belvedere.WithInterval(context.Background(), interval)
-			rootCtx, rootCancel = context.WithTimeout(rootCtx, timeout)
-			enableLogging()
 			return findProject()
 		},
 		PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
-			rootCancel()
-
 			for _, f := range exitHandlers {
 				if err := f(); err != nil {
 					return err
@@ -79,8 +73,19 @@ func commonContext(cmd *cobra.Command) (context.Context, *trace.Span) {
 }
 
 func Execute(version string) {
+	_ = rootCmd.ParseFlags(os.Args[1:])
+	enableLogging()
+
+	ctx, span := trace.StartSpan(context.Background(), "belvedere.cmd")
+	ctx = belvedere.WithInterval(ctx, interval)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	rootCtx = ctx
 	rootCmd.Version = version
-	if err := rootCmd.Execute(); err != nil {
+	err := rootCmd.Execute()
+	span.End()
+	if err != nil {
 		os.Exit(1)
 	}
 }
@@ -103,11 +108,18 @@ func enableLogging() {
 }
 
 func findProject() error {
+	ctx, span := trace.StartSpan(rootCtx, "belvedere.cmd.findProject")
+	defer span.End()
+
+	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
 	if project != "" {
+		span.AddAttributes(trace.StringAttribute("project", project))
 		return nil
 	}
 
-	b, err := exec.Command("gcloud", "config", "config-helper", "--format=json").Output()
+	b, err := exec.CommandContext(ctx, "gcloud", "config", "config-helper", "--format=json").Output()
 	if err != nil {
 		return xerrors.Errorf("unable to execute gcloud: %w", err)
 	}
@@ -127,6 +139,7 @@ func findProject() error {
 
 	if config.Configuration.Properties.Core.Project != "" {
 		project = config.Configuration.Properties.Core.Project
+		span.AddAttributes(trace.StringAttribute("project", project))
 		return nil
 	}
 
