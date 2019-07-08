@@ -1,8 +1,8 @@
-package main
+package internal
 
 import (
-	"bytes"
 	"encoding/csv"
+	"io"
 	"os"
 
 	"github.com/olekukonko/tablewriter"
@@ -14,19 +14,18 @@ func isTerminal() bool {
 	return err == nil
 }
 
-func formatTable(headers []string, rows [][]string) string {
-	b := bytes.NewBuffer(nil)
+func PrintTable(w io.Writer, rows [][]string, headers ...string) error {
 	if isTerminal() {
-		tw := tablewriter.NewWriter(b)
+		tw := tablewriter.NewWriter(w)
 		tw.SetAutoFormatHeaders(false)
 		tw.SetHeader(headers)
 		tw.AppendBulk(rows)
 		tw.Render()
 	} else {
-		cw := csv.NewWriter(b)
+		cw := csv.NewWriter(w)
 		_ = cw.Write(headers)
 		_ = cw.WriteAll(rows)
 		cw.Flush()
 	}
-	return b.String()
+	return nil
 }
