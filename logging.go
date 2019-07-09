@@ -1,4 +1,4 @@
-package internal
+package main
 
 import (
 	"fmt"
@@ -10,11 +10,11 @@ import (
 	"go.opencensus.io/trace"
 )
 
-type TraceLogger struct {
+type traceLogger struct {
 	m sync.Mutex
 }
 
-func (l *TraceLogger) ExportSpan(s *trace.SpanData) {
+func (l *traceLogger) ExportSpan(s *trace.SpanData) {
 	l.m.Lock()
 	defer l.m.Unlock()
 
@@ -35,7 +35,7 @@ func (l *TraceLogger) ExportSpan(s *trace.SpanData) {
 	}
 }
 
-func (l *TraceLogger) printAttributes(attributes map[string]interface{}) {
+func (l *traceLogger) printAttributes(attributes map[string]interface{}) {
 	var keys []string
 	for k := range attributes {
 		keys = append(keys, k)
