@@ -111,7 +111,7 @@ func findProject() error {
 	ctx, span := trace.StartSpan(rootCtx, "belvedere.cmd.findProject")
 	defer span.End()
 
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	if project != "" {
