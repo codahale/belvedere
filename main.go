@@ -300,7 +300,7 @@ func isCmd(opts docopt.Opts, commands ...string) bool {
 }
 
 func config(ctx context.Context, opts docopt.Opts) (project string, err error) {
-	_, span := trace.StartSpan(ctx, "belvedere.config")
+	ctx, span := trace.StartSpan(ctx, "belvedere.config")
 	defer func() {
 		span.AddAttributes(
 			trace.StringAttribute("project", project),
@@ -308,13 +308,16 @@ func config(ctx context.Context, opts docopt.Opts) (project string, err error) {
 	}()
 	defer span.End()
 
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
 	project, _ = opts.String("--project")
 
 	if project != "" {
 		return project, nil
 	}
 
-	cmd := exec.Command("gcloud", "config", "config-helper", "--format=json")
+	cmd := exec.CommandContext(ctx, "gcloud", "config", "config-helper", "--format=json")
 	b, err := cmd.Output()
 	if err != nil {
 		return "", err
