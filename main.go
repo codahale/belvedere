@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
-	"strconv"
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere"
@@ -146,12 +145,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		if err != nil {
 			return err
 		}
-
-		var rows [][]string
-		for _, mt := range machineTypes {
-			rows = append(rows, []string{mt.Name, strconv.Itoa(mt.CPU), strconv.Itoa(mt.Memory)})
-		}
-		return printTable([]string{"Name", "vCPUs", "Memory (MiB)"}, rows)
+		return printFancyTable(machineTypes)
 	case isCmd(opts, "instances"):
 		app, _ := opts.String("<app>")
 		release, _ := opts.String("<release>")
@@ -161,11 +155,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 			return err
 		}
 
-		var rows [][]string
-		for _, i := range instances {
-			rows = append(rows, []string{i.Name, i.MachineType, i.Zone, i.Status})
-		}
-		return printTable([]string{"Name", "Machine Type", "Zone", "Status"}, rows)
+		return printFancyTable(instances)
 	case isCmd(opts, "ssh"):
 		instance, _ := opts.String("<instance>")
 		ssh, err := belvedere.SSH(ctx, project, instance)
@@ -196,25 +186,13 @@ func run(ctx context.Context, opts docopt.Opts) error {
 			return err
 		}
 
-		var rows [][]string
-		for _, log := range logs {
-			rows = append(rows, []string{
-				log.Timestamp.Format(time.Stamp), log.Release, log.Instance, log.Container, log.Message,
-			})
-		}
-
-		return printTable([]string{"Timestamp", "Release", "Instance", "Container", "Message"}, rows)
+		return printFancyTable(logs)
 	case isCmd(opts, "apps", "list"):
 		apps, err := belvedere.ListApps(ctx, project)
 		if err != nil {
 			return err
 		}
-
-		var rows [][]string
-		for _, app := range apps {
-			rows = append(rows, []string{app.Project, app.Region, app.Name})
-		}
-		return printTable([]string{"Project", "Region", "Name"}, rows)
+		return printFancyTable(apps)
 	case isCmd(opts, "apps", "create"):
 		app, _ := opts.String("<app>")
 		region, _ := opts.String("<region>")
@@ -242,12 +220,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		if err != nil {
 			return err
 		}
-
-		var rows [][]string
-		for _, p := range releases {
-			rows = append(rows, []string{p.Project, p.Region, p.App, p.Release, p.Hash})
-		}
-		return printTable([]string{"Project", "Region", "App", "Release", "Hash"}, rows)
+		return printFancyTable(releases)
 	case isCmd(opts, "releases", "create"):
 		app, _ := opts.String("<app>")
 		release, _ := opts.String("<release>")

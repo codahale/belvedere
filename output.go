@@ -2,7 +2,10 @@ package main
 
 import (
 	"encoding/csv"
+	"fmt"
 	"os"
+	"reflect"
+	"time"
 
 	"github.com/olekukonko/tablewriter"
 	"golang.org/x/sys/unix"
@@ -28,4 +31,44 @@ func printTable(headers []string, rows [][]string) error {
 		cw.Flush()
 	}
 	return nil
+}
+
+func printFancyTable(i interface{}) error {
+	t := reflect.TypeOf(i)
+	if t.Kind() != reflect.Slice {
+		return nil
+	}
+
+	t = t.Elem()
+	if t.Kind() != reflect.Struct {
+		return nil
+	}
+
+	var headers []string
+	for i := 0; i < t.NumField(); i++ {
+		s := t.Field(i).Tag.Get("table")
+		if s == "" {
+			s = t.Field(i).Name
+		}
+		headers = append(headers, s)
+	}
+
+	var rows [][]string
+	iv := reflect.ValueOf(i)
+	for i := 0; i < iv.Len(); i++ {
+		var row []string
+		ev := iv.Index(i)
+		for j := range headers {
+			f := ev.Field(j)
+
+			if t, ok := f.Interface().(time.Time); ok {
+				row = append(row, t.Format(time.Stamp))
+			} else {
+				row = append(row, fmt.Sprint(f.Interface()))
+			}
+		}
+		rows = append(rows, row)
+	}
+
+	return printTable(headers, rows)
 }

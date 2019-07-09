@@ -44,7 +44,7 @@ func DNSServers(ctx context.Context, project string) ([]string, error) {
 
 type Instance struct {
 	Name        string
-	MachineType string
+	MachineType string `table:"Machine Type"`
 	Zone        string
 	Status      string
 }
@@ -150,7 +150,7 @@ func SSH(ctx context.Context, project, instance string) (func() error, error) {
 type MachineType struct {
 	Name   string
 	CPU    int
-	Memory int
+	Memory int `table:"Memory (MiB)"`
 }
 
 func (mt MachineType) lexical() string {
