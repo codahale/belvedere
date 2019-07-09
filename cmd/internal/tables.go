@@ -18,6 +18,7 @@ func PrintTable(w io.Writer, rows [][]string, headers ...string) error {
 	if isTerminal() {
 		tw := tablewriter.NewWriter(w)
 		tw.SetAutoFormatHeaders(false)
+		tw.SetAutoWrapText(false)
 		tw.SetHeader(headers)
 		tw.AppendBulk(rows)
 		tw.Render()
