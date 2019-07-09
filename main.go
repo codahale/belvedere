@@ -133,29 +133,22 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		if err != nil {
 			return err
 		}
-
-		var rows [][]string
-		for _, s := range servers {
-			rows = append(rows, []string{s})
-		}
-		return printTable([]string{"Server"}, rows)
+		return printTable(servers)
 	case isCmd(opts, "machine-types"):
 		region, _ := opts.String("<region>")
 		machineTypes, err := belvedere.MachineTypes(ctx, project, region)
 		if err != nil {
 			return err
 		}
-		return printFancyTable(machineTypes)
+		return printTable(machineTypes)
 	case isCmd(opts, "instances"):
 		app, _ := opts.String("<app>")
 		release, _ := opts.String("<release>")
-
 		instances, err := belvedere.ListInstances(ctx, project, app, release)
 		if err != nil {
 			return err
 		}
-
-		return printFancyTable(instances)
+		return printTable(instances)
 	case isCmd(opts, "ssh"):
 		instance, _ := opts.String("<instance>")
 		ssh, err := belvedere.SSH(ctx, project, instance)
@@ -186,13 +179,13 @@ func run(ctx context.Context, opts docopt.Opts) error {
 			return err
 		}
 
-		return printFancyTable(logs)
+		return printTable(logs)
 	case isCmd(opts, "apps", "list"):
 		apps, err := belvedere.ListApps(ctx, project)
 		if err != nil {
 			return err
 		}
-		return printFancyTable(apps)
+		return printTable(apps)
 	case isCmd(opts, "apps", "create"):
 		app, _ := opts.String("<app>")
 		region, _ := opts.String("<region>")
@@ -220,7 +213,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		if err != nil {
 			return err
 		}
-		return printFancyTable(releases)
+		return printTable(releases)
 	case isCmd(opts, "releases", "create"):
 		app, _ := opts.String("<app>")
 		release, _ := opts.String("<release>")

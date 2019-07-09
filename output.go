@@ -16,24 +16,7 @@ func isTerminal() bool {
 	return err == nil
 }
 
-func printTable(headers []string, rows [][]string) error {
-	if isTerminal() {
-		tw := tablewriter.NewWriter(os.Stdout)
-		tw.SetAutoFormatHeaders(false)
-		tw.SetAutoWrapText(false)
-		tw.SetHeader(headers)
-		tw.AppendBulk(rows)
-		tw.Render()
-	} else {
-		cw := csv.NewWriter(os.Stdout)
-		_ = cw.Write(headers)
-		_ = cw.WriteAll(rows)
-		cw.Flush()
-	}
-	return nil
-}
-
-func printFancyTable(i interface{}) error {
+func printTable(i interface{}) error {
 	t := reflect.TypeOf(i)
 	if t.Kind() != reflect.Slice {
 		return nil
@@ -70,5 +53,18 @@ func printFancyTable(i interface{}) error {
 		rows = append(rows, row)
 	}
 
-	return printTable(headers, rows)
+	if isTerminal() {
+		tw := tablewriter.NewWriter(os.Stdout)
+		tw.SetAutoFormatHeaders(false)
+		tw.SetAutoWrapText(false)
+		tw.SetHeader(headers)
+		tw.AppendBulk(rows)
+		tw.Render()
+	} else {
+		cw := csv.NewWriter(os.Stdout)
+		_ = cw.Write(headers)
+		_ = cw.WriteAll(rows)
+		cw.Flush()
+	}
+	return nil
 }

@@ -26,8 +26,12 @@ func WithInterval(ctx context.Context, interval time.Duration) context.Context {
 	return waiter.WithInterval(ctx, interval)
 }
 
+type DNSServer struct {
+	Server string
+}
+
 // DNSServers returns a list of DNS servers which handle the project's managed zone.
-func DNSServers(ctx context.Context, project string) ([]string, error) {
+func DNSServers(ctx context.Context, project string) ([]DNSServer, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DNSServers")
 	span.AddAttributes(trace.StringAttribute("project", project))
 	defer span.End()
@@ -39,7 +43,11 @@ func DNSServers(ctx context.Context, project string) ([]string, error) {
 	}
 
 	// Return the DNS servers.
-	return mz.NameServers, nil
+	var servers []DNSServer
+	for _, s := range mz.NameServers {
+		servers = append(servers, DNSServer{Server: s})
+	}
+	return servers, nil
 }
 
 type Instance struct {
