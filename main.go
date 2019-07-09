@@ -32,7 +32,7 @@ var (
 			Default("10s").Duration()
 	timeout = app.Flag("timeout", "Specify a timeout for long-running operations.").
 		Default("10m").Duration()
-	project = app.Flag("project", "Specify a GCP project ID.").String()
+	project = app.Flag("project", "Specify a GCP project ID. Defaults to using gcloud.").String()
 
 	setupCmd     = app.Command("setup", "Initialize a GCP project for use with Belvedere.")
 	setupDnsZone = setupCmd.Arg("dns-zone", "The DNS zone to be managed by this project.").
