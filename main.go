@@ -33,7 +33,7 @@ Usage:
   belvedere dns-servers [options]
   belvedere machine-types [<region>] [options]
   belvedere instances [<app>] [<release>] [options]
-  belvedere ssh <instance> [options]
+  belvedere ssh <instance> [--] [<args>...] [options]
   belvedere logs <app> [<release>] [<instance>] [--filter=<s>...] [--freshness=<duration>] [options]
   belvedere apps list [options]
   belvedere apps create <app> <region> <config> [options]
@@ -151,7 +151,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		return printTable(instances)
 	case isCmd(opts, "ssh"):
 		instance, _ := opts.String("<instance>")
-		ssh, err := belvedere.SSH(ctx, project, instance)
+		ssh, err := belvedere.SSH(ctx, project, instance, opts["<args>"].([]string))
 		if err != nil {
 			return err
 		}
