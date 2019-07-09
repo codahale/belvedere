@@ -139,7 +139,7 @@ The load balancer and DNS stuff will take 10-30 minutes to fully provision.
 To create a release for an app, get the SHA256 hash of the container image and run:
 
 ----
-belvedere releases create my-app v1 ./my-app.yaml 93433e08c1065c0fe8ebd151a329e2f8733495e7e6ef2a23249a6f12600de103
+belvedere releases create my-app v1 ./my-app.yaml $SHA256
 ----
 
 This will create a Deployment Manager deployment with some more goodies:
