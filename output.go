@@ -53,7 +53,7 @@ func printTable(i interface{}) error {
 		rows = append(rows, row)
 	}
 
-	if isTerminal() {
+	if isTerminal() && !*printCSV {
 		tw := tablewriter.NewWriter(os.Stdout)
 		tw.SetAutoFormatHeaders(false)
 		tw.SetAutoWrapText(false)
