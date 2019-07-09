@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/csv"
 	"os"
 
@@ -14,19 +13,19 @@ func isTerminal() bool {
 	return err == nil
 }
 
-func formatTable(headers []string, rows [][]string) string {
-	b := bytes.NewBuffer(nil)
+func printTable(headers []string, rows [][]string) error {
 	if isTerminal() {
-		tw := tablewriter.NewWriter(b)
+		tw := tablewriter.NewWriter(os.Stdout)
 		tw.SetAutoFormatHeaders(false)
+		tw.SetAutoWrapText(false)
 		tw.SetHeader(headers)
 		tw.AppendBulk(rows)
 		tw.Render()
 	} else {
-		cw := csv.NewWriter(b)
+		cw := csv.NewWriter(os.Stdout)
 		_ = cw.Write(headers)
 		_ = cw.WriteAll(rows)
 		cw.Flush()
 	}
-	return b.String()
+	return nil
 }

@@ -11,7 +11,6 @@ import (
 	"os/exec"
 	"os/user"
 	"strconv"
-	"text/tabwriter"
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere"
@@ -140,8 +139,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		for _, s := range servers {
 			rows = append(rows, []string{s})
 		}
-		_, _ = fmt.Fprint(os.Stdout, formatTable([]string{"Server"}, rows))
-		return nil
+		return printTable([]string{"Server"}, rows)
 	case isCmd(opts, "machine-types"):
 		region, _ := opts.String("<region>")
 		machineTypes, err := belvedere.MachineTypes(ctx, project, region)
@@ -153,8 +151,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		for _, mt := range machineTypes {
 			rows = append(rows, []string{mt.Name, strconv.Itoa(mt.CPU), strconv.Itoa(mt.Memory)})
 		}
-		_, _ = fmt.Fprint(os.Stdout, formatTable([]string{"Name", "vCPUs", "Memory (MiB)"}, rows))
-		return nil
+		return printTable([]string{"Name", "vCPUs", "Memory (MiB)"}, rows)
 	case isCmd(opts, "instances"):
 		app, _ := opts.String("<app>")
 		release, _ := opts.String("<release>")
@@ -168,8 +165,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		for _, i := range instances {
 			rows = append(rows, []string{i.Name, i.MachineType, i.Zone, i.Status})
 		}
-		_, _ = fmt.Fprint(os.Stdout, formatTable([]string{"Name", "Machine Type", "Zone", "Status"}, rows))
-		return nil
+		return printTable([]string{"Name", "Machine Type", "Zone", "Status"}, rows)
 	case isCmd(opts, "ssh"):
 		instance, _ := opts.String("<instance>")
 		ssh, err := belvedere.SSH(ctx, project, instance)
@@ -200,13 +196,14 @@ func run(ctx context.Context, opts docopt.Opts) error {
 			return err
 		}
 
-		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		_, _ = fmt.Fprintln(w, "Timestamp\tRelease\tInstance\tContainer\tMessage")
+		var rows [][]string
 		for _, log := range logs {
-			_, _ = fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
-				log.Timestamp.Format(time.Stamp), log.Release, log.Instance, log.Container, log.Message)
+			rows = append(rows, []string{
+				log.Timestamp.Format(time.Stamp), log.Release, log.Instance, log.Container, log.Message,
+			})
 		}
-		return w.Flush()
+
+		return printTable([]string{"Timestamp", "Release", "Instance", "Container", "Message"}, rows)
 	case isCmd(opts, "apps", "list"):
 		apps, err := belvedere.ListApps(ctx, project)
 		if err != nil {
@@ -217,8 +214,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		for _, app := range apps {
 			rows = append(rows, []string{app.Project, app.Region, app.Name})
 		}
-		_, _ = fmt.Fprint(os.Stdout, formatTable([]string{"Project", "Region", "Name"}, rows))
-		return nil
+		return printTable([]string{"Project", "Region", "Name"}, rows)
 	case isCmd(opts, "apps", "create"):
 		app, _ := opts.String("<app>")
 		region, _ := opts.String("<region>")
@@ -251,8 +247,7 @@ func run(ctx context.Context, opts docopt.Opts) error {
 		for _, p := range releases {
 			rows = append(rows, []string{p.Project, p.Region, p.App, p.Release, p.Hash})
 		}
-		_, _ = fmt.Fprint(os.Stdout, formatTable([]string{"Project", "Region", "App", "Release", "Hash"}, rows))
-		return nil
+		return printTable([]string{"Project", "Region", "App", "Release", "Hash"}, rows)
 	case isCmd(opts, "releases", "create"):
 		app, _ := opts.String("<app>")
 		release, _ := opts.String("<release>")
