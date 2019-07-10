@@ -69,11 +69,11 @@ var (
 	appsCreateCmd    = appsCmd.Command("create", "Create an application.")
 	appsCreateApp    = appsCreateCmd.Arg("app", "The app's name.").Required().String()
 	appsCreateRegion = appsCreateCmd.Arg("region", "The app's region.").Required().String()
-	appsCreateConfig = appsCreateCmd.Arg("config", "The app's configuration.").Required().ExistingFile()
+	appsCreateConfig = appsCreateCmd.Arg("config", "The app's configuration.").Required().String()
 
 	appsUpdateCmd    = appsCmd.Command("update", "Update an application.")
 	appsUpdateApp    = appsUpdateCmd.Arg("app", "The app's name.").Required().String()
-	appsUpdateConfig = appsUpdateCmd.Arg("config", "The app's configuration.").Required().ExistingFile()
+	appsUpdateConfig = appsUpdateCmd.Arg("config", "The app's configuration.").Required().String()
 
 	appsDeleteCmd   = appsCmd.Command("delete", "Delete an application.")
 	appsDeleteApp   = appsDeleteCmd.Arg("app", "The app's name.").Required().String()
@@ -87,7 +87,7 @@ var (
 	relCreateCmd     = relCmd.Command("create", "Create a release.")
 	relCreateApp     = relCreateCmd.Arg("app", "The app's name.").Required().String()
 	relCreateRelease = relCreateCmd.Arg("release", "The release's name.").Required().String()
-	relCreateConfig  = relCreateCmd.Arg("config", "The app's config.").Required().ExistingFile()
+	relCreateConfig  = relCreateCmd.Arg("config", "The app's config.").Required().String()
 	relCreateHash    = relCreateCmd.Arg("sha256", "The app container's SHA256 hash.").Required().String()
 	relCreateEnable  = relCreateCmd.Flag("enable", "Put release into service once created.").Bool()
 
