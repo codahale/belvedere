@@ -260,9 +260,9 @@ func runCmd(ctx context.Context, cmd string) error {
 			return err
 		}
 		return belvedere.DeleteRelease(ctx, *project, *relDeleteApp, *relDeleteRelease, *dryRun, *relDeleteAsync)
+	default:
+		return fmt.Errorf("command not implemented: %s", cmd)
 	}
-
-	return fmt.Errorf("command not implemented: %s", cmd)
 }
 
 func die(err error) {
