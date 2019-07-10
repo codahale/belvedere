@@ -22,13 +22,12 @@ import (
 var (
 	exitHandlers []func() error
 	version      = "unknown"
-	app          = kingpin.New("belvedere", "A fine place from which to survey your estate.").
-			Version(version)
-	debug    = app.Flag("debug", "Enable debug logging.").Bool()
-	quiet    = app.Flag("quiet", "Disable all logging.").Short('q').Bool()
-	dryRun   = app.Flag("dry-run", "Print modifications instead of performing them.").Bool()
-	printCSV = app.Flag("csv", "Print tables as CSV").Bool()
-	interval = app.Flag("interval", "Specify a polling interval for long-running operations.").
+	app          = kingpin.New("belvedere", "A fine place from which to survey your estate.")
+	debug        = app.Flag("debug", "Enable debug logging.").Bool()
+	quiet        = app.Flag("quiet", "Disable all logging.").Short('q').Bool()
+	dryRun       = app.Flag("dry-run", "Print modifications instead of performing them.").Bool()
+	printCSV     = app.Flag("csv", "Print tables as CSV").Bool()
+	interval     = app.Flag("interval", "Specify a polling interval for long-running operations.").
 			Default("10s").Duration()
 	timeout = app.Flag("timeout", "Specify a timeout for long-running operations.").
 		Default("10m").Duration()
@@ -107,6 +106,7 @@ var (
 
 func main() {
 	app.HelpFlag.Short('h')
+	app.Version(version)
 
 	// Parse command line.
 	cmd, err := app.Parse(os.Args[1:])
