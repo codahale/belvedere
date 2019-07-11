@@ -113,28 +113,14 @@ func main() {
 	// Set up trace logging.
 	enableLogging()
 
-	// Initialize a context with a timeout and an interval.
-	ctx := belvedere.WithInterval(context.Background(), *interval)
-	ctx, cancel := context.WithTimeout(ctx, *timeout)
-	defer cancel()
-
 	// Create a root span.
-	ctx, span := trace.StartSpan(ctx, "belvedere.run")
-	if hostname, err := os.Hostname(); err == nil {
-		span.AddAttributes(trace.StringAttribute("hostname", hostname))
-	}
-	if u, err := user.Current(); err == nil {
-		span.AddAttributes(trace.StringAttribute("user", u.Username))
-	}
+	ctx, cancel, span := rootSpan()
+	defer cancel()
 	defer span.End()
 
-	// Detect project.
-	if *project == "" {
-		p, err := belvedere.DefaultProject(ctx)
-		if err != nil {
-			die(err)
-		}
-		project = &p
+	// If a project was not explicitly specified, detect one.
+	if err := detectProject(ctx); err != nil {
+		die(err)
 	}
 
 	// Run command.
@@ -149,6 +135,33 @@ func main() {
 			die(err)
 		}
 	}
+}
+
+func detectProject(ctx context.Context) error {
+	if *project == "" {
+		p, err := belvedere.DefaultProject(ctx)
+		if err != nil {
+			return err
+		}
+		project = &p
+	}
+	return nil
+}
+
+func rootSpan() (context.Context, context.CancelFunc, *trace.Span) {
+	// Initialize a context with a timeout and an interval.
+	ctx := belvedere.WithInterval(context.Background(), *interval)
+	ctx, cancel := context.WithTimeout(ctx, *timeout)
+	// Create a root span.
+	ctx, span := trace.StartSpan(ctx, "belvedere.run")
+	if hostname, err := os.Hostname(); err == nil {
+		span.AddAttributes(trace.StringAttribute("hostname", hostname))
+	}
+	if u, err := user.Current(); err == nil {
+		span.AddAttributes(trace.StringAttribute("username", u.Username))
+		span.AddAttributes(trace.StringAttribute("uid", u.Uid))
+	}
+	return ctx, cancel, span
 }
 
 func enableLogging() {
