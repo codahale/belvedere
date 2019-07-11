@@ -13,6 +13,7 @@ import (
 	"google.golang.org/api/dns/v1"
 )
 
+// App is a Belvedere app.
 type App struct {
 	Project string
 	Region  string

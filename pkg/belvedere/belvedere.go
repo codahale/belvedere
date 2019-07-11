@@ -26,6 +26,7 @@ func WithInterval(ctx context.Context, interval time.Duration) context.Context {
 	return waiter.WithInterval(ctx, interval)
 }
 
+// DNSServer is a DNS server run by Google.
 type DNSServer struct {
 	Server string
 }
@@ -50,6 +51,7 @@ func DNSServers(ctx context.Context, project string) ([]DNSServer, error) {
 	return servers, nil
 }
 
+// Instance is a Google Compute Engine VM instance.
 type Instance struct {
 	Name        string
 	MachineType string `table:"Machine Type"`
