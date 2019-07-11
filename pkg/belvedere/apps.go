@@ -20,9 +20,9 @@ type App struct {
 	Name    string
 }
 
-// ListApps returns a list of apps which have been created in the given project.
-func ListApps(ctx context.Context, project string) ([]App, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.ListApps")
+// Apps returns a list of apps which have been created in the given project.
+func Apps(ctx context.Context, project string) ([]App, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.Apps")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 	)

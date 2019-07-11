@@ -59,10 +59,10 @@ type Instance struct {
 	Status      string
 }
 
-// ListInstances returns a list of running instances in the project. If an app or release are
+// Instances returns a list of running instances in the project. If an app or release are
 // provided, limits the results to instances running the given app or release.
-func ListInstances(ctx context.Context, project, app, release string) ([]Instance, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.ListInstances")
+func Instances(ctx context.Context, project, app, release string) ([]Instance, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.Instances")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", app),

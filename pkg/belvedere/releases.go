@@ -24,9 +24,9 @@ type Release struct {
 	Hash    string
 }
 
-// ListReleases returns a list of releases in the given project for the given app, if any is passed.
-func ListReleases(ctx context.Context, project, app string) ([]Release, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.ListReleases")
+// Releases returns a list of releases in the given project for the given app, if any is passed.
+func Releases(ctx context.Context, project, app string) ([]Release, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.Releases")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 	)

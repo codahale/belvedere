@@ -190,7 +190,7 @@ func runCmd(ctx context.Context, cmd string, exit *func() error) error {
 		}
 		return printTable(machineTypes)
 	case instancesCmd.FullCommand():
-		instances, err := belvedere.ListInstances(ctx, *project, *instancesApp, *instancesRelease)
+		instances, err := belvedere.Instances(ctx, *project, *instancesApp, *instancesRelease)
 		if err != nil {
 			return err
 		}
@@ -210,7 +210,7 @@ func runCmd(ctx context.Context, cmd string, exit *func() error) error {
 		}
 		return printTable(logs)
 	case appsListCmd.FullCommand():
-		apps, err := belvedere.ListApps(ctx, *project)
+		apps, err := belvedere.Apps(ctx, *project)
 		if err != nil {
 			return err
 		}
@@ -230,7 +230,7 @@ func runCmd(ctx context.Context, cmd string, exit *func() error) error {
 	case appsDeleteCmd.FullCommand():
 		return belvedere.DeleteApp(ctx, *project, *appsDeleteApp, *dryRun, *appsDeleteAsync)
 	case relListCmd.FullCommand():
-		releases, err := belvedere.ListReleases(ctx, *project, *relListApp)
+		releases, err := belvedere.Releases(ctx, *project, *relListApp)
 		if err != nil {
 			return err
 		}
