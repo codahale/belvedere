@@ -4,11 +4,8 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"os/user"
 	"time"
 
@@ -133,7 +130,7 @@ func main() {
 
 	// Detect project.
 	if *project == "" {
-		p, err := gcloud(ctx)
+		p, err := belvedere.DefaultProject(ctx)
 		if err != nil {
 			die(err)
 		}
@@ -268,39 +265,4 @@ func runCmd(ctx context.Context, cmd string, exit *func() error) error {
 func die(err error) {
 	_, _ = fmt.Fprintln(os.Stderr, err)
 	os.Exit(-1)
-}
-
-func gcloud(ctx context.Context) (string, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.gcloud")
-	defer span.End()
-
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-
-	cmd := exec.CommandContext(ctx, "gcloud", "config", "config-helper", "--format=json")
-	b, err := cmd.Output()
-	if err != nil {
-		return "", err
-	}
-
-	var config struct {
-		Configuration struct {
-			Properties struct {
-				Core struct {
-					Project string `json:"project"`
-				} `json:"core"`
-			} `json:"properties"`
-		} `json:"configuration"`
-	}
-	if err = json.Unmarshal(b, &config); err != nil {
-		return "", err
-	}
-
-	if config.Configuration.Properties.Core.Project != "" {
-		span.AddAttributes(trace.StringAttribute("project",
-			config.Configuration.Properties.Core.Project))
-		return config.Configuration.Properties.Core.Project, nil
-	}
-
-	return "", errors.New("project not found")
 }
