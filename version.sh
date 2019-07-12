@@ -12,3 +12,4 @@ func init() {
   version = "${COMMIT}-${TIME}"
 }
 EOF
+go fmt .
