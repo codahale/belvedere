@@ -39,6 +39,7 @@ type ServiceAccount struct {
 	DisplayName string `json:"displayName"`
 }
 
+// MarshalJSON marshals the service account as a JSON object.
 func (s *ServiceAccount) MarshalJSON() ([]byte, error) {
 	// Cast from a pointer to a raw type to avoid infinite recursion while reusing the standard JSON
 	// marshalling code.
@@ -57,6 +58,7 @@ type ResourceRecordSets struct {
 	Records     []*dns.ResourceRecordSet `json:"records"`
 }
 
+// MarshalJSON marshals the resource record sets as a JSON object.
 func (rrs *ResourceRecordSets) MarshalJSON() ([]byte, error) {
 	// Cast from a pointer to a raw type to avoid infinite recursion while reusing the standard JSON
 	// marshalling code.
@@ -75,6 +77,7 @@ type IAMMemberBinding struct {
 	Member   string `json:"member"`
 }
 
+// MarshalJSON marshals the IAM member binding as a JSON object.
 func (b *IAMMemberBinding) MarshalJSON() ([]byte, error) {
 	// Cast from a pointer to a raw type to avoid infinite recursion while reusing the standard JSON
 	// marshalling code.
