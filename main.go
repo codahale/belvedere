@@ -16,6 +16,18 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
+func main() {
+	app.HelpFlag.Short('h')
+	app.Version(version)
+
+	// Parse command line and execute the action associated with the command.
+	_, err := app.Parse(os.Args[1:])
+	if err != nil {
+		die(err)
+	}
+}
+
+// Define the CLI app, commands, and flags.
 var (
 	version = "unknown" // version is injected via the go:generate statement
 
@@ -120,40 +132,156 @@ var (
 	relDeleteAsync   = relDeleteCmd.Flag("async", "Return without waiting for successful completion.").Bool()
 )
 
-func main() {
-	app.HelpFlag.Short('h')
-	app.Version(version)
+// Map all commands to actions. This has to happen outside the `var` clauses because command actions
+// refer to command args and flags which themselves refer to commands. Go doesn't do cycles.
+func init() {
+	setupCmd.Action(contextAction(func(ctx context.Context, exit *func() error) error {
+		return belvedere.Setup(ctx, *project, *setupDnsZone, *dryRun)
+	}))
 
-	// Parse command line.
-	cmd, err := app.Parse(os.Args[1:])
-	if err != nil {
-		die(err)
-	}
+	teardownCmd.Action(contextAction(func(ctx context.Context, exit *func() error) error {
+		return belvedere.Teardown(ctx, *project, *dryRun, *teardownAsync)
+	}))
 
-	// Set up trace logging.
-	enableLogging()
+	dnsServersCmd.Action(contextAction(func(ctx context.Context, exit *func() error) error {
+		servers, err := belvedere.DNSServers(ctx, *project)
+		if err != nil {
+			return err
+		}
+		return printTable(servers)
+	}))
 
-	// Create a root span.
-	ctx, cancel, span := rootSpan()
-	defer cancel()
-	defer span.End()
+	machineTypesCmd.Action(contextAction(func(ctx context.Context, exit *func() error) error {
+		machineTypes, err := belvedere.MachineTypes(ctx, *project, *machineTypesRegion)
+		if err != nil {
+			return err
+		}
+		return printTable(machineTypes)
+	}))
 
-	// If a project was not explicitly specified, detect one.
-	if err := detectProject(ctx); err != nil {
-		die(err)
-	}
+	instancesCmd.Action(contextAction(func(ctx context.Context, exit *func() error) error {
+		instances, err := belvedere.Instances(ctx, *project, *instancesApp, *instancesRelease)
+		if err != nil {
+			return err
+		}
+		return printTable(instances)
+	}))
 
-	// Run command.
-	var exit func() error
-	if err := runCmd(ctx, cmd, &exit); err != nil {
-		die(err)
-	}
+	sshCmd.Action(contextAction(func(ctx context.Context, exit *func() error) error {
+		ssh, err := belvedere.SSH(ctx, *project, *sshInstance, *sshArgs)
+		if err != nil {
+			return err
+		}
+		*exit = ssh
+		return nil
+	}))
 
-	// Run exit handlers, if any.
-	if exit != nil {
-		if err := exit(); err != nil {
+	logsCmd.Action(contextAction(func(ctx context.Context, exit *func() error) error {
+		t := time.Now().Add(-*logsFreshness)
+		logs, err := belvedere.Logs(ctx, *project, *logsApp, *logsRelease, *logsInstance, t, *logsFilters)
+		if err != nil {
+			return err
+		}
+		return printTable(logs)
+	}))
+
+	appsListCmd.Action(contextAction(func(ctx context.Context, exit *func() error) error {
+		apps, err := belvedere.Apps(ctx, *project)
+		if err != nil {
+			return err
+		}
+		return printTable(apps)
+	}))
+
+	appsCreateCmd.Action(contextAction(func(ctx context.Context, exit *func() error) error {
+		config, err := belvedere.LoadConfig(ctx, *appsCreateConfig)
+		if err != nil {
+			return err
+		}
+		return belvedere.CreateApp(ctx, *project, *appsCreateRegion, *appsCreateApp, config, *dryRun)
+	}))
+
+	appsUpdateCmd.Action(contextAction(func(ctx context.Context, exit *func() error) error {
+		config, err := belvedere.LoadConfig(ctx, *appsUpdateConfig)
+		if err != nil {
+			return err
+		}
+		return belvedere.UpdateApp(ctx, *project, *appsUpdateApp, config, *dryRun)
+	}))
+
+	appsDeleteCmd.Action(contextAction(func(ctx context.Context, exit *func() error) error {
+		return belvedere.DeleteApp(ctx, *project, *appsDeleteApp, *dryRun, *appsDeleteAsync)
+	}))
+
+	relListCmd.Action(contextAction(func(ctx context.Context, exit *func() error) error {
+		releases, err := belvedere.Releases(ctx, *project, *relListApp)
+		if err != nil {
+			return err
+		}
+		return printTable(releases)
+	}))
+
+	relCreateCmd.Action(contextAction(func(ctx context.Context, exit *func() error) error {
+		config, err := belvedere.LoadConfig(ctx, *relCreateConfig)
+		if err != nil {
+			return err
+		}
+		if err := belvedere.CreateRelease(
+			ctx, *project, *relCreateApp, *relCreateRelease, config, *relCreateHash, *dryRun,
+		); err != nil {
+			return err
+		}
+		if *relCreateEnable {
+			if err := belvedere.EnableRelease(ctx, *project, *relCreateApp, *relCreateRelease, *dryRun); err != nil {
+				return err
+			}
+		}
+		return nil
+	}))
+
+	relEnableCmd.Action(contextAction(func(ctx context.Context, exit *func() error) error {
+		return belvedere.EnableRelease(ctx, *project, *relEnableApp, *relEnableRelease, *dryRun)
+	}))
+
+	relDisableCmd.Action(contextAction(func(ctx context.Context, exit *func() error) error {
+		return belvedere.DisableRelease(ctx, *project, *relDisableApp, *relDisableRelease, *dryRun)
+	}))
+
+	relDeleteCmd.Action(contextAction(func(ctx context.Context, exit *func() error) error {
+		if err := belvedere.DisableRelease(ctx, *project, *relDeleteApp, *relDeleteRelease, false); err != nil {
+			return err
+		}
+		return belvedere.DeleteRelease(ctx, *project, *relDeleteApp, *relDeleteRelease, *dryRun, *relDeleteAsync)
+	}))
+}
+
+func contextAction(f func(ctx context.Context, exit *func() error) error) kingpin.Action {
+	return func(parseContext *kingpin.ParseContext) error {
+		// Enable trace logging.
+		enableLogging()
+
+		// Create a root span.
+		ctx, cancel, span := rootSpan()
+		defer cancel()
+		defer span.End()
+
+		// If a project was not explicitly specified, detect one.
+		if err := detectProject(ctx); err != nil {
 			die(err)
 		}
+
+		var exit func() error
+		if err := f(ctx, &exit); err != nil {
+			return err
+		}
+
+		if exit != nil {
+			// Manually end the root span and execute the exit handler.
+			span.End()
+			return exit()
+		}
+
+		return nil
 	}
 }
 
@@ -198,100 +326,6 @@ func enableLogging() {
 	} else if !*quiet {
 		// Unless we're quiet, use the trace logger for more practical logging.
 		trace.RegisterExporter(&traceLogger{})
-	}
-}
-
-func runCmd(ctx context.Context, cmd string, exit *func() error) error {
-	switch cmd {
-	case setupCmd.FullCommand():
-		return belvedere.Setup(ctx, *project, *setupDnsZone, *dryRun)
-	case teardownCmd.FullCommand():
-		return belvedere.Teardown(ctx, *project, *dryRun, *teardownAsync)
-	case dnsServersCmd.FullCommand():
-		servers, err := belvedere.DNSServers(ctx, *project)
-		if err != nil {
-			return err
-		}
-		return printTable(servers)
-	case machineTypesCmd.FullCommand():
-		machineTypes, err := belvedere.MachineTypes(ctx, *project, *machineTypesRegion)
-		if err != nil {
-			return err
-		}
-		return printTable(machineTypes)
-	case instancesCmd.FullCommand():
-		instances, err := belvedere.Instances(ctx, *project, *instancesApp, *instancesRelease)
-		if err != nil {
-			return err
-		}
-		return printTable(instances)
-	case sshCmd.FullCommand():
-		ssh, err := belvedere.SSH(ctx, *project, *sshInstance, *sshArgs)
-		if err != nil {
-			return err
-		}
-		*exit = ssh
-		return nil
-	case logsCmd.FullCommand():
-		t := time.Now().Add(-*logsFreshness)
-		logs, err := belvedere.Logs(ctx, *project, *logsApp, *logsRelease, *logsInstance, t, *logsFilters)
-		if err != nil {
-			return err
-		}
-		return printTable(logs)
-	case appsListCmd.FullCommand():
-		apps, err := belvedere.Apps(ctx, *project)
-		if err != nil {
-			return err
-		}
-		return printTable(apps)
-	case appsCreateCmd.FullCommand():
-		config, err := belvedere.LoadConfig(ctx, *appsCreateConfig)
-		if err != nil {
-			return err
-		}
-		return belvedere.CreateApp(ctx, *project, *appsCreateRegion, *appsCreateApp, config, *dryRun)
-	case appsUpdateCmd.FullCommand():
-		config, err := belvedere.LoadConfig(ctx, *appsUpdateConfig)
-		if err != nil {
-			return err
-		}
-		return belvedere.UpdateApp(ctx, *project, *appsUpdateApp, config, *dryRun)
-	case appsDeleteCmd.FullCommand():
-		return belvedere.DeleteApp(ctx, *project, *appsDeleteApp, *dryRun, *appsDeleteAsync)
-	case relListCmd.FullCommand():
-		releases, err := belvedere.Releases(ctx, *project, *relListApp)
-		if err != nil {
-			return err
-		}
-		return printTable(releases)
-	case relCreateCmd.FullCommand():
-		config, err := belvedere.LoadConfig(ctx, *relCreateConfig)
-		if err != nil {
-			return err
-		}
-		if err := belvedere.CreateRelease(
-			ctx, *project, *relCreateApp, *relCreateRelease, config, *relCreateHash, *dryRun,
-		); err != nil {
-			return err
-		}
-		if *relCreateEnable {
-			if err := belvedere.EnableRelease(ctx, *project, *relCreateApp, *relCreateRelease, *dryRun); err != nil {
-				return err
-			}
-		}
-		return nil
-	case relEnableCmd.FullCommand():
-		return belvedere.EnableRelease(ctx, *project, *relEnableApp, *relEnableRelease, *dryRun)
-	case relDisableCmd.FullCommand():
-		return belvedere.DisableRelease(ctx, *project, *relDisableApp, *relDisableRelease, *dryRun)
-	case relDeleteCmd.FullCommand():
-		if err := belvedere.DisableRelease(ctx, *project, *relDeleteApp, *relDeleteRelease, false); err != nil {
-			return err
-		}
-		return belvedere.DeleteRelease(ctx, *project, *relDeleteApp, *relDeleteRelease, *dryRun, *relDeleteAsync)
-	default:
-		return fmt.Errorf("command not implemented: %s", cmd)
 	}
 }
 
