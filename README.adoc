@@ -229,6 +229,12 @@ This will use `gcloud` to automatically configure an SSH key, inject it into the
 IAP tunneling is used because it allows for public SSH access to app instances to be disabled.
 Only IAP tunnels are allowed, and IAP tunnels require that the initiator be an authenticated member of the GCP project.
 
+You can also pass arguments to SSH:
+
+----
+belvedere ssh my-app-v43-hxht -- ls -al
+----
+
 === Viewing Logs
 
 To view the logs for an app and its sidecar containers, run:
