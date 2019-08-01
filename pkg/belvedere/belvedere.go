@@ -16,6 +16,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
+	"golang.org/x/sync/errgroup"
 	"golang.org/x/xerrors"
 	compute "google.golang.org/api/compute/v0.beta"
 )
@@ -82,9 +83,8 @@ func Instances(ctx context.Context, project, app, release string) ([]Instance, e
 		return nil, xerrors.Errorf("error listing zones: %w", err)
 	}
 
-	// Create a wait group for the zones.
-	var wg sync.WaitGroup
-	wg.Add(len(zones.Items))
+	// Create an error group for the results.
+	g, ctx := errgroup.WithContext(ctx)
 
 	// Create a slice and mutex for aggregating results.
 	var instances []Instance
@@ -92,13 +92,14 @@ func Instances(ctx context.Context, project, app, release string) ([]Instance, e
 
 	// For each zone, start a goroutine to find instances.
 	for _, zone := range zones.Items {
-		go func(zoneName string) {
-			defer wg.Done()
+		g.Go(func() error {
+			// Copy the zone name.
+			zoneName := zone.Name
 
 			// List all instances in the zone.
 			zi, err := gce.Instances.List(project, zoneName).Context(ctx).Do()
 			if err != nil {
-				return // ignore errors b/c concurrency sucks
+				return err
 			}
 
 			// Filter instances by app and release. Only return belvedere-managed instances,
@@ -122,11 +123,15 @@ func Instances(ctx context.Context, project, app, release string) ([]Instance, e
 					}
 				}
 			}
-		}(zone.Name)
+
+			return nil
+		})
 	}
 
 	// Wait for all zones to complete.
-	wg.Wait()
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
 
 	// Return results.
 	return instances, nil

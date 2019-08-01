@@ -17,6 +17,7 @@ require (
 	go.opencensus.io v0.22.0
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7 // indirect
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
+	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	golang.org/x/sys v0.0.0-20190730183949-1393eb018365
 	golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7
 	google.golang.org/api v0.7.0
