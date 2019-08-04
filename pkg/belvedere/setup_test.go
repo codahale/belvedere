@@ -1,12 +1,10 @@
 package belvedere
 
 import (
-	"bytes"
 	"encoding/json"
-	"io/ioutil"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/fixtures"
 )
 
 func TestSetupResources(t *testing.T) {
@@ -19,14 +17,5 @@ func TestSetupResources(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	//_ = ioutil.WriteFile("setup_fixture.json", actual, 0644)
-
-	expected, err := ioutil.ReadFile("setup_fixture.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !bytes.Equal(expected, actual) {
-		t.Error(cmp.Diff(string(expected), string(actual)))
-	}
+	fixtures.Compare(t, "setup_fixture.json", actual)
 }

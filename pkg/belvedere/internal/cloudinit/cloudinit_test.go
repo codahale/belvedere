@@ -1,11 +1,9 @@
 package cloudinit
 
 import (
-	"bytes"
-	"io/ioutil"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/fixtures"
 )
 
 func TestCloudConfig(t *testing.T) {
@@ -28,16 +26,5 @@ func TestCloudConfig(t *testing.T) {
 		},
 	}
 
-	actual := []byte(config.String())
-
-	//_ = ioutil.WriteFile("cloudinit_fixture.yaml", actual, 0644)
-
-	expected, err := ioutil.ReadFile("cloudinit_fixture.yaml")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !bytes.Equal(expected, actual) {
-		t.Error(cmp.Diff(string(expected), string(actual)))
-	}
+	fixtures.Compare(t, "cloudinit_fixture.yaml", []byte(config.String()))
 }
