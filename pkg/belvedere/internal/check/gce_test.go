@@ -14,7 +14,7 @@ func TestGCERunning(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://www.googleapis.com/compute/beta/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/beta/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 		Reply(200).
 		JSON(compute.Operation{
 			Status: "RUNNING",
@@ -35,7 +35,7 @@ func TestGCEDone(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://www.googleapis.com/compute/beta/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/beta/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 		Reply(200).
 		JSON(compute.Operation{
 			Status: "DONE",
@@ -56,7 +56,7 @@ func TestGCEError(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://www.googleapis.com/compute/beta/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/beta/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 		Reply(200).
 		JSON(compute.Operation{
 			Status: "DONE",

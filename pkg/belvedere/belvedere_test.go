@@ -14,7 +14,7 @@ func TestMachineTypes(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://www.googleapis.com/compute/beta/projects/my-project/aggregated/machineTypes?alt=json&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/machineTypes?alt=json&prettyPrint=false").
 		Reply(200).
 		JSON(compute.MachineTypeAggregatedList{
 			Items: map[string]compute.MachineTypesScopedList{
