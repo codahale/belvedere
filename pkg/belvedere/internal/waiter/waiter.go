@@ -26,9 +26,14 @@ func Poll(ctx context.Context, c Condition) error {
 		return fmt.Errorf("no interval set")
 	}
 
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
 	for {
 		select {
-		case <-time.After(interval):
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
 			done, err := c()
 			if err != nil {
 				return err
@@ -37,8 +42,6 @@ func Poll(ctx context.Context, c Condition) error {
 			if done {
 				return nil
 			}
-		case <-ctx.Done():
-			return ctx.Err()
 		}
 	}
 }
