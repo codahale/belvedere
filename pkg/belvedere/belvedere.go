@@ -99,7 +99,7 @@ func Instances(ctx context.Context, project, app, release string) ([]Instance, e
 			// List all instances in the zone.
 			zi, err := gce.Instances.List(project, zoneName).Context(ctx).Do()
 			if err != nil {
-				return err
+				return xerrors.Errorf("error listing instances in %s: %w", zoneName, err)
 			}
 
 			// Filter instances by app and release. Only return belvedere-managed instances,
