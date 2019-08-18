@@ -163,6 +163,7 @@ func SSH(ctx context.Context, project, instance string, args []string) (func() e
 	}, nil
 }
 
+// Memory represents a specific amount of RAM provided to a virtual machine.
 type Memory int64
 
 func (m Memory) String() string {
