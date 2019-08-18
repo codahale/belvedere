@@ -196,7 +196,7 @@ func (mt MachineType) lexical() string {
 }
 
 // MachineTypes returns a list of GCE machine types which are available for the given project or
-// region, if one is provided.
+// GCE region, if one is provided.
 func MachineTypes(ctx context.Context, project, region string) ([]MachineType, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.MachineTypes")
 	span.AddAttributes(
