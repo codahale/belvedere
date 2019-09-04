@@ -17,7 +17,6 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	"golang.org/x/sync/errgroup"
-	"golang.org/x/xerrors"
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
@@ -80,7 +79,7 @@ func Instances(ctx context.Context, project, app, release string) ([]Instance, e
 	// List all zones in the project.
 	zones, err := gce.Zones.List(project).Context(ctx).Do()
 	if err != nil {
-		return nil, xerrors.Errorf("error listing zones: %w", err)
+		return nil, fmt.Errorf("error listing zones: %w", err)
 	}
 
 	// Create an error group for the results.
@@ -99,7 +98,7 @@ func Instances(ctx context.Context, project, app, release string) ([]Instance, e
 			// List all instances in the zone.
 			zi, err := gce.Instances.List(project, zoneName).Context(ctx).Do()
 			if err != nil {
-				return xerrors.Errorf("error listing instances in %s: %w", zoneName, err)
+				return fmt.Errorf("error listing instances in %s: %w", zoneName, err)
 			}
 
 			// Filter instances by app and release. Only return belvedere-managed instances,
@@ -150,7 +149,7 @@ func SSH(ctx context.Context, project, instance string, args []string) (func() e
 	// Find gcloud on the path.
 	gcloud, err := exec.LookPath("gcloud")
 	if err != nil {
-		return nil, xerrors.Errorf("error finding gcloud executable: %w", err)
+		return nil, fmt.Errorf("error finding gcloud executable: %w", err)
 	}
 	span.AddAttributes(trace.StringAttribute("gcloud", gcloud))
 
@@ -216,7 +215,7 @@ func MachineTypes(ctx context.Context, project, region string) ([]MachineType, e
 
 	list, err := gce.MachineTypes.AggregatedList(project).Context(ctx).Do()
 	if err != nil {
-		return nil, xerrors.Errorf("error getting machine types list: %w", err)
+		return nil, fmt.Errorf("error getting machine types list: %w", err)
 	}
 
 	// Aggregate across zones.

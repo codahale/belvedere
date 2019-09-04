@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os/exec"
 	"time"
 
 	"go.opencensus.io/trace"
-	"golang.org/x/xerrors"
 )
 
 // DefaultProject returns the default project, if any, which the Google Cloud SDK is configured to
@@ -23,7 +23,7 @@ func DefaultProject(ctx context.Context) (string, error) {
 	cmd := exec.CommandContext(ctx, "gcloud", "config", "config-helper", "--format=json")
 	b, err := cmd.Output()
 	if err != nil {
-		return "", xerrors.Errorf("unable to execute gcloud: %w", err)
+		return "", fmt.Errorf("unable to execute gcloud: %w", err)
 	}
 
 	var config struct {
@@ -36,7 +36,7 @@ func DefaultProject(ctx context.Context) (string, error) {
 		} `json:"configuration"`
 	}
 	if err = json.Unmarshal(b, &config); err != nil {
-		return "", xerrors.Errorf("unable to parse config-helper output: %w", err)
+		return "", fmt.Errorf("unable to parse config-helper output: %w", err)
 	}
 
 	p := config.Configuration.Properties.Core.Project

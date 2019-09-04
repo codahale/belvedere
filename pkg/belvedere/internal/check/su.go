@@ -7,7 +7,6 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
-	"golang.org/x/xerrors"
 )
 
 // SU returns a waiter.Condition for the given Service Usage operation completing.
@@ -26,7 +25,7 @@ func SU(ctx context.Context, operation string) waiter.Condition {
 		// Fetch the operation's status and any errors.
 		op, err := su.Operations.Get(operation).Context(ctx).Do()
 		if err != nil {
-			return false, xerrors.Errorf("error getting operation: %w", err)
+			return false, fmt.Errorf("error getting operation: %w", err)
 		}
 		span.AddAttributes(trace.BoolAttribute("done", op.Done))
 
@@ -41,7 +40,7 @@ func SU(ctx context.Context, operation string) waiter.Condition {
 
 			// Exit with a maximally descriptive error.
 			j, _ := op.Error.MarshalJSON()
-			return false, xerrors.Errorf("operation failed: %s", j)
+			return false, fmt.Errorf("operation failed: %s", j)
 		}
 
 		// Keep waiting unless the operation is done.

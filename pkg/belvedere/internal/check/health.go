@@ -2,11 +2,11 @@ package check
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
-	"golang.org/x/xerrors"
 	"google.golang.org/api/compute/v0.beta"
 )
 
@@ -31,7 +31,7 @@ func Health(ctx context.Context, project, region, backendService, instanceGroup 
 		igm, err := gce.RegionInstanceGroupManagers.Get(project, region, instanceGroup).
 			Context(ctx).Fields("status").Do()
 		if err != nil {
-			return false, xerrors.Errorf("getting getting instance group manager: %w", err)
+			return false, fmt.Errorf("getting getting instance group manager: %w", err)
 		}
 		span.AddAttributes(trace.BoolAttribute("stable", igm.Status.IsStable))
 
@@ -44,7 +44,7 @@ func Health(ctx context.Context, project, region, backendService, instanceGroup 
 		ig, err := gce.RegionInstanceGroups.Get(project, region, instanceGroup).
 			Context(ctx).Fields("selfLink", "size").Do()
 		if err != nil {
-			return false, xerrors.Errorf("getting getting instance group: %w", err)
+			return false, fmt.Errorf("getting getting instance group: %w", err)
 		}
 		span.AddAttributes(trace.Int64Attribute("instances", ig.Size))
 
@@ -53,7 +53,7 @@ func Health(ctx context.Context, project, region, backendService, instanceGroup 
 			Group: ig.SelfLink,
 		}).Context(ctx).Do()
 		if err != nil {
-			return false, xerrors.Errorf("getting getting backend service health: %w", err)
+			return false, fmt.Errorf("getting getting backend service health: %w", err)
 		}
 		span.AddAttributes(trace.Int64Attribute("registered", int64(len(health.HealthStatus))))
 

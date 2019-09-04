@@ -8,7 +8,6 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"go.opencensus.io/trace"
-	"golang.org/x/xerrors"
 	"google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/dns/v1"
 )
@@ -137,7 +136,7 @@ func findManagedZone(ctx context.Context, project string) (*dns.ManagedZone, err
 	// Find the managed zone.
 	mz, err := d.ManagedZones.Get(project, "belvedere").Context(ctx).Do()
 	if err != nil {
-		return nil, xerrors.Errorf("error getting managed zone: %w", err)
+		return nil, fmt.Errorf("error getting managed zone: %w", err)
 	}
 	return mz, nil
 }
@@ -161,7 +160,7 @@ func findRegion(ctx context.Context, project, app string) (string, error) {
 	deployment, err := dm.Deployments.Get(project, fmt.Sprintf("belvedere-%s", app)).
 		Context(ctx).Do()
 	if err != nil {
-		return "", xerrors.Errorf("error getting deployment: %w", err)
+		return "", fmt.Errorf("error getting deployment: %w", err)
 	}
 
 	// Return the app's region given the label.
