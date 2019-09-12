@@ -1,6 +1,5 @@
 name: Go
 on: [push]
-resolves: [Lint]
 jobs:
 
   build:
@@ -25,4 +24,4 @@ jobs:
       run: go test -v ./...
 
     - name: Lint
-      run: actions-contrib/golangci-lint@master
+      uses: actions-contrib/golangci-lint@master
