@@ -24,6 +24,6 @@ jobs:
       run: go test -v ./...
 
     - name: Lint
-      uses: actions-contrib/golangci-lint@master
-      with:
-        args: run
+      run: |
+        curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.18.0
+        golangci-lint run
