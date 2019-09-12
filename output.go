@@ -8,13 +8,7 @@ import (
 	"time"
 
 	"github.com/olekukonko/tablewriter"
-	"golang.org/x/sys/unix"
 )
-
-func isTerminal() bool {
-	_, err := unix.IoctlGetTermios(int(os.Stdout.Fd()), unix.TIOCGETA)
-	return err == nil
-}
 
 func printTable(i interface{}) error {
 	t := reflect.TypeOf(i)
