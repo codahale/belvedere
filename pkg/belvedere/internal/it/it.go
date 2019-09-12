@@ -1,6 +1,7 @@
 package it
 
 import (
+	"os"
 	"time"
 
 	"golang.org/x/oauth2"
@@ -9,6 +10,7 @@ import (
 
 // MockTokenSource mocks the GCP SDK's default token source endpoint with a stub token.
 func MockTokenSource() {
+	_ = os.Setenv("GCE_METADATA_HOST", "metadata.server.fake")
 	gock.New("https://oauth2.googleapis/token").
 		Reply(200).
 		JSON(oauth2.Token{
