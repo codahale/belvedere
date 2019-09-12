@@ -25,4 +25,4 @@ jobs:
 
     - name: Lint
       uses: actions-contrib/golangci-lint@master
-      run: golangci-lint run
+      args: run
