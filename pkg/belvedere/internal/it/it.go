@@ -1,6 +1,7 @@
 package it
 
 import (
+	"io/ioutil"
 	"os"
 	"time"
 
@@ -10,20 +11,29 @@ import (
 
 // MockTokenSource mocks the GCP SDK's default token source endpoint with a stub token.
 func MockTokenSource() {
-	_ = os.Setenv("GCE_METADATA_HOST", "metadata.server.fake")
-	token := oauth2.Token{
-		TokenType:    "mock",
-		AccessToken:  "access_token",
-		RefreshToken: "refresh_token",
-		Expiry:       time.Now().Add(10 * time.Hour),
+	f, err := ioutil.TempFile(os.TempDir(), "belvedere-test-creds-*")
+	if err != nil {
+		panic(err)
 	}
-	// Mock out token source for default app credentials.
+	defer func() { _ = f.Close() }()
+
+	_, err = f.Write([]byte(`{
+  "client_id": "fake.apps.googleusercontent.com",
+  "client_secret": "fake",
+  "refresh_token": "fake",
+  "type": "authorized_user"
+}`))
+	if err != nil {
+		panic(err)
+	}
+
+	_ = os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", f.Name())
 	gock.New("https://oauth2.googleapis/token").
 		Reply(200).
-		JSON(token)
-
-	// Mock out token source for fake GCE tests.
-	gock.New("http://metadata.server.fake/computeMetadata/v1/instance/service-accounts/default/token").
-		Reply(200).
-		JSON(token)
+		JSON(oauth2.Token{
+			TokenType:    "mock",
+			AccessToken:  "access_token",
+			RefreshToken: "refresh_token",
+			Expiry:       time.Now().Add(10 * time.Hour),
+		})
 }
