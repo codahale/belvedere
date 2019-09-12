@@ -1,5 +1,6 @@
 name: Go
 on: [push]
+resolves: [Lint]
 jobs:
 
   build:
