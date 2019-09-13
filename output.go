@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"syscall"
 	"time"
 
 	"github.com/olekukonko/tablewriter"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 func printTable(i interface{}) error {
@@ -47,7 +49,7 @@ func printTable(i interface{}) error {
 		rows = append(rows, row)
 	}
 
-	if isTerminal() && !*printCSV {
+	if terminal.IsTerminal(syscall.Stdout) && !*printCSV {
 		tw := tablewriter.NewWriter(os.Stdout)
 		tw.SetAutoFormatHeaders(false)
 		tw.SetAutoWrapText(false)
