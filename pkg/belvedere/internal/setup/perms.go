@@ -67,12 +67,6 @@ func SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 		}
 
 		// If none exists, add a binding and update the policy.
-		span.Annotate(
-			[]trace.Attribute{
-				trace.Int64Attribute("project_number", p.ProjectNumber),
-			},
-			"Binding created",
-		)
 		policy.Bindings = append(policy.Bindings, &cloudresourcemanager.Binding{
 			Members: []string{crmMember},
 			Role:    owner,
@@ -100,6 +94,13 @@ func SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 		} else if err != nil {
 			return fmt.Errorf("error setting IAM policy: %w", err)
 		}
+
+		span.Annotate(
+			[]trace.Attribute{
+				trace.Int64Attribute("project_number", p.ProjectNumber),
+			},
+			"Binding created",
+		)
 		return nil
 	}
 }
