@@ -13,7 +13,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/olekukonko/tablewriter v0.0.1
 	go.opencensus.io v0.22.1
-	golang.org/x/crypto v0.0.0-20190923035154-9ee001bba392
+	golang.org/x/crypto v0.0.0-20190926114937-fa1a29108794
 	golang.org/x/net v0.0.0-20190921015927-1a5e07d1ff72 // indirect
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
