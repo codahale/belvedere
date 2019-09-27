@@ -33,6 +33,18 @@ func TestSetDMPerms(t *testing.T) {
 			Etag: "300",
 		})
 
+	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/my-project:getIamPolicy?alt=json&prettyPrint=false").
+		Reply(200).
+		JSON(cloudresourcemanager.Policy{
+			Bindings: []*cloudresourcemanager.Binding{
+				{
+					Members: []string{"email:existing@example.com"},
+					Role:    "roles/passerby",
+				},
+			},
+			Etag: "301",
+		})
+
 	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/my-project:setIamPolicy?alt=json&prettyPrint=false").
 		JSON(cloudresourcemanager.SetIamPolicyRequest{
 			Policy: &cloudresourcemanager.Policy{
@@ -47,6 +59,24 @@ func TestSetDMPerms(t *testing.T) {
 					},
 				},
 				Etag: "300",
+			},
+		}).
+		Reply(409)
+
+	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/my-project:setIamPolicy?alt=json&prettyPrint=false").
+		JSON(cloudresourcemanager.SetIamPolicyRequest{
+			Policy: &cloudresourcemanager.Policy{
+				Bindings: []*cloudresourcemanager.Binding{
+					{
+						Members: []string{"email:existing@example.com"},
+						Role:    "roles/passerby",
+					},
+					{
+						Members: []string{"serviceAccount:123456@cloudservices.gserviceaccount.com"},
+						Role:    "roles/owner",
+					},
+				},
+				Etag: "301",
 			},
 		}).
 		Reply(200).
