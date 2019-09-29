@@ -83,6 +83,7 @@ func SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 	crmMember := fmt.Sprintf("serviceAccount:%d@cloudservices.gserviceaccount.com", p.ProjectNumber)
 	const owner = "roles/owner"
 
+	exists := false
 	err = modifyIAMPolicy(ctx, crm, project, func(policy *cloudresourcemanager.Policy) *cloudresourcemanager.Policy {
 		// Look for an existing IAM binding giving Deployment Manager ownership of the project.
 		for _, binding := range policy.Bindings {
@@ -95,6 +96,7 @@ func SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 							},
 							"Binding verified",
 						)
+						exists = true
 						return nil
 					}
 				}
@@ -112,12 +114,14 @@ func SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 		return err
 	}
 
-	span.Annotate(
-		[]trace.Attribute{
-			trace.Int64Attribute("project_number", p.ProjectNumber),
-		},
-		"Binding created",
-	)
+	if !exists {
+		span.Annotate(
+			[]trace.Attribute{
+				trace.Int64Attribute("project_number", p.ProjectNumber),
+			},
+			"Binding created",
+		)
+	}
 
 	return nil
 }
