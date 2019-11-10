@@ -14,16 +14,16 @@ require (
 	github.com/google/go-cmp v0.3.1
 	github.com/mattn/go-runewidth v0.0.6 // indirect
 	github.com/olekukonko/tablewriter v0.0.2
-	go.opencensus.io v0.22.1
-	golang.org/x/crypto v0.0.0-20191106202628-ed6320f186d4
-	golang.org/x/net v0.0.0-20191105084925-a882066a44e0 // indirect
+	go.opencensus.io v0.22.2
+	golang.org/x/crypto v0.0.0-20191108234033-bd318be0434a
+	golang.org/x/net v0.0.0-20191109021931-daa7c04131f5 // indirect
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
-	golang.org/x/sys v0.0.0-20191105231009-c1f44814a5cd // indirect
+	golang.org/x/sys v0.0.0-20191110163157-d32e6e3b99c4 // indirect
 	google.golang.org/api v0.13.0
 	google.golang.org/appengine v1.6.5 // indirect
-	google.golang.org/genproto v0.0.0-20191028173616-919d9bdd9fe6 // indirect
-	google.golang.org/grpc v1.25.0 // indirect
+	google.golang.org/genproto v0.0.0-20191108220845-16a3f7862a1a // indirect
+	google.golang.org/grpc v1.25.1 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/alessio/shellescape.v1 v1.0.0-20170105083845-52074bc9df61
 	gopkg.in/h2non/gock.v1 v1.0.15
