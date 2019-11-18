@@ -3,7 +3,7 @@ module github.com/codahale/belvedere
 go 1.13
 
 require (
-	cloud.google.com/go v0.47.0 // indirect
+	cloud.google.com/go v0.48.0 // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
 	github.com/alessio/shellescape v0.0.0-20190409004728-b115ca0f9053 // indirect
@@ -15,14 +15,14 @@ require (
 	github.com/mattn/go-runewidth v0.0.6 // indirect
 	github.com/olekukonko/tablewriter v0.0.2
 	go.opencensus.io v0.22.2
-	golang.org/x/crypto v0.0.0-20191108234033-bd318be0434a
-	golang.org/x/net v0.0.0-20191109021931-daa7c04131f5 // indirect
+	golang.org/x/crypto v0.0.0-20191117063200-497ca9f6d64f
+	golang.org/x/net v0.0.0-20191116160921-f9c825593386 // indirect
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
-	golang.org/x/sys v0.0.0-20191110163157-d32e6e3b99c4 // indirect
-	google.golang.org/api v0.13.0
+	golang.org/x/sys v0.0.0-20191118133127-cf1e2d577169 // indirect
+	google.golang.org/api v0.14.0
 	google.golang.org/appengine v1.6.5 // indirect
-	google.golang.org/genproto v0.0.0-20191108220845-16a3f7862a1a // indirect
+	google.golang.org/genproto v0.0.0-20191115221424-83cc0476cb11 // indirect
 	google.golang.org/grpc v1.25.1 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/alessio/shellescape.v1 v1.0.0-20170105083845-52074bc9df61
