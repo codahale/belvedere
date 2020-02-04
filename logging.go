@@ -14,6 +14,8 @@ type traceLogger struct {
 	m sync.Mutex
 }
 
+var _ trace.Exporter = &traceLogger{}
+
 func (l *traceLogger) ExportSpan(s *trace.SpanData) {
 	l.m.Lock()
 	defer l.m.Unlock()
