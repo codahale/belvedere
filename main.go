@@ -150,7 +150,6 @@ func init() {
 	relCreateCmd.Action(contextAction(runRelCreate))
 	relEnableCmd.Action(contextAction(runRelEnable))
 	relDisableCmd.Action(contextAction(runRelDisable))
-
 	relDeleteCmd.Action(contextAction(runRelDelete))
 }
 
