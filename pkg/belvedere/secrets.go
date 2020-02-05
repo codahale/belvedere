@@ -14,6 +14,8 @@ import (
 
 const accessor = "roles/secretmanager.secretAccessor"
 
+// GrantAppSecret modifies the IAM policy of the given secret to allow the given application's
+// service account access.
 func GrantAppSecret(ctx context.Context, project, app, secret string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.GrantAppSecret")
 	span.AddAttributes(
@@ -66,6 +68,8 @@ func GrantAppSecret(ctx context.Context, project, app, secret string, dryRun boo
 		})
 }
 
+// RevokeAppSecret modifies the IAM policy of the given secret to deny the given application's
+// service account access to it.
 func RevokeAppSecret(ctx context.Context, project, app, secret string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.RevokeAppSecret")
 	span.AddAttributes(
