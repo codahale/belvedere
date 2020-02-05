@@ -54,6 +54,7 @@ func GrantAppSecret(ctx context.Context, project, app, secret string, dryRun boo
 				Members: []string{sa},
 				Role:    accessor,
 			})
+
 			span.Annotate(
 				[]trace.Attribute{
 					trace.StringAttribute("service_account", sa),
