@@ -9,6 +9,7 @@ import (
 	"google.golang.org/api/deploymentmanager/v2"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/logging/v2"
+	secretmanager "google.golang.org/api/secretmanager/v1beta1"
 	"google.golang.org/api/serviceusage/v1"
 )
 
@@ -61,6 +62,14 @@ func Logging(ctx context.Context) (*logging.Service, error) {
 	return loggingService, loggingErr
 }
 
+// SecretManager creates a new Secret Manager client or returns a previously-created one.
+func SecretManager(ctx context.Context) (*secretmanager.Service, error) {
+	smOnce.Do(func() {
+		smService, smEr = secretmanager.NewService(ctx)
+	})
+	return smService, smEr
+}
+
 var (
 	gceService     *compute.Service
 	gceErr         error
@@ -80,4 +89,7 @@ var (
 	loggingService *logging.Service
 	loggingErr     error
 	loggingOnce    sync.Once
+	smService      *secretmanager.Service
+	smEr           error
+	smOnce         sync.Once
 )

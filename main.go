@@ -100,6 +100,16 @@ var (
 	appsDeleteApp   = appsDeleteCmd.Arg("app", "The app's name.").Required().String()
 	appsDeleteAsync = appsDeleteCmd.Flag("async", "Return without waiting for successful completion.").Bool()
 
+	// belvedere apps grant-secret <app> <secret>
+	appsGrantSecretCmd    = appsCmd.Command("grant-secret", "Grant access to a secret for an application.")
+	appsGrantSecretApp    = appsGrantSecretCmd.Arg("app", "The app's name.").Required().String()
+	appsGrantSecretSecret = appsGrantSecretCmd.Arg("secret", "The secrets's name.").Required().String()
+
+	// belvedere apps revoke-secret <app> <secret>
+	appsRevokeSecretCmd    = appsCmd.Command("revoke-secret", "Revoke access to a secret for an application.")
+	appsRevokeSecretApp    = appsRevokeSecretCmd.Arg("app", "The app's name.").Required().String()
+	appsRevokeSecretSecret = appsRevokeSecretCmd.Arg("secret", "The secrets's name.").Required().String()
+
 	// belvedere releases
 	relCmd = app.Command("releases", "Commands for managing releases.")
 
@@ -146,6 +156,8 @@ func init() {
 	appsCreateCmd.Action(contextAction(runAppsCreate))
 	appsUpdateCmd.Action(contextAction(runAppsUpdate))
 	appsDeleteCmd.Action(contextAction(runAppsDelete))
+	appsGrantSecretCmd.Action(contextAction(runAppsGrantSecret))
+	appsRevokeSecretCmd.Action(contextAction(runAppsRevokeSecret))
 	relListCmd.Action(contextAction(runRelList))
 	relCreateCmd.Action(contextAction(runRelCreate))
 	relEnableCmd.Action(contextAction(runRelEnable))
@@ -229,6 +241,14 @@ func runAppsUpdate(ctx context.Context, _ *func() error) error {
 
 func runAppsDelete(ctx context.Context, _ *func() error) error {
 	return belvedere.DeleteApp(ctx, *project, *appsDeleteApp, *dryRun, *appsDeleteAsync)
+}
+
+func runAppsGrantSecret(ctx context.Context, _ *func() error) error {
+	return belvedere.GrantAppSecret(ctx, *project, *appsGrantSecretApp, *appsGrantSecretSecret, *dryRun)
+}
+
+func runAppsRevokeSecret(ctx context.Context, _ *func() error) error {
+	return belvedere.RevokeAppSecret(ctx, *project, *appsRevokeSecretApp, *appsRevokeSecretSecret, *dryRun)
 }
 
 func runRelList(ctx context.Context, _ *func() error) error {
