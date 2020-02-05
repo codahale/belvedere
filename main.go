@@ -103,12 +103,12 @@ var (
 	// belvedere apps grant-secret <app> <secret>
 	appsGrantSecretCmd    = appsCmd.Command("grant-secret", "Grant access to a secret for an application.")
 	appsGrantSecretApp    = appsGrantSecretCmd.Arg("app", "The app's name.").Required().String()
-	appsGrantSecretSecret = appsGrantSecretCmd.Arg("secret", "The secrets's name.").Required().String()
+	appsGrantSecretSecret = appsGrantSecretCmd.Arg("secret", "The secret's name.").Required().String()
 
 	// belvedere apps revoke-secret <app> <secret>
 	appsRevokeSecretCmd    = appsCmd.Command("revoke-secret", "Revoke access to a secret for an application.")
 	appsRevokeSecretApp    = appsRevokeSecretCmd.Arg("app", "The app's name.").Required().String()
-	appsRevokeSecretSecret = appsRevokeSecretCmd.Arg("secret", "The secrets's name.").Required().String()
+	appsRevokeSecretSecret = appsRevokeSecretCmd.Arg("secret", "The secret's name.").Required().String()
 
 	// belvedere releases
 	relCmd = app.Command("releases", "Commands for managing releases.")
