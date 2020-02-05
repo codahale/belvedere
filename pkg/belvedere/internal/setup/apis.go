@@ -32,6 +32,7 @@ var (
 		"logging.googleapis.com",
 		"monitoring.googleapis.com",
 		"oslogin.googleapis.com",
+		"secretmanager.googleapis.com",
 		"stackdriver.googleapis.com",
 		"storage-api.googleapis.com",
 	}

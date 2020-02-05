@@ -17,7 +17,7 @@ func TestEnableAPIs(t *testing.T) {
 
 	gock.New("https://serviceusage.googleapis.com/v1/projects/my-project/services:batchEnable?alt=json&prettyPrint=false").
 		JSON(serviceusage.BatchEnableServicesRequest{
-			ServiceIds: requiredServices,
+			ServiceIds: requiredServices[:20],
 		}).
 		Reply(200).
 		JSON(serviceusage.Operation{
@@ -25,6 +25,21 @@ func TestEnableAPIs(t *testing.T) {
 		})
 
 	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&prettyPrint=false").
+		Reply(200).
+		JSON(serviceusage.Operation{
+			Done: true,
+		})
+
+	gock.New("https://serviceusage.googleapis.com/v1/projects/my-project/services:batchEnable?alt=json&prettyPrint=false").
+		JSON(serviceusage.BatchEnableServicesRequest{
+			ServiceIds: requiredServices[20:],
+		}).
+		Reply(200).
+		JSON(serviceusage.Operation{
+			Name: "op2",
+		})
+
+	gock.New("https://serviceusage.googleapis.com/v1/op2?alt=json&prettyPrint=false").
 		Reply(200).
 		JSON(serviceusage.Operation{
 			Done: true,
