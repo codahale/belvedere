@@ -200,6 +200,22 @@ belvedere logs my-app v43 --freshness=1h
 belvedere logs my-app v43 --freshness=1h --filter="/login/"
 ```
 
+### Secrets
+
+Secrets (e.g. database passwords, API keys, etc.) should be stored in [Google Secret Manager](https://cloud.google.com/secret-manager/docs) using `gcloud` or the console UI.
+
+You can quickly grant or revoke an app's access to a secret:
+
+```shell script
+belvedere apps grant-secret my-app secret1
+belvedere apps revoke-secret my-app secret1
+```
+
+If you include [Berglas](https://github.com/GoogleCloudPlatform/berglas) in your application's
+Docker image, you can use it to convert environment variables of the form
+`sm://project-id/secret-id` into the secret's current value. The resulting plaintext secrets will
+only ever be stored in memory.
+
 ## TODO
 
 - [ ] Block external access to `/healthz`
