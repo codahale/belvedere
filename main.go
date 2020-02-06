@@ -132,7 +132,10 @@ var (
 	relDeleteAsync   = relDeleteCmd.Flag("async", "Return without waiting for successful completion.").Bool()
 
 	// belvedere secrets
-	secCmd = app.Command("secrets", "Commands for managing releases.")
+	secCmd = app.Command("secrets", "Commands for managing secrets.")
+
+	// belvedere secrets list
+	secListCmd = secCmd.Command("list", "List all secrets.")
 
 	// belvedere secrets grant <app> <secret>
 	secGrantCmd    = secCmd.Command("grant-secret", "Grant access to a secret for an application.")
@@ -164,6 +167,7 @@ func init() {
 	relEnableCmd.Action(contextAction(runRelEnable))
 	relDisableCmd.Action(contextAction(runRelDisable))
 	relDeleteCmd.Action(contextAction(runRelDelete))
+	secListCmd.Action(contextAction(runSecList))
 	secGrantCmd.Action(contextAction(runSecGrant))
 	secRevokeCmd.Action(contextAction(runSecRevoke))
 }
@@ -285,6 +289,14 @@ func runRelDelete(ctx context.Context, _ *func() error) error {
 		return err
 	}
 	return belvedere.DeleteRelease(ctx, *project, *relDeleteApp, *relDeleteRelease, *dryRun, *relDeleteAsync)
+}
+
+func runSecList(ctx context.Context, _ *func() error) error {
+	releases, err := belvedere.Secrets(ctx, *project)
+	if err != nil {
+		return err
+	}
+	return printTable(releases)
 }
 
 func runSecGrant(ctx context.Context, _ *func() error) error {

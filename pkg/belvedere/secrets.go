@@ -3,6 +3,7 @@ package belvedere
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/cenkalti/backoff"
@@ -11,6 +12,50 @@ import (
 	"google.golang.org/api/googleapi"
 	secretmanager "google.golang.org/api/secretmanager/v1beta1"
 )
+
+type Secret struct {
+	Name        string
+	Replication string
+}
+
+func Secrets(ctx context.Context, project string) ([]Secret, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.Secrets")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+	)
+	defer span.End()
+
+	sm, err := gcp.SecretManager(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := sm.Projects.Secrets.List(fmt.Sprintf("projects/%s", project)).
+		Context(ctx).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	var secrets []Secret
+	for _, s := range resp.Secrets {
+		parts := strings.Split(s.Name, "/")
+		var rep string
+		if s.Replication.Automatic != nil {
+			rep = "automatic"
+		} else {
+			var locations []string
+			for _, l := range s.Replication.UserManaged.Replicas {
+				locations = append(locations, l.Location)
+			}
+			rep = fmt.Sprintf("user-managed: %v", locations)
+		}
+		secrets = append(secrets, Secret{
+			Name:        parts[len(parts)-1],
+			Replication: rep,
+		})
+	}
+	return secrets, nil
+}
 
 const accessor = "roles/secretmanager.secretAccessor"
 
