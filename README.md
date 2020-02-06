@@ -207,8 +207,8 @@ Secrets (e.g. database passwords, API keys, etc.) should be stored in [Google Se
 You can quickly grant or revoke an app's access to a secret:
 
 ```shell script
-belvedere apps grant-secret my-app secret1
-belvedere apps revoke-secret my-app secret1
+belvedere secrets grant my-app secret1
+belvedere secrets revoke my-app secret1
 ```
 
 If you include [Berglas](https://github.com/GoogleCloudPlatform/berglas) in your application's

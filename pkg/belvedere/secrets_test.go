@@ -11,7 +11,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestGrantAppSecret(t *testing.T) {
+func TestGrantSecret(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -40,12 +40,12 @@ func TestGrantAppSecret(t *testing.T) {
 		JSON(secretmanager.Policy{})
 
 	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := GrantAppSecret(ctx, "my-project", "my-app", "my-secret", false); err != nil {
+	if err := GrantSecret(ctx, "my-project", "my-app", "my-secret", false); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestRevokeAppSecret(t *testing.T) {
+func TestRevokeSecret(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -74,7 +74,7 @@ func TestRevokeAppSecret(t *testing.T) {
 		JSON(secretmanager.Policy{})
 
 	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := RevokeAppSecret(ctx, "my-project", "my-app", "my-secret", false); err != nil {
+	if err := RevokeSecret(ctx, "my-project", "my-app", "my-secret", false); err != nil {
 		t.Fatal(err)
 	}
 }

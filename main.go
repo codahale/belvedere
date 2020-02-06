@@ -100,16 +100,6 @@ var (
 	appsDeleteApp   = appsDeleteCmd.Arg("app", "The app's name.").Required().String()
 	appsDeleteAsync = appsDeleteCmd.Flag("async", "Return without waiting for successful completion.").Bool()
 
-	// belvedere apps grant-secret <app> <secret>
-	appsGrantSecretCmd    = appsCmd.Command("grant-secret", "Grant access to a secret for an application.")
-	appsGrantSecretApp    = appsGrantSecretCmd.Arg("app", "The app's name.").Required().String()
-	appsGrantSecretSecret = appsGrantSecretCmd.Arg("secret", "The secret's name.").Required().String()
-
-	// belvedere apps revoke-secret <app> <secret>
-	appsRevokeSecretCmd    = appsCmd.Command("revoke-secret", "Revoke access to a secret for an application.")
-	appsRevokeSecretApp    = appsRevokeSecretCmd.Arg("app", "The app's name.").Required().String()
-	appsRevokeSecretSecret = appsRevokeSecretCmd.Arg("secret", "The secret's name.").Required().String()
-
 	// belvedere releases
 	relCmd = app.Command("releases", "Commands for managing releases.")
 
@@ -140,6 +130,19 @@ var (
 	relDeleteApp     = relDeleteCmd.Arg("app", "The app's name.").Required().String()
 	relDeleteRelease = relDeleteCmd.Arg("release", "The releases's name.").Required().String()
 	relDeleteAsync   = relDeleteCmd.Flag("async", "Return without waiting for successful completion.").Bool()
+
+	// belvedere secrets
+	secCmd = app.Command("secrets", "Commands for managing releases.")
+
+	// belvedere secrets grant <app> <secret>
+	secGrantCmd    = secCmd.Command("grant-secret", "Grant access to a secret for an application.")
+	secGrantApp    = secGrantCmd.Arg("app", "The app's name.").Required().String()
+	secGrantSecret = secGrantCmd.Arg("secret", "The secret's name.").Required().String()
+
+	// belvedere secrets revoke <app> <secret>
+	secRevokeCmd    = secCmd.Command("revoke-secret", "Revoke access to a secret for an application.")
+	secRevokeApp    = secRevokeCmd.Arg("app", "The app's name.").Required().String()
+	secRevokeSecret = secRevokeCmd.Arg("secret", "The secret's name.").Required().String()
 )
 
 // Map all commands to actions. This has to happen outside the `var` clauses because command actions
@@ -156,13 +159,13 @@ func init() {
 	appsCreateCmd.Action(contextAction(runAppsCreate))
 	appsUpdateCmd.Action(contextAction(runAppsUpdate))
 	appsDeleteCmd.Action(contextAction(runAppsDelete))
-	appsGrantSecretCmd.Action(contextAction(runAppsGrantSecret))
-	appsRevokeSecretCmd.Action(contextAction(runAppsRevokeSecret))
 	relListCmd.Action(contextAction(runRelList))
 	relCreateCmd.Action(contextAction(runRelCreate))
 	relEnableCmd.Action(contextAction(runRelEnable))
 	relDisableCmd.Action(contextAction(runRelDisable))
 	relDeleteCmd.Action(contextAction(runRelDelete))
+	secGrantCmd.Action(contextAction(runSecGrant))
+	secRevokeCmd.Action(contextAction(runSecRevoke))
 }
 
 func runSetup(ctx context.Context, _ *func() error) error {
@@ -243,14 +246,6 @@ func runAppsDelete(ctx context.Context, _ *func() error) error {
 	return belvedere.DeleteApp(ctx, *project, *appsDeleteApp, *dryRun, *appsDeleteAsync)
 }
 
-func runAppsGrantSecret(ctx context.Context, _ *func() error) error {
-	return belvedere.GrantAppSecret(ctx, *project, *appsGrantSecretApp, *appsGrantSecretSecret, *dryRun)
-}
-
-func runAppsRevokeSecret(ctx context.Context, _ *func() error) error {
-	return belvedere.RevokeAppSecret(ctx, *project, *appsRevokeSecretApp, *appsRevokeSecretSecret, *dryRun)
-}
-
 func runRelList(ctx context.Context, _ *func() error) error {
 	releases, err := belvedere.Releases(ctx, *project, *relListApp)
 	if err != nil {
@@ -290,6 +285,14 @@ func runRelDelete(ctx context.Context, _ *func() error) error {
 		return err
 	}
 	return belvedere.DeleteRelease(ctx, *project, *relDeleteApp, *relDeleteRelease, *dryRun, *relDeleteAsync)
+}
+
+func runSecGrant(ctx context.Context, _ *func() error) error {
+	return belvedere.GrantSecret(ctx, *project, *secGrantApp, *secGrantSecret, *dryRun)
+}
+
+func runSecRevoke(ctx context.Context, _ *func() error) error {
+	return belvedere.RevokeSecret(ctx, *project, *secRevokeApp, *secRevokeSecret, *dryRun)
 }
 
 func contextAction(f func(ctx context.Context, exit *func() error) error) kingpin.Action {
