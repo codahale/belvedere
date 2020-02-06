@@ -14,8 +14,7 @@ import (
 )
 
 type Secret struct {
-	Name        string
-	Replication string
+	Name string
 }
 
 func Secrets(ctx context.Context, project string) ([]Secret, error) {
@@ -39,19 +38,8 @@ func Secrets(ctx context.Context, project string) ([]Secret, error) {
 	var secrets []Secret
 	for _, s := range resp.Secrets {
 		parts := strings.Split(s.Name, "/")
-		var rep string
-		if s.Replication.Automatic != nil {
-			rep = "automatic"
-		} else {
-			var locations []string
-			for _, l := range s.Replication.UserManaged.Replicas {
-				locations = append(locations, l.Location)
-			}
-			rep = fmt.Sprintf("user-managed: %v", locations)
-		}
 		secrets = append(secrets, Secret{
-			Name:        parts[len(parts)-1],
-			Replication: rep,
+			Name: parts[len(parts)-1],
 		})
 	}
 	return secrets, nil

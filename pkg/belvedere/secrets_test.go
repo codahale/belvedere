@@ -22,24 +22,9 @@ func TestSecrets(t *testing.T) {
 			Secrets: []*secretmanager.Secret{
 				{
 					Name: "one",
-					Replication: &secretmanager.Replication{
-						Automatic: &secretmanager.Automatic{},
-					},
 				},
 				{
 					Name: "two",
-					Replication: &secretmanager.Replication{
-						UserManaged: &secretmanager.UserManaged{
-							Replicas: []*secretmanager.Replica{
-								{
-									Location: "us-east1",
-								},
-								{
-									Location: "us-west1",
-								},
-							},
-						},
-					},
 				},
 			},
 		})
@@ -52,12 +37,10 @@ func TestSecrets(t *testing.T) {
 
 	expected := []Secret{
 		{
-			Name:        "one",
-			Replication: "automatic",
+			Name: "one",
 		},
 		{
-			Name:        "two",
-			Replication: "user-managed: [us-east1 us-west1]",
+			Name: "two",
 		},
 	}
 
