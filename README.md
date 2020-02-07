@@ -202,20 +202,51 @@ belvedere logs my-app v43 --freshness=1h --filter="/login/"
 
 ### Secrets
 
-Secrets (e.g. database passwords, API keys, etc.) should be stored in [Google Secret Manager](https://cloud.google.com/secret-manager/docs) using `gcloud` or the console UI.
+Secrets (e.g. database passwords, API keys, etc.) are stored in [Google Secret Manager](https://cloud.google.com/secret-manager/docs).
+This provides you with encryption at rest, encryption in flight, access control, and extensive audit logging.
+
+#### Creating And Updating Secrets
+
+You can create a secret with an initial value of a file's contents:
+
+```shell script
+belvedere secrets create my-secret secret-value.txt
+```
+
+Or pipe the value in via STDIN:
+
+```shell script
+echo "super secret" | belvedere secrets create my-secret -
+```
+
+Updating a secret's value works similarly:
+
+```shell script
+belvedere secrets update my-secret secret-value.txt
+```
+
+#### Listing And Deleting Secrets
+
+It's about what you'd expect:
+
+```shell script
+belvedere secrets list
+belvedere secrets delete my-secret
+```
+
+#### Granting And Revoking Access
 
 You can quickly grant or revoke an app's access to a secret:
 
 ```shell script
-belvedere secrets list
 belvedere secrets grant my-app secret1
 belvedere secrets revoke my-app secret1
 ```
 
-If you include [Berglas](https://github.com/GoogleCloudPlatform/berglas) in your application's
-Docker image, you can use it to convert environment variables of the form
-`sm://project-id/secret-id` into the secret's current value. The resulting plaintext secrets will
-only ever be stored in memory.
+#### Accessing Secrets From Your Application
+
+If you include [Berglas](https://github.com/GoogleCloudPlatform/berglas) in your application's Docker image, you can use it to convert environment variables of the form `sm://project-id/secret-id` into the secret's current value.
+The resulting plaintext secrets will only ever be stored in memory.
 
 ## TODO
 

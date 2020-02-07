@@ -49,6 +49,68 @@ func TestSecrets(t *testing.T) {
 	}
 }
 
+func TestCreateSecret(t *testing.T) {
+	defer gock.Off()
+	it.MockTokenSource()
+
+	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets?alt=json&prettyPrint=false&secretId=my-secret").
+		JSON(secretmanager.Secret{
+			Replication: &secretmanager.Replication{
+				Automatic: &secretmanager.Automatic{},
+			},
+		}).
+		Reply(200).
+		JSON(secretmanager.Secret{})
+
+	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets/my-secret:addVersion?alt=json&prettyPrint=false").
+		JSON(secretmanager.AddSecretVersionRequest{
+			Payload: &secretmanager.SecretPayload{
+				Data: "c2VjcmV0",
+			},
+		}).
+		Reply(200).
+		JSON(secretmanager.SecretVersion{})
+
+	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
+	if err := CreateSecret(ctx, "my-project", "my-secret", "secret.txt"); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestUpdateSecret(t *testing.T) {
+	defer gock.Off()
+	it.MockTokenSource()
+
+	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets/my-secret:addVersion?alt=json&prettyPrint=false").
+		JSON(secretmanager.AddSecretVersionRequest{
+			Payload: &secretmanager.SecretPayload{
+				Data: "c2VjcmV0",
+			},
+		}).
+		Reply(200).
+		JSON(secretmanager.SecretVersion{})
+
+	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
+	if err := UpdateSecret(ctx, "my-project", "my-secret", "secret.txt"); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestDeleteSecret(t *testing.T) {
+	defer gock.Off()
+	it.MockTokenSource()
+
+	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets/my-secret?alt=json&prettyPrint=false").
+		Delete("").
+		Reply(200).
+		JSON(secretmanager.Empty{})
+
+	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
+	if err := DeleteSecret(ctx, "my-project", "my-secret"); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestGrantSecret(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()

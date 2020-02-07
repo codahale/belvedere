@@ -2,7 +2,11 @@ package belvedere
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"os"
 	"strings"
 	"time"
 
@@ -13,10 +17,12 @@ import (
 	secretmanager "google.golang.org/api/secretmanager/v1beta1"
 )
 
+// Secret is a secret stored in Secret Manager.
 type Secret struct {
 	Name string
 }
 
+// Secrets returns a list of all secrets stored in Secret Manager for the given project.
 func Secrets(ctx context.Context, project string) ([]Secret, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.Secrets")
 	span.AddAttributes(
@@ -32,7 +38,7 @@ func Secrets(ctx context.Context, project string) ([]Secret, error) {
 	resp, err := sm.Projects.Secrets.List(fmt.Sprintf("projects/%s", project)).
 		Context(ctx).Do()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error listing secrets: %w", err)
 	}
 
 	var secrets []Secret
@@ -43,6 +49,102 @@ func Secrets(ctx context.Context, project string) ([]Secret, error) {
 		})
 	}
 	return secrets, nil
+}
+
+// CreateSecret creates a secret with the given name and value. If the path is a filename, the
+// contents of the file are used as the value. If the path is `-`, the contents of STDIN are used.
+func CreateSecret(ctx context.Context, project, secret, path string) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.CreateSecret")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+		trace.StringAttribute("secret", secret),
+		trace.StringAttribute("path", path),
+	)
+	defer span.End()
+
+	// Create a Secret Manager client.
+	sm, err := gcp.SecretManager(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Create a new version.
+	_, err = sm.Projects.Secrets.Create(fmt.Sprintf("projects/%s", project),
+		&secretmanager.Secret{
+			Replication: &secretmanager.Replication{Automatic: &secretmanager.Automatic{}},
+		}).SecretId(secret).Context(ctx).Do()
+	if err != nil {
+		return fmt.Errorf("error creating secret: %w", err)
+	}
+
+	// Update the secret's value.
+	return UpdateSecret(ctx, project, secret, path)
+}
+
+// UpdateSecret updates the secret's value. If the path is a filename, the contents of the file are
+// used as the value. If the path is `-`, the contents of STDIN are used.
+func UpdateSecret(ctx context.Context, project, secret, path string) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.UpdateSecret")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+		trace.StringAttribute("secret", secret),
+		trace.StringAttribute("path", path),
+	)
+	defer span.End()
+
+	// Either open the file or use STDIN.
+	var r io.ReadCloser
+	if path == "-" {
+		r = os.Stdin
+	} else {
+		f, err := os.Open(path)
+		if err != nil {
+			return fmt.Errorf("error opening %s: %w", path, err)
+		}
+		r = f
+	}
+	defer func() { _ = r.Close() }()
+
+	// Read the entire input.
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
+		return fmt.Errorf("error reading %s: %w", path, err)
+	}
+
+	// Create a Secret Manager client.
+	sm, err := gcp.SecretManager(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Add a version to the given secret.
+	_, err = sm.Projects.Secrets.AddVersion(fmt.Sprintf("projects/%s/secrets/%s", project, secret),
+		&secretmanager.AddSecretVersionRequest{
+			Payload: &secretmanager.SecretPayload{Data: base64.StdEncoding.EncodeToString(b)},
+		}).Context(ctx).Do()
+	if err != nil {
+		return fmt.Errorf("error adding secret version: %w", err)
+	}
+	return nil
+}
+
+// DeleteSecret deletes the given secret.
+func DeleteSecret(ctx context.Context, project, secret string) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.CreateSecret")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+		trace.StringAttribute("secret", secret),
+	)
+	defer span.End()
+
+	sm, err := gcp.SecretManager(ctx)
+	if err != nil {
+		return err
+	}
+
+	_, err = sm.Projects.Secrets.Delete(fmt.Sprintf("projects/%s/secrets/%s", project, secret)).
+		Context(ctx).Do()
+	return err
 }
 
 const accessor = "roles/secretmanager.secretAccessor"

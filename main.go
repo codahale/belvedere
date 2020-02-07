@@ -137,6 +137,11 @@ var (
 	// belvedere secrets list
 	secListCmd = secCmd.Command("list", "List all secrets.")
 
+	// belvedere secrets create <secret> <input-file>
+	secCreateCmd    = secCmd.Command("create", "Create a secret.")
+	secCreateSecret = secCreateCmd.Arg("secret", "The secret's name").Required().String()
+	secCreateData   = secCreateCmd.Arg("input-file", "The secret's value").Required().String()
+
 	// belvedere secrets grant <app> <secret>
 	secGrantCmd    = secCmd.Command("grant-secret", "Grant access to a secret for an application.")
 	secGrantApp    = secGrantCmd.Arg("app", "The app's name.").Required().String()
@@ -146,6 +151,15 @@ var (
 	secRevokeCmd    = secCmd.Command("revoke-secret", "Revoke access to a secret for an application.")
 	secRevokeApp    = secRevokeCmd.Arg("app", "The app's name.").Required().String()
 	secRevokeSecret = secRevokeCmd.Arg("secret", "The secret's name.").Required().String()
+
+	// belvedere secrets update <secret> <input-file>
+	secUpdateCmd    = secCmd.Command("update", "Update a secret.")
+	secUpdateSecret = secUpdateCmd.Arg("secret", "The secret's name").Required().String()
+	secUpdateData   = secUpdateCmd.Arg("input-file", "The secret's value").Required().String()
+
+	// belvedere secrets delete <secret>
+	secDeleteCmd    = secCmd.Command("delete", "Delete a secret.")
+	secDeleteSecret = secDeleteCmd.Arg("secret", "The secret's name").Required().String()
 )
 
 // Map all commands to actions. This has to happen outside the `var` clauses because command actions
@@ -168,8 +182,11 @@ func init() {
 	relDisableCmd.Action(contextAction(runRelDisable))
 	relDeleteCmd.Action(contextAction(runRelDelete))
 	secListCmd.Action(contextAction(runSecList))
+	secCreateCmd.Action(contextAction(runSecCreate))
 	secGrantCmd.Action(contextAction(runSecGrant))
 	secRevokeCmd.Action(contextAction(runSecRevoke))
+	secUpdateCmd.Action(contextAction(runSecUpdate))
+	secDeleteCmd.Action(contextAction(runSecDelete))
 }
 
 func runSetup(ctx context.Context, _ *func() error) error {
@@ -299,12 +316,24 @@ func runSecList(ctx context.Context, _ *func() error) error {
 	return printTable(releases)
 }
 
+func runSecCreate(ctx context.Context, _ *func() error) error {
+	return belvedere.CreateSecret(ctx, *project, *secCreateSecret, *secCreateData)
+}
+
 func runSecGrant(ctx context.Context, _ *func() error) error {
 	return belvedere.GrantSecret(ctx, *project, *secGrantApp, *secGrantSecret, *dryRun)
 }
 
 func runSecRevoke(ctx context.Context, _ *func() error) error {
 	return belvedere.RevokeSecret(ctx, *project, *secRevokeApp, *secRevokeSecret, *dryRun)
+}
+
+func runSecUpdate(ctx context.Context, _ *func() error) error {
+	return belvedere.UpdateSecret(ctx, *project, *secUpdateSecret, *secUpdateData)
+}
+
+func runSecDelete(ctx context.Context, _ *func() error) error {
+	return belvedere.DeleteSecret(ctx, *project, *secDeleteSecret)
 }
 
 func contextAction(f func(ctx context.Context, exit *func() error) error) kingpin.Action {
