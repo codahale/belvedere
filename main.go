@@ -15,6 +15,36 @@ import (
 	"go.opencensus.io/trace"
 )
 
+func main() {
+	var opts Options
+	cli := kong.Parse(&opts,
+		kong.Name("belvedere"), kong.UsageOnError(),
+		kong.Vars{
+			"version": version,
+		},
+	)
+
+	// Enable trace logging.
+	opts.enableLogging()
+
+	// Create a root span.
+	ctx, cancel, span := opts.rootSpan()
+	defer cancel()
+	defer span.End()
+
+	// If a project was not explicitly specified, detect one.
+	cli.FatalIfErrorf(opts.detectProject(ctx))
+
+	// Run the given command.
+	cli.BindTo(ctx, (*context.Context)(nil))
+	cli.FatalIfErrorf(cli.Run(&opts))
+
+	// Run any post-command hook.
+	if opts.exit != nil {
+		cli.FatalIfErrorf(opts.exit())
+	}
+}
+
 var (
 	version = "unknown" // version is injected via the go:generate statement
 )
@@ -326,7 +356,7 @@ func (o *Options) rootSpan() (context.Context, context.CancelFunc, *trace.Span) 
 	ctx, cancel := context.WithTimeout(ctx, o.Timeout)
 
 	// Create a root span.
-	ctx, span := trace.StartSpan(ctx, "belvedere.run")
+	ctx, span := trace.StartSpan(ctx, "belvedere.main")
 	if hostname, err := os.Hostname(); err == nil {
 		span.AddAttributes(trace.StringAttribute("hostname", hostname))
 	}
@@ -363,34 +393,4 @@ func (o *Options) detectProject(ctx context.Context) error {
 		o.Project = p
 	}
 	return nil
-}
-
-func main() {
-	var opts Options
-	cli := kong.Parse(&opts,
-		kong.Name("belvedere"), kong.UsageOnError(),
-		kong.Vars{
-			"version": version,
-		},
-	)
-
-	// Enable trace logging.
-	opts.enableLogging()
-
-	// Create a root span.
-	ctx, cancel, span := opts.rootSpan()
-	defer cancel()
-	defer span.End()
-
-	// If a project was not explicitly specified, detect one.
-	cli.FatalIfErrorf(opts.detectProject(ctx))
-
-	// Run the given command.
-	cli.BindTo(ctx, (*context.Context)(nil))
-	cli.FatalIfErrorf(cli.Run(&opts))
-
-	// Run any post-command hook.
-	if opts.exit != nil {
-		cli.FatalIfErrorf(opts.exit())
-	}
 }
