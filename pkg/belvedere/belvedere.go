@@ -213,20 +213,34 @@ func MachineTypes(ctx context.Context, project, region string) ([]MachineType, e
 		return nil, err
 	}
 
-	list, err := gce.MachineTypes.AggregatedList(project).Context(ctx).Do()
-	if err != nil {
-		return nil, fmt.Errorf("error getting machine types list: %w", err)
-	}
-
-	// Aggregate across zones.
+	// Aggregate across pages of results.
 	mtMap := map[string]*compute.MachineType{}
 	region = "zones/" + region
-	for zone, items := range list.Items {
-		if strings.HasPrefix(zone, region) {
-			for _, mt := range items.MachineTypes {
-				mtMap[mt.Name] = mt
+
+	// Iterate through all pages of the results.
+	pageToken := ""
+	for {
+		list, err := gce.MachineTypes.AggregatedList(project).
+			MaxResults(1000).
+			PageToken(pageToken).
+			Context(ctx).Do()
+		if err != nil {
+			return nil, fmt.Errorf("error getting machine types list: %w", err)
+		}
+
+		// Aggregate across zones.
+		for zone, items := range list.Items {
+			if strings.HasPrefix(zone, region) {
+				for _, mt := range items.MachineTypes {
+					mtMap[mt.Name] = mt
+				}
 			}
 		}
+
+		if list.NextPageToken == "" {
+			break
+		}
+		pageToken = list.NextPageToken
 	}
 
 	// Convert to our type in a sortable structure.
