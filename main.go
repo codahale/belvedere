@@ -4,6 +4,9 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"io"
+	"io/ioutil"
 	"os"
 	"os/user"
 	"time"
@@ -150,7 +153,12 @@ type AppsCreateCmd struct {
 }
 
 func (cmd *AppsCreateCmd) Run(ctx context.Context, o *Options) error {
-	config, err := belvedere.LoadConfig(ctx, cmd.Config)
+	b, err := readFile(ctx, cmd.Config)
+	if err != nil {
+		return err
+	}
+
+	config, err := belvedere.LoadConfig(ctx, b)
 	if err != nil {
 		return err
 	}
@@ -163,7 +171,12 @@ type AppsUpdateCmd struct {
 }
 
 func (cmd *AppsUpdateCmd) Run(ctx context.Context, o *Options) error {
-	config, err := belvedere.LoadConfig(ctx, cmd.Config)
+	b, err := readFile(ctx, cmd.Config)
+	if err != nil {
+		return err
+	}
+
+	config, err := belvedere.LoadConfig(ctx, b)
 	if err != nil {
 		return err
 	}
@@ -207,7 +220,12 @@ type ReleasesCreateCmd struct {
 }
 
 func (cmd *ReleasesCreateCmd) Run(ctx context.Context, o *Options) error {
-	config, err := belvedere.LoadConfig(ctx, cmd.Config)
+	b, err := readFile(ctx, cmd.Config)
+	if err != nil {
+		return err
+	}
+
+	config, err := belvedere.LoadConfig(ctx, b)
 	if err != nil {
 		return err
 	}
@@ -279,7 +297,11 @@ type SecretsCreateCmd struct {
 }
 
 func (cmd *SecretsCreateCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.CreateSecret(ctx, o.Project, cmd.Secret, cmd.DataFile)
+	b, err := readFile(ctx, cmd.DataFile)
+	if err != nil {
+		return err
+	}
+	return belvedere.CreateSecret(ctx, o.Project, cmd.Secret, b)
 }
 
 type SecretsGrantCmd struct {
@@ -306,7 +328,11 @@ type SecretsUpdateCmd struct {
 }
 
 func (cmd *SecretsUpdateCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.UpdateSecret(ctx, o.Project, cmd.Secret, cmd.DataFile)
+	b, err := readFile(ctx, cmd.DataFile)
+	if err != nil {
+		return err
+	}
+	return belvedere.UpdateSecret(ctx, o.Project, cmd.Secret, b)
 }
 
 type SecretsDeleteCmd struct {
@@ -393,4 +419,33 @@ func (o *Options) detectProject(ctx context.Context) error {
 		o.Project = p
 	}
 	return nil
+}
+
+func readFile(ctx context.Context, name string) ([]byte, error) {
+	_, span := trace.StartSpan(ctx, "belvedere.readFile")
+	span.AddAttributes(
+		trace.StringAttribute("name", name),
+	)
+	defer span.End()
+
+	// Either open the file or use STDIN.
+	var r io.ReadCloser
+	if name == "-" {
+		r = os.Stdin
+	} else {
+		f, err := os.Open(name)
+		if err != nil {
+			return nil, fmt.Errorf("error opening %s: %w", name, err)
+		}
+
+		r = f
+	}
+	defer func() { _ = r.Close() }()
+
+	// Read the entire input.
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, fmt.Errorf("error reading from %s: %w", name, err)
+	}
+	return b, nil
 }

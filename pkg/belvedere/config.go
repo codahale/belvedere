@@ -3,9 +3,6 @@ package belvedere
 import (
 	"context"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"os"
 
 	"github.com/ghodss/yaml"
 	"go.opencensus.io/trace"
@@ -35,39 +32,16 @@ type Container struct {
 	DockerOptions []string          `json:"dockerOptions"`
 }
 
-// LoadConfig loads the YAML configuration at the given path. If path is `-`, STDIN is used.
-func LoadConfig(ctx context.Context, name string) (*Config, error) {
+// LoadConfig loads the given bytes as a YAML configuration.
+func LoadConfig(ctx context.Context, b []byte) (*Config, error) {
 	_, span := trace.StartSpan(ctx, "belvedere.LoadConfig")
-	span.AddAttributes(
-		trace.StringAttribute("name", name),
-	)
 	defer span.End()
-
-	// Either open the file or use STDIN.
-	var r io.ReadCloser
-	if name == "-" {
-		r = os.Stdin
-	} else {
-		f, err := os.Open(name)
-		if err != nil {
-			return nil, fmt.Errorf("error opening %s: %w", name, err)
-		}
-
-		r = f
-	}
-	defer func() { _ = r.Close() }()
-
-	// Read the entire input.
-	b, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, fmt.Errorf("error reading from %s: %w", name, err)
-	}
 
 	// Unmarshal from YAML using the YAML->JSON route. This allows us to embed GCP API structs in
 	// our Config struct.
 	var config Config
 	if err := yaml.Unmarshal(b, &config); err != nil {
-		return nil, fmt.Errorf("error parsing %s: %w", name, err)
+		return nil, fmt.Errorf("error parsing config: %w", err)
 	}
 	return &config, nil
 }

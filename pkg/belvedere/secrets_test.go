@@ -72,7 +72,7 @@ func TestCreateSecret(t *testing.T) {
 		JSON(secretmanager.SecretVersion{})
 
 	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := CreateSecret(ctx, "my-project", "my-secret", "secret.txt"); err != nil {
+	if err := CreateSecret(ctx, "my-project", "my-secret", []byte("secret")); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -91,7 +91,7 @@ func TestUpdateSecret(t *testing.T) {
 		JSON(secretmanager.SecretVersion{})
 
 	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := UpdateSecret(ctx, "my-project", "my-secret", "secret.txt"); err != nil {
+	if err := UpdateSecret(ctx, "my-project", "my-secret", []byte("secret")); err != nil {
 		t.Fatal(err)
 	}
 }

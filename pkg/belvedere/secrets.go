@@ -4,9 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"os"
 	"strings"
 	"time"
 
@@ -53,12 +50,11 @@ func Secrets(ctx context.Context, project string) ([]Secret, error) {
 
 // CreateSecret creates a secret with the given name and value. If the path is a filename, the
 // contents of the file are used as the value. If the path is `-`, the contents of STDIN are used.
-func CreateSecret(ctx context.Context, project, secret, path string) error {
+func CreateSecret(ctx context.Context, project, secret string, data []byte) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateSecret")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("secret", secret),
-		trace.StringAttribute("path", path),
 	)
 	defer span.End()
 
@@ -78,38 +74,17 @@ func CreateSecret(ctx context.Context, project, secret, path string) error {
 	}
 
 	// Update the secret's value.
-	return UpdateSecret(ctx, project, secret, path)
+	return UpdateSecret(ctx, project, secret, data)
 }
 
-// UpdateSecret updates the secret's value. If the path is a filename, the contents of the file are
-// used as the value. If the path is `-`, the contents of STDIN are used.
-func UpdateSecret(ctx context.Context, project, secret, path string) error {
+// UpdateSecret updates the secret's value with the given data.
+func UpdateSecret(ctx context.Context, project, secret string, data []byte) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.UpdateSecret")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("secret", secret),
-		trace.StringAttribute("path", path),
 	)
 	defer span.End()
-
-	// Either open the file or use STDIN.
-	var r io.ReadCloser
-	if path == "-" {
-		r = os.Stdin
-	} else {
-		f, err := os.Open(path)
-		if err != nil {
-			return fmt.Errorf("error opening %s: %w", path, err)
-		}
-		r = f
-	}
-	defer func() { _ = r.Close() }()
-
-	// Read the entire input.
-	b, err := ioutil.ReadAll(r)
-	if err != nil {
-		return fmt.Errorf("error reading %s: %w", path, err)
-	}
 
 	// Create a Secret Manager client.
 	sm, err := gcp.SecretManager(ctx)
@@ -120,7 +95,7 @@ func UpdateSecret(ctx context.Context, project, secret, path string) error {
 	// Add a version to the given secret.
 	_, err = sm.Projects.Secrets.AddVersion(fmt.Sprintf("projects/%s/secrets/%s", project, secret),
 		&secretmanager.AddSecretVersionRequest{
-			Payload: &secretmanager.SecretPayload{Data: base64.StdEncoding.EncodeToString(b)},
+			Payload: &secretmanager.SecretPayload{Data: base64.StdEncoding.EncodeToString(data)},
 		}).Context(ctx).Do()
 	if err != nil {
 		return fmt.Errorf("error adding secret version: %w", err)
