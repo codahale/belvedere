@@ -149,7 +149,7 @@ func (AppsListCmd) Run(ctx context.Context, o *Options) error {
 type AppsCreateCmd struct {
 	App    string `arg:"" help:"The app's name."`
 	Region string `arg:"" help:"The app's region."`
-	Config string `help:"The path to the app's configuration file." default:"-"`
+	Config string `arg:"" optional:"" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
 }
 
 func (cmd *AppsCreateCmd) Run(ctx context.Context, o *Options) error {
@@ -167,7 +167,7 @@ func (cmd *AppsCreateCmd) Run(ctx context.Context, o *Options) error {
 
 type AppsUpdateCmd struct {
 	App    string `arg:"" help:"The app's name."`
-	Config string `help:"The path to the app's configuration file." default:"-"`
+	Config string `arg:"" optional:"" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
 }
 
 func (cmd *AppsUpdateCmd) Run(ctx context.Context, o *Options) error {
@@ -215,7 +215,7 @@ type ReleasesCreateCmd struct {
 	App     string `arg:"" help:"The app's name."`
 	Release string `arg:"" help:"The release's name."`
 	SHA256  string `arg:"" help:"The app container's SHA256 hash."`
-	Config  string `help:"The path to the app's configuration file." default:"-"`
+	Config  string `arg:"" optional:"" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
 	Enable  bool   `help:"Put release into service once created."`
 }
 
@@ -293,7 +293,7 @@ func (*SecretsListCmd) Run(ctx context.Context, o *Options) error {
 
 type SecretsCreateCmd struct {
 	Secret   string `arg:"" help:"The secret's name."`
-	DataFile string `default:"-" help:"File path from which to read secret data."`
+	DataFile string `arg:"" optional:"" help:"File path from which to read secret data. Reads from STDIN if not specified."`
 }
 
 func (cmd *SecretsCreateCmd) Run(ctx context.Context, o *Options) error {
@@ -324,7 +324,7 @@ func (cmd *SecretsRevokeCmd) Run(ctx context.Context, o *Options) error {
 
 type SecretsUpdateCmd struct {
 	Secret   string `arg:"" help:"The secret's name."`
-	DataFile string `default:"-" help:"File path from which to read secret data."`
+	DataFile string `arg:"" optional:"" help:"File path from which to read secret data. Reads from STDIN if not specified."`
 }
 
 func (cmd *SecretsUpdateCmd) Run(ctx context.Context, o *Options) error {
@@ -430,7 +430,7 @@ func readFile(ctx context.Context, name string) ([]byte, error) {
 
 	// Either open the file or use STDIN.
 	var r io.ReadCloser
-	if name == "-" {
+	if name == "" {
 		r = os.Stdin
 	} else {
 		f, err := os.Open(name)

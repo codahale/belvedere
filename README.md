@@ -70,7 +70,7 @@ Belvedere requires a Google Compute Engine machine type and a Docker image URL f
 To create an app, pick a GCE region (e.g. `us-central1`) and run:
 
 ```shell script
-belevedere apps create my-app us-central1 --config=./my-app.yaml
+belevedere apps create my-app us-central1 ./my-app.yaml
 ```
 
 You can also pipe the config in via STDIN:
@@ -99,7 +99,7 @@ The load balancer and DNS stuff will take 10-30 minutes to fully provision.
 To create a release for an app, get the SHA256 hash of the container image and run:
 
 ```shell script
-belvedere releases create my-app v1 $SHA256 --config=./my-app.yaml 
+belvedere releases create my-app v1 $SHA256 ./my-app.yaml 
 ```
 
 This will create a Deployment Manager deployment with some more goodies:
@@ -217,7 +217,7 @@ This provides you with encryption at rest, encryption in flight, access control,
 You can create a secret with an initial value of a file's contents:
 
 ```shell script
-belvedere secrets create my-secret --data-file=secret-value.txt
+belvedere secrets create my-secret secret-value.txt
 ```
 
 Or pipe the value in via STDIN:
@@ -229,7 +229,7 @@ echo "super secret" | belvedere secrets create my-secret
 Updating a secret's value works similarly:
 
 ```shell script
-belvedere secrets update my-secret --data-file=secret-value.txt
+belvedere secrets update my-secret secret-value.txt
 ```
 
 #### Listing And Deleting Secrets
