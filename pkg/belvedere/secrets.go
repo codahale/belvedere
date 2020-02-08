@@ -151,7 +151,7 @@ const accessor = "roles/secretmanager.secretAccessor"
 
 // GrantSecret modifies the IAM policy of the given secret to allow the given application's
 // service account access.
-func GrantSecret(ctx context.Context, project, app, secret string, dryRun bool) error {
+func GrantSecret(ctx context.Context, project, secret, app string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.GrantSecret")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),

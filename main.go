@@ -4,383 +4,327 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/user"
 	"time"
 
+	"github.com/alecthomas/kong"
 	"github.com/codahale/belvedere/pkg/belvedere"
 	"go.opencensus.io/examples/exporter"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
-	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-func main() {
-	app.HelpFlag.Short('h')
-	app.Version(version)
-
-	// Parse command line and execute the action associated with the command.
-	_, err := app.Parse(os.Args[1:])
-	if err != nil {
-		die(err)
-	}
-}
-
-// Define the CLI app, commands, and flags.
 var (
 	version = "unknown" // version is injected via the go:generate statement
-
-	// Application and common flags.
-	app      = kingpin.New("belvedere", "A fine place from which to survey your estate.")
-	debug    = app.Flag("debug", "Enable debug logging.").Bool()
-	quiet    = app.Flag("quiet", "Disable all logging.").Short('q').Bool()
-	dryRun   = app.Flag("dry-run", "Print modifications instead of performing them.").Bool()
-	printCSV = app.Flag("csv", "Print tables as CSV").Bool()
-	interval = app.Flag("interval", "Specify a polling interval for long-running operations.").
-			Default("10s").Duration()
-	timeout = app.Flag("timeout", "Specify a timeout for long-running operations.").
-		Default("10m").Duration()
-	project = app.Flag("project", "Specify a GCP project ID. Defaults to using gcloud.").String()
-
-	// belvedere setup <dns-zone>
-	setupCmd     = app.Command("setup", "Initialize a GCP project for use with Belvedere.")
-	setupDnsZone = setupCmd.Arg("dns-zone", "The DNS zone to be managed by this project.").
-			Required().String()
-
-	// belvedere teardown [--async]
-	teardownCmd   = app.Command("teardown", "Remove all Belvedere resources from this project.")
-	teardownAsync = teardownCmd.Flag("async", "Return without waiting for successful completion.").Bool()
-
-	// belvedere dns-servers
-	dnsServersCmd = app.Command("dns-servers", "List the DNS servers for this project.")
-
-	// belvedere machine-types
-	machineTypesCmd    = app.Command("machine-types", "List available GCE machine types.")
-	machineTypesRegion = machineTypesCmd.Arg("region", "Limit types to those available in the given region.").String()
-
-	// belvedere instances [<app>] [<release>]
-	instancesCmd     = app.Command("instances", "List running instances.")
-	instancesApp     = instancesCmd.Arg("app", "Limit instances to those running the given app.").String()
-	instancesRelease = instancesCmd.Arg("release", "Limit instances to those running the given release.").String()
-
-	// belvedere ssh <instance> [-- <args>...]
-	sshCmd      = app.Command("ssh", "SSH to an instance over IAP.")
-	sshInstance = sshCmd.Arg("instance", "The instance name.").Required().String()
-	sshArgs     = sshCmd.Arg("args", "Additional SSH arguments.").Strings()
-
-	// belvedere logs <app> [<release>] [<instance>] [--filter=FILTER...] [--freshness=5m]
-	logsCmd       = app.Command("logs", "Display application logs.")
-	logsApp       = logsCmd.Arg("app", "Limit logs to the given app.").Required().String()
-	logsRelease   = logsCmd.Arg("release", "Limit logs to the given release.").String()
-	logsInstance  = logsCmd.Arg("instance", "Limit logs to the given instance.").String()
-	logsFilters   = logsCmd.Flag("filter", "Limit logs with the given Stackdriver Logging filter.").Strings()
-	logsFreshness = logsCmd.Flag("freshness", "Limit logs to the last period of time.").
-			Default("5m").Duration()
-
-	// belvedere apps
-	appsCmd = app.Command("apps", "Commands for managing apps.")
-
-	// belvedere apps list
-	appsListCmd = appsCmd.Command("list", "List all apps.")
-
-	// belvedere apps create <app> <region> <config>
-	appsCreateCmd    = appsCmd.Command("create", "Create an application.")
-	appsCreateApp    = appsCreateCmd.Arg("app", "The app's name.").Required().String()
-	appsCreateRegion = appsCreateCmd.Arg("region", "The app's region.").Required().String()
-	appsCreateConfig = appsCreateCmd.Arg("config", "The app's configuration.").Required().String()
-
-	// belvedere apps update <app> <config>
-	appsUpdateCmd    = appsCmd.Command("update", "Update an application.")
-	appsUpdateApp    = appsUpdateCmd.Arg("app", "The app's name.").Required().String()
-	appsUpdateConfig = appsUpdateCmd.Arg("config", "The app's configuration.").Required().String()
-
-	// belvedere apps delete <app> [--async]
-	appsDeleteCmd   = appsCmd.Command("delete", "Delete an application.")
-	appsDeleteApp   = appsDeleteCmd.Arg("app", "The app's name.").Required().String()
-	appsDeleteAsync = appsDeleteCmd.Flag("async", "Return without waiting for successful completion.").Bool()
-
-	// belvedere releases
-	relCmd = app.Command("releases", "Commands for managing releases.")
-
-	// belvedere releases list [<app>]
-	relListCmd = relCmd.Command("list", "List all releases.")
-	relListApp = relListCmd.Arg("app", "Limit releases to the given app.").String()
-
-	// belvedere releases create <app> <release> <config> <sha256> [--enable]
-	relCreateCmd     = relCmd.Command("create", "Create a release.")
-	relCreateApp     = relCreateCmd.Arg("app", "The app's name.").Required().String()
-	relCreateRelease = relCreateCmd.Arg("release", "The release's name.").Required().String()
-	relCreateConfig  = relCreateCmd.Arg("config", "The app's config.").Required().String()
-	relCreateHash    = relCreateCmd.Arg("sha256", "The app container's SHA256 hash.").Required().String()
-	relCreateEnable  = relCreateCmd.Flag("enable", "Put release into service once created.").Bool()
-
-	// belvedere releases enable <app> <release>
-	relEnableCmd     = relCmd.Command("enable", "Put a release into service.")
-	relEnableApp     = relEnableCmd.Arg("app", "The app's name.").Required().String()
-	relEnableRelease = relEnableCmd.Arg("release", "The release's name.").Required().String()
-
-	// belvedere releases disable <app> <release>
-	relDisableCmd     = relCmd.Command("disable", "Remove a release from service.")
-	relDisableApp     = relDisableCmd.Arg("app", "The app's name.").Required().String()
-	relDisableRelease = relDisableCmd.Arg("release", "The release's name.").Required().String()
-
-	// belvedere releases delete <app> <release> [--async]
-	relDeleteCmd     = relCmd.Command("delete", "Delete a release.")
-	relDeleteApp     = relDeleteCmd.Arg("app", "The app's name.").Required().String()
-	relDeleteRelease = relDeleteCmd.Arg("release", "The releases's name.").Required().String()
-	relDeleteAsync   = relDeleteCmd.Flag("async", "Return without waiting for successful completion.").Bool()
-
-	// belvedere secrets
-	secCmd = app.Command("secrets", "Commands for managing secrets.")
-
-	// belvedere secrets list
-	secListCmd = secCmd.Command("list", "List all secrets.")
-
-	// belvedere secrets create <secret> <input-file>
-	secCreateCmd    = secCmd.Command("create", "Create a secret.")
-	secCreateSecret = secCreateCmd.Arg("secret", "The secret's name").Required().String()
-	secCreateData   = secCreateCmd.Arg("input-file", "The secret's value").Required().String()
-
-	// belvedere secrets grant <app> <secret>
-	secGrantCmd    = secCmd.Command("grant-secret", "Grant access to a secret for an application.")
-	secGrantApp    = secGrantCmd.Arg("app", "The app's name.").Required().String()
-	secGrantSecret = secGrantCmd.Arg("secret", "The secret's name.").Required().String()
-
-	// belvedere secrets revoke <app> <secret>
-	secRevokeCmd    = secCmd.Command("revoke-secret", "Revoke access to a secret for an application.")
-	secRevokeApp    = secRevokeCmd.Arg("app", "The app's name.").Required().String()
-	secRevokeSecret = secRevokeCmd.Arg("secret", "The secret's name.").Required().String()
-
-	// belvedere secrets update <secret> <input-file>
-	secUpdateCmd    = secCmd.Command("update", "Update a secret.")
-	secUpdateSecret = secUpdateCmd.Arg("secret", "The secret's name").Required().String()
-	secUpdateData   = secUpdateCmd.Arg("input-file", "The secret's value").Required().String()
-
-	// belvedere secrets delete <secret>
-	secDeleteCmd    = secCmd.Command("delete", "Delete a secret.")
-	secDeleteSecret = secDeleteCmd.Arg("secret", "The secret's name").Required().String()
 )
 
-// Map all commands to actions. This has to happen outside the `var` clauses because command actions
-// refer to command args and flags which themselves refer to commands. Go doesn't do cycles.
-func init() {
-	setupCmd.Action(contextAction(runSetup))
-	teardownCmd.Action(contextAction(runTeardown))
-	dnsServersCmd.Action(contextAction(runDnsServers))
-	machineTypesCmd.Action(contextAction(runMachineTypes))
-	instancesCmd.Action(contextAction(runInstances))
-	sshCmd.Action(contextAction(runSSH))
-	logsCmd.Action(contextAction(runLogs))
-	appsListCmd.Action(contextAction(runAppsList))
-	appsCreateCmd.Action(contextAction(runAppsCreate))
-	appsUpdateCmd.Action(contextAction(runAppsUpdate))
-	appsDeleteCmd.Action(contextAction(runAppsDelete))
-	relListCmd.Action(contextAction(runRelList))
-	relCreateCmd.Action(contextAction(runRelCreate))
-	relEnableCmd.Action(contextAction(runRelEnable))
-	relDisableCmd.Action(contextAction(runRelDisable))
-	relDeleteCmd.Action(contextAction(runRelDelete))
-	secListCmd.Action(contextAction(runSecList))
-	secCreateCmd.Action(contextAction(runSecCreate))
-	secGrantCmd.Action(contextAction(runSecGrant))
-	secRevokeCmd.Action(contextAction(runSecRevoke))
-	secUpdateCmd.Action(contextAction(runSecUpdate))
-	secDeleteCmd.Action(contextAction(runSecDelete))
+type SetupCmd struct {
+	DNSZone string `arg:"" required:"" help:"The DNS zone to be managed by this project."`
 }
 
-func runSetup(ctx context.Context, _ *func() error) error {
-	return belvedere.Setup(ctx, *project, *setupDnsZone, *dryRun)
+func (cmd *SetupCmd) Run(ctx context.Context, o *Options) error {
+	return belvedere.Setup(ctx, o.Project, cmd.DNSZone, o.DryRun)
 }
 
-func runTeardown(ctx context.Context, _ *func() error) error {
-	return belvedere.Teardown(ctx, *project, *dryRun, *teardownAsync)
+type TeardownCmd struct {
+	Async bool `help:"Return without waiting for successful completion."`
 }
 
-func runDnsServers(ctx context.Context, _ *func() error) error {
-	servers, err := belvedere.DNSServers(ctx, *project)
+func (cmd *TeardownCmd) Run(ctx context.Context, o *Options) error {
+	return belvedere.Teardown(ctx, o.Project, o.DryRun, cmd.Async)
+}
+
+type DNSServersCmd struct {
+}
+
+func (cmd *DNSServersCmd) Run(ctx context.Context, o *Options) error {
+	servers, err := belvedere.DNSServers(ctx, o.Project)
 	if err != nil {
 		return err
 	}
-	return printTable(servers)
+	return o.printTable(servers)
 }
 
-func runMachineTypes(ctx context.Context, _ *func() error) error {
-	machineTypes, err := belvedere.MachineTypes(ctx, *project, *machineTypesRegion)
+type MachineTypesCmd struct {
+	Region string `help:"Limit types to those available in the given region."`
+}
+
+func (cmd *MachineTypesCmd) Run(ctx context.Context, o *Options) error {
+	machineTypes, err := belvedere.MachineTypes(ctx, o.Project, cmd.Region)
 	if err != nil {
 		return err
 	}
-	return printTable(machineTypes)
+	return o.printTable(machineTypes)
 }
 
-func runInstances(ctx context.Context, _ *func() error) error {
-	instances, err := belvedere.Instances(ctx, *project, *instancesApp, *instancesRelease)
+type InstancesCmd struct {
+	App     string `arg:"" optional:"" help:"Limit instances to those running the given app."`
+	Release string `arg:"" optional:"" help:"Limit instances to those running the given release."`
+}
+
+func (cmd *InstancesCmd) Run(ctx context.Context, o *Options) error {
+	instances, err := belvedere.Instances(ctx, o.Project, cmd.App, cmd.Release)
 	if err != nil {
 		return err
 	}
-	return printTable(instances)
+	return o.printTable(instances)
 }
 
-func runSSH(ctx context.Context, exit *func() error) error {
-	ssh, err := belvedere.SSH(ctx, *project, *sshInstance, *sshArgs)
+type SSHCmd struct {
+	Instance string   `arg:"" required:"" help:"The instance name."`
+	Args     []string `arg:"" help:"Additional SSH arguments."`
+}
+
+func (cmd *SSHCmd) Run(ctx context.Context, o *Options) error {
+	ssh, err := belvedere.SSH(ctx, o.Project, cmd.Instance, cmd.Args)
 	if err != nil {
 		return err
 	}
-	*exit = ssh
+	o.exit = ssh
 	return nil
 }
 
-func runLogs(ctx context.Context, _ *func() error) error {
-	t := time.Now().Add(-*logsFreshness)
-	logs, err := belvedere.Logs(ctx, *project, *logsApp, *logsRelease, *logsInstance, t, *logsFilters)
+type LogsCmd struct {
+	App       string        `arg:"" help:"Limit logs to the given app."`
+	Release   string        `arg:"" optional:"" help:"Limit logs to the given release."`
+	Instance  string        `arg:"" optional:"" help:"Limit logs to the given instance."`
+	Filters   []string      `name:"filter" optional:"" help:"Limit logs with the given Stackdriver Logging filters."`
+	Freshness time.Duration `default:"5m" help:"Limit logs to the last period of time."`
+}
+
+func (cmd *LogsCmd) Run(ctx context.Context, o *Options) error {
+	t := time.Now().Add(-cmd.Freshness)
+	logs, err := belvedere.Logs(ctx, o.Project, cmd.App, cmd.Release, cmd.Instance, t, cmd.Filters)
 	if err != nil {
 		return err
 	}
-	return printTable(logs)
+	return o.printTable(logs)
 }
 
-func runAppsList(ctx context.Context, _ *func() error) error {
-	apps, err := belvedere.Apps(ctx, *project)
+type AppsListCmd struct {
+}
+
+func (AppsListCmd) Run(ctx context.Context, o *Options) error {
+	apps, err := belvedere.Apps(ctx, o.Project)
 	if err != nil {
 		return err
 	}
-	return printTable(apps)
+	return o.printTable(apps)
 }
 
-func runAppsCreate(ctx context.Context, _ *func() error) error {
-	config, err := belvedere.LoadConfig(ctx, *appsCreateConfig)
+type AppsCreateCmd struct {
+	App    string `arg:"" help:"The app's name."`
+	Region string `arg:"" help:"The app's region."`
+	Config string `help:"The path to the app's configuration file." default:"-"`
+}
+
+func (cmd *AppsCreateCmd) Run(ctx context.Context, o *Options) error {
+	config, err := belvedere.LoadConfig(ctx, cmd.Config)
 	if err != nil {
 		return err
 	}
-	return belvedere.CreateApp(ctx, *project, *appsCreateRegion, *appsCreateApp, config, *dryRun)
+	return belvedere.CreateApp(ctx, o.Project, cmd.Region, cmd.App, config, o.DryRun)
 }
 
-func runAppsUpdate(ctx context.Context, _ *func() error) error {
-	config, err := belvedere.LoadConfig(ctx, *appsUpdateConfig)
+type AppsUpdateCmd struct {
+	App    string `arg:"" help:"The app's name."`
+	Config string `help:"The path to the app's configuration file." default:"-"`
+}
+
+func (cmd *AppsUpdateCmd) Run(ctx context.Context, o *Options) error {
+	config, err := belvedere.LoadConfig(ctx, cmd.Config)
 	if err != nil {
 		return err
 	}
-	return belvedere.UpdateApp(ctx, *project, *appsUpdateApp, config, *dryRun)
+	return belvedere.UpdateApp(ctx, o.Project, cmd.App, config, o.DryRun)
 }
 
-func runAppsDelete(ctx context.Context, _ *func() error) error {
-	return belvedere.DeleteApp(ctx, *project, *appsDeleteApp, *dryRun, *appsDeleteAsync)
+type AppsDeleteCmd struct {
+	App   string `arg:"" help:"The app's name."`
+	Async bool   `help:"Return without waiting for successful completion."`
 }
 
-func runRelList(ctx context.Context, _ *func() error) error {
-	releases, err := belvedere.Releases(ctx, *project, *relListApp)
+func (cmd *AppsDeleteCmd) Run(ctx context.Context, o *Options) error {
+	return belvedere.DeleteApp(ctx, o.Project, cmd.App, o.DryRun, cmd.Async)
+}
+
+type AppsCmd struct {
+	List   AppsListCmd   `cmd:"" help:"List all apps."`
+	Create AppsCreateCmd `cmd:"" help:"Create an application."`
+	Update AppsUpdateCmd `cmd:"" help:"Update an application."`
+	Delete AppsDeleteCmd `cmd:"" help:"Delete an application."`
+}
+
+type ReleasesListCmd struct {
+	App string `optional:"" help:"Limit releases to the given app."`
+}
+
+func (cmd *ReleasesListCmd) Run(ctx context.Context, o *Options) error {
+	releases, err := belvedere.Releases(ctx, o.Project, cmd.App)
 	if err != nil {
 		return err
 	}
-	return printTable(releases)
+	return o.printTable(releases)
 }
 
-func runRelCreate(ctx context.Context, _ *func() error) error {
-	config, err := belvedere.LoadConfig(ctx, *relCreateConfig)
+type ReleasesCreateCmd struct {
+	App     string `arg:"" help:"The app's name."`
+	Release string `arg:"" help:"The release's name."`
+	SHA256  string `arg:"" help:"The app container's SHA256 hash."`
+	Config  string `help:"The path to the app's configuration file." default:"-"`
+	Enable  bool   `help:"Put release into service once created."`
+}
+
+func (cmd *ReleasesCreateCmd) Run(ctx context.Context, o *Options) error {
+	config, err := belvedere.LoadConfig(ctx, cmd.Config)
 	if err != nil {
 		return err
 	}
-	if err := belvedere.CreateRelease(
-		ctx, *project, *relCreateApp, *relCreateRelease, config, *relCreateHash, *dryRun,
-	); err != nil {
-		return err
-	}
-	if *relCreateEnable {
-		if err := belvedere.EnableRelease(ctx, *project, *relCreateApp, *relCreateRelease, *dryRun); err != nil {
-			return err
-		}
-	}
-	return nil
-}
 
-func runRelEnable(ctx context.Context, _ *func() error) error {
-	return belvedere.EnableRelease(ctx, *project, *relEnableApp, *relEnableRelease, *dryRun)
-}
-
-func runRelDisable(ctx context.Context, _ *func() error) error {
-	return belvedere.DisableRelease(ctx, *project, *relDisableApp, *relDisableRelease, *dryRun)
-}
-
-func runRelDelete(ctx context.Context, _ *func() error) error {
-	if err := belvedere.DisableRelease(ctx, *project, *relDeleteApp, *relDeleteRelease, false); err != nil {
-		return err
-	}
-	return belvedere.DeleteRelease(ctx, *project, *relDeleteApp, *relDeleteRelease, *dryRun, *relDeleteAsync)
-}
-
-func runSecList(ctx context.Context, _ *func() error) error {
-	releases, err := belvedere.Secrets(ctx, *project)
+	err = belvedere.CreateRelease(ctx, o.Project, cmd.App, cmd.Release, config, cmd.SHA256, o.DryRun)
 	if err != nil {
 		return err
 	}
-	return printTable(releases)
-}
 
-func runSecCreate(ctx context.Context, _ *func() error) error {
-	return belvedere.CreateSecret(ctx, *project, *secCreateSecret, *secCreateData)
-}
-
-func runSecGrant(ctx context.Context, _ *func() error) error {
-	return belvedere.GrantSecret(ctx, *project, *secGrantApp, *secGrantSecret, *dryRun)
-}
-
-func runSecRevoke(ctx context.Context, _ *func() error) error {
-	return belvedere.RevokeSecret(ctx, *project, *secRevokeApp, *secRevokeSecret, *dryRun)
-}
-
-func runSecUpdate(ctx context.Context, _ *func() error) error {
-	return belvedere.UpdateSecret(ctx, *project, *secUpdateSecret, *secUpdateData)
-}
-
-func runSecDelete(ctx context.Context, _ *func() error) error {
-	return belvedere.DeleteSecret(ctx, *project, *secDeleteSecret)
-}
-
-func contextAction(f func(ctx context.Context, exit *func() error) error) kingpin.Action {
-	return func(parseContext *kingpin.ParseContext) error {
-		// Enable trace logging.
-		enableLogging()
-
-		// Create a root span.
-		ctx, cancel, span := rootSpan()
-		defer cancel()
-		defer span.End()
-
-		// If a project was not explicitly specified, detect one.
-		if err := detectProject(ctx); err != nil {
-			die(err)
-		}
-
-		var exit func() error
-		if err := f(ctx, &exit); err != nil {
-			return err
-		}
-
-		if exit != nil {
-			// Manually end the root span and execute the exit handler.
-			span.End()
-			return exit()
-		}
-
-		return nil
-	}
-}
-
-func detectProject(ctx context.Context) error {
-	if *project == "" {
-		p, err := belvedere.DefaultProject(ctx)
+	if cmd.Enable {
+		err = belvedere.EnableRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun)
 		if err != nil {
 			return err
 		}
-		project = &p
 	}
 	return nil
 }
 
-func rootSpan() (context.Context, context.CancelFunc, *trace.Span) {
+type ReleasesEnableCmd struct {
+	App     string `arg:"" help:"The app's name."`
+	Release string `arg:"" help:"The release's name."`
+}
+
+func (cmd *ReleasesEnableCmd) Run(ctx context.Context, o *Options) error {
+	return belvedere.EnableRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun)
+}
+
+type ReleasesDisableCmd struct {
+	App     string `arg:"" help:"The app's name."`
+	Release string `arg:"" help:"The release's name."`
+}
+
+func (cmd *ReleasesDisableCmd) Run(ctx context.Context, o *Options) error {
+	return belvedere.DisableRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun)
+}
+
+type ReleasesDeleteCmd struct {
+	App     string `arg:"" help:"The app's name."`
+	Release string `arg:"" help:"The release's name."`
+	Async   bool   `help:"Return without waiting for successful completion."`
+}
+
+func (cmd *ReleasesDeleteCmd) Run(ctx context.Context, o *Options) error {
+	return belvedere.DeleteRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun, cmd.Async)
+}
+
+type ReleasesCmd struct {
+	List    ReleasesListCmd    `cmd:"" help:"List all releases."`
+	Create  ReleasesCreateCmd  `cmd:"" help:"Create a release."`
+	Enable  ReleasesEnableCmd  `cmd:"" help:"Put a release into service."`
+	Disable ReleasesDisableCmd `cmd:"" help:"Remove a release from service."`
+	Delete  ReleasesDeleteCmd  `cmd:"" help:"Delete a release."`
+}
+
+type SecretsListCmd struct {
+}
+
+func (*SecretsListCmd) Run(ctx context.Context, o *Options) error {
+	releases, err := belvedere.Secrets(ctx, o.Project)
+	if err != nil {
+		return err
+	}
+	return o.printTable(releases)
+}
+
+type SecretsCreateCmd struct {
+	Secret   string `arg:"" help:"The secret's name."`
+	DataFile string `default:"-" help:"File path from which to read secret data."`
+}
+
+func (cmd *SecretsCreateCmd) Run(ctx context.Context, o *Options) error {
+	return belvedere.CreateSecret(ctx, o.Project, cmd.Secret, cmd.DataFile)
+}
+
+type SecretsGrantCmd struct {
+	Secret string `arg:"" help:"The secret's name."`
+	App    string `arg:"" help:"The app's name."`
+}
+
+func (cmd *SecretsGrantCmd) Run(ctx context.Context, o *Options) error {
+	return belvedere.GrantSecret(ctx, o.Project, cmd.Secret, cmd.App, o.DryRun)
+}
+
+type SecretsRevokeCmd struct {
+	Secret string `arg:"" help:"The secret's name."`
+	App    string `arg:"" help:"The app's name."`
+}
+
+func (cmd *SecretsRevokeCmd) Run(ctx context.Context, o *Options) error {
+	return belvedere.RevokeSecret(ctx, o.Project, cmd.App, cmd.Secret, o.DryRun)
+}
+
+type SecretsUpdateCmd struct {
+	Secret   string `arg:"" help:"The secret's name."`
+	DataFile string `default:"-" help:"File path from which to read secret data."`
+}
+
+func (cmd *SecretsUpdateCmd) Run(ctx context.Context, o *Options) error {
+	return belvedere.UpdateSecret(ctx, o.Project, cmd.Secret, cmd.DataFile)
+}
+
+type SecretsDeleteCmd struct {
+	Secret string `arg:"" help:"The secret's name."`
+}
+
+func (cmd *SecretsDeleteCmd) Run(ctx context.Context, o *Options) error {
+	return belvedere.DeleteSecret(ctx, o.Project, cmd.Secret)
+}
+
+type SecretsCmd struct {
+	List   SecretsListCmd   `cmd:"" help:"List all secrets."`
+	Create SecretsCreateCmd `cmd:"" help:"Create a secret."`
+	Grant  SecretsGrantCmd  `cmd:"" help:"Grant access to a secret for an application."`
+	Revoke SecretsRevokeCmd `cmd:"" help:"Revoke access to a secret for an application."`
+	Update SecretsUpdateCmd `cmd:"" help:"Update a secret."`
+	Delete SecretsDeleteCmd `cmd:"" help:"Delete a secret."`
+}
+
+type Options struct {
+	Debug    bool             `help:"Enable debug logging." short:"d"`
+	Quiet    bool             `help:"Disable all logging." short:"q"`
+	DryRun   bool             `help:"Print modifications instead of performing them."`
+	CSV      bool             `help:"Print tables as CSV."`
+	Interval time.Duration    `help:"Specify a polling interval for long-running operations." default:"10s"`
+	Timeout  time.Duration    `help:"Specify a timeout for long-running operations." default:"10m"`
+	Version  kong.VersionFlag `help:"Print version information and quit."`
+	Project  string           `help:"Specify a GCP project ID. Defaults to using gcloud."`
+
+	Setup        SetupCmd        `cmd:"" help:"Initialize a GCP project for use with Belvedere."`
+	Teardown     TeardownCmd     `cmd:"" help:"Remove all Belvedere resources from this project."`
+	DNSServers   DNSServersCmd   `cmd:"" help:"List the DNS servers for this project."`
+	MachineTypes MachineTypesCmd `cmd:"" help:"List available GCE machine types."`
+	Instances    InstancesCmd    `cmd:"" help:"List running instances."`
+	SSH          SSHCmd          `cmd:"" help:"SSH to an instance over IAP."`
+	Logs         LogsCmd         `cmd:"" help:"Display application logs."`
+	Apps         AppsCmd         `cmd:"" help:"Commands for managing apps."`
+	Releases     ReleasesCmd     `cmd:"" help:"Commands for managing releases."`
+	Secrets      SecretsCmd      `cmd:"" help:"Commands for managing secrets."`
+
+	exit func() error
+}
+
+func (o *Options) rootSpan() (context.Context, context.CancelFunc, *trace.Span) {
 	// Initialize a context with a timeout and an interval.
-	ctx := belvedere.WithInterval(context.Background(), *interval)
-	ctx, cancel := context.WithTimeout(ctx, *timeout)
+	ctx := belvedere.WithInterval(context.Background(), o.Interval)
+	ctx, cancel := context.WithTimeout(ctx, o.Timeout)
+
 	// Create a root span.
 	ctx, span := trace.StartSpan(ctx, "belvedere.run")
 	if hostname, err := os.Hostname(); err == nil {
@@ -393,24 +337,60 @@ func rootSpan() (context.Context, context.CancelFunc, *trace.Span) {
 	return ctx, cancel, span
 }
 
-func enableLogging() {
+func (o *Options) enableLogging() {
 	// Export all traces.
 	trace.ApplyConfig(trace.Config{
 		DefaultSampler: trace.AlwaysSample(),
 	})
 
-	if *debug {
+	if o.Debug {
 		// Use the print exporter for debugging, as it prints everything.
 		pe := &exporter.PrintExporter{}
 		trace.RegisterExporter(pe)
 		view.RegisterExporter(pe)
-	} else if !*quiet {
+	} else if !o.Quiet {
 		// Unless we're quiet, use the trace logger for more practical logging.
 		trace.RegisterExporter(&traceLogger{})
 	}
 }
 
-func die(err error) {
-	_, _ = fmt.Fprintln(os.Stderr, err)
-	os.Exit(-1)
+func (o *Options) detectProject(ctx context.Context) error {
+	if o.Project == "" {
+		p, err := belvedere.DefaultProject(ctx)
+		if err != nil {
+			return err
+		}
+		o.Project = p
+	}
+	return nil
+}
+
+func main() {
+	var opts Options
+	cli := kong.Parse(&opts,
+		kong.Name("belvedere"), kong.UsageOnError(),
+		kong.Vars{
+			"version": version,
+		},
+	)
+
+	// Enable trace logging.
+	opts.enableLogging()
+
+	// Create a root span.
+	ctx, cancel, span := opts.rootSpan()
+	defer cancel()
+	defer span.End()
+
+	// If a project was not explicitly specified, detect one.
+	cli.FatalIfErrorf(opts.detectProject(ctx))
+
+	// Run the given command.
+	cli.BindTo(ctx, (*context.Context)(nil))
+	cli.FatalIfErrorf(cli.Run(&opts))
+
+	// Run any post-command hook.
+	if opts.exit != nil {
+		cli.FatalIfErrorf(opts.exit())
+	}
 }

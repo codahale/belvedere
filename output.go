@@ -12,7 +12,7 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-func printTable(i interface{}) error {
+func (o *Options) printTable(i interface{}) error {
 	t := reflect.TypeOf(i)
 	if t.Kind() != reflect.Slice {
 		return nil
@@ -49,7 +49,7 @@ func printTable(i interface{}) error {
 		rows = append(rows, row)
 	}
 
-	if terminal.IsTerminal(syscall.Stdout) && !*printCSV {
+	if terminal.IsTerminal(syscall.Stdout) && !o.CSV {
 		tw := tablewriter.NewWriter(os.Stdout)
 		tw.SetAutoFormatHeaders(false)
 		tw.SetAutoWrapText(false)

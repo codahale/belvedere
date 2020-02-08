@@ -70,7 +70,13 @@ Belvedere requires a Google Compute Engine machine type and a Docker image URL f
 To create an app, pick a GCE region (e.g. `us-central1`) and run:
 
 ```shell script
-belevedere apps create my-app us-central1 ./my-app.yaml
+belevedere apps create my-app us-central1 --config=./my-app.yaml
+```
+
+You can also pipe the config in via STDIN:
+
+```shell script
+cat ./my-app.yaml | belevedere apps create my-app us-central1
 ```
 
 This will create a Deployment Manager deployment with a bunch of goodies:
@@ -93,7 +99,7 @@ The load balancer and DNS stuff will take 10-30 minutes to fully provision.
 To create a release for an app, get the SHA256 hash of the container image and run:
 
 ```shell script
-belvedere releases create my-app v1 ./my-app.yaml $SHA256
+belvedere releases create my-app v1 $SHA256 --config=./my-app.yaml 
 ```
 
 This will create a Deployment Manager deployment with some more goodies:
@@ -167,8 +173,8 @@ To list all the running instances in the project, run:
 
 ```shell script
 belvedere instances
-belvedere instance my-app
-belvedere instance my-app v43
+belvedere instances my-app
+belvedere instances my-app v43
 ```
 
 ### SSH Access
@@ -186,7 +192,7 @@ Only IAP tunnels are allowed, and IAP tunnels require that the initiator be an a
 You can also pass arguments to SSH:
 
 ```shell script
-belvedere ssh my-app-v43-hxht -- ls -al
+belvedere ssh my-app-v43-hxht ls -al
 ```
 
 ### Viewing Logs
@@ -196,8 +202,9 @@ To view the logs for an app and its sidecar containers, run:
 ```shell script
 belvedere logs my-app
 belvedere logs my-app v43
-belvedere logs my-app v43 --freshness=1h
-belvedere logs my-app v43 --freshness=1h --filter="/login/"
+belvedere logs my-app v43 my-app-v43-hxht
+belvedere logs my-app v43 my-app-v43-hxht --freshness=1h
+belvedere logs my-app v43 my-app-v43-hxht --freshness=1h --filter="/login/"
 ```
 
 ### Secrets
@@ -210,19 +217,19 @@ This provides you with encryption at rest, encryption in flight, access control,
 You can create a secret with an initial value of a file's contents:
 
 ```shell script
-belvedere secrets create my-secret secret-value.txt
+belvedere secrets create my-secret --data-file=secret-value.txt
 ```
 
 Or pipe the value in via STDIN:
 
 ```shell script
-echo "super secret" | belvedere secrets create my-secret -
+echo "super secret" | belvedere secrets create my-secret 
 ```
 
 Updating a secret's value works similarly:
 
 ```shell script
-belvedere secrets update my-secret secret-value.txt
+belvedere secrets update my-secret --data-file=secret-value.txt
 ```
 
 #### Listing And Deleting Secrets
@@ -239,8 +246,8 @@ belvedere secrets delete my-secret
 You can quickly grant or revoke an app's access to a secret:
 
 ```shell script
-belvedere secrets grant my-app secret1
-belvedere secrets revoke my-app secret1
+belvedere secrets grant secret1 my-app
+belvedere secrets revoke secret1 my-app
 ```
 
 #### Accessing Secrets From Your Application

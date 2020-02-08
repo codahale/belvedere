@@ -140,7 +140,7 @@ func TestGrantSecret(t *testing.T) {
 		JSON(secretmanager.Policy{})
 
 	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := GrantSecret(ctx, "my-project", "my-app", "my-secret", false); err != nil {
+	if err := GrantSecret(ctx, "my-project", "my-secret", "my-app", false); err != nil {
 		t.Fatal(err)
 	}
 }
