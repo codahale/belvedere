@@ -4,18 +4,23 @@ package main
 
 import (
 	"context"
+	"encoding/csv"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/user"
+	"reflect"
+	"syscall"
 	"time"
 
 	"github.com/alecthomas/kong"
 	"github.com/codahale/belvedere/pkg/belvedere"
+	"github.com/olekukonko/tablewriter"
 	"go.opencensus.io/examples/exporter"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 func main() {
@@ -51,306 +56,6 @@ func main() {
 var (
 	version = "unknown" // version is injected via the go:generate statement
 )
-
-type SetupCmd struct {
-	DNSZone string `arg:"" required:"" help:"The DNS zone to be managed by this project."`
-}
-
-func (cmd *SetupCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.Setup(ctx, o.Project, cmd.DNSZone, o.DryRun)
-}
-
-type TeardownCmd struct {
-	Async bool `help:"Return without waiting for successful completion."`
-}
-
-func (cmd *TeardownCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.Teardown(ctx, o.Project, o.DryRun, cmd.Async)
-}
-
-type DNSServersCmd struct {
-}
-
-func (cmd *DNSServersCmd) Run(ctx context.Context, o *Options) error {
-	servers, err := belvedere.DNSServers(ctx, o.Project)
-	if err != nil {
-		return err
-	}
-	return o.printTable(servers)
-}
-
-type MachineTypesCmd struct {
-	Region string `help:"Limit types to those available in the given region."`
-}
-
-func (cmd *MachineTypesCmd) Run(ctx context.Context, o *Options) error {
-	machineTypes, err := belvedere.MachineTypes(ctx, o.Project, cmd.Region)
-	if err != nil {
-		return err
-	}
-	return o.printTable(machineTypes)
-}
-
-type InstancesCmd struct {
-	App     string `arg:"" optional:"" help:"Limit instances to those running the given app."`
-	Release string `arg:"" optional:"" help:"Limit instances to those running the given release."`
-}
-
-func (cmd *InstancesCmd) Run(ctx context.Context, o *Options) error {
-	instances, err := belvedere.Instances(ctx, o.Project, cmd.App, cmd.Release)
-	if err != nil {
-		return err
-	}
-	return o.printTable(instances)
-}
-
-type SSHCmd struct {
-	Instance string   `arg:"" required:"" help:"The instance name."`
-	Args     []string `arg:"" help:"Additional SSH arguments."`
-}
-
-func (cmd *SSHCmd) Run(ctx context.Context, o *Options) error {
-	ssh, err := belvedere.SSH(ctx, o.Project, cmd.Instance, cmd.Args)
-	if err != nil {
-		return err
-	}
-	o.exit = ssh
-	return nil
-}
-
-type LogsCmd struct {
-	App       string        `arg:"" help:"Limit logs to the given app."`
-	Release   string        `arg:"" optional:"" help:"Limit logs to the given release."`
-	Instance  string        `arg:"" optional:"" help:"Limit logs to the given instance."`
-	Filters   []string      `name:"filter" optional:"" help:"Limit logs with the given Stackdriver Logging filters."`
-	Freshness time.Duration `default:"5m" help:"Limit logs to the last period of time."`
-}
-
-func (cmd *LogsCmd) Run(ctx context.Context, o *Options) error {
-	t := time.Now().Add(-cmd.Freshness)
-	logs, err := belvedere.Logs(ctx, o.Project, cmd.App, cmd.Release, cmd.Instance, t, cmd.Filters)
-	if err != nil {
-		return err
-	}
-	return o.printTable(logs)
-}
-
-type AppsListCmd struct {
-}
-
-func (AppsListCmd) Run(ctx context.Context, o *Options) error {
-	apps, err := belvedere.Apps(ctx, o.Project)
-	if err != nil {
-		return err
-	}
-	return o.printTable(apps)
-}
-
-type AppsCreateCmd struct {
-	App    string `arg:"" help:"The app's name."`
-	Region string `arg:"" help:"The app's region."`
-	Config string `arg:"" optional:"" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
-}
-
-func (cmd *AppsCreateCmd) Run(ctx context.Context, o *Options) error {
-	b, err := readFile(ctx, cmd.Config)
-	if err != nil {
-		return err
-	}
-
-	config, err := belvedere.LoadConfig(ctx, b)
-	if err != nil {
-		return err
-	}
-	return belvedere.CreateApp(ctx, o.Project, cmd.Region, cmd.App, config, o.DryRun)
-}
-
-type AppsUpdateCmd struct {
-	App    string `arg:"" help:"The app's name."`
-	Config string `arg:"" optional:"" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
-}
-
-func (cmd *AppsUpdateCmd) Run(ctx context.Context, o *Options) error {
-	b, err := readFile(ctx, cmd.Config)
-	if err != nil {
-		return err
-	}
-
-	config, err := belvedere.LoadConfig(ctx, b)
-	if err != nil {
-		return err
-	}
-	return belvedere.UpdateApp(ctx, o.Project, cmd.App, config, o.DryRun)
-}
-
-type AppsDeleteCmd struct {
-	App   string `arg:"" help:"The app's name."`
-	Async bool   `help:"Return without waiting for successful completion."`
-}
-
-func (cmd *AppsDeleteCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.DeleteApp(ctx, o.Project, cmd.App, o.DryRun, cmd.Async)
-}
-
-type AppsCmd struct {
-	List   AppsListCmd   `cmd:"" help:"List all apps."`
-	Create AppsCreateCmd `cmd:"" help:"Create an application."`
-	Update AppsUpdateCmd `cmd:"" help:"Update an application."`
-	Delete AppsDeleteCmd `cmd:"" help:"Delete an application."`
-}
-
-type ReleasesListCmd struct {
-	App string `optional:"" help:"Limit releases to the given app."`
-}
-
-func (cmd *ReleasesListCmd) Run(ctx context.Context, o *Options) error {
-	releases, err := belvedere.Releases(ctx, o.Project, cmd.App)
-	if err != nil {
-		return err
-	}
-	return o.printTable(releases)
-}
-
-type ReleasesCreateCmd struct {
-	App     string `arg:"" help:"The app's name."`
-	Release string `arg:"" help:"The release's name."`
-	SHA256  string `arg:"" help:"The app container's SHA256 hash."`
-	Config  string `arg:"" optional:"" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
-	Enable  bool   `help:"Put release into service once created."`
-}
-
-func (cmd *ReleasesCreateCmd) Run(ctx context.Context, o *Options) error {
-	b, err := readFile(ctx, cmd.Config)
-	if err != nil {
-		return err
-	}
-
-	config, err := belvedere.LoadConfig(ctx, b)
-	if err != nil {
-		return err
-	}
-
-	err = belvedere.CreateRelease(ctx, o.Project, cmd.App, cmd.Release, config, cmd.SHA256, o.DryRun)
-	if err != nil {
-		return err
-	}
-
-	if cmd.Enable {
-		err = belvedere.EnableRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-type ReleasesEnableCmd struct {
-	App     string `arg:"" help:"The app's name."`
-	Release string `arg:"" help:"The release's name."`
-}
-
-func (cmd *ReleasesEnableCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.EnableRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun)
-}
-
-type ReleasesDisableCmd struct {
-	App     string `arg:"" help:"The app's name."`
-	Release string `arg:"" help:"The release's name."`
-}
-
-func (cmd *ReleasesDisableCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.DisableRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun)
-}
-
-type ReleasesDeleteCmd struct {
-	App     string `arg:"" help:"The app's name."`
-	Release string `arg:"" help:"The release's name."`
-	Async   bool   `help:"Return without waiting for successful completion."`
-}
-
-func (cmd *ReleasesDeleteCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.DeleteRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun, cmd.Async)
-}
-
-type ReleasesCmd struct {
-	List    ReleasesListCmd    `cmd:"" help:"List all releases."`
-	Create  ReleasesCreateCmd  `cmd:"" help:"Create a release."`
-	Enable  ReleasesEnableCmd  `cmd:"" help:"Put a release into service."`
-	Disable ReleasesDisableCmd `cmd:"" help:"Remove a release from service."`
-	Delete  ReleasesDeleteCmd  `cmd:"" help:"Delete a release."`
-}
-
-type SecretsListCmd struct {
-}
-
-func (*SecretsListCmd) Run(ctx context.Context, o *Options) error {
-	releases, err := belvedere.Secrets(ctx, o.Project)
-	if err != nil {
-		return err
-	}
-	return o.printTable(releases)
-}
-
-type SecretsCreateCmd struct {
-	Secret   string `arg:"" help:"The secret's name."`
-	DataFile string `arg:"" optional:"" help:"File path from which to read secret data. Reads from STDIN if not specified."`
-}
-
-func (cmd *SecretsCreateCmd) Run(ctx context.Context, o *Options) error {
-	b, err := readFile(ctx, cmd.DataFile)
-	if err != nil {
-		return err
-	}
-	return belvedere.CreateSecret(ctx, o.Project, cmd.Secret, b)
-}
-
-type SecretsGrantCmd struct {
-	Secret string `arg:"" help:"The secret's name."`
-	App    string `arg:"" help:"The app's name."`
-}
-
-func (cmd *SecretsGrantCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.GrantSecret(ctx, o.Project, cmd.Secret, cmd.App, o.DryRun)
-}
-
-type SecretsRevokeCmd struct {
-	Secret string `arg:"" help:"The secret's name."`
-	App    string `arg:"" help:"The app's name."`
-}
-
-func (cmd *SecretsRevokeCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.RevokeSecret(ctx, o.Project, cmd.App, cmd.Secret, o.DryRun)
-}
-
-type SecretsUpdateCmd struct {
-	Secret   string `arg:"" help:"The secret's name."`
-	DataFile string `arg:"" optional:"" help:"File path from which to read secret data. Reads from STDIN if not specified."`
-}
-
-func (cmd *SecretsUpdateCmd) Run(ctx context.Context, o *Options) error {
-	b, err := readFile(ctx, cmd.DataFile)
-	if err != nil {
-		return err
-	}
-	return belvedere.UpdateSecret(ctx, o.Project, cmd.Secret, b)
-}
-
-type SecretsDeleteCmd struct {
-	Secret string `arg:"" help:"The secret's name."`
-}
-
-func (cmd *SecretsDeleteCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.DeleteSecret(ctx, o.Project, cmd.Secret)
-}
-
-type SecretsCmd struct {
-	List   SecretsListCmd   `cmd:"" help:"List all secrets."`
-	Create SecretsCreateCmd `cmd:"" help:"Create a secret."`
-	Grant  SecretsGrantCmd  `cmd:"" help:"Grant access to a secret for an application."`
-	Revoke SecretsRevokeCmd `cmd:"" help:"Revoke access to a secret for an application."`
-	Update SecretsUpdateCmd `cmd:"" help:"Update a secret."`
-	Delete SecretsDeleteCmd `cmd:"" help:"Delete a secret."`
-}
 
 type Options struct {
 	Debug    bool             `help:"Enable debug logging." short:"d"`
@@ -421,6 +126,58 @@ func (o *Options) detectProject(ctx context.Context) error {
 	return nil
 }
 
+func (o *Options) printTable(i interface{}) error {
+	t := reflect.TypeOf(i)
+	if t.Kind() != reflect.Slice {
+		return nil
+	}
+
+	t = t.Elem()
+	if t.Kind() != reflect.Struct {
+		return nil
+	}
+
+	var headers []string
+	for i := 0; i < t.NumField(); i++ {
+		s := t.Field(i).Tag.Get("table")
+		if s == "" {
+			s = t.Field(i).Name
+		}
+		headers = append(headers, s)
+	}
+
+	var rows [][]string
+	iv := reflect.ValueOf(i)
+	for i := 0; i < iv.Len(); i++ {
+		var row []string
+		ev := iv.Index(i)
+		for j := range headers {
+			f := ev.Field(j)
+
+			if t, ok := f.Interface().(time.Time); ok {
+				row = append(row, t.Format(time.Stamp))
+			} else {
+				row = append(row, fmt.Sprint(f.Interface()))
+			}
+		}
+		rows = append(rows, row)
+	}
+
+	if terminal.IsTerminal(syscall.Stdout) && !o.CSV {
+		tw := tablewriter.NewWriter(os.Stdout)
+		tw.SetAutoFormatHeaders(false)
+		tw.SetAutoWrapText(false)
+		tw.SetHeader(headers)
+		tw.AppendBulk(rows)
+		tw.Render()
+	} else {
+		cw := csv.NewWriter(os.Stdout)
+		_ = cw.Write(headers)
+		_ = cw.WriteAll(rows)
+		cw.Flush()
+	}
+	return nil
+}
 func readFile(ctx context.Context, name string) ([]byte, error) {
 	_, span := trace.StartSpan(ctx, "belvedere.readFile")
 	span.AddAttributes(
