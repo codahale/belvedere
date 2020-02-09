@@ -178,6 +178,7 @@ func (o *Options) printTable(i interface{}) error {
 	}
 	return nil
 }
+
 func readFile(ctx context.Context, name string) ([]byte, error) {
 	_, span := trace.StartSpan(ctx, "belvedere.readFile")
 	span.AddAttributes(

@@ -14,6 +14,7 @@ type SecretsCmd struct {
 	Update SecretsUpdateCmd `cmd:"" help:"Update a secret."`
 	Delete SecretsDeleteCmd `cmd:"" help:"Delete a secret."`
 }
+
 type SecretsListCmd struct {
 }
 
