@@ -26,12 +26,15 @@ import (
 func main() {
 	var opts Options
 	cli := kong.Parse(&opts,
-		kong.Name("belvedere"), kong.UsageOnError(),
-		kong.Vars{
-			"version": version,
-		},
+		kong.Name("belvedere"),
+		kong.Vars{"version": version},
+		kong.Description("A small lookout tower (usually square) on the roof of a house."),
+		kong.UsageOnError(),
 	)
+	cli.FatalIfErrorf(run(cli, opts))
+}
 
+func run(cli *kong.Context, opts Options) error {
 	// Enable trace logging.
 	opts.enableLogging()
 
@@ -41,16 +44,22 @@ func main() {
 	defer span.End()
 
 	// If a project was not explicitly specified, detect one.
-	cli.FatalIfErrorf(opts.detectProject(ctx))
+	if err := opts.detectProject(ctx); err != nil {
+		return err
+	}
 
-	// Run the given command.
+	// Run the given command, passing in the context and options.
 	cli.BindTo(ctx, (*context.Context)(nil))
-	cli.FatalIfErrorf(cli.Run(&opts))
+	if err := cli.Run(&opts); err != nil {
+		return err
+	}
 
 	// Run any post-command hook.
 	if opts.exit != nil {
-		cli.FatalIfErrorf(opts.exit())
+		return opts.exit()
 	}
+
+	return nil
 }
 
 var (
