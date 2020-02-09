@@ -181,16 +181,22 @@ func (o *Options) printTable(i interface{}) error {
 
 func readFile(ctx context.Context, name string) ([]byte, error) {
 	_, span := trace.StartSpan(ctx, "belvedere.readFile")
-	span.AddAttributes(
-		trace.StringAttribute("name", name),
-	)
 	defer span.End()
 
 	// Either open the file or use STDIN.
 	var r io.ReadCloser
 	if name == "" {
+		span.AddAttributes(
+			trace.StringAttribute("name", "stdin"),
+		)
+		if terminal.IsTerminal(syscall.Stdin) {
+			return nil, fmt.Errorf("can't read from stdin")
+		}
 		r = os.Stdin
 	} else {
+		span.AddAttributes(
+			trace.StringAttribute("name", name),
+		)
 		f, err := os.Open(name)
 		if err != nil {
 			return nil, fmt.Errorf("error opening %s: %w", name, err)
