@@ -220,6 +220,7 @@ func releaseResources(project string, region string, app string, release string,
 							},
 						},
 					},
+					// TODO move to v1 when shielded VMs goes GA
 					// Enable all Shielded VM options.
 					ShieldedVmConfig: &compute.ShieldedVmConfig{
 						EnableIntegrityMonitoring: true,

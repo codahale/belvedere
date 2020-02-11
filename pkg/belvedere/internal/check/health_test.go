@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
-	compute "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/compute/v0.beta"
 	"gopkg.in/h2non/gock.v1"
 )
 

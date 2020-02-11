@@ -231,6 +231,7 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 					DrainingTimeoutSec: 60,
 				},
 				Iap: config.IAP,
+				// TODO move to v1 when LogConfig goes GA
 				LogConfig: &compute.BackendServiceLogConfig{
 					Enable: true,
 				},
@@ -274,6 +275,7 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 			Name: sslCertificate,
 			Type: "compute.beta.sslCertificate",
 			Properties: &compute.SslCertificate{
+				// TODO move to v1 when managed certs goes GA
 				Managed: &compute.SslCertificateManagedSslCertificate{
 					Domains: []string{dnsName},
 				},

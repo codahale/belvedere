@@ -17,7 +17,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	"golang.org/x/sync/errgroup"
-	compute "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/compute/v0.beta"
 )
 
 // WithInterval returns a new context with the given polling interval. This is required for using

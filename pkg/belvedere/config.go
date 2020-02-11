@@ -6,7 +6,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"go.opencensus.io/trace"
-	compute "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/compute/v0.beta"
 )
 
 // Config contains all the mutable parameters of an app's configuration.

@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
-	compute "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/deploymentmanager/v2"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/logging/v2"
