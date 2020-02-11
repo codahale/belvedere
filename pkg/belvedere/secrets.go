@@ -48,8 +48,7 @@ func Secrets(ctx context.Context, project string) ([]Secret, error) {
 	return secrets, nil
 }
 
-// CreateSecret creates a secret with the given name and value. If the path is a filename, the
-// contents of the file are used as the value. If the path is `-`, the contents of STDIN are used.
+// CreateSecret creates a secret with the given name and data.
 func CreateSecret(ctx context.Context, project, secret string, data []byte) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateSecret")
 	span.AddAttributes(
