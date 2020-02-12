@@ -9,7 +9,8 @@ import (
 )
 
 // ModifyLoop performs the given operation in a retry loop with exponential backoff, retrying if the
-// operation returns a 409 Conflict response from a GCP API.
+// operation returns a 409 Conflict response from a GCP API. This is a required primitive for
+// modifying IAM policies safely.
 func ModifyLoop(interval, timeout time.Duration, f func() error) error {
 	bo := backoff.NewExponentialBackOff()
 	bo.MaxInterval = interval
