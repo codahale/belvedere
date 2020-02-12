@@ -7,10 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cenkalti/backoff"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"go.opencensus.io/trace"
-	"google.golang.org/api/googleapi"
 	secretmanager "google.golang.org/api/secretmanager/v1beta1"
 )
 
@@ -246,10 +244,7 @@ func modifyIAMPolicy(
 	dryRun bool,
 	f func(policy *secretmanager.Policy) *secretmanager.Policy) error {
 
-	bo := backoff.NewExponentialBackOff()
-	bo.MaxInterval = 5 * time.Second
-	bo.MaxElapsedTime = 1 * time.Minute
-	for {
+	err := gcp.ModifyLoop(5*time.Second, 1*time.Minute, func() error {
 		// Get the secret's IAM policy.
 		policy, err := sm.Projects.Secrets.GetIamPolicy(secret).Context(ctx).Do()
 		if err != nil {
@@ -272,19 +267,11 @@ func modifyIAMPolicy(
 			Policy: policy,
 		}).Context(ctx).Do()
 
-		// If the policy was modified underneath us, try again.
-		if e, ok := err.(*googleapi.Error); ok {
-			if e.Code == 409 {
-				d := bo.NextBackOff()
-				if d == backoff.Stop {
-					return fmt.Errorf("couldn't write IAM policy after %s", bo.GetElapsedTime())
-				}
-				time.Sleep(d)
-				continue
-			}
-		} else if err != nil {
-			return fmt.Errorf("error setting IAM policy: %w", err)
-		}
-		return nil
+		return err
+	})
+
+	if err != nil {
+		return fmt.Errorf("error setting IAM policy: %w", err)
 	}
+	return nil
 }

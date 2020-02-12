@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cenkalti/backoff"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/cloudresourcemanager/v1"
-	"google.golang.org/api/googleapi"
 )
 
 func modifyIAMPolicy(
@@ -18,10 +16,7 @@ func modifyIAMPolicy(
 	project string,
 	f func(policy *cloudresourcemanager.Policy) *cloudresourcemanager.Policy) error {
 
-	bo := backoff.NewExponentialBackOff()
-	bo.MaxInterval = 5 * time.Second
-	bo.MaxElapsedTime = 1 * time.Minute
-	for {
+	err := gcp.ModifyLoop(5*time.Second, 1*time.Minute, func() error {
 		// Get the project's IAM policy.
 		policy, err := crm.Projects.GetIamPolicy(project, &cloudresourcemanager.GetIamPolicyRequest{}).
 			Context(ctx).Do()
@@ -39,22 +34,13 @@ func modifyIAMPolicy(
 		_, err = crm.Projects.SetIamPolicy(project, &cloudresourcemanager.SetIamPolicyRequest{
 			Policy: policy,
 		}).Context(ctx).Do()
+		return err
+	})
 
-		// If the policy was modified underneath us, try again.
-		if e, ok := err.(*googleapi.Error); ok {
-			if e.Code == 409 {
-				d := bo.NextBackOff()
-				if d == backoff.Stop {
-					return fmt.Errorf("couldn't write IAM policy after %s", bo.GetElapsedTime())
-				}
-				time.Sleep(d)
-				continue
-			}
-		} else if err != nil {
-			return fmt.Errorf("error setting IAM policy: %w", err)
-		}
-		return nil
+	if err != nil {
+		return fmt.Errorf("error modifying IAM policy: %w", err)
 	}
+	return nil
 }
 
 // SetDMPerms binds the Deployment Manager service account to the `owner` role if it has not already
