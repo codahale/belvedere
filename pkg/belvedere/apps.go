@@ -84,7 +84,7 @@ func CreateApp(ctx context.Context, project, region, app string, config *Config,
 
 // UpdateApp updates the resources for the given app to match the given configuration.
 func UpdateApp(ctx context.Context, project, app string, config *Config, dryRun bool, interval time.Duration) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.CreateApp")
+	ctx, span := trace.StartSpan(ctx, "belvedere.UpdateApp")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", app),
