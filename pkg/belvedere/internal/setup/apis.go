@@ -3,6 +3,7 @@ package setup
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
@@ -39,7 +40,7 @@ var (
 )
 
 // EnableAPIs enables all required services for the given GCP project.
-func EnableAPIs(ctx context.Context, project string, dryRun bool) error {
+func EnableAPIs(ctx context.Context, project string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.setup.EnableAPIs")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -80,7 +81,7 @@ func EnableAPIs(ctx context.Context, project string, dryRun bool) error {
 		}
 
 		// Poll for the services to be enabled.
-		if err := waiter.Poll(ctx, check.SU(ctx, op.Name)); err != nil {
+		if err := waiter.Poll(ctx, interval, check.SU(ctx, op.Name)); err != nil {
 			return err
 		}
 	}

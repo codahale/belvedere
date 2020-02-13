@@ -45,13 +45,13 @@ func (cmd *ReleasesCreateCmd) Run(ctx context.Context, o *Options) error {
 		return err
 	}
 
-	err = belvedere.CreateRelease(ctx, o.Project, cmd.App, cmd.Release, config, cmd.SHA256, o.DryRun)
+	err = belvedere.CreateRelease(ctx, o.Project, cmd.App, cmd.Release, config, cmd.SHA256, o.DryRun, o.Interval)
 	if err != nil {
 		return err
 	}
 
 	if cmd.Enable {
-		err = belvedere.EnableRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun)
+		err = belvedere.EnableRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun, o.Interval)
 		if err != nil {
 			return err
 		}
@@ -65,7 +65,7 @@ type ReleasesEnableCmd struct {
 }
 
 func (cmd *ReleasesEnableCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.EnableRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun)
+	return belvedere.EnableRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun, o.Interval)
 }
 
 type ReleasesDisableCmd struct {
@@ -74,7 +74,7 @@ type ReleasesDisableCmd struct {
 }
 
 func (cmd *ReleasesDisableCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.DisableRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun)
+	return belvedere.DisableRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun, o.Interval)
 }
 
 type ReleasesDeleteCmd struct {
@@ -84,5 +84,5 @@ type ReleasesDeleteCmd struct {
 }
 
 func (cmd *ReleasesDeleteCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.DeleteRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun, cmd.Async)
+	return belvedere.DeleteRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun, cmd.Async, o.Interval)
 }

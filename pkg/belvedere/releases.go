@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/backends"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
@@ -57,7 +58,7 @@ func Releases(ctx context.Context, project, app string) ([]Release, error) {
 }
 
 // CreateRelease creates a deployment containing release resources for the given app.
-func CreateRelease(ctx context.Context, project, app, release string, config *Config, imageSHA256 string, dryRun bool) error {
+func CreateRelease(ctx context.Context, project, app, release string, config *Config, imageSHA256 string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -86,12 +87,12 @@ func CreateRelease(ctx context.Context, project, app, release string, config *Co
 			"belvedere-release": release,
 			"belvedere-region":  region,
 			"belvedere-hash":    imageSHA256[:32],
-		}, dryRun)
+		}, dryRun, interval)
 }
 
 // EnableRelease adds the release's instance group to the app's backend service and waits for the
 // instances to go fully into service.
-func EnableRelease(ctx context.Context, project, app, release string, dryRun bool) error {
+func EnableRelease(ctx context.Context, project, app, release string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.EnableRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -108,15 +109,15 @@ func EnableRelease(ctx context.Context, project, app, release string, dryRun boo
 
 	backendService := fmt.Sprintf("%s-bes", app)
 	instanceGroup := fmt.Sprintf("%s-%s-ig", app, release)
-	if err := backends.Add(ctx, project, region, backendService, instanceGroup, dryRun); err != nil {
+	if err := backends.Add(ctx, project, region, backendService, instanceGroup, dryRun, interval); err != nil {
 		return err
 	}
 
-	return waiter.Poll(ctx, check.Health(ctx, project, region, backendService, instanceGroup))
+	return waiter.Poll(ctx, interval, check.Health(ctx, project, region, backendService, instanceGroup))
 }
 
 // DisableRelease removes the release's instance group from the app's backend service.
-func DisableRelease(ctx context.Context, project, app, release string, dryRun bool) error {
+func DisableRelease(ctx context.Context, project, app, release string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DisableRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -133,12 +134,12 @@ func DisableRelease(ctx context.Context, project, app, release string, dryRun bo
 
 	backendService := fmt.Sprintf("%s-bes", app)
 	instanceGroup := fmt.Sprintf("%s-%s-ig", app, release)
-	return backends.Remove(ctx, project, region, backendService, instanceGroup, dryRun)
+	return backends.Remove(ctx, project, region, backendService, instanceGroup, dryRun, interval)
 }
 
 // DeleteRelease deletes the release's deployment and waits for all underlying resources to be
 // deleted.
-func DeleteRelease(ctx context.Context, project, app, release string, dryRun, async bool) error {
+func DeleteRelease(ctx context.Context, project, app, release string, dryRun, async bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DeleteRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -149,7 +150,7 @@ func DeleteRelease(ctx context.Context, project, app, release string, dryRun, as
 	)
 	defer span.End()
 
-	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s-%s", app, release), dryRun, async)
+	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s-%s", app, release), dryRun, async, interval)
 }
 
 // releaseResources returns a list of Deployment Manager resources for the given release.

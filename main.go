@@ -92,8 +92,7 @@ type Options struct {
 
 func (o *Options) rootSpan() (context.Context, context.CancelFunc, *trace.Span) {
 	// Initialize a context with a timeout and an interval.
-	ctx := belvedere.WithInterval(context.Background(), o.Interval)
-	ctx, cancel := context.WithTimeout(ctx, o.Timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), o.Timeout)
 
 	// Create a root span.
 	ctx, span := trace.StartSpan(ctx, "belvedere.main")

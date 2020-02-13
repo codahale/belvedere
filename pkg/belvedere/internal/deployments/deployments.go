@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
@@ -93,7 +94,7 @@ type deploymentConfig struct {
 }
 
 // Insert inserts a new deployment with the given name, resources, and labels.
-func Insert(ctx context.Context, project, name string, resources []Resource, labels map[string]string, dryRun bool) error {
+func Insert(ctx context.Context, project, name string, resources []Resource, labels map[string]string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Insert")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -151,11 +152,11 @@ func Insert(ctx context.Context, project, name string, resources []Resource, lab
 	}
 
 	// Wait for the deployment to be created or fail.
-	return waiter.Poll(ctx, check.DM(ctx, project, op.Name))
+	return waiter.Poll(ctx, interval, check.DM(ctx, project, op.Name))
 }
 
 // Update patches the given deployment to add, remove, or modify resources.
-func Update(ctx context.Context, project, name string, resources []Resource, dryRun bool) error {
+func Update(ctx context.Context, project, name string, resources []Resource, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Update")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -202,11 +203,11 @@ func Update(ctx context.Context, project, name string, resources []Resource, dry
 	}
 
 	// Wait for the deployment to be updated or fail.
-	return waiter.Poll(ctx, check.DM(ctx, project, op.Name))
+	return waiter.Poll(ctx, interval, check.DM(ctx, project, op.Name))
 }
 
 // Delete deletes the given deployment.
-func Delete(ctx context.Context, project, name string, dryRun, async bool) error {
+func Delete(ctx context.Context, project, name string, dryRun, async bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Delete")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -239,7 +240,7 @@ func Delete(ctx context.Context, project, name string, dryRun, async bool) error
 	}
 
 	// Wait for the deployment to be deleted or fail.
-	return waiter.Poll(ctx, check.DM(ctx, project, op.Name))
+	return waiter.Poll(ctx, interval, check.DM(ctx, project, op.Name))
 }
 
 // List returns the names and labels for all deployments in the project.

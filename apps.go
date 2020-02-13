@@ -40,7 +40,7 @@ func (cmd *AppsCreateCmd) Run(ctx context.Context, o *Options) error {
 	if err != nil {
 		return err
 	}
-	return belvedere.CreateApp(ctx, o.Project, cmd.Region, cmd.App, config, o.DryRun)
+	return belvedere.CreateApp(ctx, o.Project, cmd.Region, cmd.App, config, o.DryRun, o.Interval)
 }
 
 type AppsUpdateCmd struct {
@@ -58,7 +58,7 @@ func (cmd *AppsUpdateCmd) Run(ctx context.Context, o *Options) error {
 	if err != nil {
 		return err
 	}
-	return belvedere.UpdateApp(ctx, o.Project, cmd.App, config, o.DryRun)
+	return belvedere.UpdateApp(ctx, o.Project, cmd.App, config, o.DryRun, o.Interval)
 }
 
 type AppsDeleteCmd struct {
@@ -67,5 +67,5 @@ type AppsDeleteCmd struct {
 }
 
 func (cmd *AppsDeleteCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.DeleteApp(ctx, o.Project, cmd.App, o.DryRun, cmd.Async)
+	return belvedere.DeleteApp(ctx, o.Project, cmd.App, o.DryRun, cmd.Async, o.Interval)
 }

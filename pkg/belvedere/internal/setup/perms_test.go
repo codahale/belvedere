@@ -3,10 +3,8 @@ package setup
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -82,8 +80,7 @@ func TestSetDMPerms(t *testing.T) {
 		Reply(200).
 		JSON(cloudresourcemanager.Policy{})
 
-	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := SetDMPerms(ctx, "my-project", false); err != nil {
+	if err := SetDMPerms(context.TODO(), "my-project", false); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -3,10 +3,8 @@ package belvedere
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"github.com/google/go-cmp/cmp"
 	secretmanager "google.golang.org/api/secretmanager/v1beta1"
 	"gopkg.in/h2non/gock.v1"
@@ -29,8 +27,7 @@ func TestSecrets(t *testing.T) {
 			},
 		})
 
-	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	actual, err := Secrets(ctx, "my-project")
+	actual, err := Secrets(context.TODO(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,8 +68,7 @@ func TestCreateSecret(t *testing.T) {
 		Reply(200).
 		JSON(secretmanager.SecretVersion{})
 
-	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := CreateSecret(ctx, "my-project", "my-secret", []byte("secret")); err != nil {
+	if err := CreateSecret(context.TODO(), "my-project", "my-secret", []byte("secret")); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -90,8 +86,7 @@ func TestUpdateSecret(t *testing.T) {
 		Reply(200).
 		JSON(secretmanager.SecretVersion{})
 
-	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := UpdateSecret(ctx, "my-project", "my-secret", []byte("secret")); err != nil {
+	if err := UpdateSecret(context.TODO(), "my-project", "my-secret", []byte("secret")); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -105,8 +100,7 @@ func TestDeleteSecret(t *testing.T) {
 		Reply(200).
 		JSON(secretmanager.Empty{})
 
-	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := DeleteSecret(ctx, "my-project", "my-secret"); err != nil {
+	if err := DeleteSecret(context.TODO(), "my-project", "my-secret"); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -139,8 +133,7 @@ func TestGrantSecret(t *testing.T) {
 		Reply(200).
 		JSON(secretmanager.Policy{})
 
-	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := GrantSecret(ctx, "my-project", "my-secret", "my-app", false); err != nil {
+	if err := GrantSecret(context.TODO(), "my-project", "my-secret", "my-app", false); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -173,8 +166,7 @@ func TestRevokeSecret(t *testing.T) {
 		Reply(200).
 		JSON(secretmanager.Policy{})
 
-	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := RevokeSecret(ctx, "my-project", "my-app", "my-secret", false); err != nil {
+	if err := RevokeSecret(context.TODO(), "my-project", "my-app", "my-secret", false); err != nil {
 		t.Fatal(err)
 	}
 }

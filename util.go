@@ -12,7 +12,7 @@ type SetupCmd struct {
 }
 
 func (cmd *SetupCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.Setup(ctx, o.Project, cmd.DNSZone, o.DryRun)
+	return belvedere.Setup(ctx, o.Project, cmd.DNSZone, o.DryRun, o.Interval)
 }
 
 type TeardownCmd struct {
@@ -20,7 +20,7 @@ type TeardownCmd struct {
 }
 
 func (cmd *TeardownCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.Teardown(ctx, o.Project, o.DryRun, cmd.Async)
+	return belvedere.Teardown(ctx, o.Project, o.DryRun, cmd.Async, o.Interval)
 }
 
 type DNSServersCmd struct {

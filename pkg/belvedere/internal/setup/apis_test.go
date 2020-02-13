@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"google.golang.org/api/serviceusage/v1"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -45,8 +44,7 @@ func TestEnableAPIs(t *testing.T) {
 			Done: true,
 		})
 
-	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := EnableAPIs(ctx, "my-project", false); err != nil {
+	if err := EnableAPIs(context.TODO(), "my-project", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }

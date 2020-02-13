@@ -11,20 +11,12 @@ import (
 	"strings"
 	"sync"
 	"syscall"
-	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/api/compute/v0.beta"
 )
-
-// WithInterval returns a new context with the given polling interval. This is required for using
-// most methods in this package.
-func WithInterval(ctx context.Context, interval time.Duration) context.Context {
-	return waiter.WithInterval(ctx, interval)
-}
 
 // DNSServer is a DNS server run by Google.
 type DNSServer struct {

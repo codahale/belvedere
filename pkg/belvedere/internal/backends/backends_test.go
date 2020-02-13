@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"google.golang.org/api/compute/v0.beta"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -56,8 +55,7 @@ func TestAdd(t *testing.T) {
 			Status: "DONE",
 		})
 
-	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := Add(ctx, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
+	if err := Add(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -83,8 +81,7 @@ func TestAddExisting(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := Add(ctx, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
+	if err := Add(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -110,8 +107,7 @@ func TestAddDryRun(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := Add(ctx, "my-project", "us-central1", "bes-1", "ig-1", true); err != nil {
+	if err := Add(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", true, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -160,8 +156,7 @@ func TestRemove(t *testing.T) {
 			Status: "DONE",
 		})
 
-	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := Remove(ctx, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
+	if err := Remove(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -200,8 +195,7 @@ func TestRemoveLast(t *testing.T) {
 			Status: "DONE",
 		})
 
-	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := Remove(ctx, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
+	if err := Remove(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -227,8 +221,7 @@ func TestRemoveMissing(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := Remove(ctx, "my-project", "us-central1", "bes-1", "ig-1", false); err != nil {
+	if err := Remove(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -257,8 +250,7 @@ func TestRemoveDryRun(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := Remove(ctx, "my-project", "us-central1", "bes-1", "ig-1", true); err != nil {
+	if err := Remove(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", true, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }

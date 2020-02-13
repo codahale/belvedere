@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/deploymentmanager/v2"
@@ -43,8 +42,7 @@ func TestInsert(t *testing.T) {
 			Status: "DONE",
 		})
 
-	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := Insert(ctx, "my-project", "my-deployment",
+	if err := Insert(context.TODO(), "my-project", "my-deployment",
 		[]Resource{
 			{
 				Name: "my-instance",
@@ -57,7 +55,7 @@ func TestInsert(t *testing.T) {
 		map[string]string{
 			"one": "two",
 		},
-		false); err != nil {
+		false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -85,8 +83,7 @@ func TestUpdate(t *testing.T) {
 			Status: "DONE",
 		})
 
-	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := Update(ctx, "my-project", "my-deployment",
+	if err := Update(context.TODO(), "my-project", "my-deployment",
 		[]Resource{
 			{
 				Name: "my-instance",
@@ -96,7 +93,7 @@ func TestUpdate(t *testing.T) {
 				},
 			},
 		},
-		false); err != nil {
+		false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -117,8 +114,7 @@ func TestDelete(t *testing.T) {
 			Status: "DONE",
 		})
 
-	ctx := waiter.WithInterval(context.TODO(), 10*time.Millisecond)
-	if err := Delete(ctx, "my-project", "my-deployment", false, false); err != nil {
+	if err := Delete(context.TODO(), "my-project", "my-deployment", false, false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }

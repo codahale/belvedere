@@ -3,6 +3,7 @@ package backends
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
@@ -13,7 +14,10 @@ import (
 
 // Add adds an instance group to a backend service. If the instance group is already registered as a
 // backend, exits early.
-func Add(ctx context.Context, project, region, backendService, instanceGroup string, dryRun bool) error {
+func Add(
+	ctx context.Context, project, region, backendService, instanceGroup string,
+	dryRun bool, interval time.Duration,
+) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Add")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -74,12 +78,15 @@ func Add(ctx context.Context, project, region, backendService, instanceGroup str
 	}
 
 	// Return patch operation.
-	return waiter.Poll(ctx, check.GCE(ctx, project, op.Name))
+	return waiter.Poll(ctx, interval, check.GCE(ctx, project, op.Name))
 }
 
 // Remove removes an instance group from a backend service. If the instance group is not registered
 // as a backend, exits early.
-func Remove(ctx context.Context, project, region, backendService, instanceGroup string, dryRun bool) error {
+func Remove(
+	ctx context.Context, project, region, backendService, instanceGroup string,
+	dryRun bool, interval time.Duration,
+) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Remove")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -145,5 +152,5 @@ func Remove(ctx context.Context, project, region, backendService, instanceGroup 
 	}
 
 	// Return the patch operation.
-	return waiter.Poll(ctx, check.GCE(ctx, project, op.Name))
+	return waiter.Poll(ctx, interval, check.GCE(ctx, project, op.Name))
 }

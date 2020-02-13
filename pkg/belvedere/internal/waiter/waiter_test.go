@@ -16,8 +16,7 @@ func TestPoll(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.TODO(), 500*time.Second)
 	defer cancel()
-	ctx = WithInterval(ctx, 200*time.Millisecond)
-	if err := Poll(ctx, op); err != nil {
+	if err := Poll(ctx, 200*time.Millisecond, op); err != nil {
 		t.Fatal(err)
 	}
 
@@ -39,8 +38,7 @@ func TestPollError(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.TODO(), 500*time.Second)
 	defer cancel()
 
-	ctx = WithInterval(ctx, 200*time.Millisecond)
-	err := Poll(ctx, op)
+	err := Poll(ctx, 200*time.Millisecond, op)
 
 	if err == nil {
 		t.Fatal("Expected an error but none returned")
@@ -63,8 +61,7 @@ func TestPollTimeout(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.TODO(), 1*time.Second)
 	defer cancel()
-	ctx = WithInterval(ctx, 200*time.Millisecond)
-	err := Poll(ctx, op)
+	err := Poll(ctx, 200*time.Millisecond, op)
 
 	if err == nil {
 		t.Fatal("Expected an error but none returned")
@@ -83,13 +80,12 @@ func TestPollCancelled(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.TODO(), 500*time.Second)
 	defer cancel()
-	ctx = WithInterval(ctx, 1*time.Second)
 
 	go func() {
 		time.Sleep(500 * time.Millisecond)
 		cancel()
 	}()
-	err := Poll(ctx, op)
+	err := Poll(ctx, 1*time.Second, op)
 
 	if err == nil {
 		t.Fatal("Expected an error but none returned")
