@@ -15,7 +15,6 @@ require (
 	go.opencensus.io v0.22.3
 	golang.org/x/crypto v0.0.0-20200210222208-86ce3cb69678
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	google.golang.org/api v0.17.0
 	gopkg.in/alessio/shellescape.v1 v1.0.0-20170105083845-52074bc9df61
 	gopkg.in/h2non/gock.v1 v1.0.15

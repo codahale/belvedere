@@ -9,12 +9,10 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"sync"
 	"syscall"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"go.opencensus.io/trace"
-	"golang.org/x/sync/errgroup"
 	"google.golang.org/api/compute/v0.beta"
 )
 
@@ -51,6 +49,22 @@ type Instance struct {
 	Status      string
 }
 
+type instanceList []Instance
+
+func (l instanceList) Len() int {
+	return len(l)
+}
+
+func (l instanceList) Less(i, j int) bool {
+	return l[i].Name < l[j].Name
+}
+
+func (l instanceList) Swap(i, j int) {
+	tmp := l[i]
+	l[i] = l[j]
+	l[j] = tmp
+}
+
 // Instances returns a list of running instances in the project. If an app or release are
 // provided, limits the results to instances running the given app or release.
 func Instances(ctx context.Context, project, app, release string) ([]Instance, error) {
@@ -68,63 +82,43 @@ func Instances(ctx context.Context, project, app, release string) ([]Instance, e
 		return nil, err
 	}
 
-	// List all zones in the project.
-	zones, err := gce.Zones.List(project).Context(ctx).Do()
-	if err != nil {
-		return nil, fmt.Errorf("error listing zones: %w", err)
-	}
+	var instances instanceList
+	pageToken := ""
 
-	// Create an error group for the results.
-	g, ctx := errgroup.WithContext(ctx)
+	for {
+		resp, err := gce.Instances.AggregatedList(project).Context(ctx).PageToken(pageToken).Do()
+		if err != nil {
+			return nil, err
+		}
 
-	// Create a slice and mutex for aggregating results.
-	var instances []Instance
-	var m sync.Mutex
-
-	// For each zone, start a goroutine to find instances.
-	for _, zone := range zones.Items {
-		g.Go(func() error {
-			// Copy the zone name.
-			zoneName := zone.Name
-
-			// List all instances in the zone.
-			zi, err := gce.Instances.List(project, zoneName).Context(ctx).Do()
-			if err != nil {
-				return fmt.Errorf("error listing instances in %s: %w", zoneName, err)
-			}
-
-			// Filter instances by app and release. Only return belvedere-managed instances,
-			// regardless of criteria.
-			for _, i := range zi.Items {
-				if s, ok := i.Labels["belvedere-app"]; ok && (s == app || app == "") {
-					if s, ok := i.Labels["belvedere-release"]; ok && (s == release || release == "") {
-						// Aggregate instance names.
-						m.Lock()
-						mt := i.MachineType
+		for _, items := range resp.Items {
+			for _, inst := range items.Instances {
+				// Filter by app and release. Limit to belvedere instances only.
+				if s, ok := inst.Labels["belvedere-app"]; ok && (s == app || app == "") {
+					if s, ok := inst.Labels["belvedere-release"]; ok && (s == release || release == "") {
+						mt := inst.MachineType
 						mt = mt[strings.LastIndex(mt, "/")+1:]
-						zone := i.Zone
+						zone := inst.Zone
 						zone = zone[strings.LastIndex(zone, "/")+1:]
 						instances = append(instances, Instance{
-							Name:        i.Name,
+							Name:        inst.Name,
 							MachineType: mt,
 							Zone:        zone,
-							Status:      i.Status,
+							Status:      inst.Status,
 						})
-						m.Unlock()
 					}
 				}
 			}
+		}
 
-			return nil
-		})
+		if resp.NextPageToken == "" {
+			break
+		}
+		pageToken = resp.NextPageToken
 	}
 
-	// Wait for all zones to complete.
-	if err := g.Wait(); err != nil {
-		return nil, err
-	}
+	sort.Stable(instances)
 
-	// Return results.
 	return instances, nil
 }
 
