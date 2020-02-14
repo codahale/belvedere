@@ -58,7 +58,7 @@ sidecars:
 #    queryStringWhitelist: []
 #    queryStringBlacklist: []
 #  signedUrlKeyNames: []
-#  signedUrlCacheMaxAgeSec: 200
+#  signedUrlCacheMaxAgeSec: "200" # weirdly, must be a string
 
 # Optionally, a list of IAM roles to be bound to the app's service account.
 iamRoles:

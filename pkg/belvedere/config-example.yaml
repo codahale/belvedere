@@ -1,0 +1,44 @@
+machineType: n1-standard-1
+numReplicas: 2
+container:
+  image: gcr.io/cloudslap/helloworld
+  command: "ls"
+  args: ["-al"]
+  env: {
+    "ONE": "1"
+  }
+  dockerOptions: [
+    "--verbose"
+  ]
+sidecars:
+  nginx-frontend:
+    image: gcr.io/cloudslap/nginx-frontend
+autoscalingPolicy:
+  minNumReplicas: 1
+  maxNumReplicas: 10
+  coolDownPeriodSec: 60
+  cpuUtilization:
+    utilizationTarget: 0.6
+  customMetricUtilizations:
+    - metric: "www.googleapis.com/compute/instance/network/received_bytes_count"
+      utilizationTargetType: GAUGE
+      utilizationTarget: 200
+  loadBalancingUtilization:
+    utilizationTarget: 0.6
+identityAwareProxy:
+  enabled: true
+  oauth2ClientID: "client-id"
+  oauth2ClientSecret: "secret-id"
+cdnPolicy:
+  cacheKeyPolicy:
+    includeProtocol: true
+    includeHost: true
+    includeQueryString: false
+    queryStringWhitelist: ["q"]
+    queryStringBlacklist: ["id"]
+  signedUrlKeyNames: ["one"]
+  signedUrlCacheMaxAgeSec: "200"
+iamRoles:
+  - roles/cloudkms.cryptoKeyDecrypter
+network: projects/project/global/networks/network
+subnetwork: regions/region/subnetworks/subnetwork
