@@ -31,10 +31,10 @@ func main() {
 		kong.Description("A small lookout tower (usually square) on the roof of a house."),
 		kong.UsageOnError(),
 	)
-	cli.FatalIfErrorf(run(cli, opts))
+	cli.FatalIfErrorf(run(cli, &opts))
 }
 
-func run(cli *kong.Context, opts Options) error {
+func run(cli *kong.Context, opts *Options) error {
 	// Enable trace logging.
 	opts.enableLogging()
 
