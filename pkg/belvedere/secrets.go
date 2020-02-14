@@ -30,18 +30,26 @@ func Secrets(ctx context.Context, project string) ([]Secret, error) {
 		return nil, err
 	}
 
-	resp, err := sm.Projects.Secrets.List(fmt.Sprintf("projects/%s", project)).
-		Context(ctx).Do()
-	if err != nil {
-		return nil, fmt.Errorf("error listing secrets: %w", err)
-	}
-
+	name := fmt.Sprintf("projects/%s", project)
+	pageToken := ""
 	var secrets []Secret
-	for _, s := range resp.Secrets {
-		parts := strings.Split(s.Name, "/")
-		secrets = append(secrets, Secret{
-			Name: parts[len(parts)-1],
-		})
+	for {
+		resp, err := sm.Projects.Secrets.List(name).Context(ctx).PageToken(pageToken).Do()
+		if err != nil {
+			return nil, fmt.Errorf("error listing secrets: %w", err)
+		}
+
+		for _, s := range resp.Secrets {
+			parts := strings.Split(s.Name, "/")
+			secrets = append(secrets, Secret{
+				Name: parts[len(parts)-1],
+			})
+		}
+
+		if resp.NextPageToken == "" {
+			break
+		}
+		pageToken = resp.NextPageToken
 	}
 	return secrets, nil
 }
