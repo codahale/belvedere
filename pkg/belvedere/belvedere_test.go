@@ -7,8 +7,34 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/dns/v1"
 	"gopkg.in/h2non/gock.v1"
 )
+
+func TestDNSServers(t *testing.T) {
+	defer gock.Off()
+	it.MockTokenSource()
+
+	gock.New("https://dns.googleapis.com/dns/v1/projects/my-project/managedZones/belvedere?alt=json&prettyPrint=false").
+		Reply(200).
+		JSON(&dns.ManagedZone{
+			NameServers: []string{"ns1.example.com", "ns2.example.com"},
+		})
+
+	actual, err := DNSServers(context.TODO(), "my-project")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected := []DNSServer{
+		{Server: "ns1.example.com"},
+		{Server: "ns2.example.com"},
+	}
+
+	if !cmp.Equal(expected, actual) {
+		t.Fatal(cmp.Diff(expected, actual))
+	}
+}
 
 func TestMachineTypes(t *testing.T) {
 	defer gock.Off()
