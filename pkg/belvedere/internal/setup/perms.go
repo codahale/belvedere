@@ -15,7 +15,6 @@ func modifyIAMPolicy(
 	crm *cloudresourcemanager.Service,
 	project string,
 	f func(policy *cloudresourcemanager.Policy) *cloudresourcemanager.Policy) error {
-
 	err := gcp.ModifyLoop(5*time.Second, 1*time.Minute, func() error {
 		// Get the project's IAM policy.
 		policy, err := crm.Projects.GetIamPolicy(project, &cloudresourcemanager.GetIamPolicyRequest{}).

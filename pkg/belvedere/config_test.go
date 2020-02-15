@@ -76,6 +76,5 @@ func TestLoadConfig(t *testing.T) {
 
 	if !cmp.Equal(expected, actual) {
 		t.Error(cmp.Diff(expected, actual))
-
 	}
 }

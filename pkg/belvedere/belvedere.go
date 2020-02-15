@@ -13,7 +13,7 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"go.opencensus.io/trace"
-	"google.golang.org/api/compute/v0.beta"
+	compute "google.golang.org/api/compute/v0.beta"
 )
 
 // DNSServer is a DNS server run by Google.

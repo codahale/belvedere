@@ -9,7 +9,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/setup"
 	"go.opencensus.io/trace"
-	"google.golang.org/api/compute/v0.beta"
+	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/dns/v1"
 )
 
@@ -37,7 +37,7 @@ func Setup(ctx context.Context, project, dnsZone string, dryRun bool, interval t
 
 	// Ensure the DNS zone ends with a period.
 	if !strings.HasSuffix(dnsZone, ".") {
-		dnsZone = dnsZone + "."
+		dnsZone += "."
 	}
 
 	// Create a deployment with a managed DNS zone and firewall rules which limit SSH to GCE

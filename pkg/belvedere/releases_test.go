@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/fixtures"
-	"google.golang.org/api/compute/v0.beta"
+	compute "google.golang.org/api/compute/v0.beta"
 )
 
 func TestReleaseResources(t *testing.T) {

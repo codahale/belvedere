@@ -179,7 +179,6 @@ func GrantSecret(ctx context.Context, project, secret, app string, dryRun bool) 
 				"Binding created",
 			)
 			return policy
-
 		})
 }
 
@@ -251,7 +250,6 @@ func modifyIAMPolicy(
 	secret string,
 	dryRun bool,
 	f func(policy *secretmanager.Policy) *secretmanager.Policy) error {
-
 	err := gcp.ModifyLoop(5*time.Second, 1*time.Minute, func() error {
 		// Get the secret's IAM policy.
 		policy, err := sm.Projects.Secrets.GetIamPolicy(secret).Context(ctx).Do()
