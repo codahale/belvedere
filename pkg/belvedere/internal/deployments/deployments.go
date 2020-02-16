@@ -257,20 +257,29 @@ func List(ctx context.Context, project string) ([]map[string]string, error) {
 		return nil, err
 	}
 
-	// List all of the deployments.
-	list, err := dm.Deployments.List(project).Context(ctx).Do()
-	if err != nil {
-		return nil, fmt.Errorf("error listing deployments: %w", err)
+	var results []map[string]string
+	pageToken := ""
+	for {
+		// List all of the deployments.
+		list, err := dm.Deployments.List(project).Context(ctx).PageToken(pageToken).Do()
+		if err != nil {
+			return nil, fmt.Errorf("error listing deployments: %w", err)
+		}
+
+		// Convert labels to maps.
+		for _, d := range list.Deployments {
+			m := map[string]string{"name": d.Name}
+			for _, e := range d.Labels {
+				m[e.Key] = e.Value
+			}
+			results = append(results, m)
+		}
+
+		if list.NextPageToken == "" {
+			break
+		}
+		pageToken = list.NextPageToken
 	}
 
-	// Convert labels to maps and return.
-	var results []map[string]string
-	for _, d := range list.Deployments {
-		m := map[string]string{"name": d.Name}
-		for _, e := range d.Labels {
-			m[e.Key] = e.Value
-		}
-		results = append(results, m)
-	}
 	return results, nil
 }
