@@ -31,12 +31,11 @@ func Secrets(ctx context.Context, project string) ([]Secret, error) {
 	}
 
 	name := fmt.Sprintf("projects/%s", project)
-	pageToken := ""
 	var secrets []Secret
-	for {
-		resp, err := sm.Projects.Secrets.List(name).Context(ctx).PageToken(pageToken).Do()
+	if err := gcp.Paginate(func(t string) (string, error) {
+		resp, err := sm.Projects.Secrets.List(name).Context(ctx).PageToken(t).Do()
 		if err != nil {
-			return nil, fmt.Errorf("error listing secrets: %w", err)
+			return "", fmt.Errorf("error listing secrets: %w", err)
 		}
 
 		for _, s := range resp.Secrets {
@@ -46,10 +45,9 @@ func Secrets(ctx context.Context, project string) ([]Secret, error) {
 			})
 		}
 
-		if resp.NextPageToken == "" {
-			break
-		}
-		pageToken = resp.NextPageToken
+		return resp.NextPageToken, nil
+	}); err != nil {
+		return nil, err
 	}
 	return secrets, nil
 }

@@ -258,12 +258,11 @@ func List(ctx context.Context, project string) ([]map[string]string, error) {
 	}
 
 	var results []map[string]string
-	pageToken := ""
-	for {
+	if err := gcp.Paginate(func(t string) (string, error) {
 		// List all of the deployments.
-		list, err := dm.Deployments.List(project).Context(ctx).PageToken(pageToken).Do()
+		list, err := dm.Deployments.List(project).Context(ctx).PageToken(t).Do()
 		if err != nil {
-			return nil, fmt.Errorf("error listing deployments: %w", err)
+			return "", fmt.Errorf("error listing deployments: %w", err)
 		}
 
 		// Convert labels to maps.
@@ -275,11 +274,9 @@ func List(ctx context.Context, project string) ([]map[string]string, error) {
 			results = append(results, m)
 		}
 
-		if list.NextPageToken == "" {
-			break
-		}
-		pageToken = list.NextPageToken
+		return list.NextPageToken, nil
+	}); err != nil {
+		return nil, err
 	}
-
 	return results, nil
 }

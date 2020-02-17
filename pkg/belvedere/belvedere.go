@@ -83,12 +83,10 @@ func Instances(ctx context.Context, project, app, release string) ([]Instance, e
 	}
 
 	var instances instanceList
-	pageToken := ""
-
-	for {
-		resp, err := gce.Instances.AggregatedList(project).Context(ctx).PageToken(pageToken).Do()
+	if err := gcp.Paginate(func(t string) (string, error) {
+		resp, err := gce.Instances.AggregatedList(project).Context(ctx).PageToken(t).Do()
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 
 		for _, items := range resp.Items {
@@ -111,14 +109,11 @@ func Instances(ctx context.Context, project, app, release string) ([]Instance, e
 			}
 		}
 
-		if resp.NextPageToken == "" {
-			break
-		}
-		pageToken = resp.NextPageToken
+		return resp.NextPageToken, nil
+	}); err != nil {
+		return nil, err
 	}
-
 	sort.Stable(instances)
-
 	return instances, nil
 }
 
@@ -204,14 +199,13 @@ func MachineTypes(ctx context.Context, project, region string) ([]MachineType, e
 	region = "zones/" + region
 
 	// Iterate through all pages of the results.
-	pageToken := ""
-	for {
+	if err := gcp.Paginate(func(t string) (string, error) {
 		list, err := gce.MachineTypes.AggregatedList(project).
 			MaxResults(1000).
-			PageToken(pageToken).
+			PageToken(t).
 			Context(ctx).Do()
 		if err != nil {
-			return nil, fmt.Errorf("error getting machine types list: %w", err)
+			return "", fmt.Errorf("error getting machine types list: %w", err)
 		}
 
 		// Aggregate across zones.
@@ -223,10 +217,9 @@ func MachineTypes(ctx context.Context, project, region string) ([]MachineType, e
 			}
 		}
 
-		if list.NextPageToken == "" {
-			break
-		}
-		pageToken = list.NextPageToken
+		return list.NextPageToken, nil
+	}); err != nil {
+		return nil, err
 	}
 
 	// Convert to our type in a sortable structure.
