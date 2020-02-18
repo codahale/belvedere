@@ -13,7 +13,7 @@ import (
 func TestModifyLoopSuccess(t *testing.T) {
 	n := 0
 	err := ModifyLoop(10*time.Millisecond, 1*time.Second, func() error {
-		n += 1
+		n++
 		return nil
 	})
 
@@ -29,7 +29,7 @@ func TestModifyLoopSuccess(t *testing.T) {
 func TestModifyLoopInitialFailure(t *testing.T) {
 	n := 0
 	err := ModifyLoop(10*time.Millisecond, 1*time.Second, func() error {
-		n += 1
+		n++
 		if n < 3 {
 			return &googleapi.Error{Code: 409}
 		}
@@ -48,7 +48,7 @@ func TestModifyLoopInitialFailure(t *testing.T) {
 func TestModifyLoopFinalFailure(t *testing.T) {
 	n := 0
 	err := ModifyLoop(10*time.Millisecond, 100*time.Millisecond, func() error {
-		n += 1
+		n++
 		if n < 3 {
 			return &googleapi.Error{Code: 409}
 		}
@@ -67,7 +67,7 @@ func TestModifyLoopFinalFailure(t *testing.T) {
 func TestModifyLoopFatalFailure(t *testing.T) {
 	n := 0
 	err := ModifyLoop(10*time.Millisecond, 100*time.Millisecond, func() error {
-		n += 1
+		n++
 		return os.ErrClosed
 	})
 
