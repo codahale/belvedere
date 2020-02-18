@@ -316,6 +316,7 @@ func cloudConfig(app, release string, config *Config, imageSHA256 string) string
 	}
 
 	for name, sidecar := range config.Sidecars {
+		sidecar := sidecar
 		// Add a systemd service for running the sidecar in Docker.
 		cc.WriteFiles = append(cc.WriteFiles,
 			cloudinit.File{
