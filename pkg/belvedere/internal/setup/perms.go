@@ -65,7 +65,7 @@ func SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 		return fmt.Errorf("error getting project: %w", err)
 	}
 
-	crmMember := fmt.Sprintf("serviceAccount:%d@cloudservices.gserviceaccount.com", p.ProjectNumber)
+	member := fmt.Sprintf("serviceAccount:%d@cloudservices.gserviceaccount.com", p.ProjectNumber)
 	const owner = "roles/owner"
 
 	exists := false
@@ -73,14 +73,8 @@ func SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 		// Look for an existing IAM binding giving Deployment Manager ownership of the project.
 		for _, binding := range policy.Bindings {
 			if binding.Role == owner {
-				for _, member := range binding.Members {
-					if member == crmMember {
-						span.Annotate(
-							[]trace.Attribute{
-								trace.Int64Attribute("project_number", p.ProjectNumber),
-							},
-							"Binding verified",
-						)
+				for _, m := range binding.Members {
+					if m == member {
 						exists = true
 						return nil
 					}
@@ -90,7 +84,7 @@ func SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 
 		// If none exists, add a binding and update the policy.
 		policy.Bindings = append(policy.Bindings, &cloudresourcemanager.Binding{
-			Members: []string{crmMember},
+			Members: []string{member},
 			Role:    owner,
 		})
 		return policy
@@ -99,14 +93,16 @@ func SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 		return err
 	}
 
-	if !exists {
-		span.Annotate(
-			[]trace.Attribute{
-				trace.Int64Attribute("project_number", p.ProjectNumber),
-			},
-			"Binding created",
-		)
+	msg := "Binding created"
+	if exists {
+		msg = "Binding verified"
 	}
+	span.Annotate(
+		[]trace.Attribute{
+			trace.Int64Attribute("project_number", p.ProjectNumber),
+		},
+		msg,
+	)
 
 	return nil
 }
