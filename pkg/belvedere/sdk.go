@@ -19,7 +19,7 @@ import (
 // DefaultProject returns the default project, if any, which the Google Cloud SDK is configured to
 // use.
 func DefaultProject(ctx context.Context) (string, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.DefaultProject")
+	_, span := trace.StartSpan(ctx, "belvedere.DefaultProject")
 	defer span.End()
 
 	// Find the SDK config path.
