@@ -100,8 +100,10 @@ func (o *Options) rootSpan() (context.Context, context.CancelFunc, *trace.Span) 
 		span.AddAttributes(trace.StringAttribute("hostname", hostname))
 	}
 	if u, err := user.Current(); err == nil {
-		span.AddAttributes(trace.StringAttribute("username", u.Username))
-		span.AddAttributes(trace.StringAttribute("uid", u.Uid))
+		span.AddAttributes(
+			trace.StringAttribute("username", u.Username),
+			trace.StringAttribute("uid", u.Uid),
+		)
 	}
 	return ctx, cancel, span
 }

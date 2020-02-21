@@ -15,10 +15,12 @@ import (
 func Health(ctx context.Context, project, region, backendService, instanceGroup string) waiter.Condition {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.Health")
-		span.AddAttributes(trace.StringAttribute("project", project))
-		span.AddAttributes(trace.StringAttribute("region", region))
-		span.AddAttributes(trace.StringAttribute("backend_service", backendService))
-		span.AddAttributes(trace.StringAttribute("instance_group", instanceGroup))
+		span.AddAttributes(
+			trace.StringAttribute("project", project),
+			trace.StringAttribute("region", region),
+			trace.StringAttribute("backend_service", backendService),
+			trace.StringAttribute("instance_group", instanceGroup),
+		)
 		defer span.End()
 
 		// Get or create our GCE client.

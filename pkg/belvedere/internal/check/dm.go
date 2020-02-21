@@ -13,8 +13,10 @@ import (
 func DM(ctx context.Context, project string, operation string) waiter.Condition {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.DM")
-		span.AddAttributes(trace.StringAttribute("project", project))
-		span.AddAttributes(trace.StringAttribute("operation", operation))
+		span.AddAttributes(
+			trace.StringAttribute("project", project),
+			trace.StringAttribute("operation", operation),
+		)
 		defer span.End()
 
 		// Get or create our DM client.
