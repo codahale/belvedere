@@ -83,35 +83,31 @@ func Instances(ctx context.Context, project, app, release string) ([]Instance, e
 	}
 
 	var instances instanceList
-	if err := gcp.Paginate(func(t string) (string, error) {
-		resp, err := gce.Instances.AggregatedList(project).Context(ctx).PageToken(t).Do()
-		if err != nil {
-			return "", err
-		}
-
-		for _, items := range resp.Items {
-			for _, inst := range items.Instances {
-				// Filter by app and release. Limit to belvedere instances only.
-				if s, ok := inst.Labels["belvedere-app"]; ok && (s == app || app == "") {
-					if s, ok := inst.Labels["belvedere-release"]; ok && (s == release || release == "") {
-						mt := inst.MachineType
-						mt = mt[strings.LastIndex(mt, "/")+1:]
-						zone := inst.Zone
-						zone = zone[strings.LastIndex(zone, "/")+1:]
-						instances = append(instances, Instance{
-							Name:        inst.Name,
-							MachineType: mt,
-							Zone:        zone,
-							Status:      inst.Status,
-						})
+	// Filter by app and release. Limit to belvedere instances only.
+	if err := gce.Instances.AggregatedList(project).Pages(ctx,
+		func(list *compute.InstanceAggregatedList) error {
+			for _, items := range list.Items {
+				for _, inst := range items.Instances {
+					if s, ok := inst.Labels["belvedere-app"]; ok && (s == app || app == "") {
+						if s, ok := inst.Labels["belvedere-release"]; ok && (s == release || release == "") {
+							mt := inst.MachineType
+							mt = mt[strings.LastIndex(mt, "/")+1:]
+							zone := inst.Zone
+							zone = zone[strings.LastIndex(zone, "/")+1:]
+							instances = append(instances, Instance{
+								Name:        inst.Name,
+								MachineType: mt,
+								Zone:        zone,
+								Status:      inst.Status,
+							})
+						}
 					}
 				}
 			}
-		}
-
-		return resp.NextPageToken, nil
-	}); err != nil {
-		return nil, err
+			return nil
+		},
+	); err != nil {
+		return nil, fmt.Errorf("error listing instances: %w", err)
 	}
 	sort.Stable(instances)
 	return instances, nil
@@ -199,27 +195,20 @@ func MachineTypes(ctx context.Context, project, region string) ([]MachineType, e
 	region = "zones/" + region
 
 	// Iterate through all pages of the results.
-	if err := gcp.Paginate(func(t string) (string, error) {
-		list, err := gce.MachineTypes.AggregatedList(project).
-			MaxResults(1000).
-			PageToken(t).
-			Context(ctx).Do()
-		if err != nil {
-			return "", fmt.Errorf("error getting machine types list: %w", err)
-		}
-
-		// Aggregate across zones.
-		for zone, items := range list.Items {
-			if strings.HasPrefix(zone, region) {
-				for _, mt := range items.MachineTypes {
-					mtMap[mt.Name] = mt
+	if err := gce.MachineTypes.AggregatedList(project).Pages(ctx,
+		func(list *compute.MachineTypeAggregatedList) error {
+			// Aggregate across zones.
+			for zone, items := range list.Items {
+				if strings.HasPrefix(zone, region) {
+					for _, mt := range items.MachineTypes {
+						mtMap[mt.Name] = mt
+					}
 				}
 			}
-		}
-
-		return list.NextPageToken, nil
-	}); err != nil {
-		return nil, err
+			return nil
+		},
+	); err != nil {
+		return nil, fmt.Errorf("error listing machine types: %w", err)
 	}
 
 	// Convert to our type in a sortable structure.

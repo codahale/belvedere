@@ -40,7 +40,7 @@ func TestInstances(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/instances?alt=json&pageToken=&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/instances?alt=json&prettyPrint=false").
 		Reply(200).
 		JSON(&compute.InstanceAggregatedList{
 			Items: map[string]compute.InstancesScopedList{
@@ -130,7 +130,7 @@ func TestInstancesApp(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/instances?alt=json&pageToken=&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/instances?alt=json&prettyPrint=false").
 		Reply(200).
 		JSON(&compute.InstanceAggregatedList{
 			Items: map[string]compute.InstancesScopedList{
@@ -214,7 +214,7 @@ func TestInstancesAppRelease(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/instances?alt=json&pageToken=&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/instances?alt=json&prettyPrint=false").
 		Reply(200).
 		JSON(&compute.InstanceAggregatedList{
 			Items: map[string]compute.InstancesScopedList{
@@ -292,7 +292,7 @@ func TestMachineTypes(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/machineTypes?alt=json&maxResults=1000&pageToken=&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/machineTypes?alt=json&prettyPrint=false").
 		Reply(200).
 		JSON(compute.MachineTypeAggregatedList{
 			NextPageToken: "",

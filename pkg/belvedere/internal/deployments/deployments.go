@@ -257,26 +257,22 @@ func List(ctx context.Context, project string) ([]map[string]string, error) {
 		return nil, err
 	}
 
-	var results []map[string]string
-	if err := gcp.Paginate(func(t string) (string, error) {
-		// List all of the deployments.
-		list, err := dm.Deployments.List(project).Context(ctx).PageToken(t).Do()
-		if err != nil {
-			return "", fmt.Errorf("error listing deployments: %w", err)
-		}
-
-		// Convert labels to maps.
-		for _, d := range list.Deployments {
-			m := map[string]string{"name": d.Name}
-			for _, e := range d.Labels {
-				m[e.Key] = e.Value
+	// List all of the deployments.
+	var deployments []map[string]string
+	if err := dm.Deployments.List(project).Pages(ctx,
+		func(list *deploymentmanager.DeploymentsListResponse) error {
+			// Convert labels to maps.
+			for _, d := range list.Deployments {
+				m := map[string]string{"name": d.Name}
+				for _, e := range d.Labels {
+					m[e.Key] = e.Value
+				}
+				deployments = append(deployments, m)
 			}
-			results = append(results, m)
-		}
-
-		return list.NextPageToken, nil
-	}); err != nil {
-		return nil, err
+			return nil
+		},
+	); err != nil {
+		return nil, fmt.Errorf("error listing deployments: %w", err)
 	}
-	return results, nil
+	return deployments, nil
 }

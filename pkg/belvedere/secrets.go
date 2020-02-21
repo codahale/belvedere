@@ -32,22 +32,18 @@ func Secrets(ctx context.Context, project string) ([]Secret, error) {
 
 	name := fmt.Sprintf("projects/%s", project)
 	var secrets []Secret
-	if err := gcp.Paginate(func(t string) (string, error) {
-		resp, err := sm.Projects.Secrets.List(name).Context(ctx).PageToken(t).Do()
-		if err != nil {
-			return "", fmt.Errorf("error listing secrets: %w", err)
-		}
-
-		for _, s := range resp.Secrets {
-			parts := strings.Split(s.Name, "/")
-			secrets = append(secrets, Secret{
-				Name: parts[len(parts)-1],
-			})
-		}
-
-		return resp.NextPageToken, nil
-	}); err != nil {
-		return nil, err
+	if err := sm.Projects.Secrets.List(name).Pages(ctx,
+		func(list *secretmanager.ListSecretsResponse) error {
+			for _, s := range list.Secrets {
+				parts := strings.Split(s.Name, "/")
+				secrets = append(secrets, Secret{
+					Name: parts[len(parts)-1],
+				})
+			}
+			return nil
+		},
+	); err != nil {
+		return nil, fmt.Errorf("error listing secrets: %w", err)
 	}
 	return secrets, nil
 }
