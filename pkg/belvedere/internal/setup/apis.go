@@ -15,6 +15,7 @@ import (
 var (
 	// The full set of GCP services required for Belvedere to be a happy home.
 	requiredServices = []string{
+		"cloudasset.googleapis.com",
 		"cloudbuild.googleapis.com",
 		"clouddebugger.googleapis.com",
 		"clouderrorreporting.googleapis.com",
