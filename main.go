@@ -74,7 +74,7 @@ type Options struct {
 	Interval time.Duration    `help:"Specify a polling interval for long-running operations." default:"10s"`
 	Timeout  time.Duration    `help:"Specify a timeout for long-running operations." default:"10m"`
 	Version  kong.VersionFlag `help:"Print version information and quit."`
-	Project  string           `help:"Specify a GCP project ID. Defaults to using gcloud."`
+	Project  string           `help:"Specify a GCP project ID. Defaults to using the GCP SDK's active config'."`
 
 	Setup        SetupCmd        `cmd:"" help:"Initialize a GCP project for use with Belvedere."`
 	Teardown     TeardownCmd     `cmd:"" help:"Remove all Belvedere resources from this project."`
