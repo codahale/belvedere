@@ -24,6 +24,7 @@ import (
 )
 
 func main() {
+	// Parse the command line.
 	var opts Options
 	cli := kong.Parse(&opts,
 		kong.Name("belvedere"),
@@ -31,7 +32,14 @@ func main() {
 		kong.Description("A small lookout tower (usually square) on the roof of a house."),
 		kong.UsageOnError(),
 	)
+
+	// Run the given command.
 	cli.FatalIfErrorf(run(cli, &opts))
+
+	// Run any post-command hook.
+	if opts.exit != nil {
+		cli.FatalIfErrorf(opts.exit())
+	}
 }
 
 func run(cli *kong.Context, opts *Options) error {
@@ -52,11 +60,6 @@ func run(cli *kong.Context, opts *Options) error {
 	cli.BindTo(ctx, (*context.Context)(nil))
 	if err := cli.Run(&opts); err != nil {
 		return err
-	}
-
-	// Run any post-command hook.
-	if opts.exit != nil {
-		return opts.exit()
 	}
 
 	return nil
