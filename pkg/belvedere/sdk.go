@@ -16,10 +16,9 @@ import (
 	"go.opencensus.io/trace"
 )
 
-// DefaultProject returns the default project, if any, which the Google Cloud SDK is configured to
-// use.
-func DefaultProject(ctx context.Context) (string, error) {
-	_, span := trace.StartSpan(ctx, "belvedere.DefaultProject")
+// ActiveProject returns the project, if any, which the Google Cloud SDK is configured to use.
+func ActiveProject(ctx context.Context) (string, error) {
+	_, span := trace.StartSpan(ctx, "belvedere.ActiveProject")
 	defer span.End()
 
 	// Find the SDK config path.

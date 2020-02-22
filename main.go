@@ -130,7 +130,7 @@ func (o *Options) enableLogging() {
 
 func (o *Options) detectProject(ctx context.Context) error {
 	if o.Project == "" {
-		p, err := belvedere.DefaultProject(ctx)
+		p, err := belvedere.ActiveProject(ctx)
 		if err != nil {
 			return err
 		}
