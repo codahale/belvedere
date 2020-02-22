@@ -2,6 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"os/exec"
+	"syscall"
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere"
@@ -61,15 +65,25 @@ func (cmd *InstancesCmd) Run(ctx context.Context, o *Options) error {
 
 type SSHCmd struct {
 	Instance string   `arg:"" required:"" help:"The instance name."`
-	Args     []string `arg:"" help:"Additional SSH arguments."`
+	Args     []string `arg:"" optional:"" help:"Additional SSH arguments."`
 }
 
-func (cmd *SSHCmd) Run(ctx context.Context, o *Options) error {
-	ssh, err := belvedere.SSH(ctx, o.Project, cmd.Instance, cmd.Args)
+func (cmd *SSHCmd) Run(o *Options) error {
+	// Find gcloud on the path.
+	gcloud, err := exec.LookPath("gcloud")
 	if err != nil {
-		return err
+		return fmt.Errorf("error finding gcloud executable: %w", err)
 	}
-	o.exit = ssh
+
+	// Concat SSH arguments.
+	args := append([]string{
+		gcloud, "beta", "compute", "ssh", cmd.Instance, "--tunnel-through-iap", "--",
+	}, cmd.Args...)
+
+	// Exec to gcloud as last bit of main.
+	o.exit = func() error {
+		return syscall.Exec(gcloud, args, os.Environ())
+	}
 	return nil
 }
 

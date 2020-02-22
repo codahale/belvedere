@@ -3,13 +3,10 @@ package belvedere
 import (
 	"context"
 	"fmt"
-	"os"
-	"os/exec"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
-	"syscall"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"go.opencensus.io/trace"
@@ -111,32 +108,6 @@ func Instances(ctx context.Context, project, app, release string) ([]Instance, e
 	}
 	sort.Stable(instances)
 	return instances, nil
-}
-
-// SSH returns a function which execs to a Google Cloud SDK gcloud process which tunnels an SSH
-// connection over IAP to the given instance.
-func SSH(ctx context.Context, project, instance string, args []string) (func() error, error) {
-	_, span := trace.StartSpan(ctx, "belvedere.SSH")
-	span.AddAttributes(
-		trace.StringAttribute("project", project),
-		trace.StringAttribute("instance", instance),
-	)
-	defer span.End()
-
-	// Find gcloud on the path.
-	gcloud, err := exec.LookPath("gcloud")
-	if err != nil {
-		return nil, fmt.Errorf("error finding gcloud executable: %w", err)
-	}
-	span.AddAttributes(trace.StringAttribute("gcloud", gcloud))
-
-	sshArgs := append([]string{gcloud,
-		"beta", "compute", "ssh", instance, "--tunnel-through-iap", "--",
-	}, args...)
-	return func() error {
-		// Exec to gcloud.
-		return syscall.Exec(gcloud, sshArgs, os.Environ())
-	}, nil
 }
 
 // Memory represents a specific amount of RAM provided to a virtual machine.
