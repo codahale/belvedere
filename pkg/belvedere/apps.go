@@ -71,8 +71,7 @@ func CreateApp(ctx context.Context, project, region, app string, config *Config,
 	}
 
 	// Create a deployment with all the app resources.
-	name := fmt.Sprintf("belvedere-%s", app)
-	return deployments.Insert(ctx, project, name,
+	return deployments.Insert(ctx, project, appDepName(app),
 		appResources(project, app, managedZone, config),
 		map[string]string{
 			"belvedere-type":   "app",
@@ -99,8 +98,7 @@ func UpdateApp(ctx context.Context, project, app string, config *Config, dryRun 
 	}
 
 	// Update the deployment with the new app resources.
-	name := fmt.Sprintf("belvedere-%s", app)
-	return deployments.Update(ctx, project, name,
+	return deployments.Update(ctx, project, appDepName(app),
 		appResources(project, app, managedZone, config),
 		dryRun, interval)
 }
@@ -117,7 +115,12 @@ func DeleteApp(ctx context.Context, project, app string, dryRun, async bool, int
 	defer span.End()
 
 	// Delete the app deployment.
-	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s", app), dryRun, async, interval)
+	return deployments.Delete(ctx, project, appDepName(app), dryRun, async, interval)
+}
+
+// appDepName returns the deployment name for the given app.
+func appDepName(app string) string {
+	return fmt.Sprintf("belvedere-%s", app)
 }
 
 // findManagedZone returns the Cloud DNS managed zone created via Setup.
@@ -158,8 +161,7 @@ func findRegion(ctx context.Context, project, app string) (string, error) {
 	}
 
 	// Find the app deployment.
-	deployment, err := dm.Deployments.Get(project, fmt.Sprintf("belvedere-%s", app)).
-		Context(ctx).Do()
+	deployment, err := dm.Deployments.Get(project, appDepName(app)).Context(ctx).Do()
 	if err != nil {
 		return "", fmt.Errorf("error getting deployment: %w", err)
 	}
@@ -204,7 +206,7 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 					"35.191.0.0/16",
 				},
 				TargetTags: []string{
-					fmt.Sprintf("belvedere-%s", app),
+					appDepName(app),
 				},
 			},
 		},

@@ -78,8 +78,7 @@ func CreateRelease(ctx context.Context, project, app, release string, config *Co
 		return err
 	}
 
-	name := fmt.Sprintf("belvedere-%s-%s", app, release)
-	return deployments.Insert(ctx, project, name,
+	return deployments.Insert(ctx, project, relDepName(app, release),
 		releaseResources(project, region, app, release, imageSHA256, config),
 		map[string]string{
 			"belvedere-type":    "release",
@@ -150,7 +149,12 @@ func DeleteRelease(ctx context.Context, project, app, release string, dryRun, as
 	)
 	defer span.End()
 
-	return deployments.Delete(ctx, project, fmt.Sprintf("belvedere-%s-%s", app, release), dryRun, async, interval)
+	return deployments.Delete(ctx, project, relDepName(app, release), dryRun, async, interval)
+}
+
+// relDepName returns the deployment name for the given release.
+func relDepName(app string, release string) string {
+	return fmt.Sprintf("belvedere-%s-%s", app, release)
 }
 
 // releaseResources returns a list of Deployment Manager resources for the given release.
@@ -232,7 +236,7 @@ func releaseResources(project string, region string, app string, release string,
 					Tags: &compute.Tags{
 						Items: []string{
 							"belvedere",
-							fmt.Sprintf("belvedere-%s", app),
+							appDepName(app),
 						},
 					},
 				},
