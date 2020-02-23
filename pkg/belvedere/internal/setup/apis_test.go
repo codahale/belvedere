@@ -2,6 +2,7 @@ package setup
 
 import (
 	"context"
+	"net/http"
 	"testing"
 	"time"
 
@@ -18,13 +19,13 @@ func TestEnableAPIs(t *testing.T) {
 		JSON(serviceusage.BatchEnableServicesRequest{
 			ServiceIds: requiredServices[:20],
 		}).
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(serviceusage.Operation{
 			Name: "op1",
 		})
 
 	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(serviceusage.Operation{
 			Done: true,
 		})
@@ -33,13 +34,13 @@ func TestEnableAPIs(t *testing.T) {
 		JSON(serviceusage.BatchEnableServicesRequest{
 			ServiceIds: requiredServices[20:],
 		}).
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(serviceusage.Operation{
 			Name: "op2",
 		})
 
 	gock.New("https://serviceusage.googleapis.com/v1/op2?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(serviceusage.Operation{
 			Done: true,
 		})

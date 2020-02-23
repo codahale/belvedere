@@ -2,6 +2,7 @@ package belvedere
 
 import (
 	"context"
+	"net/http"
 	"testing"
 	"time"
 
@@ -26,7 +27,7 @@ func TestLogs(t *testing.T) {
 			PageSize:      1000,
 			ResourceNames: []string{"projects/my-project"},
 		}).
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(logging.ListLogEntriesResponse{
 			Entries: []*logging.LogEntry{
 				{

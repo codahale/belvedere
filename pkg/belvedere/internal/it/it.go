@@ -2,6 +2,7 @@ package it
 
 import (
 	"io/ioutil"
+	"net/http"
 	"os"
 	"time"
 
@@ -29,7 +30,7 @@ func MockTokenSource() {
 
 	_ = os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", f.Name())
 	gock.New("https://oauth2.googleapis/token").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(oauth2.Token{
 			TokenType:    "mock",
 			AccessToken:  "access_token",

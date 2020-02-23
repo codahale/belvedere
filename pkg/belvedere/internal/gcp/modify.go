@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/cenkalti/backoff"
@@ -21,7 +22,7 @@ func ModifyLoop(interval, timeout time.Duration, f func() error) error {
 
 		if e, ok := err.(*googleapi.Error); ok {
 			// If the operation resulted in a conflict, back off and retry.
-			if e.Code == 409 {
+			if e.Code == http.StatusConflict {
 				d := bo.NextBackOff()
 				if d == backoff.Stop {
 					// If the total time has elapsed, return an error.

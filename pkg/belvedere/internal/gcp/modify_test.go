@@ -1,6 +1,7 @@
 package gcp
 
 import (
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -50,7 +51,7 @@ func TestModifyLoopFinalFailure(t *testing.T) {
 	err := ModifyLoop(10*time.Millisecond, 100*time.Millisecond, func() error {
 		n++
 		if n < 3 {
-			return &googleapi.Error{Code: 409}
+			return &googleapi.Error{Code: http.StatusConflict}
 		}
 		return nil
 	})

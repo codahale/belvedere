@@ -2,6 +2,7 @@ package belvedere
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
@@ -15,7 +16,7 @@ func TestSecrets(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(secretmanager.ListSecretsResponse{
 			Secrets: []*secretmanager.Secret{
 				{
@@ -56,7 +57,7 @@ func TestCreateSecret(t *testing.T) {
 				Automatic: &secretmanager.Automatic{},
 			},
 		}).
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(secretmanager.Secret{})
 
 	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets/my-secret:addVersion?alt=json&prettyPrint=false").
@@ -65,7 +66,7 @@ func TestCreateSecret(t *testing.T) {
 				Data: "c2VjcmV0",
 			},
 		}).
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(secretmanager.SecretVersion{})
 
 	if err := CreateSecret(context.TODO(), "my-project", "my-secret", []byte("secret")); err != nil {
@@ -83,7 +84,7 @@ func TestUpdateSecret(t *testing.T) {
 				Data: "c2VjcmV0",
 			},
 		}).
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(secretmanager.SecretVersion{})
 
 	if err := UpdateSecret(context.TODO(), "my-project", "my-secret", []byte("secret")); err != nil {
@@ -97,7 +98,7 @@ func TestDeleteSecret(t *testing.T) {
 
 	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets/my-secret?alt=json&prettyPrint=false").
 		Delete("").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(secretmanager.Empty{})
 
 	if err := DeleteSecret(context.TODO(), "my-project", "my-secret"); err != nil {
@@ -110,7 +111,7 @@ func TestGrantSecret(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets/my-secret:getIamPolicy?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{
 			Etag: "300",
 		})
@@ -130,7 +131,7 @@ func TestGrantSecret(t *testing.T) {
 					Etag: "300",
 				},
 			}).
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{})
 
 	if err := GrantSecret(context.TODO(), "my-project", "my-secret", "my-app", false); err != nil {
@@ -143,7 +144,7 @@ func TestRevokeSecret(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets/my-secret:getIamPolicy?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{
 			Bindings: []*secretmanager.Binding{
 				{
@@ -163,7 +164,7 @@ func TestRevokeSecret(t *testing.T) {
 					Etag: "300",
 				},
 			}).
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{})
 
 	if err := RevokeSecret(context.TODO(), "my-project", "my-app", "my-secret", false); err != nil {

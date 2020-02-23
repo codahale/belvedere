@@ -2,6 +2,7 @@ package check
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
@@ -15,7 +16,7 @@ func TestSURunning(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(serviceusage.Operation{
 			Done: false,
 		})
@@ -36,7 +37,7 @@ func TestSUDone(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(serviceusage.Operation{
 			Done: true,
 		})
@@ -57,7 +58,7 @@ func TestSUError(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(serviceusage.Operation{
 			Done: true,
 			Error: &serviceusage.Status{

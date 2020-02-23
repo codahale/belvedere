@@ -2,6 +2,7 @@ package check
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
@@ -14,7 +15,7 @@ func TestHealthNotStable(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-central1/instanceGroupManagers/ig-1?alt=json&fields=status&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(compute.InstanceGroupManager{
 			Status: &compute.InstanceGroupManagerStatus{
 				IsStable: false,
@@ -37,7 +38,7 @@ func TestHealthNotRegistered(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-central1/instanceGroupManagers/ig-1?alt=json&fields=status&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(compute.InstanceGroupManager{
 			Status: &compute.InstanceGroupManagerStatus{
 				IsStable: true,
@@ -45,14 +46,14 @@ func TestHealthNotRegistered(t *testing.T) {
 		})
 
 	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink%2Csize&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(compute.InstanceGroup{
 			SelfLink: "https://self-link/",
 			Size:     2,
 		})
 
 	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/global/backendServices/bes-1/getHealth?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(compute.BackendServiceGroupHealth{
 			HealthStatus: []*compute.HealthStatus{},
 		})
@@ -73,7 +74,7 @@ func TestHealthNotHealthy(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-central1/instanceGroupManagers/ig-1?alt=json&fields=status&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(compute.InstanceGroupManager{
 			Status: &compute.InstanceGroupManagerStatus{
 				IsStable: true,
@@ -81,14 +82,14 @@ func TestHealthNotHealthy(t *testing.T) {
 		})
 
 	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink%2Csize&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(compute.InstanceGroup{
 			SelfLink: "https://self-link/",
 			Size:     2,
 		})
 
 	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/global/backendServices/bes-1/getHealth?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(compute.BackendServiceGroupHealth{
 			HealthStatus: []*compute.HealthStatus{
 				{
@@ -118,7 +119,7 @@ func TestHealthDone(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-central1/instanceGroupManagers/ig-1?alt=json&fields=status&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(compute.InstanceGroupManager{
 			Status: &compute.InstanceGroupManagerStatus{
 				IsStable: true,
@@ -126,14 +127,14 @@ func TestHealthDone(t *testing.T) {
 		})
 
 	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink%2Csize&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(compute.InstanceGroup{
 			SelfLink: "https://self-link/",
 			Size:     2,
 		})
 
 	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/global/backendServices/bes-1/getHealth?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(compute.BackendServiceGroupHealth{
 			HealthStatus: []*compute.HealthStatus{
 				{

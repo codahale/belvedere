@@ -2,6 +2,7 @@ package check
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
@@ -15,7 +16,7 @@ func TestGCERunning(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/beta/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(compute.Operation{
 			Status: "RUNNING",
 		})
@@ -36,7 +37,7 @@ func TestGCEDone(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/beta/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(compute.Operation{
 			Status: "DONE",
 		})
@@ -57,7 +58,7 @@ func TestGCEError(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/beta/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(compute.Operation{
 			Status: "DONE",
 			Error: &compute.OperationError{

@@ -2,6 +2,7 @@ package belvedere
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
@@ -16,7 +17,7 @@ func TestDNSServers(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://dns.googleapis.com/dns/v1/projects/my-project/managedZones/belvedere?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(&dns.ManagedZone{
 			NameServers: []string{"ns1.example.com", "ns2.example.com"},
 		})
@@ -41,7 +42,7 @@ func TestInstances(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/instances?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(&compute.InstanceAggregatedList{
 			Items: map[string]compute.InstancesScopedList{
 				"us-west-1a": {
@@ -131,7 +132,7 @@ func TestInstancesApp(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/instances?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(&compute.InstanceAggregatedList{
 			Items: map[string]compute.InstancesScopedList{
 				"us-west-1a": {
@@ -215,7 +216,7 @@ func TestInstancesAppRelease(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/instances?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(&compute.InstanceAggregatedList{
 			Items: map[string]compute.InstancesScopedList{
 				"us-west-1a": {
@@ -293,7 +294,7 @@ func TestMachineTypes(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/machineTypes?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(compute.MachineTypeAggregatedList{
 			NextPageToken: "",
 			Items: map[string]compute.MachineTypesScopedList{

@@ -2,6 +2,7 @@ package setup
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
@@ -14,13 +15,13 @@ func TestSetDMPerms(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/my-project?alt=json&fields=projectNumber&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(cloudresourcemanager.Project{
 			ProjectNumber: 123456,
 		})
 
 	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/my-project:getIamPolicy?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(cloudresourcemanager.Policy{
 			Bindings: []*cloudresourcemanager.Binding{
 				{
@@ -32,7 +33,7 @@ func TestSetDMPerms(t *testing.T) {
 		})
 
 	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/my-project:getIamPolicy?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(cloudresourcemanager.Policy{
 			Bindings: []*cloudresourcemanager.Binding{
 				{
@@ -59,7 +60,7 @@ func TestSetDMPerms(t *testing.T) {
 				Etag: "300",
 			},
 		}).
-		Reply(409)
+		Reply(http.StatusConflict)
 
 	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/my-project:setIamPolicy?alt=json&prettyPrint=false").
 		JSON(cloudresourcemanager.SetIamPolicyRequest{
@@ -77,7 +78,7 @@ func TestSetDMPerms(t *testing.T) {
 				Etag: "301",
 			},
 		}).
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(cloudresourcemanager.Policy{})
 
 	if err := SetDMPerms(context.TODO(), "my-project", false); err != nil {

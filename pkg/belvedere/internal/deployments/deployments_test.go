@@ -2,6 +2,7 @@ package deployments
 
 import (
 	"context"
+	"net/http"
 	"testing"
 	"time"
 
@@ -31,13 +32,13 @@ func TestInsert(t *testing.T) {
 				},
 			},
 		}).
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(deploymentmanager.Operation{
 			Name: "op1",
 		})
 
 	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(deploymentmanager.Operation{
 			Status: "DONE",
 		})
@@ -72,13 +73,13 @@ func TestUpdate(t *testing.T) {
 				},
 			},
 		}).
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(deploymentmanager.Operation{
 			Name: "op1",
 		})
 
 	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(deploymentmanager.Operation{
 			Status: "DONE",
 		})
@@ -103,13 +104,13 @@ func TestDelete(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/deployments/my-deployment?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(deploymentmanager.Operation{
 			Name: "op1",
 		})
 
 	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(deploymentmanager.Operation{
 			Status: "DONE",
 		})
@@ -124,7 +125,7 @@ func TestList(t *testing.T) {
 	it.MockTokenSource()
 
 	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/deployments?alt=json&prettyPrint=false").
-		Reply(200).
+		Reply(http.StatusOK).
 		JSON(deploymentmanager.DeploymentsListResponse{
 			Deployments: []*deploymentmanager.Deployment{
 				{
