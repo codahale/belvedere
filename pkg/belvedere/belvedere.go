@@ -31,7 +31,7 @@ func DNSServers(ctx context.Context, project string) ([]DNSServer, error) {
 	}
 
 	// Return the DNS servers.
-	var servers []DNSServer
+	servers := make([]DNSServer, 0, len(mz.NameServers))
 	for _, s := range mz.NameServers {
 		servers = append(servers, DNSServer{Server: s})
 	}

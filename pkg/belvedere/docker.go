@@ -8,7 +8,7 @@ import (
 
 // dockerArgs returns a list of arguments to `docker run` for running the given container.
 func dockerArgs(c *Container, app, release, sha256 string, labels map[string]string) []string {
-	var labelNames []string
+	labelNames := make([]string, 0, len(labels))
 	for k := range labels {
 		labelNames = append(labelNames, k)
 	}
@@ -34,7 +34,7 @@ func dockerArgs(c *Container, app, release, sha256 string, labels map[string]str
 		}...)
 	}
 
-	var envNames []string
+	envNames := make([]string, 0, len(c.Env))
 	for k := range c.Env {
 		envNames = append(envNames, k)
 	}

@@ -110,7 +110,7 @@ func Insert(ctx context.Context, project, name string, resources []Resource, lab
 	}
 
 	// Convert labels from a map to a list.
-	var l []*deploymentmanager.DeploymentLabelEntry
+	l := make([]*deploymentmanager.DeploymentLabelEntry, 0, len(labels))
 	for k, v := range labels {
 		l = append(l, &deploymentmanager.DeploymentLabelEntry{
 			Key:   k,

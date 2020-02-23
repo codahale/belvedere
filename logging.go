@@ -38,7 +38,7 @@ func (l *traceLogger) ExportSpan(s *trace.SpanData) {
 }
 
 func (l *traceLogger) printAttributes(attributes map[string]interface{}) {
-	var keys []string
+	keys := make([]string, 0, len(attributes))
 	for k := range attributes {
 		keys = append(keys, k)
 	}

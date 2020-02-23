@@ -362,7 +362,7 @@ ExecStopPost=/usr/bin/docker rm %s
 // systemdService returns a systemd service file with the given Docker arguments. All Docker
 // arguments are escaped, if necessary.
 func systemdService(name string, dockerArgs []string) string {
-	var args []string
+	args := make([]string, 0, len(dockerArgs))
 	for _, s := range dockerArgs {
 		args = append(args, shellescape.Quote(s))
 	}
