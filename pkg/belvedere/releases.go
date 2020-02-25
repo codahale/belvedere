@@ -10,6 +10,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/cloudinit"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	compute "google.golang.org/api/compute/v0.beta"
@@ -166,7 +167,7 @@ func releaseResources(project string, region string, app string, release string,
 	if config.Network != "" {
 		network = config.Network
 	}
-	resources := []deployments.Resource{
+	dep := []deployments.Resource{
 		// An instance template for creating release instances.
 		{
 			Name: instanceTemplate,
@@ -236,7 +237,7 @@ func releaseResources(project string, region string, app string, release string,
 					Tags: &compute.Tags{
 						Items: []string{
 							"belvedere",
-							appDepName(app),
+							resources.Name(app),
 						},
 					},
 				},
@@ -263,7 +264,7 @@ func releaseResources(project string, region string, app string, release string,
 
 	// An optional autoscaler.
 	if config.AutoscalingPolicy != nil {
-		resources = append(resources, deployments.Resource{
+		dep = append(dep, deployments.Resource{
 			Name: autoscaler,
 			Type: "compute.beta.regionAutoscaler",
 			Properties: &compute.Autoscaler{
@@ -275,7 +276,7 @@ func releaseResources(project string, region string, app string, release string,
 		})
 	}
 
-	return resources
+	return dep
 }
 
 const (

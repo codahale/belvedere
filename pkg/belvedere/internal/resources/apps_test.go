@@ -1,4 +1,4 @@
-package belvedere
+package resources
 
 import (
 	"encoding/json"
@@ -14,7 +14,7 @@ func TestAppResources(t *testing.T) {
 		Name:    "belvedere",
 		DnsName: "horse.club",
 	}
-	resources := appResources("my-project", "my-app", zone,
+	resources := App("my-project", "my-app", zone,
 		&compute.BackendServiceCdnPolicy{
 			SignedUrlCacheMaxAgeSec: 200,
 		}, &compute.BackendServiceIAP{
@@ -33,5 +33,5 @@ func TestAppResources(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fixtures.Compare(t, "app_fixture.json", actual)
+	fixtures.Compare(t, "app.json", actual)
 }
