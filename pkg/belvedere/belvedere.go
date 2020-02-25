@@ -13,6 +13,28 @@ import (
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
+// ActiveProject returns the project, if any, which the Google Cloud SDK is configured to use.
+func ActiveProject(ctx context.Context) (string, error) {
+	_, span := trace.StartSpan(ctx, "belvedere.ActiveProject")
+	defer span.End()
+
+	// Load SDK config.
+	config, err := gcp.SDKConfig()
+	if err != nil {
+		return "", err
+	}
+
+	// Return core.project, if it exists.
+	if core, ok := config["core"]; ok {
+		if project, ok := core["project"]; ok {
+			return project, nil
+		}
+	}
+
+	// Complain if core.project doesn't exist.
+	return "", fmt.Errorf("core.project not found")
+}
+
 // DNSServer is a DNS server run by Google.
 type DNSServer struct {
 	Server string

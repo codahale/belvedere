@@ -1,8 +1,7 @@
-package belvedere
+package gcp
 
 import (
 	"bufio"
-	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -12,50 +11,32 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-
-	"go.opencensus.io/trace"
 )
 
-// ActiveProject returns the project, if any, which the Google Cloud SDK is configured to use.
-func ActiveProject(ctx context.Context) (string, error) {
-	_, span := trace.StartSpan(ctx, "belvedere.ActiveProject")
-	defer span.End()
-
+// SDKConfig returns a map of SDK config section names to config section settings.
+func SDKConfig() (map[string]map[string]string, error) {
 	// Find the SDK config path.
 	sdkPath, err := sdkPath()
 	if err != nil {
-		return "", fmt.Errorf("error getting SDK config path: %w", err)
+		return nil, fmt.Errorf("error getting SDK config path: %w", err)
 	}
 
 	// Read the active config.
 	activeConfig, err := ioutil.ReadFile(filepath.Join(sdkPath, "active_config"))
 	if err != nil {
-		return "", fmt.Errorf("error reading active config name: %w", err)
+		return nil, fmt.Errorf("error reading active config name: %w", err)
 	}
 
 	// Open the default config file.
 	configPath := filepath.Join(sdkPath, "configurations", fmt.Sprintf("config_%s", activeConfig))
 	f, err := os.Open(configPath)
 	if err != nil {
-		return "", fmt.Errorf("failed to load active config: %w", err)
+		return nil, fmt.Errorf("failed to load active config: %w", err)
 	}
 	defer func() { _ = f.Close() }()
 
 	// Parse as an INI file.
-	config, err := parseINI(f)
-	if err != nil {
-		return "", fmt.Errorf("failed to parse config: %w", err)
-	}
-
-	// Return core.project, if it exists.
-	if core, ok := config["core"]; ok {
-		if project, ok := core["project"]; ok {
-			return project, nil
-		}
-	}
-
-	// Complain if core.project doesn't exist.
-	return "", fmt.Errorf("core.project not found")
+	return parseINI(f)
 }
 
 func parseINI(ini io.Reader) (map[string]map[string]string, error) {
