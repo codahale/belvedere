@@ -46,8 +46,8 @@ func Setup(ctx context.Context, project, dnsZone string, dryRun bool, interval t
 		}, dryRun, interval)
 }
 
-// Teardown deletes the shared firewall rules and managed zone created by Setup.
-// It does not disable services or downgrade Deployment Manager's permissions.
+// Teardown deletes the shared firewall rules and managed zone created by Setup. It does not disable
+// services or downgrade Deployment Manager's permissions.
 func Teardown(ctx context.Context, project string, dryRun, async bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.Teardown")
 	span.AddAttributes(
