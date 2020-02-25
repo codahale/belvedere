@@ -3,6 +3,8 @@ package belvedere
 import (
 	"context"
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/ghodss/yaml"
 	"go.opencensus.io/trace"
@@ -30,6 +32,60 @@ type Container struct {
 	Args          []string          `json:"args"`
 	Env           map[string]string `json:"env"`
 	DockerOptions []string          `json:"dockerOptions"`
+}
+
+// dockerArgs returns a list of arguments to `docker run` for running the given container.
+func (c *Container) dockerArgs(app, release, sha256 string, labels map[string]string) []string {
+	labelNames := make([]string, 0, len(labels))
+	for k := range labels {
+		labelNames = append(labelNames, k)
+	}
+	sort.Stable(sort.StringSlice(labelNames))
+
+	args := []string{
+		"--log-driver", "gcplogs",
+		"--log-opt", fmt.Sprintf("labels=%s", strings.Join(labelNames, ",")),
+		"--name", app,
+		"--network", "host",
+		"--oom-kill-disable",
+	}
+
+	for _, k := range labelNames {
+		args = append(args, []string{
+			"--label", fmt.Sprintf("%s=%s", k, labels[k]),
+		}...)
+	}
+
+	if release != "" {
+		args = append(args, []string{
+			"--env", fmt.Sprintf("RELEASE=%s", release),
+		}...)
+	}
+
+	envNames := make([]string, 0, len(c.Env))
+	for k := range c.Env {
+		envNames = append(envNames, k)
+	}
+	sort.Stable(sort.StringSlice(envNames))
+
+	for _, k := range envNames {
+		args = append(args, []string{
+			"--env", fmt.Sprintf("%s=%s", k, c.Env[k]),
+		}...)
+	}
+
+	args = append(args, c.DockerOptions...)
+	url := c.Image
+	if sha256 != "" {
+		url = fmt.Sprintf("%s@sha256:%s", url, sha256)
+	}
+	args = append(args, url)
+	if c.Command != "" {
+		args = append(args, c.Command)
+	}
+	args = append(args, c.Args...)
+
+	return args
 }
 
 // LoadConfig loads the given bytes as a YAML configuration.

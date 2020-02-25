@@ -298,7 +298,7 @@ func cloudConfig(app, release string, config *Config, imageSHA256 string) string
 			// Write a systemd service for running the app's container in Docker.
 			{
 				Content: systemdService(app,
-					dockerArgs(&config.Container, app, release, imageSHA256,
+					config.Container.dockerArgs(app, release, imageSHA256,
 						map[string]string{
 							"app":     app,
 							"release": release,
@@ -325,7 +325,7 @@ func cloudConfig(app, release string, config *Config, imageSHA256 string) string
 		cc.WriteFiles = append(cc.WriteFiles,
 			cloudinit.File{
 				Content: systemdService(name,
-					dockerArgs(&sidecar, name, "", "",
+					sidecar.dockerArgs(name, "", "",
 						map[string]string{
 							"app":     app,
 							"release": release,
