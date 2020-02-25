@@ -67,22 +67,6 @@ type Instance struct {
 	Status      string
 }
 
-type instanceList []Instance
-
-func (l instanceList) Len() int {
-	return len(l)
-}
-
-func (l instanceList) Less(i, j int) bool {
-	return l[i].Name < l[j].Name
-}
-
-func (l instanceList) Swap(i, j int) {
-	tmp := l[i]
-	l[i] = l[j]
-	l[j] = tmp
-}
-
 // Instances returns a list of running instances in the project. If an app or release are
 // provided, limits the results to instances running the given app or release.
 func Instances(ctx context.Context, project, app, release string) ([]Instance, error) {
@@ -100,12 +84,13 @@ func Instances(ctx context.Context, project, app, release string) ([]Instance, e
 		return nil, err
 	}
 
-	var instances instanceList
-	// Filter by app and release. Limit to belvedere instances only.
+	var instances []Instance
+	// List all instances.
 	if err := gce.Instances.AggregatedList(project).Pages(ctx,
 		func(list *compute.InstanceAggregatedList) error {
 			for _, items := range list.Items {
 				for _, inst := range items.Instances {
+					// Filter by app and release. Limit to belvedere instances only.
 					if s, ok := inst.Labels["belvedere-app"]; ok && (s == app || app == "") {
 						if s, ok := inst.Labels["belvedere-release"]; ok && (s == release || release == "") {
 							mt := inst.MachineType
@@ -127,7 +112,11 @@ func Instances(ctx context.Context, project, app, release string) ([]Instance, e
 	); err != nil {
 		return nil, fmt.Errorf("error listing instances: %w", err)
 	}
-	sort.Stable(instances)
+
+	// Sort by name and return.
+	sort.SliceStable(instances, func(i, j int) bool {
+		return instances[i].Name < instances[j].Name
+	})
 	return instances, nil
 }
 
@@ -203,8 +192,8 @@ func MachineTypes(ctx context.Context, project, region string) ([]MachineType, e
 		return nil, fmt.Errorf("error listing machine types: %w", err)
 	}
 
-	// Convert to our type in a sortable structure.
-	var machineTypes machineTypeSlice
+	// Convert to our type.
+	machineTypes := make([]MachineType, 0, len(mtMap))
 	for _, v := range mtMap {
 		machineTypes = append(machineTypes, MachineType{
 			Name:   v.Name,
@@ -214,22 +203,8 @@ func MachineTypes(ctx context.Context, project, region string) ([]MachineType, e
 	}
 
 	// Sort the machine types and return.
-	sort.Stable(machineTypes)
+	sort.SliceStable(machineTypes, func(i, j int) bool {
+		return machineTypes[i].lexical() < machineTypes[j].lexical()
+	})
 	return machineTypes, nil
-}
-
-type machineTypeSlice []MachineType
-
-func (m machineTypeSlice) Len() int {
-	return len(m)
-}
-
-func (m machineTypeSlice) Less(i, j int) bool {
-	return m[i].lexical() < m[j].lexical()
-}
-
-func (m machineTypeSlice) Swap(i, j int) {
-	tmp := m[i]
-	m[i] = m[j]
-	m[j] = tmp
 }
