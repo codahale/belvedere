@@ -14,20 +14,17 @@ func TestAppResources(t *testing.T) {
 		Name:    "belvedere",
 		DnsName: "horse.club",
 	}
-	config := &Config{
-		CDNPolicy: &compute.BackendServiceCdnPolicy{
+	resources := appResources("my-project", "my-app", zone,
+		&compute.BackendServiceCdnPolicy{
 			SignedUrlCacheMaxAgeSec: 200,
-		},
-		IAMRoles: []string{
-			"roles/dogWalker.dog",
-		},
-		IAP: &compute.BackendServiceIAP{
+		}, &compute.BackendServiceIAP{
 			Enabled:            true,
 			Oauth2ClientId:     "hello",
 			Oauth2ClientSecret: "world",
+		}, []string{
+			"roles/dogWalker.dog",
 		},
-	}
-	resources := appResources("my-project", "my-app", zone, config)
+	)
 
 	actual, err := json.MarshalIndent(map[string]interface{}{
 		"resources": resources,

@@ -1,4 +1,4 @@
-package belvedere
+package resources
 
 import (
 	"encoding/json"
@@ -7,8 +7,8 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/fixtures"
 )
 
-func TestSetupResources(t *testing.T) {
-	resources := setupResources("cornbread.club")
+func TestBaseResources(t *testing.T) {
+	resources := Base("cornbread.club")
 
 	actual, err := json.MarshalIndent(map[string]interface{}{
 		"resources": resources,
@@ -17,5 +17,5 @@ func TestSetupResources(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fixtures.Compare(t, "setup_fixture.json", actual)
+	fixtures.Compare(t, "base.json", actual)
 }

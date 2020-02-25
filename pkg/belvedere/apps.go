@@ -72,7 +72,7 @@ func CreateApp(ctx context.Context, project, region, app string, config *Config,
 
 	// Create a deployment with all the app resources.
 	return deployments.Insert(ctx, project, appDepName(app),
-		appResources(project, app, managedZone, config),
+		appResources(project, app, managedZone, config.CDNPolicy, config.IAP, config.IAMRoles),
 		map[string]string{
 			"belvedere-type":   "app",
 			"belvedere-app":    app,
@@ -99,7 +99,7 @@ func UpdateApp(ctx context.Context, project, app string, config *Config, dryRun 
 
 	// Update the deployment with the new app resources.
 	return deployments.Update(ctx, project, appDepName(app),
-		appResources(project, app, managedZone, config),
+		appResources(project, app, managedZone, config.CDNPolicy, config.IAP, config.IAMRoles),
 		dryRun, interval)
 }
 
@@ -178,7 +178,11 @@ func findRegion(ctx context.Context, project, app string) (string, error) {
 }
 
 // appResources returns a list of Deployment Manager resources for an app.
-func appResources(project string, app string, managedZone *dns.ManagedZone, config *Config) []deployments.Resource {
+func appResources(
+	project string, app string, managedZone *dns.ManagedZone,
+	cdn *compute.BackendServiceCdnPolicy, iap *compute.BackendServiceIAP,
+	iamRoles []string,
+) []deployments.Resource {
 	firewall := fmt.Sprintf("belvedere-allow-%s-lb", app)
 	healthcheck := fmt.Sprintf("%s-hc", app)
 	backendService := fmt.Sprintf("%s-bes", app)
@@ -228,12 +232,12 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 			Name: backendService,
 			Type: "compute.beta.backendService",
 			Properties: &compute.BackendService{
-				EnableCDN: config.CDNPolicy != nil,
-				CdnPolicy: config.CDNPolicy,
+				EnableCDN: cdn != nil,
+				CdnPolicy: cdn,
 				ConnectionDraining: &compute.ConnectionDraining{
 					DrainingTimeoutSec: 60,
 				},
-				Iap: config.IAP,
+				Iap: iap,
 				// TODO move to v1 when LogConfig goes GA
 				LogConfig: &compute.BackendServiceLogConfig{
 					Enable: true,
@@ -339,7 +343,7 @@ func appResources(project string, app string, managedZone *dns.ManagedZone, conf
 		resources = append(resources, roleBinding(project, serviceAccount, role))
 	}
 
-	for _, role := range config.IAMRoles {
+	for _, role := range iamRoles {
 		resources = append(resources, roleBinding(project, serviceAccount, role))
 	}
 
