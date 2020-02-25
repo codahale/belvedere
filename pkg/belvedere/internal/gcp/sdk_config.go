@@ -22,13 +22,14 @@ func SDKConfig() (map[string]map[string]string, error) {
 	}
 
 	// Read the active config.
-	activeConfig, err := ioutil.ReadFile(filepath.Join(sdkPath, "active_config"))
+	configName, err := ioutil.ReadFile(filepath.Join(sdkPath, "active_config"))
 	if err != nil {
 		return nil, fmt.Errorf("error reading active config name: %w", err)
 	}
 
 	// Open the default config file.
-	configPath := filepath.Join(sdkPath, "configurations", fmt.Sprintf("config_%s", activeConfig))
+	configPath := filepath.Join(sdkPath, "configurations",
+		fmt.Sprintf("config_%s", strings.TrimSpace(string(configName))))
 	f, err := os.Open(configPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load active config: %w", err)

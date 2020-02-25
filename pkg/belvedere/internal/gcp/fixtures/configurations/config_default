@@ -1,0 +1,7 @@
+bare = 1
+
+[core]
+project = boop
+
+[other]
+yes = no
