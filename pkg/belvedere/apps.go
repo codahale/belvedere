@@ -60,7 +60,7 @@ func CreateApp(ctx context.Context, project, region, app string, config *Config,
 	defer span.End()
 
 	// Validate the app name.
-	if err := validateRFC1035(app); err != nil {
+	if err := gcp.ValidateRFC1035(app); err != nil {
 		return err
 	}
 

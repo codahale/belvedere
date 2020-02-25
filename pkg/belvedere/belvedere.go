@@ -3,7 +3,6 @@ package belvedere
 import (
 	"context"
 	"fmt"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -233,16 +232,4 @@ func (m machineTypeSlice) Swap(i, j int) {
 	tmp := m[i]
 	m[i] = m[j]
 	m[j] = tmp
-}
-
-var (
-	rfc1035 = regexp.MustCompile(`^[[:alnum:]][[:alnum:]\-]{0,61}[[:alnum:]]|[[:alpha:]]$`)
-)
-
-// validateRFC1035 returns an error if the given name is not a valid RFC1305 DNS name.
-func validateRFC1035(name string) error {
-	if !rfc1035.MatchString(name) {
-		return fmt.Errorf("invalid name: %s", name)
-	}
-	return nil
 }

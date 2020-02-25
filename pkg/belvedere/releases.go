@@ -8,6 +8,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/backends"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
@@ -66,7 +67,7 @@ func CreateRelease(ctx context.Context, project, app, release string, config *Co
 	)
 	defer span.End()
 
-	if err := validateRFC1035(release); err != nil {
+	if err := gcp.ValidateRFC1035(release); err != nil {
 		return err
 	}
 
