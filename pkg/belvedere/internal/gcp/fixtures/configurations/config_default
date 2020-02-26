@@ -1,5 +1,7 @@
 bare = 1
 
+; comment
+
 [core]
 project = boop
 
