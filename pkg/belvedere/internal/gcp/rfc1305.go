@@ -6,12 +6,12 @@ import (
 )
 
 var (
-	rfc1035 = regexp.MustCompile(`^[[:alnum:]][[:alnum:]\-]{0,61}[[:alnum:]]|[[:alpha:]]$`)
+	rfc1035 = regexp.MustCompile(`^[a-z]([-a-z0-9]*[a-z0-9])?$`)
 )
 
-// ValidateRFC1035 returns an error if the given name is not a valid RFC1305 DNS name.
+// ValidateRFC1035 returns an error if the given name is not a valid RFC1035 DNS name.
 func ValidateRFC1035(name string) error {
-	if !rfc1035.MatchString(name) {
+	if len(name) < 1 || len(name) > 63 || !rfc1035.MatchString(name) {
 		return fmt.Errorf("invalid name: %s", name)
 	}
 	return nil
