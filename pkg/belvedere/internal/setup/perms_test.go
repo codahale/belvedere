@@ -85,3 +85,34 @@ func TestSetDMPerms(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestSetDMPermsExisting(t *testing.T) {
+	defer gock.Off()
+	it.MockTokenSource()
+
+	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/my-project?alt=json&fields=projectNumber&prettyPrint=false").
+		Reply(http.StatusOK).
+		JSON(cloudresourcemanager.Project{
+			ProjectNumber: 123456,
+		})
+
+	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/my-project:getIamPolicy?alt=json&prettyPrint=false").
+		Reply(http.StatusOK).
+		JSON(cloudresourcemanager.Policy{
+			Bindings: []*cloudresourcemanager.Binding{
+				{
+					Members: []string{"email:existing@example.com"},
+					Role:    "roles/passerby",
+				},
+				{
+					Members: []string{"serviceAccount:123456@cloudservices.gserviceaccount.com"},
+					Role:    "roles/owner",
+				},
+			},
+			Etag: "300",
+		})
+
+	if err := SetDMPerms(context.TODO(), "my-project", false); err != nil {
+		t.Fatal(err)
+	}
+}
