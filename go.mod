@@ -5,9 +5,10 @@ go 1.14
 require (
 	cloud.google.com/go v0.53.0 // indirect
 	github.com/alecthomas/kong v0.2.2
-	github.com/alessio/shellescape v0.0.0-20190409004728-b115ca0f9053
+	github.com/alessio/shellescape v1.2.1
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/ghodss/yaml v1.0.0
+	github.com/golang/protobuf v1.3.4 // indirect
 	github.com/google/go-cmp v0.4.0
 	github.com/mattn/go-runewidth v0.0.8 // indirect
 	github.com/olekukonko/tablewriter v0.0.4
@@ -18,7 +19,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sys v0.0.0-20200223170610-d5e6a3e2c0ae // indirect
 	google.golang.org/api v0.19.0
-	google.golang.org/genproto v0.0.0-20200225123651-fc8f55426688
+	google.golang.org/genproto v0.0.0-20200227132054-3f1135a288c9
 	gopkg.in/h2non/gock.v1 v1.0.15
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
