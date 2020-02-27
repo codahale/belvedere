@@ -38,7 +38,7 @@ func TestApps(t *testing.T) {
 					},
 				},
 				{
-					Name: "belvedere-base",
+					Name: "belvedere-app1",
 					Labels: []*deploymentmanager.DeploymentLabelEntry{
 						{
 							Key:   "belvedere-type",
