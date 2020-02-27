@@ -26,6 +26,7 @@ func ActiveProject(ctx context.Context) (string, error) {
 	// Return core.project, if it exists.
 	if core, ok := config["core"]; ok {
 		if project, ok := core["project"]; ok {
+			span.AddAttributes(trace.StringAttribute("project", project))
 			return project, nil
 		}
 	}
