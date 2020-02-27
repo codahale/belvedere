@@ -22,8 +22,12 @@ func TestInsert(t *testing.T) {
 			Name: "my-deployment",
 			Labels: []*deploymentmanager.DeploymentLabelEntry{
 				{
-					Key:   "one",
-					Value: "two",
+					Key:   "a",
+					Value: "2",
+				},
+				{
+					Key:   "b",
+					Value: "1",
 				},
 			},
 			Target: &deploymentmanager.TargetConfiguration{
@@ -54,7 +58,8 @@ func TestInsert(t *testing.T) {
 			},
 		},
 		map[string]string{
-			"one": "two",
+			"a": "2",
+			"b": "1",
 		},
 		false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)

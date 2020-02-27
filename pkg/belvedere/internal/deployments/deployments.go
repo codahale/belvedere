@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
@@ -117,6 +118,9 @@ func Insert(ctx context.Context, project, name string, resources []Resource, lab
 			Value: v,
 		})
 	}
+	sort.SliceStable(l, func(i, j int) bool {
+		return l[i].Key < l[j].Value
+	})
 
 	// Create our config target.
 	d := deploymentConfig{Resources: resources}
