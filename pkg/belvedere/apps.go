@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sort"
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
@@ -37,16 +36,13 @@ func Apps(ctx context.Context, project string) ([]App, error) {
 
 	// Filter the app deployments and pull their metadata from the labels.
 	var apps []App
-	for _, labels := range list {
+	for _, dep := range list {
 		apps = append(apps, App{
 			Project: project,
-			Name:    labels.App,
-			Region:  labels.Region,
+			Name:    dep.App,
+			Region:  dep.Region,
 		})
 	}
-	sort.SliceStable(apps, func(i, j int) bool {
-		return apps[i].Name < apps[j].Name
-	})
 	return apps, nil
 }
 

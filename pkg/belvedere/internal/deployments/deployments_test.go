@@ -238,14 +238,20 @@ func TestList(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := map[string]Labels{
-		"belvedere-base": {
-			Type: "base",
+	expected := []Deployment{
+		{
+			Name: "belvedere-base",
+			Labels: Labels{
+				Type: "base",
+			},
 		},
-		"belvedere-my-app": {
-			Type:   "app",
-			Region: "us-west1",
-			App:    "my-app",
+		{
+			Name: "belvedere-my-app",
+			Labels: Labels{
+				Type:   "app",
+				Region: "us-west1",
+				App:    "my-app",
+			},
 		},
 	}
 

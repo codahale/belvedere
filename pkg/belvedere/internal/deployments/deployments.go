@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
@@ -284,9 +285,14 @@ func Delete(ctx context.Context, project, name string, dryRun, async bool, inter
 	return waiter.Poll(ctx, interval, check.DM(ctx, project, op.Name))
 }
 
-// List returns a map of deployment names to labels for deployments in the project which match the
-// given filter.
-func List(ctx context.Context, project, filter string) (map[string]Labels, error) {
+// Deployment represents a Belvedere-managed DM deployment.
+type Deployment struct {
+	Name string
+	Labels
+}
+
+// List returns a list of deployments in the project which match the given filter.
+func List(ctx context.Context, project, filter string) ([]Deployment, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.List")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -300,19 +306,22 @@ func List(ctx context.Context, project, filter string) (map[string]Labels, error
 	}
 
 	// List all of the deployments.
-	deployments := map[string]Labels{}
+	var deployments []Deployment
 	if err := dm.Deployments.List(project).Filter(filter).Pages(ctx,
 		func(list *deploymentmanager.DeploymentsListResponse) error {
 			// Convert labels to maps.
 			for _, d := range list.Deployments {
 				var labels Labels
 				labels.fromEntries(d.Labels)
-				deployments[d.Name] = labels
+				deployments = append(deployments, Deployment{Name: d.Name, Labels: labels})
 			}
 			return nil
 		},
 	); err != nil {
 		return nil, fmt.Errorf("error listing deployments: %w", err)
 	}
+	sort.SliceStable(deployments, func(i, j int) bool {
+		return deployments[i].Name < deployments[j].Name
+	})
 	return deployments, nil
 }

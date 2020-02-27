@@ -46,13 +46,13 @@ func Releases(ctx context.Context, project, app string) ([]Release, error) {
 	}
 
 	var releases []Release
-	for _, labels := range list {
+	for _, dep := range list {
 		releases = append(releases, Release{
 			Project: project,
-			Region:  labels.Region,
-			App:     labels.App,
-			Release: labels.Release,
-			Hash:    labels.Hash,
+			Region:  dep.Region,
+			App:     dep.App,
+			Release: dep.Release,
+			Hash:    dep.Hash,
 		})
 	}
 	return releases, nil
