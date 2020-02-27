@@ -9,7 +9,7 @@ import (
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
-func TestLoadConfig(t *testing.T) {
+func TestParseConfig(t *testing.T) {
 	b, err := ioutil.ReadFile("config-example.yaml")
 	if err != nil {
 		t.Fatal(err)
