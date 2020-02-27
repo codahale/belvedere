@@ -34,7 +34,7 @@ func Apps(ctx context.Context, project string) ([]App, error) {
 		return nil, err
 	}
 
-	// Filter the app deployments and pull their metadata from the labels.
+	// Pul app metadata from the labels.
 	apps := make([]App, len(list))
 	for i, dep := range list {
 		apps[i] = App{
