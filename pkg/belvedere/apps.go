@@ -35,13 +35,13 @@ func Apps(ctx context.Context, project string) ([]App, error) {
 	}
 
 	// Filter the app deployments and pull their metadata from the labels.
-	var apps []App
-	for _, dep := range list {
-		apps = append(apps, App{
+	apps := make([]App, len(list))
+	for i, dep := range list {
+		apps[i] = App{
 			Project: project,
 			Name:    dep.App,
 			Region:  dep.Region,
-		})
+		}
 	}
 	return apps, nil
 }
