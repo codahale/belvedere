@@ -53,9 +53,14 @@ func run(cli *kong.Context, opts *Options) error {
 	defer span.End()
 
 	// If a project was not explicitly specified, detect one.
-	if err := opts.detectProject(ctx); err != nil {
-		return err
+	if opts.Project == "" {
+		project, err := belvedere.ActiveProject()
+		if err != nil {
+			return err
+		}
+		opts.Project = project
 	}
+	span.AddAttributes(trace.StringAttribute("project", opts.Project))
 
 	// Run the given command, passing in the context and options.
 	cli.BindTo(ctx, (*context.Context)(nil))
@@ -131,17 +136,6 @@ func (o *Options) enableLogging() {
 		// Unless we're quiet, use the trace logger for more practical logging.
 		trace.RegisterExporter(&traceLogger{})
 	}
-}
-
-func (o *Options) detectProject(ctx context.Context) error {
-	if o.Project == "" {
-		p, err := belvedere.ActiveProject(ctx)
-		if err != nil {
-			return err
-		}
-		o.Project = p
-	}
-	return nil
 }
 
 func (o *Options) printTable(i interface{}) error {

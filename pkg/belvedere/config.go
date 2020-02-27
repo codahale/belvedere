@@ -1,7 +1,6 @@
 package belvedere
 
 import (
-	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -9,7 +8,6 @@ import (
 	"github.com/alessio/shellescape"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/cloudinit"
 	"github.com/ghodss/yaml"
-	"go.opencensus.io/trace"
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
@@ -168,11 +166,8 @@ func (c *Container) dockerArgs(app, release, sha256 string, labels map[string]st
 	return args
 }
 
-// LoadConfig loads the given bytes as a YAML configuration.
-func LoadConfig(ctx context.Context, b []byte) (*Config, error) {
-	_, span := trace.StartSpan(ctx, "belvedere.LoadConfig")
-	defer span.End()
-
+// ParseConfig loads the given bytes as a YAML configuration.
+func ParseConfig(b []byte) (*Config, error) {
 	// Unmarshal from YAML using the YAML->JSON route. This allows us to embed GCP API structs in
 	// our Config struct.
 	var config Config

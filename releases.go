@@ -40,7 +40,7 @@ func (cmd *ReleasesCreateCmd) Run(ctx context.Context, o *Options) error {
 		return err
 	}
 
-	config, err := belvedere.LoadConfig(ctx, b)
+	config, err := belvedere.ParseConfig(b)
 	if err != nil {
 		return err
 	}

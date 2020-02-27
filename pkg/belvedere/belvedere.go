@@ -13,10 +13,7 @@ import (
 )
 
 // ActiveProject returns the project, if any, which the Google Cloud SDK is configured to use.
-func ActiveProject(ctx context.Context) (string, error) {
-	_, span := trace.StartSpan(ctx, "belvedere.ActiveProject")
-	defer span.End()
-
+func ActiveProject() (string, error) {
 	// Load SDK config.
 	config, err := gcp.SDKConfig()
 	if err != nil {
@@ -26,7 +23,6 @@ func ActiveProject(ctx context.Context) (string, error) {
 	// Return core.project, if it exists.
 	if core, ok := config["core"]; ok {
 		if project, ok := core["project"]; ok {
-			span.AddAttributes(trace.StringAttribute("project", project))
 			return project, nil
 		}
 	}

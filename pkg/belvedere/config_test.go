@@ -16,7 +16,7 @@ func TestLoadConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	actual, err := LoadConfig(context.TODO(), b)
+	actual, err := ParseConfig(b)
 	if err != nil {
 		t.Fatal(err)
 	}
