@@ -6,11 +6,11 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/alessio/shellescape"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/cloudinit"
 	"github.com/ghodss/yaml"
 	"go.opencensus.io/trace"
 	compute "google.golang.org/api/compute/v0.beta"
-	"gopkg.in/alessio/shellescape.v1"
 )
 
 // Config contains all the mutable parameters of an app's configuration.

@@ -5,7 +5,7 @@ go 1.14
 require (
 	cloud.google.com/go v0.53.0 // indirect
 	github.com/alecthomas/kong v0.2.2
-	github.com/alessio/shellescape v0.0.0-20190409004728-b115ca0f9053 // indirect
+	github.com/alessio/shellescape v0.0.0-20190409004728-b115ca0f9053
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.4.0
@@ -19,7 +19,6 @@ require (
 	golang.org/x/sys v0.0.0-20200223170610-d5e6a3e2c0ae // indirect
 	google.golang.org/api v0.19.0
 	google.golang.org/genproto v0.0.0-20200225123651-fc8f55426688 // indirect
-	gopkg.in/alessio/shellescape.v1 v1.0.0-20170105083845-52074bc9df61
 	gopkg.in/h2non/gock.v1 v1.0.15
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
