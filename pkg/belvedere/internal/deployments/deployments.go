@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sort"
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
@@ -94,8 +93,56 @@ type deploymentConfig struct {
 	Resources []Resource `json:"resources"`
 }
 
+// Labels are the set of possible deployment labels in use.
+type Labels struct {
+	Type    string
+	Region  string
+	App     string
+	Release string
+	Hash    string
+}
+
+func (l *Labels) entry(k, v string) *deploymentmanager.DeploymentLabelEntry {
+	return &deploymentmanager.DeploymentLabelEntry{Key: k, Value: v}
+}
+
+func (l *Labels) toEntries() []*deploymentmanager.DeploymentLabelEntry {
+	var entries []*deploymentmanager.DeploymentLabelEntry
+	if l.App != "" {
+		entries = append(entries, l.entry("belvedere-app", l.App))
+	}
+	if l.Hash != "" {
+		entries = append(entries, l.entry("belvedere-hash", l.Hash))
+	}
+	if l.Region != "" {
+		entries = append(entries, l.entry("belvedere-region", l.Region))
+	}
+	if l.Release != "" {
+		entries = append(entries, l.entry("belvedere-release", l.Release))
+	}
+	entries = append(entries, l.entry("belvedere-type", l.Type))
+	return entries
+}
+
+func (l *Labels) fromEntries(labels []*deploymentmanager.DeploymentLabelEntry) {
+	for _, e := range labels {
+		switch e.Key {
+		case "belvedere-app":
+			l.App = e.Value
+		case "belvedere-hash":
+			l.Hash = e.Value
+		case "belvedere-region":
+			l.Region = e.Value
+		case "belvedere-release":
+			l.Release = e.Value
+		case "belvedere-type":
+			l.Type = e.Value
+		}
+	}
+}
+
 // Insert inserts a new deployment with the given name, resources, and labels.
-func Insert(ctx context.Context, project, name string, resources []Resource, labels map[string]string, dryRun bool, interval time.Duration) error {
+func Insert(ctx context.Context, project, name string, resources []Resource, labels Labels, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Insert")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -111,16 +158,6 @@ func Insert(ctx context.Context, project, name string, resources []Resource, lab
 	}
 
 	// Convert labels from a map to a list.
-	l := make([]*deploymentmanager.DeploymentLabelEntry, 0, len(labels))
-	for k, v := range labels {
-		l = append(l, &deploymentmanager.DeploymentLabelEntry{
-			Key:   k,
-			Value: v,
-		})
-	}
-	sort.SliceStable(l, func(i, j int) bool {
-		return l[i].Key < l[j].Value
-	})
 
 	// Create our config target.
 	d := deploymentConfig{Resources: resources}
@@ -143,7 +180,7 @@ func Insert(ctx context.Context, project, name string, resources []Resource, lab
 
 	// Insert the new deployment.
 	op, err := dm.Deployments.Insert(project, &deploymentmanager.Deployment{
-		Labels: l,
+		Labels: labels.toEntries(),
 		Name:   name,
 		Target: &deploymentmanager.TargetConfiguration{
 			Config: &deploymentmanager.ConfigFile{
@@ -247,9 +284,9 @@ func Delete(ctx context.Context, project, name string, dryRun, async bool, inter
 	return waiter.Poll(ctx, interval, check.DM(ctx, project, op.Name))
 }
 
-// List returns the names and labels for all deployments in the project which match the given
-// filter.
-func List(ctx context.Context, project, filter string) ([]map[string]string, error) {
+// List returns a map of deployment names to labels for deployments in the project which match the
+// given filter.
+func List(ctx context.Context, project, filter string) (map[string]Labels, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.List")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -263,16 +300,14 @@ func List(ctx context.Context, project, filter string) ([]map[string]string, err
 	}
 
 	// List all of the deployments.
-	var deployments []map[string]string
+	deployments := map[string]Labels{}
 	if err := dm.Deployments.List(project).Filter(filter).Pages(ctx,
 		func(list *deploymentmanager.DeploymentsListResponse) error {
 			// Convert labels to maps.
 			for _, d := range list.Deployments {
-				m := map[string]string{"name": d.Name}
-				for _, e := range d.Labels {
-					m[e.Key] = e.Value
-				}
-				deployments = append(deployments, m)
+				var labels Labels
+				labels.fromEntries(d.Labels)
+				deployments[d.Name] = labels
 			}
 			return nil
 		},

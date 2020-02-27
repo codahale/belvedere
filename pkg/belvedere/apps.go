@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
@@ -39,10 +40,13 @@ func Apps(ctx context.Context, project string) ([]App, error) {
 	for _, labels := range list {
 		apps = append(apps, App{
 			Project: project,
-			Region:  labels["belvedere-region"],
-			Name:    labels["belvedere-app"],
+			Name:    labels.App,
+			Region:  labels.Region,
 		})
 	}
+	sort.SliceStable(apps, func(i, j int) bool {
+		return apps[i].Name < apps[j].Name
+	})
 	return apps, nil
 }
 
@@ -71,10 +75,10 @@ func CreateApp(ctx context.Context, project, region, app string, config *Config,
 	// Create a deployment with all the app resources.
 	return deployments.Insert(ctx, project, resources.Name(app),
 		resources.App(project, app, managedZone, config.CDNPolicy, config.IAP, config.IAMRoles),
-		map[string]string{
-			"belvedere-type":   "app",
-			"belvedere-app":    app,
-			"belvedere-region": region,
+		deployments.Labels{
+			Type:   "app",
+			App:    app,
+			Region: region,
 		},
 		dryRun, interval)
 }

@@ -49,10 +49,10 @@ func Releases(ctx context.Context, project, app string) ([]Release, error) {
 	for _, labels := range list {
 		releases = append(releases, Release{
 			Project: project,
-			Region:  labels["belvedere-region"],
-			App:     labels["belvedere-app"],
-			Release: labels["belvedere-release"],
-			Hash:    labels["belvedere-hash"],
+			Region:  labels.Region,
+			App:     labels.App,
+			Release: labels.Release,
+			Hash:    labels.Hash,
 		})
 	}
 	return releases, nil
@@ -85,12 +85,12 @@ func CreateRelease(ctx context.Context, project, app, release string, config *Co
 			config.MachineType, config.cloudConfig(app, release, imageSHA256),
 			config.NumReplicas, config.AutoscalingPolicy,
 		),
-		map[string]string{
-			"belvedere-type":    "release",
-			"belvedere-app":     app,
-			"belvedere-release": release,
-			"belvedere-region":  region,
-			"belvedere-hash":    imageSHA256[:32],
+		deployments.Labels{
+			Type:    "release",
+			App:     app,
+			Release: release,
+			Region:  region,
+			Hash:    imageSHA256[:32],
 		}, dryRun, interval)
 }
 

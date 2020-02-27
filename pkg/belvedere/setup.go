@@ -41,8 +41,8 @@ func Setup(ctx context.Context, project, dnsZone string, dryRun bool, interval t
 	// Create a deployment with a managed DNS zone and firewall rules which limit SSH to GCE
 	// instances to those tunneled over IAP.
 	return deployments.Insert(ctx, project, "belvedere", resources.Base(dnsZone),
-		map[string]string{
-			"belvedere-type": "base",
+		deployments.Labels{
+			Type: "base",
 		}, dryRun, interval)
 }
 

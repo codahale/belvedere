@@ -13,6 +13,82 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
+func TestLabelsToEntries(t *testing.T) {
+	expected := []*deploymentmanager.DeploymentLabelEntry{
+		{
+			Key:   "belvedere-app",
+			Value: "my-app",
+		},
+		{
+			Key:   "belvedere-hash",
+			Value: "12345",
+		},
+		{
+			Key:   "belvedere-region",
+			Value: "us-west1",
+		},
+		{
+			Key:   "belvedere-release",
+			Value: "v1",
+		},
+		{
+			Key:   "belvedere-type",
+			Value: "release",
+		},
+	}
+
+	labels := Labels{
+		Type:    "release",
+		Region:  "us-west1",
+		App:     "my-app",
+		Release: "v1",
+		Hash:    "12345",
+	}
+	actual := labels.toEntries()
+
+	if !cmp.Equal(expected, actual) {
+		t.Fatal(cmp.Diff(expected, actual))
+	}
+}
+
+func TestLabelsFromEntries(t *testing.T) {
+	var actual Labels
+	actual.fromEntries([]*deploymentmanager.DeploymentLabelEntry{
+		{
+			Key:   "belvedere-type",
+			Value: "release",
+		},
+		{
+			Key:   "belvedere-app",
+			Value: "my-app",
+		},
+		{
+			Key:   "belvedere-region",
+			Value: "us-west1",
+		},
+		{
+			Key:   "belvedere-release",
+			Value: "v1",
+		},
+		{
+			Key:   "belvedere-hash",
+			Value: "12345",
+		},
+	})
+
+	expected := Labels{
+		Type:    "release",
+		Region:  "us-west1",
+		App:     "my-app",
+		Release: "v1",
+		Hash:    "12345",
+	}
+
+	if !cmp.Equal(expected, actual) {
+		t.Fatal(cmp.Diff(expected, actual))
+	}
+}
+
 func TestInsert(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
@@ -22,12 +98,8 @@ func TestInsert(t *testing.T) {
 			Name: "my-deployment",
 			Labels: []*deploymentmanager.DeploymentLabelEntry{
 				{
-					Key:   "a",
-					Value: "2",
-				},
-				{
-					Key:   "b",
-					Value: "1",
+					Key:   "belvedere-type",
+					Value: "base",
 				},
 			},
 			Target: &deploymentmanager.TargetConfiguration{
@@ -57,9 +129,8 @@ func TestInsert(t *testing.T) {
 				},
 			},
 		},
-		map[string]string{
-			"a": "2",
-			"b": "1",
+		Labels{
+			Type: "base",
 		},
 		false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
@@ -134,28 +205,28 @@ func TestList(t *testing.T) {
 		JSON(deploymentmanager.DeploymentsListResponse{
 			Deployments: []*deploymentmanager.Deployment{
 				{
-					Name: "one",
+					Name: "belvedere-base",
 					Labels: []*deploymentmanager.DeploymentLabelEntry{
 						{
-							Key:   "one-a",
-							Value: "a",
-						},
-						{
-							Key:   "one-b",
-							Value: "b",
+							Key:   "belvedere-type",
+							Value: "base",
 						},
 					},
 				},
 				{
-					Name: "two",
+					Name: "belvedere-my-app",
 					Labels: []*deploymentmanager.DeploymentLabelEntry{
 						{
-							Key:   "two-a",
-							Value: "a",
+							Key:   "belvedere-type",
+							Value: "app",
 						},
 						{
-							Key:   "two-b",
-							Value: "b",
+							Key:   "belvedere-region",
+							Value: "us-west1",
+						},
+						{
+							Key:   "belvedere-app",
+							Value: "my-app",
 						},
 					},
 				},
@@ -167,9 +238,15 @@ func TestList(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := []map[string]string{
-		{"name": "one", "one-a": "a", "one-b": "b"},
-		{"name": "two", "two-a": "a", "two-b": "b"},
+	expected := map[string]Labels{
+		"belvedere-base": {
+			Type: "base",
+		},
+		"belvedere-my-app": {
+			Type:   "app",
+			Region: "us-west1",
+			App:    "my-app",
+		},
 	}
 
 	if !cmp.Equal(expected, actual) {
