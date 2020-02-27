@@ -21,6 +21,7 @@ import (
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"golang.org/x/crypto/ssh/terminal"
+	"google.golang.org/genproto/googleapis/rpc/code"
 )
 
 func main() {
@@ -59,6 +60,10 @@ func run(cli *kong.Context, opts *Options) error {
 	// Run the given command, passing in the context and options.
 	cli.BindTo(ctx, (*context.Context)(nil))
 	if err := cli.Run(&opts); err != nil {
+		span.SetStatus(trace.Status{
+			Code:    int32(code.Code_INTERNAL),
+			Message: err.Error(),
+		})
 		return err
 	}
 
