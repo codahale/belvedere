@@ -1,7 +1,6 @@
 package belvedere
 
 import (
-	"context"
 	"io/ioutil"
 	"testing"
 
