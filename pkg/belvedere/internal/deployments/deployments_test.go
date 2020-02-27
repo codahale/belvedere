@@ -129,7 +129,7 @@ func TestList(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/deployments?alt=json&prettyPrint=false").
+	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/deployments?alt=json&filter=bobs+eq+1&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(deploymentmanager.DeploymentsListResponse{
 			Deployments: []*deploymentmanager.Deployment{
@@ -162,7 +162,7 @@ func TestList(t *testing.T) {
 			},
 		})
 
-	actual, err := List(context.TODO(), "my-project")
+	actual, err := List(context.TODO(), "my-project", "bobs eq 1")
 	if err != nil {
 		t.Fatal(err)
 	}

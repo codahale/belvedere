@@ -29,7 +29,7 @@ func Apps(ctx context.Context, project string) ([]App, error) {
 	defer span.End()
 
 	// List all deployments in the project.
-	list, err := deployments.List(ctx, project)
+	list, err := deployments.List(ctx, project, `labels.belvedere-type eq "app"`)
 	if err != nil {
 		return nil, err
 	}
@@ -37,13 +37,11 @@ func Apps(ctx context.Context, project string) ([]App, error) {
 	// Filter the app deployments and pull their metadata from the labels.
 	var apps []App
 	for _, labels := range list {
-		if labels["belvedere-type"] == "app" {
-			apps = append(apps, App{
-				Project: project,
-				Region:  labels["belvedere-region"],
-				Name:    labels["belvedere-app"],
-			})
-		}
+		apps = append(apps, App{
+			Project: project,
+			Region:  labels["belvedere-region"],
+			Name:    labels["belvedere-app"],
+		})
 	}
 	return apps, nil
 }

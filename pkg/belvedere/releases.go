@@ -35,22 +35,25 @@ func Releases(ctx context.Context, project, app string) ([]Release, error) {
 		span.AddAttributes(trace.StringAttribute("app", app))
 	}
 
-	list, err := deployments.List(ctx, project)
+	filter := `labels.belvedere-type eq "release"`
+	if app != "" {
+		filter = fmt.Sprintf("%s AND labels.belvedere-app eq %q", filter, app)
+	}
+
+	list, err := deployments.List(ctx, project, filter)
 	if err != nil {
 		return nil, err
 	}
 
 	var releases []Release
 	for _, labels := range list {
-		if (labels["belvedere-type"] == "release") && (app == "" || labels["belvedere-app"] == app) {
-			releases = append(releases, Release{
-				Project: project,
-				Region:  labels["belvedere-region"],
-				App:     labels["belvedere-app"],
-				Release: labels["belvedere-release"],
-				Hash:    labels["belvedere-hash"],
-			})
-		}
+		releases = append(releases, Release{
+			Project: project,
+			Region:  labels["belvedere-region"],
+			App:     labels["belvedere-app"],
+			Release: labels["belvedere-release"],
+			Hash:    labels["belvedere-hash"],
+		})
 	}
 	return releases, nil
 }

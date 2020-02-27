@@ -15,7 +15,7 @@ type ReleasesCmd struct {
 }
 
 type ReleasesListCmd struct {
-	App string `optional:"" help:"Limit releases to the given app."`
+	App string `arg:"" optional:"" help:"Limit releases to the given app."`
 }
 
 func (cmd *ReleasesListCmd) Run(ctx context.Context, o *Options) error {

@@ -247,8 +247,9 @@ func Delete(ctx context.Context, project, name string, dryRun, async bool, inter
 	return waiter.Poll(ctx, interval, check.DM(ctx, project, op.Name))
 }
 
-// List returns the names and labels for all deployments in the project.
-func List(ctx context.Context, project string) ([]map[string]string, error) {
+// List returns the names and labels for all deployments in the project which match the given
+// filter.
+func List(ctx context.Context, project, filter string) ([]map[string]string, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.List")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -263,7 +264,7 @@ func List(ctx context.Context, project string) ([]map[string]string, error) {
 
 	// List all of the deployments.
 	var deployments []map[string]string
-	if err := dm.Deployments.List(project).Pages(ctx,
+	if err := dm.Deployments.List(project).Filter(filter).Pages(ctx,
 		func(list *deploymentmanager.DeploymentsListResponse) error {
 			// Convert labels to maps.
 			for _, d := range list.Deployments {
