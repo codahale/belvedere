@@ -37,22 +37,22 @@ func TestList(t *testing.T) {
 			},
 		})
 
-	service, err := NewLogService(context.TODO(), "my-project")
+	s, err := NewService(context.TODO(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// mock out the clock
-	(service.(*logService)).clock = func() time.Time {
+	(s.(*service)).clock = func() time.Time {
 		return time.Date(2019, 6, 25, 13, 18+15, 33, 43, time.UTC)
 	}
 
-	actual, err := service.List(context.TODO(), "my-app", "", "", 15*time.Minute, []string{"health"})
+	actual, err := s.List(context.TODO(), "my-app", "", "", 15*time.Minute, []string{"health"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := []LogEntry{
+	expected := []Entry{
 		{
 			Timestamp: time.Date(2019, 6, 25, 14, 55, 1, 0, time.UTC),
 			Release:   "v2",

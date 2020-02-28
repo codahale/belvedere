@@ -97,7 +97,7 @@ type LogsCmd struct {
 }
 
 func (cmd *LogsCmd) Run(ctx context.Context, o *Options) error {
-	ls, err := logs.NewLogService(ctx, o.Project)
+	ls, err := logs.NewService(ctx, o.Project)
 	if err != nil {
 		return err
 	}
