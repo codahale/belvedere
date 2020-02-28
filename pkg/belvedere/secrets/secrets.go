@@ -1,8 +1,10 @@
-package belvedere
+package secrets
 
 import (
 	"context"
+	"crypto/sha512"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"strings"
 	"time"
@@ -17,22 +19,48 @@ type Secret struct {
 	Name string
 }
 
-// Secrets returns a list of all secrets stored in Secret Manager for the given project.
-func Secrets(ctx context.Context, project string) ([]Secret, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.Secrets")
-	span.AddAttributes(
-		trace.StringAttribute("project", project),
-	)
-	defer span.End()
+// Service manages secrets using Google Secret Manager.
+type Service interface {
+	// List returns a list of all Belvedere-managed secrets.
+	List(ctx context.Context) ([]Secret, error)
+	// Create creates a new secret with the given name and value.
+	Create(ctx context.Context, name string, value []byte) error
+	// Update updates the given secret with a new value.
+	Update(ctx context.Context, name string, value []byte) error
+	// Delete deletes the given secret.
+	Delete(ctx context.Context, name string) error
+	// Grant modifies the given secret's IAM policy to grant read access to the given app.
+	Grant(ctx context.Context, secret, app string) error
+	// Revoke modifies the given secret's IAM policy to revoke read access from the given app.
+	Revoke(ctx context.Context, secret, app string) error
+}
 
-	sm, err := gcp.SecretManager(ctx)
+// NewService returns a new Service implementation.
+func NewService(ctx context.Context, project string, dryRun bool) (Service, error) {
+	sm, err := secretmanager.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
+	return &service{
+		project: project,
+		dryRun:  dryRun,
+		sm:      sm,
+	}, nil
+}
 
-	name := fmt.Sprintf("projects/%s", project)
+type service struct {
+	project string
+	dryRun  bool
+	sm      *secretmanager.Service
+}
+
+func (s *service) List(ctx context.Context) ([]Secret, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.list")
+	defer span.End()
+
+	name := fmt.Sprintf("projects/%s", s.project)
 	var secrets []Secret
-	if err := sm.Projects.Secrets.List(name).Pages(ctx,
+	if err := s.sm.Projects.Secrets.List(name).Fields("secrets.name").Pages(ctx,
 		func(list *secretmanager.ListSecretsResponse) error {
 			for _, s := range list.Secrets {
 				parts := strings.Split(s.Name, "/")
@@ -48,100 +76,79 @@ func Secrets(ctx context.Context, project string) ([]Secret, error) {
 	return secrets, nil
 }
 
-// CreateSecret creates a secret with the given name and data.
-func CreateSecret(ctx context.Context, project, secret string, data []byte) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.CreateSecret")
+func (s *service) Create(ctx context.Context, name string, value []byte) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.create")
 	span.AddAttributes(
-		trace.StringAttribute("project", project),
-		trace.StringAttribute("secret", secret),
+		trace.StringAttribute("name", name),
+		trace.StringAttribute("value", obscure(value)),
 	)
 	defer span.End()
 
-	// Create a Secret Manager client.
-	sm, err := gcp.SecretManager(ctx)
-	if err != nil {
-		return err
+	if s.dryRun {
+		return nil
 	}
 
 	// Create a new version.
-	_, err = sm.Projects.Secrets.Create(fmt.Sprintf("projects/%s", project),
+	if _, err := s.sm.Projects.Secrets.Create(
+		fmt.Sprintf("projects/%s", s.project),
 		&secretmanager.Secret{
 			Replication: &secretmanager.Replication{Automatic: &secretmanager.Automatic{}},
-		}).SecretId(secret).Context(ctx).Do()
-	if err != nil {
+		},
+	).SecretId(name).Context(ctx).Do(); err != nil {
 		return fmt.Errorf("error creating secret: %w", err)
 	}
 
 	// Update the secret's value.
-	return UpdateSecret(ctx, project, secret, data)
+	return s.Update(ctx, name, value)
 }
 
-// UpdateSecret updates the secret's value with the given data.
-func UpdateSecret(ctx context.Context, project, secret string, data []byte) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.UpdateSecret")
+func (s *service) Update(ctx context.Context, name string, value []byte) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.update")
 	span.AddAttributes(
-		trace.StringAttribute("project", project),
-		trace.StringAttribute("secret", secret),
+		trace.StringAttribute("name", name),
+		trace.StringAttribute("value", obscure(value)),
 	)
 	defer span.End()
 
-	// Create a Secret Manager client.
-	sm, err := gcp.SecretManager(ctx)
-	if err != nil {
-		return err
+	if s.dryRun {
+		return nil
 	}
 
 	// Add a version to the given secret.
-	_, err = sm.Projects.Secrets.AddVersion(fmt.Sprintf("projects/%s/secrets/%s", project, secret),
+	if _, err := s.sm.Projects.Secrets.AddVersion(
+		fmt.Sprintf("projects/%s/secrets/%s", s.project, name),
 		&secretmanager.AddSecretVersionRequest{
-			Payload: &secretmanager.SecretPayload{Data: base64.StdEncoding.EncodeToString(data)},
-		}).Context(ctx).Do()
-	if err != nil {
+			Payload: &secretmanager.SecretPayload{Data: base64.StdEncoding.EncodeToString(value)},
+		},
+	).Context(ctx).Do(); err != nil {
 		return fmt.Errorf("error adding secret version: %w", err)
 	}
 	return nil
 }
 
-// DeleteSecret deletes the given secret.
-func DeleteSecret(ctx context.Context, project, secret string) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.CreateSecret")
+func (s *service) Delete(ctx context.Context, name string) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.delete")
 	span.AddAttributes(
-		trace.StringAttribute("project", project),
-		trace.StringAttribute("secret", secret),
+		trace.StringAttribute("name", name),
 	)
 	defer span.End()
 
-	sm, err := gcp.SecretManager(ctx)
-	if err != nil {
-		return err
-	}
-
-	_, err = sm.Projects.Secrets.Delete(fmt.Sprintf("projects/%s/secrets/%s", project, secret)).
+	_, err := s.sm.Projects.Secrets.
+		Delete(fmt.Sprintf("projects/%s/secrets/%s", s.project, name)).
 		Context(ctx).Do()
 	return err
 }
 
-const accessor = "roles/secretmanager.secretAccessor"
-
-// GrantSecret modifies the IAM policy of the given secret to allow the given application's
-// service account access.
-func GrantSecret(ctx context.Context, project, secret, app string, dryRun bool) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.GrantSecret")
+func (s *service) Grant(ctx context.Context, secret, app string) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.grant")
 	span.AddAttributes(
-		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", app),
 		trace.StringAttribute("secret", secret),
-		trace.BoolAttribute("dry_run", dryRun),
+		trace.StringAttribute("app", app),
 	)
 	defer span.End()
 
-	sm, err := gcp.SecretManager(ctx)
-	if err != nil {
-		return err
-	}
-
-	sa := fmt.Sprintf("serviceAccount:%s-sa@%s.iam.gserviceaccount.com", app, project)
-	return modifyIAMPolicy(ctx, sm, fmt.Sprintf("projects/%s/secrets/%s", project, secret), dryRun,
+	sa := fmt.Sprintf("serviceAccount:%s-sa@%s.iam.gserviceaccount.com", app, s.project)
+	return s.modifyIAMPolicy(ctx, fmt.Sprintf("projects/%s/secrets/%s", s.project, secret),
 		func(policy *secretmanager.Policy) *secretmanager.Policy {
 			// Look for an existing IAM binding giving the app access to the secret.
 			for _, binding := range policy.Bindings {
@@ -176,25 +183,16 @@ func GrantSecret(ctx context.Context, project, secret, app string, dryRun bool) 
 		})
 }
 
-// RevokeSecret modifies the IAM policy of the given secret to deny the given application's
-// service account access to it.
-func RevokeSecret(ctx context.Context, project, app, secret string, dryRun bool) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.RevokeSecret")
+func (s *service) Revoke(ctx context.Context, secret, app string) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.revoke")
 	span.AddAttributes(
-		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", app),
 		trace.StringAttribute("secret", secret),
-		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
-	sm, err := gcp.SecretManager(ctx)
-	if err != nil {
-		return err
-	}
-
-	sa := fmt.Sprintf("serviceAccount:%s-sa@%s.iam.gserviceaccount.com", app, project)
-	return modifyIAMPolicy(ctx, sm, fmt.Sprintf("projects/%s/secrets/%s", project, secret), dryRun,
+	sa := fmt.Sprintf("serviceAccount:%s-sa@%s.iam.gserviceaccount.com", app, s.project)
+	return s.modifyIAMPolicy(ctx, fmt.Sprintf("projects/%s/secrets/%s", s.project, secret),
 		func(policy *secretmanager.Policy) *secretmanager.Policy {
 			var bindings []*secretmanager.Binding
 
@@ -238,15 +236,13 @@ func RevokeSecret(ctx context.Context, project, app, secret string, dryRun bool)
 		})
 }
 
-func modifyIAMPolicy(
+func (s *service) modifyIAMPolicy(
 	ctx context.Context,
-	sm *secretmanager.Service,
 	secret string,
-	dryRun bool,
 	f func(policy *secretmanager.Policy) *secretmanager.Policy) error {
 	err := gcp.ModifyLoop(5*time.Second, 1*time.Minute, func() error {
 		// Get the secret's IAM policy.
-		policy, err := sm.Projects.Secrets.GetIamPolicy(secret).Context(ctx).Do()
+		policy, err := s.sm.Projects.Secrets.GetIamPolicy(secret).Context(ctx).Do()
 		if err != nil {
 			return fmt.Errorf("error getting IAM policy: %w", err)
 		}
@@ -258,12 +254,12 @@ func modifyIAMPolicy(
 		}
 
 		// Don't modify anything if it's a dry run.
-		if dryRun {
+		if s.dryRun {
 			return nil
 		}
 
 		// Set the modified policy.
-		_, err = sm.Projects.Secrets.SetIamPolicy(secret, &secretmanager.SetIamPolicyRequest{
+		_, err = s.sm.Projects.Secrets.SetIamPolicy(secret, &secretmanager.SetIamPolicyRequest{
 			Policy: policy,
 		}).Context(ctx).Do()
 
@@ -275,3 +271,10 @@ func modifyIAMPolicy(
 	}
 	return nil
 }
+
+func obscure(secret []byte) string {
+	h := sha512.Sum512(secret)
+	return hex.EncodeToString(h[:4])
+}
+
+const accessor = "roles/secretmanager.secretAccessor"

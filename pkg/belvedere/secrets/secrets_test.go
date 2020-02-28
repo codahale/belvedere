@@ -1,4 +1,4 @@
-package belvedere
+package secrets
 
 import (
 	"context"
@@ -11,11 +11,11 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestSecrets(t *testing.T) {
+func TestList(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets?alt=json&prettyPrint=false").
+	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets?alt=json&fields=secrets.name&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(secretmanager.ListSecretsResponse{
 			Secrets: []*secretmanager.Secret{
@@ -28,7 +28,12 @@ func TestSecrets(t *testing.T) {
 			},
 		})
 
-	actual, err := Secrets(context.TODO(), "my-project")
+	secrets, err := NewService(context.TODO(), "my-project", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	actual, err := secrets.List(context.TODO())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +52,7 @@ func TestSecrets(t *testing.T) {
 	}
 }
 
-func TestCreateSecret(t *testing.T) {
+func TestCreate(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -69,12 +74,17 @@ func TestCreateSecret(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.SecretVersion{})
 
-	if err := CreateSecret(context.TODO(), "my-project", "my-secret", []byte("secret")); err != nil {
+	secrets, err := NewService(context.TODO(), "my-project", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := secrets.Create(context.TODO(), "my-secret", []byte("secret")); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestUpdateSecret(t *testing.T) {
+func TestUpdate(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -87,12 +97,17 @@ func TestUpdateSecret(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.SecretVersion{})
 
-	if err := UpdateSecret(context.TODO(), "my-project", "my-secret", []byte("secret")); err != nil {
+	secrets, err := NewService(context.TODO(), "my-project", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := secrets.Update(context.TODO(), "my-secret", []byte("secret")); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestDeleteSecret(t *testing.T) {
+func TestDelete(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -101,12 +116,17 @@ func TestDeleteSecret(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.Empty{})
 
-	if err := DeleteSecret(context.TODO(), "my-project", "my-secret"); err != nil {
+	secrets, err := NewService(context.TODO(), "my-project", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := secrets.Delete(context.TODO(), "my-secret"); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestGrantSecret(t *testing.T) {
+func TestGrant(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -134,12 +154,17 @@ func TestGrantSecret(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{})
 
-	if err := GrantSecret(context.TODO(), "my-project", "my-secret", "my-app", false); err != nil {
+	secrets, err := NewService(context.TODO(), "my-project", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := secrets.Grant(context.TODO(), "my-secret", "my-app"); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestRevokeSecret(t *testing.T) {
+func TestRevoke(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -167,7 +192,12 @@ func TestRevokeSecret(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{})
 
-	if err := RevokeSecret(context.TODO(), "my-project", "my-app", "my-secret", false); err != nil {
+	secrets, err := NewService(context.TODO(), "my-project", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := secrets.Revoke(context.TODO(), "my-secret", "my-app"); err != nil {
 		t.Fatal(err)
 	}
 }

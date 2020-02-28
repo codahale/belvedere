@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/codahale/belvedere/pkg/belvedere"
+	"github.com/codahale/belvedere/pkg/belvedere/secrets"
 )
 
 type SecretsCmd struct {
@@ -19,7 +19,12 @@ type SecretsListCmd struct {
 }
 
 func (*SecretsListCmd) Run(ctx context.Context, o *Options) error {
-	releases, err := belvedere.Secrets(ctx, o.Project)
+	s, err := secrets.NewService(ctx, o.Project, o.DryRun)
+	if err != nil {
+		return err
+	}
+
+	releases, err := s.List(ctx)
 	if err != nil {
 		return err
 	}
@@ -32,11 +37,16 @@ type SecretsCreateCmd struct {
 }
 
 func (cmd *SecretsCreateCmd) Run(ctx context.Context, o *Options) error {
+	s, err := secrets.NewService(ctx, o.Project, o.DryRun)
+	if err != nil {
+		return err
+	}
+
 	b, err := readFile(ctx, cmd.DataFile)
 	if err != nil {
 		return err
 	}
-	return belvedere.CreateSecret(ctx, o.Project, cmd.Secret, b)
+	return s.Create(ctx, cmd.Secret, b)
 }
 
 type SecretsGrantCmd struct {
@@ -45,7 +55,12 @@ type SecretsGrantCmd struct {
 }
 
 func (cmd *SecretsGrantCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.GrantSecret(ctx, o.Project, cmd.Secret, cmd.App, o.DryRun)
+	s, err := secrets.NewService(ctx, o.Project, o.DryRun)
+	if err != nil {
+		return err
+	}
+
+	return s.Grant(ctx, cmd.Secret, cmd.App)
 }
 
 type SecretsRevokeCmd struct {
@@ -54,7 +69,12 @@ type SecretsRevokeCmd struct {
 }
 
 func (cmd *SecretsRevokeCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.RevokeSecret(ctx, o.Project, cmd.App, cmd.Secret, o.DryRun)
+	s, err := secrets.NewService(ctx, o.Project, o.DryRun)
+	if err != nil {
+		return err
+	}
+
+	return s.Revoke(ctx, cmd.Secret, cmd.App)
 }
 
 type SecretsUpdateCmd struct {
@@ -63,11 +83,16 @@ type SecretsUpdateCmd struct {
 }
 
 func (cmd *SecretsUpdateCmd) Run(ctx context.Context, o *Options) error {
+	s, err := secrets.NewService(ctx, o.Project, o.DryRun)
+	if err != nil {
+		return err
+	}
+
 	b, err := readFile(ctx, cmd.DataFile)
 	if err != nil {
 		return err
 	}
-	return belvedere.UpdateSecret(ctx, o.Project, cmd.Secret, b)
+	return s.Update(ctx, cmd.Secret, b)
 }
 
 type SecretsDeleteCmd struct {
@@ -75,5 +100,10 @@ type SecretsDeleteCmd struct {
 }
 
 func (cmd *SecretsDeleteCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.DeleteSecret(ctx, o.Project, cmd.Secret)
+	s, err := secrets.NewService(ctx, o.Project, o.DryRun)
+	if err != nil {
+		return err
+	}
+
+	return s.Delete(ctx, cmd.Secret)
 }
