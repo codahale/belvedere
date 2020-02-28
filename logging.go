@@ -42,7 +42,7 @@ func (l *traceLogger) printAttributes(attributes map[string]interface{}) {
 	for k := range attributes {
 		keys = append(keys, k)
 	}
-	sort.Strings(keys)
+	sort.Stable(sort.StringSlice(keys))
 	for _, k := range keys {
 		_, _ = fmt.Fprintf(os.Stderr, " %v=%v", k, attributes[k])
 	}
