@@ -1,4 +1,4 @@
-package belvedere
+package logs
 
 import (
 	"context"
@@ -7,10 +7,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/logging/v2"
 )
+
+// LogService manages access to application logs.
+type LogService interface {
+	// List returns log entries from the given app which match the other optional criteria.
+	List(ctx context.Context, app, release, instance string, maxAge time.Duration, filters []string) ([]LogEntry, error)
+}
 
 // LogEntry represents an app log entry.
 type LogEntry struct {
@@ -21,14 +26,30 @@ type LogEntry struct {
 	Message   string
 }
 
-// Logs returns log entries from the given app which match the other optional criteria. minTimestamp
-// is required.
-func Logs(ctx context.Context, project, app, release, instance string, minTimestamp time.Time, filters []string) ([]LogEntry, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.Logs")
+// NewLogService returns a new LogService for the given project.
+func NewLogService(ctx context.Context, project string) (LogService, error) {
+	ls, err := logging.NewService(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &logService{
+		project: project,
+		ls:      ls,
+		clock:   time.Now,
+	}, nil
+}
+
+type logService struct {
+	project string
+	ls      *logging.Service
+	clock   func() time.Time
+}
+
+func (l *logService) List(ctx context.Context, app, release, instance string, maxAge time.Duration, filters []string) ([]LogEntry, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.logs.list")
 	span.AddAttributes(
-		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", app),
-		trace.StringAttribute("min_timestamp", minTimestamp.Format(time.RFC3339)),
+		trace.Int64Attribute("max_age_ms", maxAge.Milliseconds()),
 	)
 	defer span.End()
 
@@ -36,16 +57,11 @@ func Logs(ctx context.Context, project, app, release, instance string, minTimest
 		span.AddAttributes(trace.StringAttribute(fmt.Sprintf("filter.%d", i), f))
 	}
 
-	// Get our Logging client.
-	logs, err := gcp.Logging(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	// Always filter by resource type, time, and app.
+	ts := l.clock().Add(-maxAge)
 	filter := []string{
 		`resource.type="gce_instance"`,
-		fmt.Sprintf(`timestamp>=%q`, minTimestamp.Format(time.RFC3339Nano)),
+		fmt.Sprintf(`timestamp>=%q`, ts.Format(time.RFC3339Nano)),
 		fmt.Sprintf(`jsonPayload.container.metadata.app=%q`, app),
 	}
 
@@ -69,10 +85,10 @@ func Logs(ctx context.Context, project, app, release, instance string, minTimest
 	filter = append(filter, filters...)
 
 	// List log entries which match the full set of filters.
-	entries, err := logs.Entries.List(&logging.ListLogEntriesRequest{
+	entries, err := l.ls.Entries.List(&logging.ListLogEntriesRequest{
 		Filter:        strings.Join(filter, " "),
 		OrderBy:       "timestamp desc", // reverse chronological order
-		ResourceNames: []string{fmt.Sprintf("projects/%s", project)},
+		ResourceNames: []string{fmt.Sprintf("projects/%s", l.project)},
 		PageSize:      1000, // cap at 1000 entries
 	}).Context(ctx).Do()
 	if err != nil {

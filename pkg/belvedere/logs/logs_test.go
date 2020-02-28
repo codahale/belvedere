@@ -1,4 +1,4 @@
-package belvedere
+package logs
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestLogs(t *testing.T) {
+func TestList(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -37,8 +37,17 @@ func TestLogs(t *testing.T) {
 			},
 		})
 
-	ts := time.Date(2019, 6, 25, 13, 18, 33, 43, time.UTC)
-	actual, err := Logs(context.TODO(), "my-project", "my-app", "", "", ts, []string{"health"})
+	service, err := NewLogService(context.TODO(), "my-project")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// mock out the clock
+	(service.(*logService)).clock = func() time.Time {
+		return time.Date(2019, 6, 25, 13, 18+15, 33, 43, time.UTC)
+	}
+
+	actual, err := service.List(context.TODO(), "my-app", "", "", 15*time.Minute, []string{"health"})
 	if err != nil {
 		t.Fatal(err)
 	}
