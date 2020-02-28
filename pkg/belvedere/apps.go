@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
@@ -47,7 +48,7 @@ func Apps(ctx context.Context, project string) ([]App, error) {
 }
 
 // CreateApp creates an app in the given project and region with the given name and configuration.
-func CreateApp(ctx context.Context, project, region, app string, config *Config, dryRun bool, interval time.Duration) error {
+func CreateApp(ctx context.Context, project, region, app string, config *cfg.Config, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateApp")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -81,7 +82,7 @@ func CreateApp(ctx context.Context, project, region, app string, config *Config,
 }
 
 // UpdateApp updates the resources for the given app to match the given configuration.
-func UpdateApp(ctx context.Context, project, app string, config *Config, dryRun bool, interval time.Duration) error {
+func UpdateApp(ctx context.Context, project, app string, config *cfg.Config, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.UpdateApp")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),

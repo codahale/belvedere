@@ -1,4 +1,4 @@
-package belvedere
+package cfg
 
 import (
 	"io/ioutil"
@@ -9,13 +9,13 @@ import (
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
-func TestParseConfig(t *testing.T) {
+func TestParse(t *testing.T) {
 	b, err := ioutil.ReadFile("config-example.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	actual, err := ParseConfig(b)
+	actual, err := Parse(b)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -188,6 +188,6 @@ func TestCloudConfig(t *testing.T) {
 		},
 	}
 
-	actual := config.cloudConfig("my-app", "v43", "abcdef0123456789")
+	actual := config.CloudConfig("my-app", "v43", "abcdef0123456789")
 	fixtures.Compare(t, "cloudconfig.yaml", []byte(actual))
 }

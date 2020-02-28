@@ -1,4 +1,4 @@
-package belvedere
+package cfg
 
 import (
 	"fmt"
@@ -25,8 +25,8 @@ type Config struct {
 	Subnetwork        string                           `json:"subnetwork"`
 }
 
-// ParseConfig loads the given bytes as a YAML configuration.
-func ParseConfig(b []byte) (*Config, error) {
+// Parse loads the given bytes as a YAML configuration.
+func Parse(b []byte) (*Config, error) {
 	// Unmarshal from YAML using the YAML->JSON route. This allows us to embed GCP API structs in
 	// our Config struct.
 	var config Config
@@ -36,8 +36,8 @@ func ParseConfig(b []byte) (*Config, error) {
 	return &config, nil
 }
 
-// cloudConfig returns a cloud-config manifest for the given release.
-func (c *Config) cloudConfig(app, release string, imageSHA256 string) string {
+// CloudConfig returns a cloud-config manifest for the given release.
+func (c *Config) CloudConfig(app, release string, imageSHA256 string) string {
 	cc := cloudinit.CloudConfig{
 		WriteFiles: []cloudinit.File{
 			// Write a systemd service for running the app's container in Docker.

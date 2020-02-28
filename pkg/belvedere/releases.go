@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/backends"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
@@ -59,7 +60,7 @@ func Releases(ctx context.Context, project, app string) ([]Release, error) {
 }
 
 // CreateRelease creates a deployment containing release resources for the given app.
-func CreateRelease(ctx context.Context, project, app, release string, config *Config, imageSHA256 string, dryRun bool, interval time.Duration) error {
+func CreateRelease(ctx context.Context, project, app, release string, config *cfg.Config, imageSHA256 string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.CreateRelease")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -82,7 +83,7 @@ func CreateRelease(ctx context.Context, project, app, release string, config *Co
 	return deployments.Insert(ctx, project, resources.Name(app, release),
 		resources.Release(
 			project, region, app, release, config.Network, config.Subnetwork,
-			config.MachineType, config.cloudConfig(app, release, imageSHA256),
+			config.MachineType, config.CloudConfig(app, release, imageSHA256),
 			config.NumReplicas, config.AutoscalingPolicy,
 		),
 		deployments.Labels{

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/codahale/belvedere/pkg/belvedere"
+	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 )
 
 type ReleasesCmd struct {
@@ -40,7 +41,7 @@ func (cmd *ReleasesCreateCmd) Run(ctx context.Context, o *Options) error {
 		return err
 	}
 
-	config, err := belvedere.ParseConfig(b)
+	config, err := cfg.Parse(b)
 	if err != nil {
 		return err
 	}
