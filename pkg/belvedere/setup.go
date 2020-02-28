@@ -43,7 +43,9 @@ func Setup(ctx context.Context, project, dnsZone string, dryRun bool, interval t
 	return deployments.Insert(ctx, project, "belvedere", resources.Base(dnsZone),
 		deployments.Labels{
 			Type: "base",
-		}, dryRun, interval)
+		},
+		dryRun, interval,
+	)
 }
 
 // Teardown deletes the shared firewall rules and managed zone created by Setup. It does not disable

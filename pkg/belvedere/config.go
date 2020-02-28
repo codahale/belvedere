@@ -25,6 +25,17 @@ type Config struct {
 	Subnetwork        string                           `json:"subnetwork"`
 }
 
+// ParseConfig loads the given bytes as a YAML configuration.
+func ParseConfig(b []byte) (*Config, error) {
+	// Unmarshal from YAML using the YAML->JSON route. This allows us to embed GCP API structs in
+	// our Config struct.
+	var config Config
+	if err := yaml.Unmarshal(b, &config); err != nil {
+		return nil, fmt.Errorf("error parsing config: %w", err)
+	}
+	return &config, nil
+}
+
 // cloudConfig returns a cloud-config manifest for the given release.
 func (c *Config) cloudConfig(app, release string, imageSHA256 string) string {
 	cc := cloudinit.CloudConfig{
@@ -164,15 +175,4 @@ func (c *Container) dockerArgs(app, release, sha256 string, labels map[string]st
 	args = append(args, c.Args...)
 
 	return args
-}
-
-// ParseConfig loads the given bytes as a YAML configuration.
-func ParseConfig(b []byte) (*Config, error) {
-	// Unmarshal from YAML using the YAML->JSON route. This allows us to embed GCP API structs in
-	// our Config struct.
-	var config Config
-	if err := yaml.Unmarshal(b, &config); err != nil {
-		return nil, fmt.Errorf("error parsing config: %w", err)
-	}
-	return &config, nil
 }

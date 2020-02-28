@@ -21,5 +21,5 @@ require (
 	google.golang.org/api v0.19.0
 	google.golang.org/genproto v0.0.0-20200227132054-3f1135a288c9
 	gopkg.in/h2non/gock.v1 v1.0.15
-	gopkg.in/yaml.v2 v2.2.8 // indirect
+	gopkg.in/yaml.v2 v2.2.8
 )

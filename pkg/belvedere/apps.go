@@ -76,7 +76,8 @@ func CreateApp(ctx context.Context, project, region, app string, config *Config,
 			App:    app,
 			Region: region,
 		},
-		dryRun, interval)
+		dryRun, interval,
+	)
 }
 
 // UpdateApp updates the resources for the given app to match the given configuration.
@@ -98,7 +99,8 @@ func UpdateApp(ctx context.Context, project, app string, config *Config, dryRun 
 	// Update the deployment with the new app resources.
 	return deployments.Update(ctx, project, resources.Name(app),
 		resources.App(project, app, managedZone, config.CDNPolicy, config.IAP, config.IAMRoles),
-		dryRun, interval)
+		dryRun, interval,
+	)
 }
 
 // DeleteApp deletes all the resources associated with the given app.

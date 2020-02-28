@@ -91,7 +91,9 @@ func CreateRelease(ctx context.Context, project, app, release string, config *Co
 			Release: release,
 			Region:  region,
 			Hash:    imageSHA256[:32],
-		}, dryRun, interval)
+		},
+		dryRun, interval,
+	)
 }
 
 // EnableRelease adds the release's instance group to the app's backend service and waits for the
