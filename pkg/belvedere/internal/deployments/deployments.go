@@ -194,7 +194,7 @@ func Insert(ctx context.Context, project, name string, resources []Resource, lab
 	}
 
 	// Wait for the deployment to be created or fail.
-	return waiter.Poll(ctx, interval, check.DM(ctx, project, op.Name))
+	return waiter.Poll(ctx, interval, check.DM(ctx, dm, project, op.Name))
 }
 
 // Update patches the given deployment to add, remove, or modify resources.
@@ -245,7 +245,7 @@ func Update(ctx context.Context, project, name string, resources []Resource, dry
 	}
 
 	// Wait for the deployment to be updated or fail.
-	return waiter.Poll(ctx, interval, check.DM(ctx, project, op.Name))
+	return waiter.Poll(ctx, interval, check.DM(ctx, dm, project, op.Name))
 }
 
 // Delete deletes the given deployment.
@@ -282,7 +282,7 @@ func Delete(ctx context.Context, project, name string, dryRun, async bool, inter
 	}
 
 	// Wait for the deployment to be deleted or fail.
-	return waiter.Poll(ctx, interval, check.DM(ctx, project, op.Name))
+	return waiter.Poll(ctx, interval, check.DM(ctx, dm, project, op.Name))
 }
 
 // Deployment represents a Belvedere-managed DM deployment.
