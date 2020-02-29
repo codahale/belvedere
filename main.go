@@ -53,12 +53,12 @@ func run(cli *kong.Context, opts *Options) error {
 	defer span.End()
 
 	// Create a Belvedere project.
-	project, err := belvedere.NewProject(opts.Project)
+	project, err := belvedere.NewProject(ctx, opts.Project)
 	if err != nil {
 		return err
 	}
 	opts.Project = project.Name()
-	span.AddAttributes(trace.StringAttribute("project", opts.Project))
+	span.AddAttributes(trace.StringAttribute("project", project.Name()))
 
 	// Run the given command, passing in the context and options.
 	cli.BindTo(ctx, (*context.Context)(nil))

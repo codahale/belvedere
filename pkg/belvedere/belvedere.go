@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
+	"github.com/codahale/belvedere/pkg/belvedere/logs"
+	"github.com/codahale/belvedere/pkg/belvedere/secrets"
 	"go.opencensus.io/trace"
 	compute "google.golang.org/api/compute/v0.beta"
 )
@@ -27,6 +29,12 @@ type Project interface {
 	// MachineTypes returns a list of GCE machine types which are available for the given project or
 	// GCE region, if one is provided.
 	MachineTypes(ctx context.Context, region string) ([]MachineType, error)
+
+	// Logs returns a logs service.
+	Logs() logs.Service
+
+	// Secrets returns a secrets service.
+	Secrets() secrets.Service
 }
 
 // DNSServer is a DNS server run by Google.
@@ -36,7 +44,7 @@ type DNSServer struct {
 
 // NewProject returns a new Project instance for the given GCP project. If no project is provided,
 // the active project configured for the Google Cloud SDK is used.
-func NewProject(name string) (Project, error) {
+func NewProject(ctx context.Context, name string) (Project, error) {
 	if name == "" {
 		s, err := activeProject()
 		if err != nil {
@@ -45,13 +53,35 @@ func NewProject(name string) (Project, error) {
 		name = s
 	}
 
+	ls, err := logs.NewService(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+
+	ss, err := secrets.NewService(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+
 	return &project{
+		ls:   ls,
+		ss:   ss,
 		name: name,
 	}, nil
 }
 
 type project struct {
 	name string
+	ls   logs.Service
+	ss   secrets.Service
+}
+
+func (p *project) Secrets() secrets.Service {
+	return p.ss
+}
+
+func (p *project) Logs() logs.Service {
+	return p.Logs()
 }
 
 func (p *project) Instances(ctx context.Context, app, release string) ([]Instance, error) {

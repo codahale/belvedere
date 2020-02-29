@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere"
-	"github.com/codahale/belvedere/pkg/belvedere/logs"
 )
 
 type SetupCmd struct {
@@ -96,13 +95,8 @@ type LogsCmd struct {
 	Freshness time.Duration `default:"5m" help:"Limit logs to the last period of time."`
 }
 
-func (cmd *LogsCmd) Run(ctx context.Context, o *Options) error {
-	ls, err := logs.NewService(ctx, o.Project)
-	if err != nil {
-		return err
-	}
-
-	entries, err := ls.List(ctx, cmd.App, cmd.Release, cmd.Instance, cmd.Freshness, cmd.Filters)
+func (cmd *LogsCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+	entries, err := project.Logs().List(ctx, cmd.App, cmd.Release, cmd.Instance, cmd.Freshness, cmd.Filters)
 	if err != nil {
 		return err
 	}

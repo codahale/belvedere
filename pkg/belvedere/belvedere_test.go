@@ -22,7 +22,7 @@ func TestDNSServers(t *testing.T) {
 			NameServers: []string{"ns1.example.com", "ns2.example.com"},
 		})
 
-	s, err := NewProject("my-project")
+	s, err := NewProject(context.TODO(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,7 +101,7 @@ func TestInstances(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject("my-project")
+	s, err := NewProject(context.TODO(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -196,7 +196,7 @@ func TestInstancesApp(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject("my-project")
+	s, err := NewProject(context.TODO(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -285,7 +285,7 @@ func TestInstancesAppRelease(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject("my-project")
+	s, err := NewProject(context.TODO(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -353,7 +353,7 @@ func TestMachineTypes(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject("my-project")
+	s, err := NewProject(context.TODO(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}

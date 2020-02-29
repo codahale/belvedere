@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/codahale/belvedere/pkg/belvedere/secrets"
+	"github.com/codahale/belvedere/pkg/belvedere"
 )
 
 type SecretsCmd struct {
@@ -18,13 +18,8 @@ type SecretsCmd struct {
 type SecretsListCmd struct {
 }
 
-func (*SecretsListCmd) Run(ctx context.Context, o *Options) error {
-	s, err := secrets.NewService(ctx, o.Project, o.DryRun)
-	if err != nil {
-		return err
-	}
-
-	releases, err := s.List(ctx)
+func (*SecretsListCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+	releases, err := project.Secrets().List(ctx)
 	if err != nil {
 		return err
 	}
@@ -36,17 +31,12 @@ type SecretsCreateCmd struct {
 	DataFile string `arg:"" optional:"" help:"File path from which to read secret data. Reads from STDIN if not specified."`
 }
 
-func (cmd *SecretsCreateCmd) Run(ctx context.Context, o *Options) error {
-	s, err := secrets.NewService(ctx, o.Project, o.DryRun)
-	if err != nil {
-		return err
-	}
-
+func (cmd *SecretsCreateCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
 	b, err := readFile(ctx, cmd.DataFile)
 	if err != nil {
 		return err
 	}
-	return s.Create(ctx, cmd.Secret, b)
+	return project.Secrets().Create(ctx, cmd.Secret, b, o.DryRun)
 }
 
 type SecretsGrantCmd struct {
@@ -54,13 +44,8 @@ type SecretsGrantCmd struct {
 	App    string `arg:"" help:"The app's name."`
 }
 
-func (cmd *SecretsGrantCmd) Run(ctx context.Context, o *Options) error {
-	s, err := secrets.NewService(ctx, o.Project, o.DryRun)
-	if err != nil {
-		return err
-	}
-
-	return s.Grant(ctx, cmd.Secret, cmd.App)
+func (cmd *SecretsGrantCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+	return project.Secrets().Grant(ctx, cmd.Secret, cmd.App, o.DryRun)
 }
 
 type SecretsRevokeCmd struct {
@@ -68,13 +53,8 @@ type SecretsRevokeCmd struct {
 	App    string `arg:"" help:"The app's name."`
 }
 
-func (cmd *SecretsRevokeCmd) Run(ctx context.Context, o *Options) error {
-	s, err := secrets.NewService(ctx, o.Project, o.DryRun)
-	if err != nil {
-		return err
-	}
-
-	return s.Revoke(ctx, cmd.Secret, cmd.App)
+func (cmd *SecretsRevokeCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+	return project.Secrets().Revoke(ctx, cmd.Secret, cmd.App, o.DryRun)
 }
 
 type SecretsUpdateCmd struct {
@@ -82,28 +62,18 @@ type SecretsUpdateCmd struct {
 	DataFile string `arg:"" optional:"" help:"File path from which to read secret data. Reads from STDIN if not specified."`
 }
 
-func (cmd *SecretsUpdateCmd) Run(ctx context.Context, o *Options) error {
-	s, err := secrets.NewService(ctx, o.Project, o.DryRun)
-	if err != nil {
-		return err
-	}
-
+func (cmd *SecretsUpdateCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
 	b, err := readFile(ctx, cmd.DataFile)
 	if err != nil {
 		return err
 	}
-	return s.Update(ctx, cmd.Secret, b)
+	return project.Secrets().Update(ctx, cmd.Secret, b, o.DryRun)
 }
 
 type SecretsDeleteCmd struct {
 	Secret string `arg:"" help:"The secret's name."`
 }
 
-func (cmd *SecretsDeleteCmd) Run(ctx context.Context, o *Options) error {
-	s, err := secrets.NewService(ctx, o.Project, o.DryRun)
-	if err != nil {
-		return err
-	}
-
-	return s.Delete(ctx, cmd.Secret)
+func (cmd *SecretsDeleteCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+	return project.Secrets().Delete(ctx, cmd.Secret, o.DryRun)
 }

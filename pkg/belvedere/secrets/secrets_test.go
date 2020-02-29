@@ -28,7 +28,7 @@ func TestList(t *testing.T) {
 			},
 		})
 
-	secrets, err := NewService(context.TODO(), "my-project", false)
+	secrets, err := NewService(context.TODO(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,12 +74,12 @@ func TestCreate(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.SecretVersion{})
 
-	secrets, err := NewService(context.TODO(), "my-project", false)
+	secrets, err := NewService(context.TODO(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := secrets.Create(context.TODO(), "my-secret", []byte("secret")); err != nil {
+	if err := secrets.Create(context.TODO(), "my-secret", []byte("secret"), false); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -97,12 +97,12 @@ func TestUpdate(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.SecretVersion{})
 
-	secrets, err := NewService(context.TODO(), "my-project", false)
+	secrets, err := NewService(context.TODO(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := secrets.Update(context.TODO(), "my-secret", []byte("secret")); err != nil {
+	if err := secrets.Update(context.TODO(), "my-secret", []byte("secret"), false); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -116,12 +116,12 @@ func TestDelete(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.Empty{})
 
-	secrets, err := NewService(context.TODO(), "my-project", false)
+	secrets, err := NewService(context.TODO(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := secrets.Delete(context.TODO(), "my-secret"); err != nil {
+	if err := secrets.Delete(context.TODO(), "my-secret", false); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -154,12 +154,12 @@ func TestGrant(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{})
 
-	secrets, err := NewService(context.TODO(), "my-project", false)
+	secrets, err := NewService(context.TODO(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := secrets.Grant(context.TODO(), "my-secret", "my-app"); err != nil {
+	if err := secrets.Grant(context.TODO(), "my-secret", "my-app", false); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -192,12 +192,12 @@ func TestRevoke(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{})
 
-	secrets, err := NewService(context.TODO(), "my-project", false)
+	secrets, err := NewService(context.TODO(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := secrets.Revoke(context.TODO(), "my-secret", "my-app"); err != nil {
+	if err := secrets.Revoke(context.TODO(), "my-secret", "my-app", false); err != nil {
 		t.Fatal(err)
 	}
 }
