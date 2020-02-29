@@ -41,7 +41,7 @@ type secretsService struct {
 }
 
 func (s *secretsService) List(ctx context.Context) ([]Secret, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.list")
+	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.List")
 	defer span.End()
 
 	name := fmt.Sprintf("projects/%s", s.project)
@@ -63,7 +63,7 @@ func (s *secretsService) List(ctx context.Context) ([]Secret, error) {
 }
 
 func (s *secretsService) Create(ctx context.Context, name string, value []byte, dryRun bool) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.create")
+	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.Create")
 	span.AddAttributes(
 		trace.StringAttribute("name", name),
 		trace.StringAttribute("value", obscure(value)),
@@ -89,7 +89,7 @@ func (s *secretsService) Create(ctx context.Context, name string, value []byte, 
 }
 
 func (s *secretsService) Update(ctx context.Context, name string, value []byte, dryRun bool) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.update")
+	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.Update")
 	span.AddAttributes(
 		trace.StringAttribute("name", name),
 		trace.StringAttribute("value", obscure(value)),
@@ -113,7 +113,7 @@ func (s *secretsService) Update(ctx context.Context, name string, value []byte, 
 }
 
 func (s *secretsService) Delete(ctx context.Context, name string, dryRun bool) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.delete")
+	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.Delete")
 	span.AddAttributes(
 		trace.StringAttribute("name", name),
 	)
@@ -130,7 +130,7 @@ func (s *secretsService) Delete(ctx context.Context, name string, dryRun bool) e
 }
 
 func (s *secretsService) Grant(ctx context.Context, secret, app string, dryRun bool) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.grant")
+	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.Grant")
 	span.AddAttributes(
 		trace.StringAttribute("secret", secret),
 		trace.StringAttribute("app", app),
@@ -176,7 +176,7 @@ func (s *secretsService) Grant(ctx context.Context, secret, app string, dryRun b
 }
 
 func (s *secretsService) Revoke(ctx context.Context, secret, app string, dryRun bool) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.revoke")
+	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.Revoke")
 	span.AddAttributes(
 		trace.StringAttribute("app", app),
 		trace.StringAttribute("secret", secret),
