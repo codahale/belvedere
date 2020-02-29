@@ -11,7 +11,6 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
 	"go.opencensus.io/trace"
-	"google.golang.org/api/dns/v1"
 )
 
 type AppService interface {
@@ -37,6 +36,7 @@ type App struct {
 
 type appService struct {
 	project string
+	dns     *dnsService
 }
 
 var _ AppService = &appService{}
@@ -78,7 +78,7 @@ func (s *appService) Create(ctx context.Context, region, name string, config *cf
 	}
 
 	// Find the project's managed zone.
-	managedZone, err := findManagedZone(ctx, s.project)
+	managedZone, err := s.dns.findManagedZone(ctx)
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func (s *appService) Update(ctx context.Context, name string, config *cfg.Config
 	defer span.End()
 
 	// Find the project's managed zone.
-	managedZone, err := findManagedZone(ctx, s.project)
+	managedZone, err := s.dns.findManagedZone(ctx)
 	if err != nil {
 		return err
 	}
@@ -127,28 +127,6 @@ func (s *appService) Delete(ctx context.Context, name string, dryRun, async bool
 
 	// Delete the app deployment.
 	return deployments.Delete(ctx, s.project, resources.Name(name), dryRun, async, interval)
-}
-
-// findManagedZone returns the Cloud DNS managed zone created via Setup.
-func findManagedZone(ctx context.Context, project string) (*dns.ManagedZone, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.findManagedZone")
-	span.AddAttributes(
-		trace.StringAttribute("project", project),
-	)
-	defer span.End()
-
-	// Get our DNS client.
-	d, err := gcp.DNS(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// Find the managed zone.
-	mz, err := d.ManagedZones.Get(project, "belvedere").Context(ctx).Do()
-	if err != nil {
-		return nil, fmt.Errorf("error getting managed zone: %w", err)
-	}
-	return mz, nil
 }
 
 // findRegion returns the region the app was created in.

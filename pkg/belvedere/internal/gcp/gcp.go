@@ -7,7 +7,6 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/deploymentmanager/v2"
-	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/serviceusage/v1"
 )
 
@@ -44,14 +43,6 @@ func CloudResourceManager(ctx context.Context) (*cloudresourcemanager.Service, e
 	return crmService, crmErr
 }
 
-// DNS creates a new DNS client or returns a previously-created one.
-func DNS(ctx context.Context) (*dns.Service, error) {
-	dnsOnce.Do(func() {
-		dnsService, dnsErr = dns.NewService(ctx)
-	})
-	return dnsService, dnsErr
-}
-
 var (
 	gceService *compute.Service
 	gceErr     error
@@ -65,7 +56,4 @@ var (
 	crmService *cloudresourcemanager.Service
 	crmErr     error
 	crmOnce    sync.Once
-	dnsService *dns.Service
-	dnsErr     error
-	dnsOnce    sync.Once
 )

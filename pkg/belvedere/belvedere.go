@@ -11,6 +11,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"go.opencensus.io/trace"
 	compute "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/logging/v2"
 	"google.golang.org/api/secretmanager/v1"
 )
@@ -76,8 +77,18 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 		return nil, err
 	}
 
+	ds, err := dns.NewService(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	d := &dnsService{
+		project: name,
+		dns:     ds,
+	}
+
 	return &project{
-		ls: &logService{
+		logs: &logService{
 			project: name,
 			clock:   time.Now,
 			ls:      ls,
@@ -88,16 +99,19 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 		},
 		apps: &appService{
 			project: name,
+			dns:     d,
 		},
+		dns:  d,
 		name: name,
 	}, nil
 }
 
 type project struct {
 	name    string
-	ls      LogService
+	logs    LogService
 	secrets SecretsService
 	apps    *appService
+	dns     *dnsService
 }
 
 func (p *project) Apps() AppService {
@@ -171,7 +185,7 @@ func (p *project) DNSServers(ctx context.Context) ([]DNSServer, error) {
 	defer span.End()
 
 	// Find the project'p managed zone.
-	mz, err := findManagedZone(ctx, p.name)
+	mz, err := p.dns.findManagedZone(ctx)
 	if err != nil {
 		return nil, err
 	}
