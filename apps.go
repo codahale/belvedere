@@ -17,8 +17,8 @@ type AppsCmd struct {
 type AppsListCmd struct {
 }
 
-func (AppsListCmd) Run(ctx context.Context, o *Options) error {
-	apps, err := belvedere.Apps(ctx, o.Project)
+func (AppsListCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+	apps, err := project.Apps().List(ctx)
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ type AppsCreateCmd struct {
 	Config string `arg:"" optional:"" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
 }
 
-func (cmd *AppsCreateCmd) Run(ctx context.Context, o *Options) error {
+func (cmd *AppsCreateCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
 	b, err := readFile(ctx, cmd.Config)
 	if err != nil {
 		return err
@@ -41,7 +41,7 @@ func (cmd *AppsCreateCmd) Run(ctx context.Context, o *Options) error {
 	if err != nil {
 		return err
 	}
-	return belvedere.CreateApp(ctx, o.Project, cmd.Region, cmd.App, config, o.DryRun, o.Interval)
+	return project.Apps().Create(ctx, cmd.Region, cmd.App, config, o.DryRun, o.Interval)
 }
 
 type AppsUpdateCmd struct {
@@ -49,7 +49,7 @@ type AppsUpdateCmd struct {
 	Config string `arg:"" optional:"" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
 }
 
-func (cmd *AppsUpdateCmd) Run(ctx context.Context, o *Options) error {
+func (cmd *AppsUpdateCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
 	b, err := readFile(ctx, cmd.Config)
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func (cmd *AppsUpdateCmd) Run(ctx context.Context, o *Options) error {
 	if err != nil {
 		return err
 	}
-	return belvedere.UpdateApp(ctx, o.Project, cmd.App, config, o.DryRun, o.Interval)
+	return project.Apps().Update(ctx, cmd.App, config, o.DryRun, o.Interval)
 }
 
 type AppsDeleteCmd struct {
@@ -67,6 +67,6 @@ type AppsDeleteCmd struct {
 	Async bool   `help:"Return without waiting for successful completion."`
 }
 
-func (cmd *AppsDeleteCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.DeleteApp(ctx, o.Project, cmd.App, o.DryRun, cmd.Async, o.Interval)
+func (cmd *AppsDeleteCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+	return project.Apps().Delete(ctx, cmd.App, o.DryRun, cmd.Async, o.Interval)
 }

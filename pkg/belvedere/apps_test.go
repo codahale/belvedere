@@ -39,7 +39,9 @@ func TestApps(t *testing.T) {
 			},
 		})
 
-	actual, err := Apps(context.TODO(), "my-project")
+	as := &appService{project: "my-project"}
+
+	actual, err := as.List(context.TODO())
 	if err != nil {
 		t.Fatal(err)
 	}

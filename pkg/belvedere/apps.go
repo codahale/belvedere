@@ -14,6 +14,20 @@ import (
 	"google.golang.org/api/dns/v1"
 )
 
+type AppService interface {
+	// List returns a list of apps which have been created in the project.
+	List(ctx context.Context) ([]App, error)
+
+	// Create creates an app in the given region with the given name and configuration.
+	Create(ctx context.Context, region, name string, config *cfg.Config, dryRun bool, interval time.Duration) error
+
+	// Update updates the resources for the given app to match the given configuration.
+	Update(ctx context.Context, name string, config *cfg.Config, dryRun bool, interval time.Duration) error
+
+	// Delete deletes all the resources associated with the given app.
+	Delete(ctx context.Context, name string, dryRun, async bool, interval time.Duration) error
+}
+
 // App is a Belvedere app.
 type App struct {
 	Project string
@@ -21,16 +35,18 @@ type App struct {
 	Name    string
 }
 
-// Apps returns a list of apps which have been created in the given project.
-func Apps(ctx context.Context, project string) ([]App, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.Apps")
-	span.AddAttributes(
-		trace.StringAttribute("project", project),
-	)
+type appService struct {
+	project string
+}
+
+var _ AppService = &appService{}
+
+func (s *appService) List(ctx context.Context) ([]App, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.apps.List")
 	defer span.End()
 
 	// List all deployments in the project.
-	list, err := deployments.List(ctx, project, `labels.belvedere-type eq "app"`)
+	list, err := deployments.List(ctx, s.project, `labels.belvedere-type eq "app"`)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +55,7 @@ func Apps(ctx context.Context, project string) ([]App, error) {
 	apps := make([]App, len(list))
 	for i, dep := range list {
 		apps[i] = App{
-			Project: project,
+			Project: s.project,
 			Name:    dep.App,
 			Region:  dep.Region,
 		}
@@ -47,76 +63,70 @@ func Apps(ctx context.Context, project string) ([]App, error) {
 	return apps, nil
 }
 
-// CreateApp creates an app in the given project and region with the given name and configuration.
-func CreateApp(ctx context.Context, project, region, app string, config *cfg.Config, dryRun bool, interval time.Duration) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.CreateApp")
+func (s *appService) Create(ctx context.Context, region, name string, config *cfg.Config, dryRun bool, interval time.Duration) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.apps.Create")
 	span.AddAttributes(
-		trace.StringAttribute("project", project),
 		trace.StringAttribute("region", region),
-		trace.StringAttribute("app", app),
+		trace.StringAttribute("name", name),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
 	// Validate the app name.
-	if err := gcp.ValidateRFC1035(app); err != nil {
+	if err := gcp.ValidateRFC1035(name); err != nil {
 		return err
 	}
 
 	// Find the project's managed zone.
-	managedZone, err := findManagedZone(ctx, project)
+	managedZone, err := findManagedZone(ctx, s.project)
 	if err != nil {
 		return err
 	}
 
 	// Create a deployment with all the app resources.
-	return deployments.Insert(ctx, project, resources.Name(app),
-		resources.App(project, app, managedZone, config.CDNPolicy, config.IAP, config.IAMRoles),
+	return deployments.Insert(ctx, s.project, resources.Name(name),
+		resources.App(s.project, name, managedZone, config.CDNPolicy, config.IAP, config.IAMRoles),
 		deployments.Labels{
 			Type:   "app",
-			App:    app,
+			App:    name,
 			Region: region,
 		},
 		dryRun, interval,
 	)
 }
 
-// UpdateApp updates the resources for the given app to match the given configuration.
-func UpdateApp(ctx context.Context, project, app string, config *cfg.Config, dryRun bool, interval time.Duration) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.UpdateApp")
+func (s *appService) Update(ctx context.Context, name string, config *cfg.Config, dryRun bool, interval time.Duration) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.apps.Update")
 	span.AddAttributes(
-		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", app),
+		trace.StringAttribute("name", name),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
 	// Find the project's managed zone.
-	managedZone, err := findManagedZone(ctx, project)
+	managedZone, err := findManagedZone(ctx, s.project)
 	if err != nil {
 		return err
 	}
 
 	// Update the deployment with the new app resources.
-	return deployments.Update(ctx, project, resources.Name(app),
-		resources.App(project, app, managedZone, config.CDNPolicy, config.IAP, config.IAMRoles),
+	return deployments.Update(ctx, s.project, resources.Name(name),
+		resources.App(s.project, name, managedZone, config.CDNPolicy, config.IAP, config.IAMRoles),
 		dryRun, interval,
 	)
 }
 
-// DeleteApp deletes all the resources associated with the given app.
-func DeleteApp(ctx context.Context, project, app string, dryRun, async bool, interval time.Duration) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.DeleteApp")
+func (s *appService) Delete(ctx context.Context, name string, dryRun, async bool, interval time.Duration) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.apps.Delete")
 	span.AddAttributes(
-		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", app),
+		trace.StringAttribute("name", name),
 		trace.BoolAttribute("dry_run", dryRun),
 		trace.BoolAttribute("async", async),
 	)
 	defer span.End()
 
 	// Delete the app deployment.
-	return deployments.Delete(ctx, project, resources.Name(app), dryRun, async, interval)
+	return deployments.Delete(ctx, s.project, resources.Name(name), dryRun, async, interval)
 }
 
 // findManagedZone returns the Cloud DNS managed zone created via Setup.

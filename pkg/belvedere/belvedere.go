@@ -35,6 +35,9 @@ type Project interface {
 
 	// Secrets returns a secrets service.
 	Secrets() secrets.Service
+
+	// Apps returns an apps service.
+	Apps() AppService
 }
 
 // DNSServer is a DNS server run by Google.
@@ -63,9 +66,12 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 		return nil, err
 	}
 
+	as := &appService{project: name}
+
 	return &project{
 		ls:   ls,
 		ss:   ss,
+		as:   as,
 		name: name,
 	}, nil
 }
@@ -74,6 +80,11 @@ type project struct {
 	name string
 	ls   logs.Service
 	ss   secrets.Service
+	as   *appService
+}
+
+func (p *project) Apps() AppService {
+	return p.as
 }
 
 func (p *project) Secrets() secrets.Service {
