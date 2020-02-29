@@ -9,7 +9,7 @@ import (
 )
 
 func TestReleaseResources(t *testing.T) {
-	resources := Release(
+	resources := NewBuilder().Release(
 		"my-project", "us-central1", "my-app", "v43",
 		"", "", "n1-standard-1", "echo woo",
 		20,

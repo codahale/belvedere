@@ -43,10 +43,11 @@ type ReleaseService interface {
 }
 
 type releaseService struct {
-	project  string
-	dm       deployments.Manager
-	gce      *compute.Service
-	backends backends.Service
+	project   string
+	dm        deployments.Manager
+	gce       *compute.Service
+	backends  backends.Service
+	resources resources.Builder
 }
 
 func (r *releaseService) List(ctx context.Context, app string) ([]Release, error) {
@@ -100,7 +101,7 @@ func (r *releaseService) Create(ctx context.Context, app, name string, config *C
 	}
 
 	return r.dm.Insert(ctx, r.project, resources.Name(app, name),
-		resources.Release(
+		r.resources.Release(
 			r.project, region, app, name, config.Network, config.Subnetwork,
 			config.MachineType, config.CloudConfig(app, name, imageSHA256),
 			config.NumReplicas, config.AutoscalingPolicy,

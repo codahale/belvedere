@@ -14,7 +14,7 @@ func TestAppResources(t *testing.T) {
 		Name:    "belvedere",
 		DnsName: "horse.club",
 	}
-	resources := App("my-project", "my-app", zone,
+	resources := NewBuilder().App("my-project", "my-app", zone,
 		&compute.BackendServiceCdnPolicy{
 			SignedUrlCacheMaxAgeSec: 200,
 		}, &compute.BackendServiceIAP{

@@ -8,7 +8,7 @@ import (
 	"google.golang.org/api/dns/v1"
 )
 
-func Base(dnsZone string) []deployments.Resource {
+func (*builder) Base(dnsZone string) []deployments.Resource {
 	resources := []deployments.Resource{
 		// A managed DNS zone for all the app A records.
 		{

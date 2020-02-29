@@ -2,18 +2,13 @@ package resources
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/dns/v1"
 )
 
-func Name(s ...string) string {
-	return fmt.Sprintf("belvedere-%s", strings.Join(s, "-"))
-}
-
-func App(
+func (*builder) App(
 	project string, app string, managedZone *dns.ManagedZone,
 	cdn *compute.BackendServiceCdnPolicy, iap *compute.BackendServiceIAP,
 	iamRoles []string,

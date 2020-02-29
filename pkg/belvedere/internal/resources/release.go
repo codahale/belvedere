@@ -7,7 +7,7 @@ import (
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
-func Release(project, region, app, release, network, subnetwork, machineType, userData string, replicas int, autoscalingPolicy *compute.AutoscalingPolicy) []deployments.Resource {
+func (*builder) Release(project, region, app, release, network, subnetwork, machineType, userData string, replicas int, autoscalingPolicy *compute.AutoscalingPolicy) []deployments.Resource {
 	instanceTemplate := fmt.Sprintf("%s-%s-it", app, release)
 	instanceGroupManager := fmt.Sprintf("%s-%s-ig", app, release)
 	autoscaler := fmt.Sprintf("%s-%s-as", app, release)

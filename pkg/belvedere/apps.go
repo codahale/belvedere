@@ -32,9 +32,10 @@ type App struct {
 }
 
 type appService struct {
-	project string
-	dns     *dnsService
-	dm      deployments.Manager
+	project   string
+	dns       *dnsService
+	dm        deployments.Manager
+	resources resources.Builder
 }
 
 var _ AppService = &appService{}
@@ -83,7 +84,7 @@ func (s *appService) Create(ctx context.Context, region, name string, config *Co
 
 	// Create a deployment with all the app resources.
 	return s.dm.Insert(ctx, s.project, resources.Name(name),
-		resources.App(s.project, name, managedZone, config.CDNPolicy, config.IAP, config.IAMRoles),
+		s.resources.App(s.project, name, managedZone, config.CDNPolicy, config.IAP, config.IAMRoles),
 		deployments.Labels{
 			Type:   "app",
 			App:    name,
@@ -109,7 +110,7 @@ func (s *appService) Update(ctx context.Context, name string, config *Config, dr
 
 	// Update the deployment with the new app resources.
 	return s.dm.Update(ctx, s.project, resources.Name(name),
-		resources.App(s.project, name, managedZone, config.CDNPolicy, config.IAP, config.IAMRoles),
+		s.resources.App(s.project, name, managedZone, config.CDNPolicy, config.IAP, config.IAMRoles),
 		dryRun, interval,
 	)
 }

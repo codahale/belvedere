@@ -108,6 +108,8 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 		return nil, err
 	}
 
+	res := resources.NewBuilder()
+
 	return &project{
 		logs: &logService{
 			project: name,
@@ -119,33 +121,37 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 			sm:      sm,
 		},
 		apps: &appService{
-			project: name,
-			dm:      dm,
-			dns:     ds,
+			project:   name,
+			dm:        dm,
+			dns:       ds,
+			resources: res,
 		},
 		dns: ds,
 		releases: &releaseService{
-			project: name,
-			dm:      dm,
-			gce:     gce,
+			project:   name,
+			dm:        dm,
+			gce:       gce,
+			resources: res,
 		},
-		name:  name,
-		dm:    dm,
-		gce:   gce,
-		setup: s,
+		name:      name,
+		dm:        dm,
+		gce:       gce,
+		setup:     s,
+		resources: res,
 	}, nil
 }
 
 type project struct {
-	name     string
-	logs     LogService
-	secrets  SecretsService
-	apps     *appService
-	dns      *dnsService
-	releases *releaseService
-	dm       deployments.Manager
-	gce      *compute.Service
-	setup    setup.Service
+	name      string
+	logs      LogService
+	secrets   SecretsService
+	apps      *appService
+	dns       *dnsService
+	releases  *releaseService
+	dm        deployments.Manager
+	gce       *compute.Service
+	setup     setup.Service
+	resources resources.Builder
 }
 
 func (p *project) Apps() AppService {

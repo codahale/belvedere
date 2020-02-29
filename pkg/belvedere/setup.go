@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
 	"go.opencensus.io/trace"
 )
 
@@ -35,7 +34,7 @@ func (p *project) Setup(ctx context.Context, dnsZone string, dryRun bool, interv
 
 	// Create a deployment with a managed DNS zone and firewall rules which limit SSH to GCE
 	// instances to those tunneled over IAP.
-	return p.dm.Insert(ctx, p.name, "belvedere", resources.Base(dnsZone),
+	return p.dm.Insert(ctx, p.name, "belvedere", p.resources.Base(dnsZone),
 		deployments.Labels{
 			Type: "base",
 		},

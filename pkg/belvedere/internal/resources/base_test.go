@@ -8,7 +8,7 @@ import (
 )
 
 func TestBaseResources(t *testing.T) {
-	resources := Base("cornbread.club")
+	resources := NewBuilder().Base("cornbread.club")
 
 	actual, err := json.MarshalIndent(map[string]interface{}{
 		"resources": resources,
