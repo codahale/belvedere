@@ -7,7 +7,6 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/setup"
 	"go.opencensus.io/trace"
 )
 
@@ -20,12 +19,12 @@ func (p *project) Setup(ctx context.Context, dnsZone string, dryRun bool, interv
 	defer span.End()
 
 	// Enable all required services.
-	if err := setup.EnableAPIs(ctx, p.name, dryRun, interval); err != nil {
+	if err := p.setup.EnableAPIs(ctx, p.name, dryRun, interval); err != nil {
 		return err
 	}
 
 	// Grant Deployment Manager the required permissions to manage IAM roles.
-	if err := setup.SetDMPerms(ctx, p.name, dryRun); err != nil {
+	if err := p.setup.SetDMPerms(ctx, p.name, dryRun); err != nil {
 		return err
 	}
 

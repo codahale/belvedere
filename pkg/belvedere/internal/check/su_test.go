@@ -21,7 +21,12 @@ func TestSURunning(t *testing.T) {
 			Done: false,
 		})
 
-	f := SU(context.TODO(), "op1")
+	su, err := serviceusage.NewService(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	f := SU(context.TODO(), su, "op1")
 	done, err := f()
 	if err != nil {
 		t.Fatal(err)
@@ -42,7 +47,12 @@ func TestSUDone(t *testing.T) {
 			Done: true,
 		})
 
-	f := SU(context.TODO(), "op1")
+	su, err := serviceusage.NewService(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	f := SU(context.TODO(), su, "op1")
 	done, err := f()
 	if err != nil {
 		t.Fatal(err)
@@ -67,8 +77,13 @@ func TestSUError(t *testing.T) {
 			},
 		})
 
-	f := SU(context.TODO(), "op1")
-	_, err := f()
+	su, err := serviceusage.NewService(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	f := SU(context.TODO(), su, "op1")
+	_, err = f()
 	if err == nil {
 		t.Fatal("should have returned an error")
 	}

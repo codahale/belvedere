@@ -10,7 +10,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestSetDMPerms(t *testing.T) {
+func TestManager_SetDMPerms(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -81,12 +81,19 @@ func TestSetDMPerms(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(cloudresourcemanager.Policy{})
 
-	if err := SetDMPerms(context.TODO(), "my-project", false); err != nil {
+	crm, err := cloudresourcemanager.NewService(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	m := &manager{crm: crm}
+
+	if err := m.SetDMPerms(context.TODO(), "my-project", false); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestSetDMPermsExisting(t *testing.T) {
+func TestManager_SetDMPermsExisting(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -112,7 +119,14 @@ func TestSetDMPermsExisting(t *testing.T) {
 			Etag: "300",
 		})
 
-	if err := SetDMPerms(context.TODO(), "my-project", false); err != nil {
+	crm, err := cloudresourcemanager.NewService(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	m := &manager{crm: crm}
+
+	if err := m.SetDMPerms(context.TODO(), "my-project", false); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/serviceusage/v1"
@@ -40,20 +39,13 @@ var (
 	}
 )
 
-// EnableAPIs enables all required services for the given GCP project.
-func EnableAPIs(ctx context.Context, project string, dryRun bool, interval time.Duration) error {
+func (m *manager) EnableAPIs(ctx context.Context, project string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.setup.EnableAPIs")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
-
-	// Get our SU client.
-	su, err := gcp.ServiceUsage(ctx)
-	if err != nil {
-		return err
-	}
 
 	// Divide the required services up into batches of at most 20 services.
 	for _, serviceIDs := range batchStrings(requiredServices, 20) {
@@ -63,7 +55,7 @@ func EnableAPIs(ctx context.Context, project string, dryRun bool, interval time.
 		}
 
 		// Enable the services.
-		op, err := su.Services.BatchEnable(
+		op, err := m.su.Services.BatchEnable(
 			fmt.Sprintf("projects/%s", project),
 			&serviceusage.BatchEnableServicesRequest{
 				ServiceIds: serviceIDs,
@@ -82,7 +74,7 @@ func EnableAPIs(ctx context.Context, project string, dryRun bool, interval time.
 		}
 
 		// Poll for the services to be enabled.
-		if err := waiter.Poll(ctx, interval, check.SU(ctx, op.Name)); err != nil {
+		if err := waiter.Poll(ctx, interval, check.SU(ctx, m.su, op.Name)); err != nil {
 			return err
 		}
 	}

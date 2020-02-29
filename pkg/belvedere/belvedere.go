@@ -12,6 +12,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/setup"
 	"go.opencensus.io/trace"
 	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/dns/v1"
@@ -102,6 +103,11 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 		dns:     gds,
 	}
 
+	s, err := setup.NewManager(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	return &project{
 		logs: &logService{
 			project: name,
@@ -123,9 +129,10 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 			dm:      dm,
 			gce:     gce,
 		},
-		name: name,
-		dm:   dm,
-		gce:  gce,
+		name:  name,
+		dm:    dm,
+		gce:   gce,
+		setup: s,
 	}, nil
 }
 
@@ -138,6 +145,7 @@ type project struct {
 	releases *releaseService
 	dm       deployments.Manager
 	gce      *compute.Service
+	setup    setup.Manager
 }
 
 func (p *project) Apps() AppService {

@@ -11,7 +11,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestEnableAPIs(t *testing.T) {
+func TestManager_EnableAPIs(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -45,7 +45,14 @@ func TestEnableAPIs(t *testing.T) {
 			Done: true,
 		})
 
-	if err := EnableAPIs(context.TODO(), "my-project", false, 10*time.Millisecond); err != nil {
+	su, err := serviceusage.NewService(context.TODO())
+	if err != nil {
+		t.Fatal()
+	}
+
+	m := &manager{su: su}
+
+	if err := m.EnableAPIs(context.TODO(), "my-project", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
