@@ -2,13 +2,16 @@ package belvedere
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
 	"go.opencensus.io/trace"
 	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/dns/v1"
@@ -84,9 +87,9 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 		return nil, err
 	}
 
-	d := &dnsService{
-		project: name,
-		dns:     ds,
+	dm, err := deployments.NewManager(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	return &project{
@@ -101,10 +104,22 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 		},
 		apps: &appService{
 			project: name,
-			dns:     d,
+			dm:      dm,
+			dns: &dnsService{
+				project: name,
+				dns:     ds,
+			},
 		},
-		dns:  d,
+		dns: &dnsService{
+			project: name,
+			dns:     ds,
+		},
+		releases: &releaseService{
+			project: name,
+			dm:      dm,
+		},
 		name: name,
+		dm:   dm,
 	}, nil
 }
 
@@ -115,6 +130,7 @@ type project struct {
 	apps     *appService
 	dns      *dnsService
 	releases *releaseService
+	dm       deployments.Manager
 }
 
 func (p *project) Apps() AppService {
@@ -316,4 +332,26 @@ func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineTyp
 		return machineTypes[i].lexical() < machineTypes[j].lexical()
 	})
 	return machineTypes, nil
+}
+
+// findRegion returns the region the app was created in.
+func findRegion(dm deployments.Manager, ctx context.Context, project, app string) (string, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.project.findRegion")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+		trace.StringAttribute("app", app),
+	)
+	defer span.End()
+
+	// Find the app deployment.
+	d, err := dm.Get(ctx, project, resources.Name(app))
+	if err != nil {
+		return "", err
+	}
+
+	if d.Region == "" {
+		return "", errors.New("no region found")
+	}
+
+	return d.Region, nil
 }

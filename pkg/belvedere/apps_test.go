@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	"github.com/google/go-cmp/cmp"
 	deploymentmanager "google.golang.org/api/deploymentmanager/v2beta"
@@ -39,7 +40,11 @@ func TestAppService_List(t *testing.T) {
 			},
 		})
 
-	as := &appService{project: "my-project"}
+	dm, err := deployments.NewManager(context.TODO())
+	as := &appService{
+		project: "my-project",
+		dm:      dm,
+	}
 
 	actual, err := as.List(context.TODO())
 	if err != nil {

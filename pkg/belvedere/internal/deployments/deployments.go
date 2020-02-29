@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	"google.golang.org/api/deploymentmanager/v2"
@@ -142,8 +141,64 @@ func (l *Labels) fromEntries(labels []*deploymentmanager.DeploymentLabelEntry) {
 	}
 }
 
-// Insert inserts a new deployment with the given name, resources, and labels.
-func Insert(ctx context.Context, project, name string, resources []Resource, labels Labels, dryRun bool, interval time.Duration) error {
+// Deployment represents a Belvedere-managed DM deployment.
+type Deployment struct {
+	Name string
+	Labels
+}
+
+type Manager interface {
+	// Get returns the deployment with the given name.
+	Get(ctx context.Context, project, name string) (*Deployment, error)
+
+	// Insert inserts a new deployment with the given name, resources, and labels.
+	Insert(ctx context.Context, project, name string, resources []Resource, labels Labels, dryRun bool, interval time.Duration) error
+
+	// Update patches the given deployment to add, remove, or modify resources.
+	Update(ctx context.Context, project, name string, resources []Resource, dryRun bool, interval time.Duration) error
+
+	// Delete deletes the given deployment.
+	Delete(ctx context.Context, project, name string, dryRun, async bool, interval time.Duration) error
+
+	// List returns a list of deployments in the project which match the given filter.
+	List(ctx context.Context, project, filter string) ([]Deployment, error)
+}
+
+func NewManager(ctx context.Context) (Manager, error) {
+	dm, err := deploymentmanager.NewService(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &manager{dm: dm}, nil
+}
+
+type manager struct {
+	dm *deploymentmanager.Service
+}
+
+func (m *manager) Get(ctx context.Context, project, name string) (*Deployment, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Get")
+	span.AddAttributes(
+		trace.StringAttribute("project", project),
+		trace.StringAttribute("name", name),
+	)
+	defer span.End()
+
+	d, err := m.dm.Deployments.Get(project, name).Fields("").Context(ctx).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	var labels Labels
+	labels.fromEntries(d.Labels)
+
+	return &Deployment{
+		Name:   d.Name,
+		Labels: labels,
+	}, nil
+}
+
+func (m *manager) Insert(ctx context.Context, project, name string, resources []Resource, labels Labels, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Insert")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -151,14 +206,6 @@ func Insert(ctx context.Context, project, name string, resources []Resource, lab
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
-
-	// Get or create our DM client.
-	dm, err := gcp.DeploymentManager(ctx)
-	if err != nil {
-		return err
-	}
-
-	// Convert labels from a map to a list.
 
 	// Create our config target.
 	d := deploymentConfig{Resources: resources}
@@ -180,7 +227,7 @@ func Insert(ctx context.Context, project, name string, resources []Resource, lab
 	}
 
 	// Insert the new deployment.
-	op, err := dm.Deployments.Insert(project, &deploymentmanager.Deployment{
+	op, err := m.dm.Deployments.Insert(project, &deploymentmanager.Deployment{
 		Labels: labels.toEntries(),
 		Name:   name,
 		Target: &deploymentmanager.TargetConfiguration{
@@ -194,11 +241,10 @@ func Insert(ctx context.Context, project, name string, resources []Resource, lab
 	}
 
 	// Wait for the deployment to be created or fail.
-	return waiter.Poll(ctx, interval, check.DM(ctx, dm, project, op.Name))
+	return waiter.Poll(ctx, interval, check.DM(ctx, m.dm, project, op.Name))
 }
 
-// Update patches the given deployment to add, remove, or modify resources.
-func Update(ctx context.Context, project, name string, resources []Resource, dryRun bool, interval time.Duration) error {
+func (m *manager) Update(ctx context.Context, project, name string, resources []Resource, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Update")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -206,12 +252,6 @@ func Update(ctx context.Context, project, name string, resources []Resource, dry
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
-
-	// Get or create our DM client.
-	dm, err := gcp.DeploymentManager(ctx)
-	if err != nil {
-		return err
-	}
 
 	// Create our config target.
 	d := deploymentConfig{Resources: resources}
@@ -233,7 +273,7 @@ func Update(ctx context.Context, project, name string, resources []Resource, dry
 	}
 
 	// Update the deployment.
-	op, err := dm.Deployments.Patch(project, name, &deploymentmanager.Deployment{
+	op, err := m.dm.Deployments.Patch(project, name, &deploymentmanager.Deployment{
 		Target: &deploymentmanager.TargetConfiguration{
 			Config: &deploymentmanager.ConfigFile{
 				Content: string(j),
@@ -245,11 +285,10 @@ func Update(ctx context.Context, project, name string, resources []Resource, dry
 	}
 
 	// Wait for the deployment to be updated or fail.
-	return waiter.Poll(ctx, interval, check.DM(ctx, dm, project, op.Name))
+	return waiter.Poll(ctx, interval, check.DM(ctx, m.dm, project, op.Name))
 }
 
-// Delete deletes the given deployment.
-func Delete(ctx context.Context, project, name string, dryRun, async bool, interval time.Duration) error {
+func (m *manager) Delete(ctx context.Context, project, name string, dryRun, async bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Delete")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -259,19 +298,13 @@ func Delete(ctx context.Context, project, name string, dryRun, async bool, inter
 	)
 	defer span.End()
 
-	// Get or create our DM client.
-	dm, err := gcp.DeploymentManager(ctx)
-	if err != nil {
-		return err
-	}
-
 	// Early exit if we don't want side effects.
 	if dryRun {
 		return nil
 	}
 
 	// Delete the deployment.
-	op, err := dm.Deployments.Delete(project, name).Context(ctx).Do()
+	op, err := m.dm.Deployments.Delete(project, name).Context(ctx).Do()
 	if err != nil {
 		return fmt.Errorf("error deleting deployment: %w", err)
 	}
@@ -282,32 +315,19 @@ func Delete(ctx context.Context, project, name string, dryRun, async bool, inter
 	}
 
 	// Wait for the deployment to be deleted or fail.
-	return waiter.Poll(ctx, interval, check.DM(ctx, dm, project, op.Name))
+	return waiter.Poll(ctx, interval, check.DM(ctx, m.dm, project, op.Name))
 }
 
-// Deployment represents a Belvedere-managed DM deployment.
-type Deployment struct {
-	Name string
-	Labels
-}
-
-// List returns a list of deployments in the project which match the given filter.
-func List(ctx context.Context, project, filter string) ([]Deployment, error) {
+func (m *manager) List(ctx context.Context, project, filter string) ([]Deployment, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.List")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 	)
 	defer span.End()
 
-	// Get or create our DM client.
-	dm, err := gcp.DeploymentManager(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	// List all of the deployments.
 	var deployments []Deployment
-	if err := dm.Deployments.List(project).Filter(filter).Pages(ctx,
+	if err := m.dm.Deployments.List(project).Filter(filter).Pages(ctx,
 		func(list *deploymentmanager.DeploymentsListResponse) error {
 			// Convert labels to maps.
 			for _, d := range list.Deployments {

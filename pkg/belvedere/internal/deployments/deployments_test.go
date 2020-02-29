@@ -13,7 +13,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestLabelsToEntries(t *testing.T) {
+func TestLabels_toEntries(t *testing.T) {
 	expected := []*deploymentmanager.DeploymentLabelEntry{
 		{
 			Key:   "belvedere-app",
@@ -51,7 +51,7 @@ func TestLabelsToEntries(t *testing.T) {
 	}
 }
 
-func TestLabelsFromEntries(t *testing.T) {
+func TestLabels_fromEntries(t *testing.T) {
 	var actual Labels
 	actual.fromEntries([]*deploymentmanager.DeploymentLabelEntry{
 		{
@@ -89,7 +89,7 @@ func TestLabelsFromEntries(t *testing.T) {
 	}
 }
 
-func TestInsert(t *testing.T) {
+func TestManager_Insert(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -119,7 +119,12 @@ func TestInsert(t *testing.T) {
 			Status: "DONE",
 		})
 
-	if err := Insert(context.TODO(), "my-project", "my-deployment",
+	dm, err := NewManager(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := dm.Insert(context.TODO(), "my-project", "my-deployment",
 		[]Resource{
 			{
 				Name: "my-instance",
@@ -137,7 +142,7 @@ func TestInsert(t *testing.T) {
 	}
 }
 
-func TestUpdate(t *testing.T) {
+func TestManager_Update(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -160,7 +165,12 @@ func TestUpdate(t *testing.T) {
 			Status: "DONE",
 		})
 
-	if err := Update(context.TODO(), "my-project", "my-deployment",
+	dm, err := NewManager(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := dm.Update(context.TODO(), "my-project", "my-deployment",
 		[]Resource{
 			{
 				Name: "my-instance",
@@ -175,7 +185,7 @@ func TestUpdate(t *testing.T) {
 	}
 }
 
-func TestDelete(t *testing.T) {
+func TestManager_Delete(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -191,12 +201,17 @@ func TestDelete(t *testing.T) {
 			Status: "DONE",
 		})
 
-	if err := Delete(context.TODO(), "my-project", "my-deployment", false, false, 10*time.Millisecond); err != nil {
+	dm, err := NewManager(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := dm.Delete(context.TODO(), "my-project", "my-deployment", false, false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestList(t *testing.T) {
+func TestManager_List(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -233,7 +248,12 @@ func TestList(t *testing.T) {
 			},
 		})
 
-	actual, err := List(context.TODO(), "my-project", "bobs eq 1")
+	dm, err := NewManager(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	actual, err := dm.List(context.TODO(), "my-project", "bobs eq 1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -252,6 +272,44 @@ func TestList(t *testing.T) {
 				Region: "us-west1",
 				App:    "my-app",
 			},
+		},
+	}
+
+	if !cmp.Equal(expected, actual) {
+		t.Error(cmp.Diff(expected, actual))
+	}
+}
+
+func TestManager_Get(t *testing.T) {
+	defer gock.Off()
+	it.MockTokenSource()
+
+	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/deployments/belvedere-base?alt=json&fields=&prettyPrint=false").
+		Reply(http.StatusOK).
+		JSON(&deploymentmanager.Deployment{
+			Name: "belvedere-base",
+			Labels: []*deploymentmanager.DeploymentLabelEntry{
+				{
+					Key:   "belvedere-type",
+					Value: "base",
+				},
+			},
+		})
+
+	dm, err := NewManager(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	actual, err := dm.Get(context.TODO(), "my-project", "belvedere-base")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected := &Deployment{
+		Name: "belvedere-base",
+		Labels: Labels{
+			Type: "base",
 		},
 	}
 

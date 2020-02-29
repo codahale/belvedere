@@ -44,6 +44,7 @@ type ReleaseService interface {
 
 type releaseService struct {
 	project string
+	dm      deployments.Manager
 }
 
 func (r *releaseService) List(ctx context.Context, app string) ([]Release, error) {
@@ -59,7 +60,7 @@ func (r *releaseService) List(ctx context.Context, app string) ([]Release, error
 		filter = fmt.Sprintf("%s AND labels.belvedere-app eq %q", filter, app)
 	}
 
-	list, err := deployments.List(ctx, r.project, filter)
+	list, err := r.dm.List(ctx, r.project, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -91,12 +92,12 @@ func (r *releaseService) Create(ctx context.Context, app, name string, config *c
 		return err
 	}
 
-	region, err := findRegion(ctx, r.project, app)
+	region, err := findRegion(r.dm, ctx, r.project, app)
 	if err != nil {
 		return err
 	}
 
-	return deployments.Insert(ctx, r.project, resources.Name(app, name),
+	return r.dm.Insert(ctx, r.project, resources.Name(app, name),
 		resources.Release(
 			r.project, region, app, name, config.Network, config.Subnetwork,
 			config.MachineType, config.CloudConfig(app, name, imageSHA256),
@@ -122,7 +123,7 @@ func (r *releaseService) Enable(ctx context.Context, app, name string, dryRun bo
 	)
 	defer span.End()
 
-	region, err := findRegion(ctx, r.project, app)
+	region, err := findRegion(r.dm, ctx, r.project, app)
 	if err != nil {
 		return err
 	}
@@ -145,7 +146,7 @@ func (r *releaseService) Disable(ctx context.Context, app, name string, dryRun b
 	)
 	defer span.End()
 
-	region, err := findRegion(ctx, r.project, app)
+	region, err := findRegion(r.dm, ctx, r.project, app)
 	if err != nil {
 		return err
 	}
@@ -165,5 +166,5 @@ func (r *releaseService) Delete(ctx context.Context, app, name string, dryRun, a
 	)
 	defer span.End()
 
-	return deployments.Delete(ctx, r.project, resources.Name(app, name), dryRun, async, interval)
+	return r.dm.Delete(ctx, r.project, resources.Name(app, name), dryRun, async, interval)
 }
