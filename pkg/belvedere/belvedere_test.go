@@ -12,7 +12,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestDNSServers(t *testing.T) {
+func TestProject_DNSServers(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -42,7 +42,7 @@ func TestDNSServers(t *testing.T) {
 	}
 }
 
-func TestInstances(t *testing.T) {
+func TestProject_Instances(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -137,7 +137,7 @@ func TestInstances(t *testing.T) {
 	}
 }
 
-func TestInstancesApp(t *testing.T) {
+func TestProject_InstancesApp(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -226,7 +226,7 @@ func TestInstancesApp(t *testing.T) {
 	}
 }
 
-func TestInstancesAppRelease(t *testing.T) {
+func TestProject_InstancesAppRelease(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -309,7 +309,7 @@ func TestInstancesAppRelease(t *testing.T) {
 	}
 }
 
-func TestMachineTypes(t *testing.T) {
+func TestProject_MachineTypes(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 

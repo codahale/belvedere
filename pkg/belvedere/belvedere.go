@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
-	"github.com/codahale/belvedere/pkg/belvedere/logs"
 	"go.opencensus.io/trace"
 	compute "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/logging/v2"
 	"google.golang.org/api/secretmanager/v1"
 )
 
@@ -41,7 +41,7 @@ type Project interface {
 	MachineTypes(ctx context.Context, region string) ([]MachineType, error)
 
 	// Logs returns a logs service.
-	Logs() logs.Service
+	Logs() LogService
 
 	// Secrets returns a secrets service.
 	Secrets() SecretsService
@@ -66,7 +66,7 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 		name = s
 	}
 
-	ls, err := logs.NewService(ctx, name)
+	ls, err := logging.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -77,12 +77,16 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 	}
 
 	return &project{
-		ls: ls,
+		ls: &logService{
+			project: name,
+			clock:   time.Now,
+			ls:      ls,
+		},
 		secrets: &secretsService{
 			project: name,
 			sm:      sm,
 		},
-		as: &appService{
+		apps: &appService{
 			project: name,
 		},
 		name: name,
@@ -91,20 +95,20 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 
 type project struct {
 	name    string
-	ls      logs.Service
+	ls      LogService
 	secrets SecretsService
-	as      *appService
+	apps    *appService
 }
 
 func (p *project) Apps() AppService {
-	return p.as
+	return p.apps
 }
 
 func (p *project) Secrets() SecretsService {
 	return p.secrets
 }
 
-func (p *project) Logs() logs.Service {
+func (p *project) Logs() LogService {
 	return p.Logs()
 }
 

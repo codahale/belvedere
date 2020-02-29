@@ -11,7 +11,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestApps(t *testing.T) {
+func TestAppService_List(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 

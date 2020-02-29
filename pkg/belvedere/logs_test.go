@@ -1,4 +1,4 @@
-package logs
+package belvedere
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestList(t *testing.T) {
+func TestLogService_List(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -43,7 +43,7 @@ func TestList(t *testing.T) {
 	}
 
 	// mock out the clock
-	(s.(*service)).clock = func() time.Time {
+	(s.(*logService)).clock = func() time.Time {
 		return time.Date(2019, 6, 25, 13, 18+15, 33, 43, time.UTC)
 	}
 
@@ -52,7 +52,7 @@ func TestList(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := []Entry{
+	expected := []LogEntry{
 		{
 			Timestamp: time.Date(2019, 6, 25, 14, 55, 1, 0, time.UTC),
 			Release:   "v2",

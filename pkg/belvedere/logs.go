@@ -1,4 +1,4 @@
-package logs
+package belvedere
 
 import (
 	"context"
@@ -11,8 +11,8 @@ import (
 	"google.golang.org/api/logging/v2"
 )
 
-// Entry represents an app log entry.
-type Entry struct {
+// LogEntry represents an app log entry.
+type LogEntry struct {
 	Timestamp time.Time
 	Release   string
 	Instance  string
@@ -20,32 +20,32 @@ type Entry struct {
 	Message   string
 }
 
-// Service manages access to application logs.
-type Service interface {
+// LogService manages access to application logs.
+type LogService interface {
 	// List returns log entries from the given app which match the other optional criteria.
-	List(ctx context.Context, app, release, instance string, maxAge time.Duration, filters []string) ([]Entry, error)
+	List(ctx context.Context, app, release, instance string, maxAge time.Duration, filters []string) ([]LogEntry, error)
 }
 
-// NewService returns a new Service for the given project.
-func NewService(ctx context.Context, project string) (Service, error) {
+// NewService returns a new LogService for the given project.
+func NewService(ctx context.Context, project string) (LogService, error) {
 	ls, err := logging.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &service{
+	return &logService{
 		project: project,
 		ls:      ls,
 		clock:   time.Now,
 	}, nil
 }
 
-type service struct {
+type logService struct {
 	project string
 	ls      *logging.Service
 	clock   func() time.Time
 }
 
-func (l *service) List(ctx context.Context, app, release, instance string, maxAge time.Duration, filters []string) ([]Entry, error) {
+func (l *logService) List(ctx context.Context, app, release, instance string, maxAge time.Duration, filters []string) ([]LogEntry, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.logs.list")
 	span.AddAttributes(
 		trace.StringAttribute("app", app),
@@ -76,7 +76,7 @@ func (l *service) List(ctx context.Context, app, release, instance string, maxAg
 	return l.parse(entries)
 }
 
-func (l *service) makeFilter(app string, release string, instance string, maxAge time.Duration, filters []string) []string {
+func (l *logService) makeFilter(app string, release string, instance string, maxAge time.Duration, filters []string) []string {
 	// Always filter by resource type, time, and app.
 	ts := l.clock().Add(-maxAge)
 	filter := []string{
@@ -104,8 +104,8 @@ func (l *service) makeFilter(app string, release string, instance string, maxAge
 	return filter
 }
 
-func (l *service) parse(entries *logging.ListLogEntriesResponse) ([]Entry, error) {
-	results := make([]Entry, len(entries.Entries))
+func (l *logService) parse(entries *logging.ListLogEntriesResponse) ([]LogEntry, error) {
+	results := make([]LogEntry, len(entries.Entries))
 	var payload struct {
 		Container struct {
 			Name     string `json:"name"`
@@ -126,7 +126,7 @@ func (l *service) parse(entries *logging.ListLogEntriesResponse) ([]Entry, error
 		if err != nil {
 			return nil, fmt.Errorf("error parsing timestamp in %s: %w", e.InsertId, err)
 		}
-		results[i] = Entry{
+		results[i] = LogEntry{
 			Timestamp: ts,
 			Release:   payload.Container.Metadata.Release,
 			Instance:  payload.Instance.Name,
