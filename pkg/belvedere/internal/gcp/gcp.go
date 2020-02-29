@@ -8,8 +8,6 @@ import (
 	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/deploymentmanager/v2"
 	"google.golang.org/api/dns/v1"
-	"google.golang.org/api/logging/v2"
-	secretmanager "google.golang.org/api/secretmanager/v1beta1"
 	"google.golang.org/api/serviceusage/v1"
 )
 
@@ -54,42 +52,20 @@ func DNS(ctx context.Context) (*dns.Service, error) {
 	return dnsService, dnsErr
 }
 
-// Logging creates a new Logging client or returns a previously-created one.
-func Logging(ctx context.Context) (*logging.Service, error) {
-	loggingOnce.Do(func() {
-		loggingService, loggingErr = logging.NewService(ctx)
-	})
-	return loggingService, loggingErr
-}
-
-// SecretManager creates a new Secret Manager client or returns a previously-created one.
-func SecretManager(ctx context.Context) (*secretmanager.Service, error) {
-	smOnce.Do(func() {
-		smService, smEr = secretmanager.NewService(ctx)
-	})
-	return smService, smEr
-}
-
 var (
-	gceService     *compute.Service
-	gceErr         error
-	gceOnce        sync.Once
-	dmService      *deploymentmanager.Service
-	dmErr          error
-	dmOnce         sync.Once
-	suService      *serviceusage.Service
-	suErr          error
-	suOnce         sync.Once
-	crmService     *cloudresourcemanager.Service
-	crmErr         error
-	crmOnce        sync.Once
-	dnsService     *dns.Service
-	dnsErr         error
-	dnsOnce        sync.Once
-	loggingService *logging.Service
-	loggingErr     error
-	loggingOnce    sync.Once
-	smService      *secretmanager.Service
-	smEr           error
-	smOnce         sync.Once
+	gceService *compute.Service
+	gceErr     error
+	gceOnce    sync.Once
+	dmService  *deploymentmanager.Service
+	dmErr      error
+	dmOnce     sync.Once
+	suService  *serviceusage.Service
+	suErr      error
+	suOnce     sync.Once
+	crmService *cloudresourcemanager.Service
+	crmErr     error
+	crmOnce    sync.Once
+	dnsService *dns.Service
+	dnsErr     error
+	dnsOnce    sync.Once
 )
