@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/backends"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
@@ -30,7 +29,7 @@ type ReleaseService interface {
 	List(ctx context.Context, app string) ([]Release, error)
 
 	// Create creates a deployment containing release resources for the given app.
-	Create(ctx context.Context, app, name string, config *cfg.Config, imageSHA256 string, dryRun bool, interval time.Duration) error
+	Create(ctx context.Context, app, name string, config *Config, imageSHA256 string, dryRun bool, interval time.Duration) error
 
 	// Enable adds the release's instance group to the app's backend project and waits for the
 	// instances to go fully into project.
@@ -80,7 +79,7 @@ func (r *releaseService) List(ctx context.Context, app string) ([]Release, error
 	return releases, nil
 }
 
-func (r *releaseService) Create(ctx context.Context, app, name string, config *cfg.Config, imageSHA256 string, dryRun bool, interval time.Duration) error {
+func (r *releaseService) Create(ctx context.Context, app, name string, config *Config, imageSHA256 string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.releases.Create")
 	span.AddAttributes(
 		trace.StringAttribute("app", app),
@@ -140,7 +139,7 @@ func (r *releaseService) Enable(ctx context.Context, app, name string, dryRun bo
 }
 
 func (r *releaseService) Disable(ctx context.Context, app, name string, dryRun bool, interval time.Duration) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.DisableRelease")
+	ctx, span := trace.StartSpan(ctx, "belvedere.releases.Disable")
 	span.AddAttributes(
 		trace.StringAttribute("app", app),
 		trace.StringAttribute("name", name),
@@ -159,7 +158,7 @@ func (r *releaseService) Disable(ctx context.Context, app, name string, dryRun b
 }
 
 func (r *releaseService) Delete(ctx context.Context, app, name string, dryRun, async bool, interval time.Duration) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.DeleteRelease")
+	ctx, span := trace.StartSpan(ctx, "belvedere.releases.Delete")
 	span.AddAttributes(
 		trace.StringAttribute("app", app),
 		trace.StringAttribute("name", name),

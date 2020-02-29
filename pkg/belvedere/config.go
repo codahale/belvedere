@@ -1,4 +1,4 @@
-package cfg
+package belvedere
 
 import (
 	"fmt"
@@ -25,8 +25,8 @@ type Config struct {
 	Subnetwork        string                           `json:"subnetwork"`
 }
 
-// Parse loads the given bytes as a YAML configuration.
-func Parse(b []byte) (*Config, error) {
+// ParseConfig loads the given bytes as a YAML configuration.
+func ParseConfig(b []byte) (*Config, error) {
 	// Unmarshal from YAML using the YAML->JSON route. This allows us to embed GCP API structs in
 	// our Config struct.
 	var config Config

@@ -25,7 +25,7 @@ import (
 )
 
 func main() {
-	// Parse the command line.
+	// ParseConfig the command line.
 	var opts Options
 	cli := kong.Parse(&opts,
 		kong.Name("belvedere"),

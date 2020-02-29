@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
@@ -16,10 +15,10 @@ type AppService interface {
 	List(ctx context.Context) ([]App, error)
 
 	// Create creates an app in the given region with the given name and configuration.
-	Create(ctx context.Context, region, name string, config *cfg.Config, dryRun bool, interval time.Duration) error
+	Create(ctx context.Context, region, name string, config *Config, dryRun bool, interval time.Duration) error
 
 	// Update updates the resources for the given app to match the given configuration.
-	Update(ctx context.Context, name string, config *cfg.Config, dryRun bool, interval time.Duration) error
+	Update(ctx context.Context, name string, config *Config, dryRun bool, interval time.Duration) error
 
 	// Delete deletes all the resources associated with the given app.
 	Delete(ctx context.Context, name string, dryRun, async bool, interval time.Duration) error
@@ -62,7 +61,7 @@ func (s *appService) List(ctx context.Context) ([]App, error) {
 	return apps, nil
 }
 
-func (s *appService) Create(ctx context.Context, region, name string, config *cfg.Config, dryRun bool, interval time.Duration) error {
+func (s *appService) Create(ctx context.Context, region, name string, config *Config, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.apps.Create")
 	span.AddAttributes(
 		trace.StringAttribute("region", region),
@@ -94,7 +93,7 @@ func (s *appService) Create(ctx context.Context, region, name string, config *cf
 	)
 }
 
-func (s *appService) Update(ctx context.Context, name string, config *cfg.Config, dryRun bool, interval time.Duration) error {
+func (s *appService) Update(ctx context.Context, name string, config *Config, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.apps.Update")
 	span.AddAttributes(
 		trace.StringAttribute("name", name),

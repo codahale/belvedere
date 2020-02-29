@@ -33,7 +33,7 @@ type logService struct {
 }
 
 func (l *logService) List(ctx context.Context, app, release, instance string, maxAge time.Duration, filters []string) ([]LogEntry, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.logs.list")
+	ctx, span := trace.StartSpan(ctx, "belvedere.logs.List")
 	span.AddAttributes(
 		trace.StringAttribute("app", app),
 		trace.Int64Attribute("max_age_ms", maxAge.Milliseconds()),
@@ -59,7 +59,7 @@ func (l *logService) List(ctx context.Context, app, release, instance string, ma
 		return nil, fmt.Errorf("error listing log entries: %w", err)
 	}
 
-	// Parse the resulting log entries to return structured data.
+	// ParseConfig the resulting log entries to return structured data.
 	return l.parse(entries)
 }
 
