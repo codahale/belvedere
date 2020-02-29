@@ -12,23 +12,21 @@ import (
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
-// ActiveProject returns the project, if any, which the Google Cloud SDK is configured to use.
-func ActiveProject() (string, error) {
-	// Load SDK config.
-	config, err := gcp.SDKConfig()
-	if err != nil {
-		return "", err
-	}
+// Project provides the main functionality of Belvedere.
+type Project interface {
+	// Name returns the name of the project.
+	Name() string
 
-	// Return core.project, if it exists.
-	if core, ok := config["core"]; ok {
-		if project, ok := core["project"]; ok {
-			return project, nil
-		}
-	}
+	// DNSServers returns a list of DNS servers which handle the project's managed zone.
+	DNSServers(ctx context.Context) ([]DNSServer, error)
 
-	// Complain if core.project doesn't exist.
-	return "", fmt.Errorf("core.project not found")
+	// Instances returns a list of running instances in the project. If an app or release are
+	// provided, limits the results to instances running the given app or release.
+	Instances(ctx context.Context, app, release string) ([]Instance, error)
+
+	// MachineTypes returns a list of GCE machine types which are available for the given project or
+	// GCE region, if one is provided.
+	MachineTypes(ctx context.Context, region string) ([]MachineType, error)
 }
 
 // DNSServer is a DNS server run by Google.
@@ -36,40 +34,29 @@ type DNSServer struct {
 	Server string
 }
 
-// DNSServers returns a list of DNS servers which handle the project's managed zone.
-func DNSServers(ctx context.Context, project string) ([]DNSServer, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.DNSServers")
-	span.AddAttributes(trace.StringAttribute("project", project))
-	defer span.End()
-
-	// Find the project's managed zone.
-	mz, err := findManagedZone(ctx, project)
-	if err != nil {
-		return nil, err
+// NewProject returns a new Project instance for the given GCP project. If no project is provided,
+// the active project configured for the Google Cloud SDK is used.
+func NewProject(name string) (Project, error) {
+	if name == "" {
+		s, err := activeProject()
+		if err != nil {
+			return nil, err
+		}
+		name = s
 	}
 
-	// Return the DNS servers.
-	servers := make([]DNSServer, 0, len(mz.NameServers))
-	for _, s := range mz.NameServers {
-		servers = append(servers, DNSServer{Server: s})
-	}
-	return servers, nil
+	return &project{
+		name: name,
+	}, nil
 }
 
-// Instance is a Google Compute Engine VM instance.
-type Instance struct {
-	Name        string
-	MachineType string `table:"Machine Type"`
-	Zone        string
-	Status      string
+type project struct {
+	name string
 }
 
-// Instances returns a list of running instances in the project. If an app or release are
-// provided, limits the results to instances running the given app or release.
-func Instances(ctx context.Context, project, app, release string) ([]Instance, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.Instances")
+func (p *project) Instances(ctx context.Context, app, release string) ([]Instance, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.project.Instances")
 	span.AddAttributes(
-		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", app),
 		trace.StringAttribute("release", release),
 	)
@@ -83,7 +70,7 @@ func Instances(ctx context.Context, project, app, release string) ([]Instance, e
 
 	var instances []Instance
 	// List all instances.
-	if err := gce.Instances.AggregatedList(project).Pages(ctx,
+	if err := gce.Instances.AggregatedList(p.name).Pages(ctx,
 		func(list *compute.InstanceAggregatedList) error {
 			for _, items := range list.Items {
 				for _, inst := range items.Instances {
@@ -115,6 +102,54 @@ func Instances(ctx context.Context, project, app, release string) ([]Instance, e
 		return instances[i].Name < instances[j].Name
 	})
 	return instances, nil
+}
+
+func (p *project) Name() string {
+	return p.name
+}
+
+func (p *project) DNSServers(ctx context.Context) ([]DNSServer, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.project.DNSServers")
+	defer span.End()
+
+	// Find the project'p managed zone.
+	mz, err := findManagedZone(ctx, p.name)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return the DNS servers.
+	servers := make([]DNSServer, 0, len(mz.NameServers))
+	for _, s := range mz.NameServers {
+		servers = append(servers, DNSServer{Server: s})
+	}
+	return servers, nil
+}
+
+func activeProject() (string, error) {
+	// Load SDK config.
+	config, err := gcp.SDKConfig()
+	if err != nil {
+		return "", err
+	}
+
+	// Return core.project, if it exists.
+	if core, ok := config["core"]; ok {
+		if project, ok := core["project"]; ok {
+			return project, nil
+		}
+	}
+
+	// Complain if core.project doesn't exist.
+	return "", fmt.Errorf("core.project not found")
+}
+
+// Instance is a Google Compute Engine VM instance.
+type Instance struct {
+	Name        string
+	MachineType string `table:"Machine Type"`
+	Zone        string
+	Status      string
 }
 
 // Memory represents a specific amount of RAM provided to a virtual machine.
@@ -150,12 +185,10 @@ func (mt MachineType) lexical() string {
 	return fmt.Sprintf("%10s%10s%010d", parts[0], parts[1], n)
 }
 
-// MachineTypes returns a list of GCE machine types which are available for the given project or
-// GCE region, if one is provided.
-func MachineTypes(ctx context.Context, project, region string) ([]MachineType, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.MachineTypes")
+func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineType, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.project.MachineTypes")
 	span.AddAttributes(
-		trace.StringAttribute("project", project),
+		trace.StringAttribute("region", region),
 	)
 	defer span.End()
 
@@ -173,7 +206,7 @@ func MachineTypes(ctx context.Context, project, region string) ([]MachineType, e
 	region = "zones/" + region
 
 	// Iterate through all pages of the results.
-	if err := gce.MachineTypes.AggregatedList(project).Pages(ctx,
+	if err := gce.MachineTypes.AggregatedList(p.name).Pages(ctx,
 		func(list *compute.MachineTypeAggregatedList) error {
 			// Aggregate across zones.
 			for zone, items := range list.Items {

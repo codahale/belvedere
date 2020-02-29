@@ -12,7 +12,7 @@ import (
 )
 
 // Setup enables all required GCP services, grants Deployment Manager the permissions required to
-// manage service accounts and IAM roles, and creates a deployment with the base resources needed
+// manage project accounts and IAM roles, and creates a deployment with the base resources needed
 // to use Belvedere.
 func Setup(ctx context.Context, project, dnsZone string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.Setup")

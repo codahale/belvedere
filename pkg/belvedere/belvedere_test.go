@@ -22,7 +22,12 @@ func TestDNSServers(t *testing.T) {
 			NameServers: []string{"ns1.example.com", "ns2.example.com"},
 		})
 
-	actual, err := DNSServers(context.TODO(), "my-project")
+	s, err := NewProject("my-project")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	actual, err := s.DNSServers(context.TODO())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +101,12 @@ func TestInstances(t *testing.T) {
 			},
 		})
 
-	actual, err := Instances(context.TODO(), "my-project", "", "")
+	s, err := NewProject("my-project")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	actual, err := s.Instances(context.TODO(), "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -186,7 +196,12 @@ func TestInstancesApp(t *testing.T) {
 			},
 		})
 
-	actual, err := Instances(context.TODO(), "my-project", "my-app", "")
+	s, err := NewProject("my-project")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	actual, err := s.Instances(context.TODO(), "my-app", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -270,7 +285,12 @@ func TestInstancesAppRelease(t *testing.T) {
 			},
 		})
 
-	actual, err := Instances(context.TODO(), "my-project", "my-app", "v2")
+	s, err := NewProject("my-project")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	actual, err := s.Instances(context.TODO(), "my-app", "v2")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -333,7 +353,12 @@ func TestMachineTypes(t *testing.T) {
 			},
 		})
 
-	actual, err := MachineTypes(context.TODO(), "my-project", "us-central1")
+	s, err := NewProject("my-project")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	actual, err := s.MachineTypes(context.TODO(), "us-central1")
 	if err != nil {
 		t.Fatal(err)
 	}

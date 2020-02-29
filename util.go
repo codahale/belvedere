@@ -31,8 +31,8 @@ func (cmd *TeardownCmd) Run(ctx context.Context, o *Options) error {
 type DNSServersCmd struct {
 }
 
-func (cmd *DNSServersCmd) Run(ctx context.Context, o *Options) error {
-	servers, err := belvedere.DNSServers(ctx, o.Project)
+func (cmd *DNSServersCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+	servers, err := project.DNSServers(ctx)
 	if err != nil {
 		return err
 	}
@@ -43,8 +43,8 @@ type MachineTypesCmd struct {
 	Region string `help:"Limit types to those available in the given region."`
 }
 
-func (cmd *MachineTypesCmd) Run(ctx context.Context, o *Options) error {
-	machineTypes, err := belvedere.MachineTypes(ctx, o.Project, cmd.Region)
+func (cmd *MachineTypesCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+	machineTypes, err := project.MachineTypes(ctx, cmd.Region)
 	if err != nil {
 		return err
 	}
@@ -56,8 +56,8 @@ type InstancesCmd struct {
 	Release string `arg:"" optional:"" help:"Limit instances to those running the given release."`
 }
 
-func (cmd *InstancesCmd) Run(ctx context.Context, o *Options) error {
-	instances, err := belvedere.Instances(ctx, o.Project, cmd.App, cmd.Release)
+func (cmd *InstancesCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+	instances, err := project.Instances(ctx, cmd.App, cmd.Release)
 	if err != nil {
 		return err
 	}

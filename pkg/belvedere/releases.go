@@ -97,8 +97,8 @@ func CreateRelease(ctx context.Context, project, app, release string, config *cf
 	)
 }
 
-// EnableRelease adds the release's instance group to the app's backend service and waits for the
-// instances to go fully into service.
+// EnableRelease adds the release's instance group to the app's backend project and waits for the
+// instances to go fully into project.
 func EnableRelease(ctx context.Context, project, app, release string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.EnableRelease")
 	span.AddAttributes(
@@ -123,7 +123,7 @@ func EnableRelease(ctx context.Context, project, app, release string, dryRun boo
 	return waiter.Poll(ctx, interval, check.Health(ctx, project, region, backendService, instanceGroup))
 }
 
-// DisableRelease removes the release's instance group from the app's backend service.
+// DisableRelease removes the release's instance group from the app's backend project.
 func DisableRelease(ctx context.Context, project, app, release string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DisableRelease")
 	span.AddAttributes(

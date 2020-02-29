@@ -52,18 +52,17 @@ func run(cli *kong.Context, opts *Options) error {
 	defer cancel()
 	defer span.End()
 
-	// If a project was not explicitly specified, detect one.
-	if opts.Project == "" {
-		project, err := belvedere.ActiveProject()
-		if err != nil {
-			return err
-		}
-		opts.Project = project
+	// Create a Belvedere project.
+	project, err := belvedere.NewProject(opts.Project)
+	if err != nil {
+		return err
 	}
+	opts.Project = project.Name()
 	span.AddAttributes(trace.StringAttribute("project", opts.Project))
 
 	// Run the given command, passing in the context and options.
 	cli.BindTo(ctx, (*context.Context)(nil))
+	cli.BindTo(project, (*belvedere.Project)(nil))
 	if err := cli.Run(&opts); err != nil {
 		span.SetStatus(trace.Status{
 			Code:    int32(code.Code_INTERNAL),
