@@ -1,4 +1,4 @@
-package secrets
+package belvedere
 
 import (
 	"context"
@@ -7,15 +7,15 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	"github.com/google/go-cmp/cmp"
-	secretmanager "google.golang.org/api/secretmanager/v1beta1"
+	"google.golang.org/api/secretmanager/v1"
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestList(t *testing.T) {
+func TestSecretsService_List(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets?alt=json&fields=secrets.name&prettyPrint=false").
+	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets?alt=json&fields=secrets.name&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(secretmanager.ListSecretsResponse{
 			Secrets: []*secretmanager.Secret{
@@ -28,9 +28,14 @@ func TestList(t *testing.T) {
 			},
 		})
 
-	secrets, err := NewService(context.TODO(), "my-project")
+	sm, err := secretmanager.NewService(context.TODO())
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	secrets := &secretsService{
+		project: "my-project",
+		sm:      sm,
 	}
 
 	actual, err := secrets.List(context.TODO())
@@ -52,11 +57,11 @@ func TestList(t *testing.T) {
 	}
 }
 
-func TestCreate(t *testing.T) {
+func TestSecretsService_Create(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets?alt=json&prettyPrint=false&secretId=my-secret").
+	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets?alt=json&prettyPrint=false&secretId=my-secret").
 		JSON(secretmanager.Secret{
 			Replication: &secretmanager.Replication{
 				Automatic: &secretmanager.Automatic{},
@@ -65,7 +70,7 @@ func TestCreate(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.Secret{})
 
-	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets/my-secret:addVersion?alt=json&prettyPrint=false").
+	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret:addVersion?alt=json&prettyPrint=false").
 		JSON(secretmanager.AddSecretVersionRequest{
 			Payload: &secretmanager.SecretPayload{
 				Data: "c2VjcmV0",
@@ -74,9 +79,14 @@ func TestCreate(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.SecretVersion{})
 
-	secrets, err := NewService(context.TODO(), "my-project")
+	sm, err := secretmanager.NewService(context.TODO())
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	secrets := &secretsService{
+		project: "my-project",
+		sm:      sm,
 	}
 
 	if err := secrets.Create(context.TODO(), "my-secret", []byte("secret"), false); err != nil {
@@ -84,11 +94,11 @@ func TestCreate(t *testing.T) {
 	}
 }
 
-func TestUpdate(t *testing.T) {
+func TestSecretsService_Update(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets/my-secret:addVersion?alt=json&prettyPrint=false").
+	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret:addVersion?alt=json&prettyPrint=false").
 		JSON(secretmanager.AddSecretVersionRequest{
 			Payload: &secretmanager.SecretPayload{
 				Data: "c2VjcmV0",
@@ -97,9 +107,14 @@ func TestUpdate(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.SecretVersion{})
 
-	secrets, err := NewService(context.TODO(), "my-project")
+	sm, err := secretmanager.NewService(context.TODO())
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	secrets := &secretsService{
+		project: "my-project",
+		sm:      sm,
 	}
 
 	if err := secrets.Update(context.TODO(), "my-secret", []byte("secret"), false); err != nil {
@@ -107,18 +122,23 @@ func TestUpdate(t *testing.T) {
 	}
 }
 
-func TestDelete(t *testing.T) {
+func TestSecretsService_Delete(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets/my-secret?alt=json&prettyPrint=false").
+	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret?alt=json&prettyPrint=false").
 		Delete("").
 		Reply(http.StatusOK).
 		JSON(secretmanager.Empty{})
 
-	secrets, err := NewService(context.TODO(), "my-project")
+	sm, err := secretmanager.NewService(context.TODO())
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	secrets := &secretsService{
+		project: "my-project",
+		sm:      sm,
 	}
 
 	if err := secrets.Delete(context.TODO(), "my-secret", false); err != nil {
@@ -126,17 +146,17 @@ func TestDelete(t *testing.T) {
 	}
 }
 
-func TestGrant(t *testing.T) {
+func TestSecretsService_Grant(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets/my-secret:getIamPolicy?alt=json&prettyPrint=false").
+	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret:getIamPolicy?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{
 			Etag: "300",
 		})
 
-	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets/my-secret:setIamPolicy?alt=json&prettyPrint=false").
+	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret:setIamPolicy?alt=json&prettyPrint=false").
 		JSON(
 			secretmanager.SetIamPolicyRequest{
 				Policy: &secretmanager.Policy{
@@ -154,9 +174,14 @@ func TestGrant(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{})
 
-	secrets, err := NewService(context.TODO(), "my-project")
+	sm, err := secretmanager.NewService(context.TODO())
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	secrets := &secretsService{
+		project: "my-project",
+		sm:      sm,
 	}
 
 	if err := secrets.Grant(context.TODO(), "my-secret", "my-app", false); err != nil {
@@ -164,11 +189,11 @@ func TestGrant(t *testing.T) {
 	}
 }
 
-func TestRevoke(t *testing.T) {
+func TestSecretsService_Revoke(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets/my-secret:getIamPolicy?alt=json&prettyPrint=false").
+	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret:getIamPolicy?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{
 			Bindings: []*secretmanager.Binding{
@@ -182,7 +207,7 @@ func TestRevoke(t *testing.T) {
 			Etag: "300",
 		})
 
-	gock.New("https://secretmanager.googleapis.com/v1beta1/projects/my-project/secrets/my-secret:setIamPolicy?alt=json&prettyPrint=false").
+	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret:setIamPolicy?alt=json&prettyPrint=false").
 		JSON(
 			secretmanager.SetIamPolicyRequest{
 				Policy: &secretmanager.Policy{
@@ -192,9 +217,14 @@ func TestRevoke(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{})
 
-	secrets, err := NewService(context.TODO(), "my-project")
+	sm, err := secretmanager.NewService(context.TODO())
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	secrets := &secretsService{
+		project: "my-project",
+		sm:      sm,
 	}
 
 	if err := secrets.Revoke(context.TODO(), "my-secret", "my-app", false); err != nil {

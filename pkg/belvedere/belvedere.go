@@ -9,9 +9,9 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/logs"
-	"github.com/codahale/belvedere/pkg/belvedere/secrets"
 	"go.opencensus.io/trace"
 	compute "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/secretmanager/v1"
 )
 
 // Project provides the main functionality of Belvedere.
@@ -34,7 +34,7 @@ type Project interface {
 	Logs() logs.Service
 
 	// Secrets returns a secrets service.
-	Secrets() secrets.Service
+	Secrets() SecretsService
 
 	// Apps returns an apps service.
 	Apps() AppService
@@ -61,34 +61,37 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 		return nil, err
 	}
 
-	ss, err := secrets.NewService(ctx, name)
+	sm, err := secretmanager.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	as := &appService{project: name}
-
 	return &project{
-		ls:   ls,
-		ss:   ss,
-		as:   as,
+		ls: ls,
+		secrets: &secretsService{
+			project: name,
+			sm:      sm,
+		},
+		as: &appService{
+			project: name,
+		},
 		name: name,
 	}, nil
 }
 
 type project struct {
-	name string
-	ls   logs.Service
-	ss   secrets.Service
-	as   *appService
+	name    string
+	ls      logs.Service
+	secrets SecretsService
+	as      *appService
 }
 
 func (p *project) Apps() AppService {
 	return p.as
 }
 
-func (p *project) Secrets() secrets.Service {
-	return p.ss
+func (p *project) Secrets() SecretsService {
+	return p.secrets
 }
 
 func (p *project) Logs() logs.Service {
