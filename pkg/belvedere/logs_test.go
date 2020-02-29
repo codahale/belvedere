@@ -44,7 +44,7 @@ func TestLogService_List(t *testing.T) {
 
 	s := &logService{
 		project: "my-project",
-		ls:      logs,
+		logs:    logs,
 		clock: func() time.Time {
 			return time.Date(2019, 6, 25, 13, 18+15, 33, 43, time.UTC)
 		},

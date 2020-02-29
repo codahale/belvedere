@@ -28,7 +28,7 @@ type LogService interface {
 
 type logService struct {
 	project string
-	ls      *logging.Service
+	logs    *logging.Service
 	clock   func() time.Time
 }
 
@@ -49,7 +49,7 @@ func (l *logService) List(ctx context.Context, app, release, instance string, ma
 	filter := l.makeFilter(app, release, instance, maxAge, filters)
 
 	// List log entries which match the full set of filters.
-	entries, err := l.ls.Entries.List(&logging.ListLogEntriesRequest{
+	entries, err := l.logs.Entries.List(&logging.ListLogEntriesRequest{
 		Filter:        strings.Join(filter, " "),
 		OrderBy:       "timestamp desc", // reverse chronological order
 		ResourceNames: []string{fmt.Sprintf("projects/%s", l.project)},

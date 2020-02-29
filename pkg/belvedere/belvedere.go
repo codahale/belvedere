@@ -93,7 +93,7 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 		logs: &logService{
 			project: name,
 			clock:   time.Now,
-			ls:      ls,
+			logs:    ls,
 		},
 		secrets: &secretsService{
 			project: name,
