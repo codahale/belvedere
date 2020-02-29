@@ -95,7 +95,7 @@ func (r *releaseService) Create(ctx context.Context, app, name string, config *C
 		return err
 	}
 
-	region, err := findRegion(r.dm, ctx, r.project, app)
+	region, err := findRegion(ctx, r.dm, r.project, app)
 	if err != nil {
 		return err
 	}
@@ -126,7 +126,7 @@ func (r *releaseService) Enable(ctx context.Context, app, name string, dryRun bo
 	)
 	defer span.End()
 
-	region, err := findRegion(r.dm, ctx, r.project, app)
+	region, err := findRegion(ctx, r.dm, r.project, app)
 	if err != nil {
 		return err
 	}
@@ -149,7 +149,7 @@ func (r *releaseService) Disable(ctx context.Context, app, name string, dryRun b
 	)
 	defer span.End()
 
-	region, err := findRegion(r.dm, ctx, r.project, app)
+	region, err := findRegion(ctx, r.dm, r.project, app)
 	if err != nil {
 		return err
 	}

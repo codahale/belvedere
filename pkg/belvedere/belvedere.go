@@ -345,7 +345,7 @@ func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineTyp
 }
 
 // findRegion returns the region the app was created in.
-func findRegion(dm deployments.Manager, ctx context.Context, project, app string) (string, error) {
+func findRegion(ctx context.Context, dm deployments.Manager, project, app string) (string, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.project.findRegion")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),

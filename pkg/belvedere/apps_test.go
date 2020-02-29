@@ -41,6 +41,10 @@ func TestAppService_List(t *testing.T) {
 		})
 
 	dm, err := deployments.NewManager(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	as := &appService{
 		project: "my-project",
 		dm:      dm,
