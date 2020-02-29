@@ -8,9 +8,9 @@ import (
 	"google.golang.org/api/serviceusage/v1"
 )
 
-type Manager interface {
-	// SetDMPerms binds the Deployment Manager service account to the `owner` role if it has not already
-	// been so bound. This allows Deployment Manager to add IAM roles to service accounts per
+type Service interface {
+	// SetDMPerms binds the Deployment Service service account to the `owner` role if it has not already
+	// been so bound. This allows Deployment Service to add IAM roles to service accounts per
 	// https://cloud.google.com/deployment-manager/docs/configuration/set-access-control-resources#granting_deployment_manager_permission_to_set_iam_policies
 	SetDMPerms(ctx context.Context, project string, dryRun bool) error
 
@@ -18,7 +18,7 @@ type Manager interface {
 	EnableAPIs(ctx context.Context, project string, dryRun bool, interval time.Duration) error
 }
 
-func NewManager(ctx context.Context) (Manager, error) {
+func NewService(ctx context.Context) (Service, error) {
 	crm, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
 		return nil, err
@@ -37,4 +37,4 @@ type manager struct {
 	su  *serviceusage.Service
 }
 
-var _ Manager = &manager{}
+var _ Service = &manager{}

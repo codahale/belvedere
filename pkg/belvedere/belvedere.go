@@ -25,13 +25,13 @@ type Project interface {
 	// Name returns the name of the project.
 	Name() string
 
-	// Setup enables all required GCP services, grants Deployment Manager the permissions required
+	// Setup enables all required GCP services, grants Deployment Service the permissions required
 	// to manage project accounts and IAM roles, and creates a deployment with the base resources
 	// needed to use Belvedere.
 	Setup(ctx context.Context, dnsZone string, dryRun bool, interval time.Duration) error
 
 	// Teardown deletes the shared firewall rules and managed zone created by Setup. It does not
-	// disable services or downgrade Deployment Manager's permissions.
+	// disable services or downgrade Deployment Service's permissions.
 	Teardown(ctx context.Context, dryRun, async bool, interval time.Duration) error
 
 	// DNSServers returns a list of DNS servers which handle the project's managed zone.
@@ -103,7 +103,7 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 		dns:     gds,
 	}
 
-	s, err := setup.NewManager(ctx)
+	s, err := setup.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +145,7 @@ type project struct {
 	releases *releaseService
 	dm       deployments.Manager
 	gce      *compute.Service
-	setup    setup.Manager
+	setup    setup.Service
 }
 
 func (p *project) Apps() AppService {
