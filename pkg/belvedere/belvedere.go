@@ -49,6 +49,8 @@ type Project interface {
 
 	// Apps returns an apps service.
 	Apps() AppService
+
+	Releases() ReleaseService
 }
 
 // DNSServer is a DNS server run by Google.
@@ -107,11 +109,12 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 }
 
 type project struct {
-	name    string
-	logs    LogService
-	secrets SecretsService
-	apps    *appService
-	dns     *dnsService
+	name     string
+	logs     LogService
+	secrets  SecretsService
+	apps     *appService
+	dns      *dnsService
+	releases *releaseService
 }
 
 func (p *project) Apps() AppService {
@@ -123,7 +126,11 @@ func (p *project) Secrets() SecretsService {
 }
 
 func (p *project) Logs() LogService {
-	return p.Logs()
+	return p.logs
+}
+
+func (p *project) Releases() ReleaseService {
+	return p.releases
 }
 
 func (p *project) Instances(ctx context.Context, app, release string) ([]Instance, error) {

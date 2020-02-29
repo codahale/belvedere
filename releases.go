@@ -19,8 +19,8 @@ type ReleasesListCmd struct {
 	App string `arg:"" optional:"" help:"Limit releases to the given app."`
 }
 
-func (cmd *ReleasesListCmd) Run(ctx context.Context, o *Options) error {
-	releases, err := belvedere.Releases(ctx, o.Project, cmd.App)
+func (cmd *ReleasesListCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+	releases, err := project.Releases().List(ctx, cmd.App)
 	if err != nil {
 		return err
 	}
@@ -35,7 +35,7 @@ type ReleasesCreateCmd struct {
 	Enable  bool   `help:"Put release into service once created."`
 }
 
-func (cmd *ReleasesCreateCmd) Run(ctx context.Context, o *Options) error {
+func (cmd *ReleasesCreateCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
 	b, err := readFile(ctx, cmd.Config)
 	if err != nil {
 		return err
@@ -46,13 +46,13 @@ func (cmd *ReleasesCreateCmd) Run(ctx context.Context, o *Options) error {
 		return err
 	}
 
-	err = belvedere.CreateRelease(ctx, o.Project, cmd.App, cmd.Release, config, cmd.SHA256, o.DryRun, o.Interval)
+	err = project.Releases().Create(ctx, cmd.App, cmd.Release, config, cmd.SHA256, o.DryRun, o.Interval)
 	if err != nil {
 		return err
 	}
 
 	if cmd.Enable {
-		err = belvedere.EnableRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun, o.Interval)
+		err = project.Releases().Enable(ctx, cmd.App, cmd.Release, o.DryRun, o.Interval)
 		if err != nil {
 			return err
 		}
@@ -65,8 +65,8 @@ type ReleasesEnableCmd struct {
 	Release string `arg:"" help:"The release's name."`
 }
 
-func (cmd *ReleasesEnableCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.EnableRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun, o.Interval)
+func (cmd *ReleasesEnableCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+	return project.Releases().Enable(ctx, cmd.App, cmd.Release, o.DryRun, o.Interval)
 }
 
 type ReleasesDisableCmd struct {
@@ -74,8 +74,8 @@ type ReleasesDisableCmd struct {
 	Release string `arg:"" help:"The release's name."`
 }
 
-func (cmd *ReleasesDisableCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.DisableRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun, o.Interval)
+func (cmd *ReleasesDisableCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+	return project.Releases().Disable(ctx, cmd.App, cmd.Release, o.DryRun, o.Interval)
 }
 
 type ReleasesDeleteCmd struct {
@@ -84,6 +84,6 @@ type ReleasesDeleteCmd struct {
 	Async   bool   `help:"Return without waiting for successful completion."`
 }
 
-func (cmd *ReleasesDeleteCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.DeleteRelease(ctx, o.Project, cmd.App, cmd.Release, o.DryRun, cmd.Async, o.Interval)
+func (cmd *ReleasesDeleteCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+	return project.Releases().Delete(ctx, cmd.App, cmd.Release, o.DryRun, cmd.Async, o.Interval)
 }

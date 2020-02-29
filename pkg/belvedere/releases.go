@@ -24,12 +24,30 @@ type Release struct {
 	Hash    string
 }
 
-// Releases returns a list of releases in the given project for the given app, if any is passed.
-func Releases(ctx context.Context, project, app string) ([]Release, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.Releases")
-	span.AddAttributes(
-		trace.StringAttribute("project", project),
-	)
+type ReleaseService interface {
+	// List returns a list of releases in the given project for the given app, if any is passed.
+	List(ctx context.Context, app string) ([]Release, error)
+
+	// Create creates a deployment containing release resources for the given app.
+	Create(ctx context.Context, app, name string, config *cfg.Config, imageSHA256 string, dryRun bool, interval time.Duration) error
+
+	// Enable adds the release's instance group to the app's backend project and waits for the
+	// instances to go fully into project.
+	Enable(ctx context.Context, app, name string, dryRun bool, interval time.Duration) error
+
+	// Disable removes the release's instance group from the app's backend project.
+	Disable(ctx context.Context, app, name string, dryRun bool, interval time.Duration) error
+
+	// Delete deletes the release's deployment and waits for all underlying resources to be deleted.
+	Delete(ctx context.Context, app, release string, dryRun, async bool, interval time.Duration) error
+}
+
+type releaseService struct {
+	project string
+}
+
+func (r *releaseService) List(ctx context.Context, app string) ([]Release, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.releases.List")
 	defer span.End()
 
 	if app != "" {
@@ -41,7 +59,7 @@ func Releases(ctx context.Context, project, app string) ([]Release, error) {
 		filter = fmt.Sprintf("%s AND labels.belvedere-app eq %q", filter, app)
 	}
 
-	list, err := deployments.List(ctx, project, filter)
+	list, err := deployments.List(ctx, r.project, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +67,7 @@ func Releases(ctx context.Context, project, app string) ([]Release, error) {
 	releases := make([]Release, len(list))
 	for i, dep := range list {
 		releases[i] = Release{
-			Project: project,
+			Project: r.project,
 			Region:  dep.Region,
 			App:     dep.App,
 			Release: dep.Release,
@@ -59,37 +77,35 @@ func Releases(ctx context.Context, project, app string) ([]Release, error) {
 	return releases, nil
 }
 
-// CreateRelease creates a deployment containing release resources for the given app.
-func CreateRelease(ctx context.Context, project, app, release string, config *cfg.Config, imageSHA256 string, dryRun bool, interval time.Duration) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.CreateRelease")
+func (r *releaseService) Create(ctx context.Context, app, name string, config *cfg.Config, imageSHA256 string, dryRun bool, interval time.Duration) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.releases.Create")
 	span.AddAttributes(
-		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", app),
-		trace.StringAttribute("release", release),
+		trace.StringAttribute("name", name),
 		trace.StringAttribute("image_sha256", imageSHA256),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
-	if err := gcp.ValidateRFC1035(release); err != nil {
+	if err := gcp.ValidateRFC1035(name); err != nil {
 		return err
 	}
 
-	region, err := findRegion(ctx, project, app)
+	region, err := findRegion(ctx, r.project, app)
 	if err != nil {
 		return err
 	}
 
-	return deployments.Insert(ctx, project, resources.Name(app, release),
+	return deployments.Insert(ctx, r.project, resources.Name(app, name),
 		resources.Release(
-			project, region, app, release, config.Network, config.Subnetwork,
-			config.MachineType, config.CloudConfig(app, release, imageSHA256),
+			r.project, region, app, name, config.Network, config.Subnetwork,
+			config.MachineType, config.CloudConfig(app, name, imageSHA256),
 			config.NumReplicas, config.AutoscalingPolicy,
 		),
 		deployments.Labels{
-			Type:    "release",
+			Type:    "name",
 			App:     app,
-			Release: release,
+			Release: name,
 			Region:  region,
 			Hash:    imageSHA256[:32],
 		},
@@ -97,65 +113,57 @@ func CreateRelease(ctx context.Context, project, app, release string, config *cf
 	)
 }
 
-// EnableRelease adds the release's instance group to the app's backend project and waits for the
-// instances to go fully into project.
-func EnableRelease(ctx context.Context, project, app, release string, dryRun bool, interval time.Duration) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.EnableRelease")
+func (r *releaseService) Enable(ctx context.Context, app, name string, dryRun bool, interval time.Duration) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.releases.Enable")
 	span.AddAttributes(
-		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", app),
-		trace.StringAttribute("release", release),
+		trace.StringAttribute("name", name),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
-	region, err := findRegion(ctx, project, app)
+	region, err := findRegion(ctx, r.project, app)
 	if err != nil {
 		return err
 	}
 
 	backendService := fmt.Sprintf("%s-bes", app)
-	instanceGroup := fmt.Sprintf("%s-%s-ig", app, release)
-	if err := backends.Add(ctx, project, region, backendService, instanceGroup, dryRun, interval); err != nil {
+	instanceGroup := fmt.Sprintf("%s-%s-ig", app, name)
+	if err := backends.Add(ctx, r.project, region, backendService, instanceGroup, dryRun, interval); err != nil {
 		return err
 	}
 
-	return waiter.Poll(ctx, interval, check.Health(ctx, project, region, backendService, instanceGroup))
+	return waiter.Poll(ctx, interval, check.Health(ctx, r.project, region, backendService, instanceGroup))
 }
 
-// DisableRelease removes the release's instance group from the app's backend project.
-func DisableRelease(ctx context.Context, project, app, release string, dryRun bool, interval time.Duration) error {
+func (r *releaseService) Disable(ctx context.Context, app, name string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DisableRelease")
 	span.AddAttributes(
-		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", app),
-		trace.StringAttribute("release", release),
+		trace.StringAttribute("name", name),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
-	region, err := findRegion(ctx, project, app)
+	region, err := findRegion(ctx, r.project, app)
 	if err != nil {
 		return err
 	}
 
 	backendService := fmt.Sprintf("%s-bes", app)
-	instanceGroup := fmt.Sprintf("%s-%s-ig", app, release)
-	return backends.Remove(ctx, project, region, backendService, instanceGroup, dryRun, interval)
+	instanceGroup := fmt.Sprintf("%s-%s-ig", app, name)
+	return backends.Remove(ctx, r.project, region, backendService, instanceGroup, dryRun, interval)
 }
 
-// DeleteRelease deletes the release's deployment and waits for all underlying resources to be
-// deleted.
-func DeleteRelease(ctx context.Context, project, app, release string, dryRun, async bool, interval time.Duration) error {
+func (r *releaseService) Delete(ctx context.Context, app, name string, dryRun, async bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.DeleteRelease")
 	span.AddAttributes(
-		trace.StringAttribute("project", project),
 		trace.StringAttribute("app", app),
-		trace.StringAttribute("release", release),
+		trace.StringAttribute("name", name),
 		trace.BoolAttribute("dry_run", dryRun),
 		trace.BoolAttribute("async", async),
 	)
 	defer span.End()
 
-	return deployments.Delete(ctx, project, resources.Name(app, release), dryRun, async, interval)
+	return deployments.Delete(ctx, r.project, resources.Name(app, name), dryRun, async, interval)
 }
