@@ -11,13 +11,28 @@ import (
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
-// Add adds an instance group to a backend service. If the instance group is already registered as a
-// backend, exits early.
-func Add(
-	ctx context.Context, gce *compute.Service,
-	project, region, backendService, instanceGroup string,
-	dryRun bool, interval time.Duration,
-) error {
+type Service interface {
+	// Add adds an instance group to a backend service. If the instance group is already registered as a
+	// backend, exits early.
+	Add(ctx context.Context, project, region, backendService, instanceGroup string,
+		dryRun bool, interval time.Duration) error
+
+	// Remove removes an instance group from a backend service. If the instance group is not registered
+	// as a backend, exits early.
+	Remove(ctx context.Context, project, region, backendService, instanceGroup string,
+		dryRun bool, interval time.Duration) error
+}
+
+func NewService(gce *compute.Service) Service {
+	return &service{gce: gce}
+}
+
+type service struct {
+	gce *compute.Service
+}
+
+func (s *service) Add(ctx context.Context, project, region, backendService, instanceGroup string,
+	dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Add")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -29,14 +44,14 @@ func Add(
 	defer span.End()
 
 	// Get the current backends.
-	bes, err := gce.BackendServices.Get(project, backendService).
+	bes, err := s.gce.BackendServices.Get(project, backendService).
 		Context(ctx).Fields("backends", "fingerprint").Do()
 	if err != nil {
 		return fmt.Errorf("error getting backend service: %w", err)
 	}
 
 	// Get the instance group's full URL.
-	ig, err := gce.RegionInstanceGroups.Get(project, region, instanceGroup).
+	ig, err := s.gce.RegionInstanceGroups.Get(project, region, instanceGroup).
 		Context(ctx).Fields("selfLink").Do()
 	if err != nil {
 		return fmt.Errorf("error getting instance group: %w", err)
@@ -57,7 +72,7 @@ func Add(
 	}
 
 	// Patch the backend service to include the instance group as a backend.
-	op, err := gce.BackendServices.Patch(project, backendService,
+	op, err := s.gce.BackendServices.Patch(project, backendService,
 		&compute.BackendService{
 			Backends: append(bes.Backends, &compute.Backend{
 				Group: ig.SelfLink,
@@ -72,16 +87,11 @@ func Add(
 	}
 
 	// Return patch operation.
-	return waiter.Poll(ctx, interval, check.GCE(ctx, gce, project, op.Name))
+	return waiter.Poll(ctx, interval, check.GCE(ctx, s.gce, project, op.Name))
 }
 
-// Remove removes an instance group from a backend service. If the instance group is not registered
-// as a backend, exits early.
-func Remove(
-	ctx context.Context, gce *compute.Service,
-	project, region, backendService, instanceGroup string,
-	dryRun bool, interval time.Duration,
-) error {
+func (s *service) Remove(ctx context.Context, project, region, backendService, instanceGroup string,
+	dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Remove")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -93,14 +103,14 @@ func Remove(
 	defer span.End()
 
 	// Get the current backends.
-	bes, err := gce.BackendServices.Get(project, backendService).
+	bes, err := s.gce.BackendServices.Get(project, backendService).
 		Context(ctx).Fields("backends", "fingerprint").Do()
 	if err != nil {
 		return fmt.Errorf("error getting backend service: %w", err)
 	}
 
 	// Get the instance group's full URL.
-	ig, err := gce.RegionInstanceGroups.Get(project, region, instanceGroup).
+	ig, err := s.gce.RegionInstanceGroups.Get(project, region, instanceGroup).
 		Context(ctx).Fields("selfLink").Do()
 	if err != nil {
 		return fmt.Errorf("error getting instance group: %w", err)
@@ -127,7 +137,7 @@ func Remove(
 	}
 
 	// Patch the backend service to remove the instance group as a backend.
-	op, err := gce.BackendServices.Patch(project, backendService,
+	op, err := s.gce.BackendServices.Patch(project, backendService,
 		&compute.BackendService{
 			Backends: backends,
 			// Include the fingerprint to avoid overwriting concurrent writes.
@@ -141,5 +151,5 @@ func Remove(
 	}
 
 	// Return the patch operation.
-	return waiter.Poll(ctx, interval, check.GCE(ctx, gce, project, op.Name))
+	return waiter.Poll(ctx, interval, check.GCE(ctx, s.gce, project, op.Name))
 }

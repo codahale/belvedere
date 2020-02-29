@@ -12,7 +12,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestAdd(t *testing.T) {
+func TestService_Add(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -61,12 +61,14 @@ func TestAdd(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := Add(context.TODO(), gce, "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
+	s := NewService(gce)
+
+	if err := s.Add(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestAddExisting(t *testing.T) {
+func TestService_AddExisting(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -92,12 +94,14 @@ func TestAddExisting(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := Add(context.TODO(), gce, "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
+	s := NewService(gce)
+
+	if err := s.Add(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestAddDryRun(t *testing.T) {
+func TestService_AddDryRun(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -123,12 +127,14 @@ func TestAddDryRun(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := Add(context.TODO(), gce, "my-project", "us-central1", "bes-1", "ig-1", true, 10*time.Millisecond); err != nil {
+	s := NewService(gce)
+
+	if err := s.Add(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", true, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestRemove(t *testing.T) {
+func TestService_Remove(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -177,12 +183,14 @@ func TestRemove(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := Remove(context.TODO(), gce, "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
+	s := NewService(gce)
+
+	if err := s.Remove(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestRemoveLast(t *testing.T) {
+func TestSetup_RemoveLast(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -221,12 +229,14 @@ func TestRemoveLast(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := Remove(context.TODO(), gce, "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
+	s := NewService(gce)
+
+	if err := s.Remove(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestRemoveMissing(t *testing.T) {
+func TestSetup_RemoveMissing(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -252,12 +262,14 @@ func TestRemoveMissing(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := Remove(context.TODO(), gce, "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
+	s := NewService(gce)
+
+	if err := s.Remove(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestRemoveDryRun(t *testing.T) {
+func TestSetup_RemoveDryRun(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
@@ -286,7 +298,9 @@ func TestRemoveDryRun(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := Remove(context.TODO(), gce, "my-project", "us-central1", "bes-1", "ig-1", true, 10*time.Millisecond); err != nil {
+	s := NewService(gce)
+
+	if err := s.Remove(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", true, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
