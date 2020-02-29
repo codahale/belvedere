@@ -26,19 +26,6 @@ type LogService interface {
 	List(ctx context.Context, app, release, instance string, maxAge time.Duration, filters []string) ([]LogEntry, error)
 }
 
-// NewService returns a new LogService for the given project.
-func NewService(ctx context.Context, project string) (LogService, error) {
-	ls, err := logging.NewService(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return &logService{
-		project: project,
-		ls:      ls,
-		clock:   time.Now,
-	}, nil
-}
-
 type logService struct {
 	project string
 	ls      *logging.Service

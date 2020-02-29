@@ -37,14 +37,17 @@ func TestLogService_List(t *testing.T) {
 			},
 		})
 
-	s, err := NewService(context.TODO(), "my-project")
+	logs, err := logging.NewService(context.TODO())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// mock out the clock
-	(s.(*logService)).clock = func() time.Time {
-		return time.Date(2019, 6, 25, 13, 18+15, 33, 43, time.UTC)
+	s := &logService{
+		project: "my-project",
+		ls:      logs,
+		clock: func() time.Time {
+			return time.Date(2019, 6, 25, 13, 18+15, 33, 43, time.UTC)
+		},
 	}
 
 	actual, err := s.List(context.TODO(), "my-app", "", "", 15*time.Minute, []string{"health"})
