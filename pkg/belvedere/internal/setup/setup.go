@@ -29,12 +29,12 @@ func NewService(ctx context.Context) (Service, error) {
 		return nil, err
 	}
 
-	return &manager{crm: crm, su: su}, nil
+	return &service{crm: crm, su: su}, nil
 }
 
-type manager struct {
+type service struct {
 	crm *cloudresourcemanager.Service
 	su  *serviceusage.Service
 }
 
-var _ Service = &manager{}
+var _ Service = &service{}

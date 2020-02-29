@@ -39,7 +39,7 @@ var (
 	}
 )
 
-func (m *manager) EnableAPIs(ctx context.Context, project string, dryRun bool, interval time.Duration) error {
+func (m *service) EnableAPIs(ctx context.Context, project string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.setup.EnableAPIs")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),

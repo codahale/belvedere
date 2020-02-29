@@ -86,7 +86,7 @@ func TestManager_SetDMPerms(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	m := &manager{crm: crm}
+	m := &service{crm: crm}
 
 	if err := m.SetDMPerms(context.TODO(), "my-project", false); err != nil {
 		t.Fatal(err)
@@ -124,7 +124,7 @@ func TestManager_SetDMPermsExisting(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	m := &manager{crm: crm}
+	m := &service{crm: crm}
 
 	if err := m.SetDMPerms(context.TODO(), "my-project", false); err != nil {
 		t.Fatal(err)

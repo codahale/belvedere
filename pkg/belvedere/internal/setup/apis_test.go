@@ -50,7 +50,7 @@ func TestManager_EnableAPIs(t *testing.T) {
 		t.Fatal()
 	}
 
-	m := &manager{su: su}
+	m := &service{su: su}
 
 	if err := m.EnableAPIs(context.TODO(), "my-project", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)

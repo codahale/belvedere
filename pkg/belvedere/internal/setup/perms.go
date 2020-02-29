@@ -10,7 +10,7 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
-func (m *manager) SetDMPerms(ctx context.Context, project string, dryRun bool) error {
+func (m *service) SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.setup.SetDMPerms")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
