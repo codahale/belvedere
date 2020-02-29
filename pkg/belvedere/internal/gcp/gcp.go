@@ -6,7 +6,6 @@ import (
 
 	"google.golang.org/api/cloudresourcemanager/v1"
 	compute "google.golang.org/api/compute/v0.beta"
-	"google.golang.org/api/deploymentmanager/v2"
 	"google.golang.org/api/serviceusage/v1"
 )
 
@@ -16,14 +15,6 @@ func Compute(ctx context.Context) (*compute.Service, error) {
 		gceService, gceErr = compute.NewService(ctx)
 	})
 	return gceService, gceErr
-}
-
-// DeploymentManager creates a new Deployment Manager client or returns a previously-created one.
-func DeploymentManager(ctx context.Context) (*deploymentmanager.Service, error) {
-	dmOnce.Do(func() {
-		dmService, dmErr = deploymentmanager.NewService(ctx)
-	})
-	return dmService, dmErr
 }
 
 // ServiceUsage creates a new Service Usage client or returns a previously-created one.
@@ -47,9 +38,6 @@ var (
 	gceService *compute.Service
 	gceErr     error
 	gceOnce    sync.Once
-	dmService  *deploymentmanager.Service
-	dmErr      error
-	dmOnce     sync.Once
 	suService  *serviceusage.Service
 	suErr      error
 	suOnce     sync.Once
