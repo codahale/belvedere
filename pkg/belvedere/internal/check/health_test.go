@@ -22,7 +22,12 @@ func TestHealthNotStable(t *testing.T) {
 			},
 		})
 
-	f := Health(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1")
+	gce, err := compute.NewService(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	f := Health(context.TODO(), gce, "my-project", "us-central1", "bes-1", "ig-1")
 	done, err := f()
 	if err != nil {
 		t.Fatal(err)
@@ -58,7 +63,12 @@ func TestHealthNotRegistered(t *testing.T) {
 			HealthStatus: []*compute.HealthStatus{},
 		})
 
-	f := Health(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1")
+	gce, err := compute.NewService(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	f := Health(context.TODO(), gce, "my-project", "us-central1", "bes-1", "ig-1")
 	done, err := f()
 	if err != nil {
 		t.Fatal(err)
@@ -103,7 +113,12 @@ func TestHealthNotHealthy(t *testing.T) {
 			},
 		})
 
-	f := Health(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1")
+	gce, err := compute.NewService(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	f := Health(context.TODO(), gce, "my-project", "us-central1", "bes-1", "ig-1")
 	done, err := f()
 	if err != nil {
 		t.Fatal(err)
@@ -148,7 +163,12 @@ func TestHealthDone(t *testing.T) {
 			},
 		})
 
-	f := Health(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1")
+	gce, err := compute.NewService(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	f := Health(context.TODO(), gce, "my-project", "us-central1", "bes-1", "ig-1")
 	done, err := f()
 	if err != nil {
 		t.Fatal(err)

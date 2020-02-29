@@ -13,6 +13,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
+	compute "google.golang.org/api/compute/v0.beta"
 )
 
 // A Release describes a specific release of an app.
@@ -45,6 +46,7 @@ type ReleaseService interface {
 type releaseService struct {
 	project string
 	dm      deployments.Manager
+	gce     *compute.Service
 }
 
 func (r *releaseService) List(ctx context.Context, app string) ([]Release, error) {
@@ -130,11 +132,11 @@ func (r *releaseService) Enable(ctx context.Context, app, name string, dryRun bo
 
 	backendService := fmt.Sprintf("%s-bes", app)
 	instanceGroup := fmt.Sprintf("%s-%s-ig", app, name)
-	if err := backends.Add(ctx, r.project, region, backendService, instanceGroup, dryRun, interval); err != nil {
+	if err := backends.Add(ctx, r.gce, r.project, region, backendService, instanceGroup, dryRun, interval); err != nil {
 		return err
 	}
 
-	return waiter.Poll(ctx, interval, check.Health(ctx, r.project, region, backendService, instanceGroup))
+	return waiter.Poll(ctx, interval, check.Health(ctx, r.gce, r.project, region, backendService, instanceGroup))
 }
 
 func (r *releaseService) Disable(ctx context.Context, app, name string, dryRun bool, interval time.Duration) error {
@@ -153,7 +155,7 @@ func (r *releaseService) Disable(ctx context.Context, app, name string, dryRun b
 
 	backendService := fmt.Sprintf("%s-bes", app)
 	instanceGroup := fmt.Sprintf("%s-%s-ig", app, name)
-	return backends.Remove(ctx, r.project, region, backendService, instanceGroup, dryRun, interval)
+	return backends.Remove(ctx, r.gce, r.project, region, backendService, instanceGroup, dryRun, interval)
 }
 
 func (r *releaseService) Delete(ctx context.Context, app, name string, dryRun, async bool, interval time.Duration) error {

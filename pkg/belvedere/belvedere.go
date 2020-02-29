@@ -82,7 +82,7 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 		return nil, err
 	}
 
-	ds, err := dns.NewService(ctx)
+	gds, err := dns.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -90,6 +90,16 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 	dm, err := deployments.NewManager(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	gce, err := compute.NewService(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	ds := &dnsService{
+		project: name,
+		dns:     gds,
 	}
 
 	return &project{
@@ -105,21 +115,17 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 		apps: &appService{
 			project: name,
 			dm:      dm,
-			dns: &dnsService{
-				project: name,
-				dns:     ds,
-			},
-		},
-		dns: &dnsService{
-			project: name,
 			dns:     ds,
 		},
+		dns: ds,
 		releases: &releaseService{
 			project: name,
 			dm:      dm,
+			gce:     gce,
 		},
 		name: name,
 		dm:   dm,
+		gce:  gce,
 	}, nil
 }
 
@@ -131,6 +137,7 @@ type project struct {
 	dns      *dnsService
 	releases *releaseService
 	dm       deployments.Manager
+	gce      *compute.Service
 }
 
 func (p *project) Apps() AppService {
@@ -157,15 +164,9 @@ func (p *project) Instances(ctx context.Context, app, release string) ([]Instanc
 	)
 	defer span.End()
 
-	// Get our GCE client.
-	gce, err := gcp.Compute(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	var instances []Instance
 	// List all instances.
-	if err := gce.Instances.AggregatedList(p.name).Pages(ctx,
+	if err := p.gce.Instances.AggregatedList(p.name).Pages(ctx,
 		func(list *compute.InstanceAggregatedList) error {
 			for _, items := range list.Items {
 				for _, inst := range items.Instances {
@@ -291,17 +292,12 @@ func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineTyp
 		span.AddAttributes(trace.StringAttribute("region", region))
 	}
 
-	gce, err := gcp.Compute(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	// Aggregate across pages of results.
 	mtMap := map[string]*compute.MachineType{}
 	region = "zones/" + region
 
 	// Iterate through all pages of the results.
-	if err := gce.MachineTypes.AggregatedList(p.name).Pages(ctx,
+	if err := p.gce.MachineTypes.AggregatedList(p.name).Pages(ctx,
 		func(list *compute.MachineTypeAggregatedList) error {
 			// Aggregate across zones.
 			for zone, items := range list.Items {

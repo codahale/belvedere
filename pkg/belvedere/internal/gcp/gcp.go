@@ -5,17 +5,8 @@ import (
 	"sync"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
-	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/serviceusage/v1"
 )
-
-// Compute creates a new Compute client or returns a previously-created one.
-func Compute(ctx context.Context) (*compute.Service, error) {
-	gceOnce.Do(func() {
-		gceService, gceErr = compute.NewService(ctx)
-	})
-	return gceService, gceErr
-}
 
 // ServiceUsage creates a new Service Usage client or returns a previously-created one.
 func ServiceUsage(ctx context.Context) (*serviceusage.Service, error) {
@@ -35,9 +26,6 @@ func CloudResourceManager(ctx context.Context) (*cloudresourcemanager.Service, e
 }
 
 var (
-	gceService *compute.Service
-	gceErr     error
-	gceOnce    sync.Once
 	suService  *serviceusage.Service
 	suErr      error
 	suOnce     sync.Once

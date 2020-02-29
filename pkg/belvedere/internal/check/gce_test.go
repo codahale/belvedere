@@ -21,7 +21,12 @@ func TestGCERunning(t *testing.T) {
 			Status: "RUNNING",
 		})
 
-	f := GCE(context.TODO(), "example", "op1")
+	gce, err := compute.NewService(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	f := GCE(context.TODO(), gce, "example", "op1")
 	done, err := f()
 	if err != nil {
 		t.Fatal(err)
@@ -42,7 +47,12 @@ func TestGCEDone(t *testing.T) {
 			Status: "DONE",
 		})
 
-	f := GCE(context.TODO(), "example", "op1")
+	gce, err := compute.NewService(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	f := GCE(context.TODO(), gce, "example", "op1")
 	done, err := f()
 	if err != nil {
 		t.Fatal(err)
@@ -72,8 +82,13 @@ func TestGCEError(t *testing.T) {
 			},
 		})
 
-	f := GCE(context.TODO(), "example", "op1")
-	_, err := f()
+	gce, err := compute.NewService(context.TODO())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	f := GCE(context.TODO(), gce, "example", "op1")
+	_, err = f()
 	if err == nil {
 		t.Fatal("should have returned an error")
 	}

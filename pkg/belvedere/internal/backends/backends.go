@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	compute "google.golang.org/api/compute/v0.beta"
@@ -15,7 +14,8 @@ import (
 // Add adds an instance group to a backend service. If the instance group is already registered as a
 // backend, exits early.
 func Add(
-	ctx context.Context, project, region, backendService, instanceGroup string,
+	ctx context.Context, gce *compute.Service,
+	project, region, backendService, instanceGroup string,
 	dryRun bool, interval time.Duration,
 ) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Add")
@@ -27,12 +27,6 @@ func Add(
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
-
-	// Get or create our GCE client.
-	gce, err := gcp.Compute(ctx)
-	if err != nil {
-		return err
-	}
 
 	// Get the current backends.
 	bes, err := gce.BackendServices.Get(project, backendService).
@@ -78,13 +72,14 @@ func Add(
 	}
 
 	// Return patch operation.
-	return waiter.Poll(ctx, interval, check.GCE(ctx, project, op.Name))
+	return waiter.Poll(ctx, interval, check.GCE(ctx, gce, project, op.Name))
 }
 
 // Remove removes an instance group from a backend service. If the instance group is not registered
 // as a backend, exits early.
 func Remove(
-	ctx context.Context, project, region, backendService, instanceGroup string,
+	ctx context.Context, gce *compute.Service,
+	project, region, backendService, instanceGroup string,
 	dryRun bool, interval time.Duration,
 ) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Remove")
@@ -96,12 +91,6 @@ func Remove(
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
-
-	// Get or create our GCE client.
-	gce, err := gcp.Compute(ctx)
-	if err != nil {
-		return err
-	}
 
 	// Get the current backends.
 	bes, err := gce.BackendServices.Get(project, backendService).
@@ -152,5 +141,5 @@ func Remove(
 	}
 
 	// Return the patch operation.
-	return waiter.Poll(ctx, interval, check.GCE(ctx, project, op.Name))
+	return waiter.Poll(ctx, interval, check.GCE(ctx, gce, project, op.Name))
 }

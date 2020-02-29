@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	compute "google.golang.org/api/compute/v0.beta"
@@ -12,7 +11,7 @@ import (
 
 // Health returns a waiter.Condition for the given instance group being stable and for all its
 // instances registering as healthy with the given backend service.
-func Health(ctx context.Context, project, region, backendService, instanceGroup string) waiter.Condition {
+func Health(ctx context.Context, gce *compute.Service, project, region, backendService, instanceGroup string) waiter.Condition {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.Health")
 		span.AddAttributes(
@@ -22,12 +21,6 @@ func Health(ctx context.Context, project, region, backendService, instanceGroup 
 			trace.StringAttribute("instance_group", instanceGroup),
 		)
 		defer span.End()
-
-		// Get or create our GCE client.
-		gce, err := gcp.Compute(ctx)
-		if err != nil {
-			return false, err
-		}
 
 		// Verify that the instance group manager exists and is stable.
 		igm, err := gce.RegionInstanceGroupManagers.Get(project, region, instanceGroup).
