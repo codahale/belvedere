@@ -11,25 +11,21 @@ import (
 	"go.opencensus.io/trace"
 )
 
-// Setup enables all required GCP services, grants Deployment Manager the permissions required to
-// manage project accounts and IAM roles, and creates a deployment with the base resources needed
-// to use Belvedere.
-func Setup(ctx context.Context, project, dnsZone string, dryRun bool, interval time.Duration) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.Setup")
+func (p *project) Setup(ctx context.Context, dnsZone string, dryRun bool, interval time.Duration) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.project.Setup")
 	span.AddAttributes(
-		trace.StringAttribute("project", project),
 		trace.StringAttribute("dns_zone", dnsZone),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
 	defer span.End()
 
 	// Enable all required services.
-	if err := setup.EnableAPIs(ctx, project, dryRun, interval); err != nil {
+	if err := setup.EnableAPIs(ctx, p.name, dryRun, interval); err != nil {
 		return err
 	}
 
 	// Grant Deployment Manager the required permissions to manage IAM roles.
-	if err := setup.SetDMPerms(ctx, project, dryRun); err != nil {
+	if err := setup.SetDMPerms(ctx, p.name, dryRun); err != nil {
 		return err
 	}
 
@@ -40,7 +36,7 @@ func Setup(ctx context.Context, project, dnsZone string, dryRun bool, interval t
 
 	// Create a deployment with a managed DNS zone and firewall rules which limit SSH to GCE
 	// instances to those tunneled over IAP.
-	return deployments.Insert(ctx, project, "belvedere", resources.Base(dnsZone),
+	return deployments.Insert(ctx, p.name, "belvedere", resources.Base(dnsZone),
 		deployments.Labels{
 			Type: "base",
 		},
@@ -48,17 +44,14 @@ func Setup(ctx context.Context, project, dnsZone string, dryRun bool, interval t
 	)
 }
 
-// Teardown deletes the shared firewall rules and managed zone created by Setup. It does not disable
-// services or downgrade Deployment Manager's permissions.
-func Teardown(ctx context.Context, project string, dryRun, async bool, interval time.Duration) error {
-	ctx, span := trace.StartSpan(ctx, "belvedere.Teardown")
+func (p *project) Teardown(ctx context.Context, dryRun, async bool, interval time.Duration) error {
+	ctx, span := trace.StartSpan(ctx, "belvedere.project.Teardown")
 	span.AddAttributes(
-		trace.StringAttribute("project", project),
 		trace.BoolAttribute("dry_run", dryRun),
 		trace.BoolAttribute("async", async),
 	)
 	defer span.End()
 
 	// Delete the shared deployment.
-	return deployments.Delete(ctx, project, "belvedere", dryRun, async, interval)
+	return deployments.Delete(ctx, p.name, "belvedere", dryRun, async, interval)
 }

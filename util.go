@@ -15,16 +15,16 @@ type SetupCmd struct {
 	DNSZone string `arg:"" required:"" help:"The DNS zone to be managed by this project."`
 }
 
-func (cmd *SetupCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.Setup(ctx, o.Project, cmd.DNSZone, o.DryRun, o.Interval)
+func (cmd *SetupCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+	return project.Setup(ctx, cmd.DNSZone, o.DryRun, o.Interval)
 }
 
 type TeardownCmd struct {
 	Async bool `help:"Return without waiting for successful completion."`
 }
 
-func (cmd *TeardownCmd) Run(ctx context.Context, o *Options) error {
-	return belvedere.Teardown(ctx, o.Project, o.DryRun, cmd.Async, o.Interval)
+func (cmd *TeardownCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+	return project.Teardown(ctx, o.DryRun, cmd.Async, o.Interval)
 }
 
 type DNSServersCmd struct {

@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/logs"
@@ -18,6 +19,15 @@ import (
 type Project interface {
 	// Name returns the name of the project.
 	Name() string
+
+	// Setup enables all required GCP services, grants Deployment Manager the permissions required
+	// to manage project accounts and IAM roles, and creates a deployment with the base resources
+	// needed to use Belvedere.
+	Setup(ctx context.Context, dnsZone string, dryRun bool, interval time.Duration) error
+
+	// Teardown deletes the shared firewall rules and managed zone created by Setup. It does not
+	// disable services or downgrade Deployment Manager's permissions.
+	Teardown(ctx context.Context, dryRun, async bool, interval time.Duration) error
 
 	// DNSServers returns a list of DNS servers which handle the project's managed zone.
 	DNSServers(ctx context.Context) ([]DNSServer, error)
