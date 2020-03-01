@@ -2,7 +2,6 @@ package belvedere
 
 import (
 	"context"
-	"net/http"
 	"testing"
 	"time"
 
@@ -11,7 +10,6 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
-	deploymentmanager "google.golang.org/api/deploymentmanager/v2beta"
 	"google.golang.org/api/dns/v1"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -20,34 +18,21 @@ func TestAppService_List(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/deployments?alt=json&filter=labels.belvedere-type+eq+%22app%22&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(&deploymentmanager.DeploymentsListResponse{
-			Deployments: []*deploymentmanager.Deployment{
-				{
-					Name: "belvedere-app1",
-					Labels: []*deploymentmanager.DeploymentLabelEntry{
-						{
-							Key:   "belvedere-type",
-							Value: "app",
-						},
-						{
-							Key:   "belvedere-app",
-							Value: "app1",
-						},
-						{
-							Key:   "belvedere-region",
-							Value: "us-west1",
-						},
-					},
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	dm := mocks.NewDeploymentsManager(ctrl)
+	dm.EXPECT().
+		List(gomock.Any(), "my-project", `labels.belvedere-type eq "app"`).
+		Return([]deployments.Deployment{
+			{
+				Labels: deployments.Labels{
+					Type:   "app",
+					App:    "app1",
+					Region: "us-west1",
 				},
 			},
-		})
-
-	dm, err := deployments.NewManager(context.TODO())
-	if err != nil {
-		t.Fatal(err)
-	}
+		}, nil)
 
 	as := &appService{
 		project: "my-project",
