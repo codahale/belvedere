@@ -3,6 +3,7 @@ package belvedere
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
@@ -107,5 +108,29 @@ func TestReleaseService_List_withApp(t *testing.T) {
 
 	if !cmp.Equal(expected, actual) {
 		t.Fatal(cmp.Diff(expected, actual))
+	}
+}
+
+func TestReleaseService_Delete(t *testing.T) {
+	defer gock.Off()
+	it.MockTokenSource()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	dm := mocks.NewDeploymentsManager(ctrl)
+
+	dm.EXPECT().
+		Delete(gomock.Any(), "my-project", "belvedere-my-app-v1", false, false, 10*time.Millisecond)
+
+	service := &releaseService{
+		project: "my-project",
+		dm:      dm,
+	}
+
+	if err := service.Delete(
+		context.TODO(), "my-app", "v1", false, false, 10*time.Millisecond,
+	); err != nil {
+		t.Fatal(err)
 	}
 }
