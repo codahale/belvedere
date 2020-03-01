@@ -2,9 +2,12 @@ package setup
 
 import (
 	"context"
+	"fmt"
 	"time"
 
+	"go.opencensus.io/trace"
 	"google.golang.org/api/cloudresourcemanager/v1"
+	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/serviceusage/v1"
 )
 
@@ -16,6 +19,8 @@ type Service interface {
 
 	// EnableAPIs enables all required services for the given GCP project.
 	EnableAPIs(ctx context.Context, project string, dryRun bool, interval time.Duration) error
+
+	ManagedZone(ctx context.Context, project string) (*dns.ManagedZone, error)
 }
 
 func NewService(ctx context.Context) (Service, error) {
@@ -29,12 +34,30 @@ func NewService(ctx context.Context) (Service, error) {
 		return nil, err
 	}
 
-	return &service{crm: crm, su: su}, nil
+	ds, err := dns.NewService(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &service{crm: crm, su: su, dns: ds}, nil
 }
 
 type service struct {
 	crm *cloudresourcemanager.Service
 	su  *serviceusage.Service
+	dns *dns.Service
 }
 
 var _ Service = &service{}
+
+func (s *service) ManagedZone(ctx context.Context, project string) (*dns.ManagedZone, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.internal.setup.ManagedZone")
+	defer span.End()
+
+	// Find the managed zone.
+	mz, err := s.dns.ManagedZones.Get(project, "belvedere").Context(ctx).Do()
+	if err != nil {
+		return nil, fmt.Errorf("error getting managed zone: %w", err)
+	}
+	return mz, nil
+}
