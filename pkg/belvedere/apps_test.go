@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/mocks"
@@ -74,7 +75,7 @@ func TestAppService_Create(t *testing.T) {
 			Name: "res",
 		},
 	}
-	config := Config{}
+	config := cfg.Config{}
 
 	setupService.EXPECT().
 		ManagedZone(gomock.Any(), "my-project").
@@ -121,7 +122,7 @@ func TestAppService_Update(t *testing.T) {
 			Name: "res",
 		},
 	}
-	config := Config{}
+	config := cfg.Config{}
 
 	setupService.EXPECT().
 		ManagedZone(gomock.Any(), "my-project").

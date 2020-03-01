@@ -1,4 +1,4 @@
-package belvedere
+package cfg
 
 import (
 	"io/ioutil"
@@ -15,7 +15,7 @@ func TestParse(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	actual, err := ParseConfig(b)
+	actual, err := Parse(b)
 	if err != nil {
 		t.Fatal(err)
 	}

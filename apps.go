@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/codahale/belvedere/pkg/belvedere"
+	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 )
 
 type AppsCmd struct {
@@ -36,7 +37,7 @@ func (cmd *AppsCreateCmd) Run(ctx context.Context, project belvedere.Project, o 
 		return err
 	}
 
-	config, err := belvedere.ParseConfig(b)
+	config, err := cfg.Parse(b)
 	if err != nil {
 		return err
 	}
@@ -54,7 +55,7 @@ func (cmd *AppsUpdateCmd) Run(ctx context.Context, project belvedere.Project, o 
 		return err
 	}
 
-	config, err := belvedere.ParseConfig(b)
+	config, err := cfg.Parse(b)
 	if err != nil {
 		return err
 	}
