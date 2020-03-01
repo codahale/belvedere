@@ -39,7 +39,7 @@ var (
 	}
 )
 
-func (m *service) EnableAPIs(ctx context.Context, project string, dryRun bool, interval time.Duration) error {
+func (s *service) EnableAPIs(ctx context.Context, project string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.setup.EnableAPIs")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -55,7 +55,7 @@ func (m *service) EnableAPIs(ctx context.Context, project string, dryRun bool, i
 		}
 
 		// Enable the services.
-		op, err := m.su.Services.BatchEnable(
+		op, err := s.su.Services.BatchEnable(
 			fmt.Sprintf("projects/%s", project),
 			&serviceusage.BatchEnableServicesRequest{
 				ServiceIds: serviceIDs,
@@ -74,7 +74,7 @@ func (m *service) EnableAPIs(ctx context.Context, project string, dryRun bool, i
 		}
 
 		// Poll for the services to be enabled.
-		if err := waiter.Poll(ctx, interval, check.SU(ctx, m.su, op.Name)); err != nil {
+		if err := waiter.Poll(ctx, interval, check.SU(ctx, s.su, op.Name)); err != nil {
 			return err
 		}
 	}

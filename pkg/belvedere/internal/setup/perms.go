@@ -10,7 +10,7 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
-func (m *service) SetDMPerms(ctx context.Context, project string, dryRun bool) error {
+func (s *service) SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.setup.SetDMPerms")
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
@@ -19,7 +19,7 @@ func (m *service) SetDMPerms(ctx context.Context, project string, dryRun bool) e
 	defer span.End()
 
 	// Resolve the project's numeric ID.
-	p, err := m.crm.Projects.Get(project).Fields("projectNumber").Context(ctx).Do()
+	p, err := s.crm.Projects.Get(project).Fields("projectNumber").Context(ctx).Do()
 	if err != nil {
 		return fmt.Errorf("error getting project: %w", err)
 	}
@@ -28,7 +28,7 @@ func (m *service) SetDMPerms(ctx context.Context, project string, dryRun bool) e
 	const owner = "roles/owner"
 
 	exists := false
-	err = modifyIAMPolicy(ctx, m.crm, project,
+	err = modifyIAMPolicy(ctx, s.crm, project,
 		func(policy *cloudresourcemanager.Policy) *cloudresourcemanager.Policy {
 			// Look for an existing IAM binding giving Deployment Service ownership of the project.
 			for _, binding := range policy.Bindings {

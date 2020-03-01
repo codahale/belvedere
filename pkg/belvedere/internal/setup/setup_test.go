@@ -43,5 +43,4 @@ func TestService_ManagedZone(t *testing.T) {
 	if !cmp.Equal(expected, actual) {
 		t.Fatal(cmp.Diff(expected, actual))
 	}
-
 }
