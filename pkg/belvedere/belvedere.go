@@ -15,7 +15,6 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/setup"
 	"go.opencensus.io/trace"
 	compute "google.golang.org/api/compute/v0.beta"
-	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/logging/v2"
 	"google.golang.org/api/secretmanager/v1"
 )
@@ -83,11 +82,6 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 		return nil, err
 	}
 
-	gds, err := dns.NewService(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	dm, err := deployments.NewManager(ctx)
 	if err != nil {
 		return nil, err
@@ -96,11 +90,6 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 	gce, err := compute.NewService(ctx)
 	if err != nil {
 		return nil, err
-	}
-
-	ds := &dnsService{
-		project: name,
-		dns:     gds,
 	}
 
 	s, err := setup.NewService(ctx)
@@ -123,10 +112,9 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 		apps: &appService{
 			project:   name,
 			dm:        dm,
-			dns:       ds,
+			setup:     s,
 			resources: res,
 		},
-		dns: ds,
 		releases: &releaseService{
 			project:   name,
 			dm:        dm,
@@ -146,7 +134,6 @@ type project struct {
 	logs      LogService
 	secrets   SecretsService
 	apps      *appService
-	dns       *dnsService
 	releases  *releaseService
 	dm        deployments.Manager
 	gce       *compute.Service
@@ -223,7 +210,7 @@ func (p *project) DNSServers(ctx context.Context) ([]DNSServer, error) {
 	defer span.End()
 
 	// Find the project'p managed zone.
-	mz, err := p.dns.findManagedZone(ctx)
+	mz, err := p.setup.ManagedZone(ctx, p.name)
 	if err != nil {
 		return nil, err
 	}

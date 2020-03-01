@@ -7,6 +7,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/setup"
 	"go.opencensus.io/trace"
 )
 
@@ -33,7 +34,7 @@ type App struct {
 
 type appService struct {
 	project   string
-	dns       *dnsService
+	setup     setup.Service
 	dm        deployments.Manager
 	resources resources.Builder
 }
@@ -77,7 +78,7 @@ func (s *appService) Create(ctx context.Context, region, name string, config *Co
 	}
 
 	// Find the project's managed zone.
-	managedZone, err := s.dns.findManagedZone(ctx)
+	managedZone, err := s.setup.ManagedZone(ctx, s.project)
 	if err != nil {
 		return err
 	}
@@ -103,7 +104,7 @@ func (s *appService) Update(ctx context.Context, name string, config *Config, dr
 	defer span.End()
 
 	// Find the project's managed zone.
-	managedZone, err := s.dns.findManagedZone(ctx)
+	managedZone, err := s.setup.ManagedZone(ctx, s.project)
 	if err != nil {
 		return err
 	}
