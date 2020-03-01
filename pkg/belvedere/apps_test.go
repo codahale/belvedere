@@ -118,3 +118,65 @@ func TestAppService_Create(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestAppService_Update(t *testing.T) {
+	defer gock.Off()
+	it.MockTokenSource()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	resourceBuilder := mocks.NewResourceBuilder(ctrl)
+	dm := mocks.NewDeploymentsManager(ctrl)
+	setupService := mocks.NewSetupService(ctrl)
+
+	mz := &dns.ManagedZone{}
+	res := []deployments.Resource{
+		{
+			Name: "res",
+		},
+	}
+	config := Config{}
+
+	setupService.EXPECT().
+		ManagedZone(gomock.Any(), "my-project").
+		Return(mz, nil)
+
+	resourceBuilder.EXPECT().
+		App("my-project", "my-app", mz, config.CDNPolicy, config.IAP, config.IAMRoles).
+		Return(res)
+
+	dm.EXPECT().
+		Update(gomock.Any(), "my-project", "belvedere-my-app", res, false, 10*time.Millisecond)
+
+	apps := &appService{
+		project:   "my-project",
+		dm:        dm,
+		resources: resourceBuilder,
+		setup:     setupService,
+	}
+	if err := apps.Update(context.TODO(), "my-app", &config, false, 10*time.Millisecond); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestAppService_Delete(t *testing.T) {
+	defer gock.Off()
+	it.MockTokenSource()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	dm := mocks.NewDeploymentsManager(ctrl)
+
+	dm.EXPECT().
+		Delete(gomock.Any(), "my-project", "belvedere-my-app", false, false, 10*time.Millisecond)
+
+	apps := &appService{
+		project: "my-project",
+		dm:      dm,
+	}
+	if err := apps.Delete(context.TODO(), "my-app", false, false, 10*time.Millisecond); err != nil {
+		t.Fatal(err)
+	}
+}
