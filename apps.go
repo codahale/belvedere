@@ -17,12 +17,12 @@ type AppsCmd struct {
 type AppsListCmd struct {
 }
 
-func (AppsListCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+func (AppsListCmd) Run(ctx context.Context, project belvedere.Project, tables TableWriter) error {
 	apps, err := project.Apps().List(ctx)
 	if err != nil {
 		return err
 	}
-	return o.printTable(apps)
+	return tables.Print(apps)
 }
 
 type AppsCreateCmd struct {

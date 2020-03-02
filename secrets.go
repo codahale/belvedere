@@ -18,12 +18,12 @@ type SecretsCmd struct {
 type SecretsListCmd struct {
 }
 
-func (*SecretsListCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+func (*SecretsListCmd) Run(ctx context.Context, project belvedere.Project, tables TableWriter) error {
 	releases, err := project.Secrets().List(ctx)
 	if err != nil {
 		return err
 	}
-	return o.printTable(releases)
+	return tables.Print(releases)
 }
 
 type SecretsCreateCmd struct {

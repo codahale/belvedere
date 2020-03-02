@@ -19,12 +19,12 @@ type ReleasesListCmd struct {
 	App string `arg:"" optional:"" help:"Limit releases to the given app."`
 }
 
-func (cmd *ReleasesListCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+func (cmd *ReleasesListCmd) Run(ctx context.Context, project belvedere.Project, tables TableWriter) error {
 	releases, err := project.Releases().List(ctx, cmd.App)
 	if err != nil {
 		return err
 	}
-	return o.printTable(releases)
+	return tables.Print(releases)
 }
 
 type ReleasesCreateCmd struct {

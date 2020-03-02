@@ -30,24 +30,24 @@ func (cmd *TeardownCmd) Run(ctx context.Context, project belvedere.Project, o *O
 type DNSServersCmd struct {
 }
 
-func (cmd *DNSServersCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+func (cmd *DNSServersCmd) Run(ctx context.Context, project belvedere.Project, tables TableWriter) error {
 	servers, err := project.DNSServers(ctx)
 	if err != nil {
 		return err
 	}
-	return o.printTable(servers)
+	return tables.Print(servers)
 }
 
 type MachineTypesCmd struct {
 	Region string `help:"Limit types to those available in the given region."`
 }
 
-func (cmd *MachineTypesCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+func (cmd *MachineTypesCmd) Run(ctx context.Context, project belvedere.Project, tables TableWriter) error {
 	machineTypes, err := project.MachineTypes(ctx, cmd.Region)
 	if err != nil {
 		return err
 	}
-	return o.printTable(machineTypes)
+	return tables.Print(machineTypes)
 }
 
 type InstancesCmd struct {
@@ -55,12 +55,12 @@ type InstancesCmd struct {
 	Release string `arg:"" optional:"" help:"Limit instances to those running the given release."`
 }
 
-func (cmd *InstancesCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+func (cmd *InstancesCmd) Run(ctx context.Context, project belvedere.Project, tables TableWriter) error {
 	instances, err := project.Instances(ctx, cmd.App, cmd.Release)
 	if err != nil {
 		return err
 	}
-	return o.printTable(instances)
+	return tables.Print(instances)
 }
 
 type SSHCmd struct {
@@ -95,10 +95,10 @@ type LogsCmd struct {
 	Freshness time.Duration `default:"5m" help:"Limit logs to the last period of time."`
 }
 
-func (cmd *LogsCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+func (cmd *LogsCmd) Run(ctx context.Context, project belvedere.Project, tables TableWriter) error {
 	entries, err := project.Logs().List(ctx, cmd.App, cmd.Release, cmd.Instance, cmd.Freshness, cmd.Filters)
 	if err != nil {
 		return err
 	}
-	return o.printTable(entries)
+	return tables.Print(entries)
 }
