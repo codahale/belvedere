@@ -2,9 +2,11 @@ package belvedere
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/mocks"
@@ -109,6 +111,66 @@ func TestReleaseService_List_withApp(t *testing.T) {
 	if !cmp.Equal(expected, actual) {
 		t.Fatal(cmp.Diff(expected, actual))
 	}
+}
+
+func TestReleaseService_Create(t *testing.T) {
+	defer gock.Off()
+	it.MockTokenSource()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	res := []deployments.Resource{
+		{
+			Name: "res",
+		},
+	}
+
+	config := &cfg.Config{}
+	imageSHA256 := strings.Repeat("1", 64)
+
+	dm := mocks.NewDeploymentsManager(ctrl)
+	dm.EXPECT().
+		Get(gomock.Any(), "my-project", "belvedere-my-app").
+		Return(&deployments.Deployment{
+			Labels: deployments.Labels{
+				Region: "us-west1",
+			},
+		}, nil)
+	dm.EXPECT().
+		Insert(gomock.Any(), "my-project", "belvedere-my-app-v1",
+			res, deployments.Labels{
+				Type:    "release",
+				Region:  "us-west1",
+				App:     "my-app",
+				Release: "v1",
+				Hash:    strings.Repeat("1", 32),
+			}, false, 10*time.Millisecond)
+
+	resourceBuilder := mocks.NewResourceBuilder(ctrl)
+	resourceBuilder.EXPECT().
+		Release("my-project", "us-west1", "my-app", "v1", imageSHA256, config).
+		Return(res)
+
+	service := &releaseService{
+		project:   "my-project",
+		dm:        dm,
+		resources: resourceBuilder,
+	}
+
+	if err := service.Create(
+		context.TODO(), "my-app", "v1", config, imageSHA256, false, 10*time.Millisecond,
+	); err != nil {
+		t.Fatal()
+	}
+}
+
+func TestReleaseService_Enable(t *testing.T) {
+	t.Skip("not implemented")
+}
+
+func TestReleaseService_Disable(t *testing.T) {
+	t.Skip("not implemented")
 }
 
 func TestReleaseService_Delete(t *testing.T) {

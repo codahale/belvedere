@@ -104,7 +104,7 @@ func (r *releaseService) Create(ctx context.Context, app, name string, config *c
 	return r.dm.Insert(ctx, r.project, resources.Name(app, name),
 		r.resources.Release(r.project, region, app, name, imageSHA256, config),
 		deployments.Labels{
-			Type:    "name",
+			Type:    "release",
 			App:     app,
 			Release: name,
 			Region:  region,
