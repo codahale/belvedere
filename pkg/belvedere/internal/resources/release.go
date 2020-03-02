@@ -1,13 +1,13 @@
 package resources
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
 
 	"github.com/alessio/shellescape"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/cloudinit"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	compute "google.golang.org/api/compute/v0.beta"
 )
@@ -146,8 +146,18 @@ func metaData(key, value string) *compute.MetadataItems {
 
 // cloudConfig returns a cloud-config manifest for the given release.
 func cloudConfig(c *cfg.Config, app, release string, imageSHA256 string) string {
-	cc := cloudinit.CloudConfig{
-		WriteFiles: []cloudinit.File{
+	type file struct {
+		Path        string `json:"path,omitempty"`
+		Permissions string `json:"permissions,omitempty"`
+		Owner       string `json:"owner,omitempty"`
+		Content     string `json:"content,omitempty"`
+	}
+
+	cc := struct {
+		WriteFiles  []file   `json:"write_files,omitempty"`
+		RunCommands []string `json:"runcmd,omitempty"`
+	}{
+		WriteFiles: []file{
 			// Write a systemd service for running the app's container in Docker.
 			{
 				Content: systemdService(app,
@@ -176,7 +186,7 @@ func cloudConfig(c *cfg.Config, app, release string, imageSHA256 string) string 
 		sidecar := sidecar
 		// Add a systemd service for running the sidecar in Docker.
 		cc.WriteFiles = append(cc.WriteFiles,
-			cloudinit.File{
+			file{
 				Content: systemdService(name,
 					dockerArgs(&sidecar, name, "", "",
 						map[string]string{
@@ -193,7 +203,8 @@ func cloudConfig(c *cfg.Config, app, release string, imageSHA256 string) string 
 		cc.RunCommands = append(cc.RunCommands, fmt.Sprintf("systemctl start docker-%s.service", name))
 	}
 
-	return cc.String()
+	b, _ := json.Marshal(cc)
+	return fmt.Sprintf("#cloud-config\n\n%s", b)
 }
 
 // systemdTemplate is a template for starting a container in Docker. It includes authenticating
