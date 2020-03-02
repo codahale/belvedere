@@ -144,7 +144,7 @@ func metaData(key, value string) *compute.MetadataItems {
 	}
 }
 
-// CloudConfig returns a cloud-config manifest for the given release.
+// cloudConfig returns a cloud-config manifest for the given release.
 func cloudConfig(c *cfg.Config, app, release string, imageSHA256 string) string {
 	cc := cloudinit.CloudConfig{
 		WriteFiles: []cloudinit.File{
