@@ -20,6 +20,7 @@ type Service interface {
 	// EnableAPIs enables all required services for the given GCP project.
 	EnableAPIs(ctx context.Context, project string, dryRun bool, interval time.Duration) error
 
+	// ManagedZone returns the managed zone for the given project.
 	ManagedZone(ctx context.Context, project string) (*dns.ManagedZone, error)
 }
 
