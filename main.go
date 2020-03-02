@@ -57,7 +57,6 @@ func run(cli *kong.Context, opts *Options) error {
 	if err != nil {
 		return err
 	}
-	opts.Project = project.Name()
 	span.AddAttributes(trace.StringAttribute("project", project.Name()))
 
 	// Run the given command, passing in the context and options.
