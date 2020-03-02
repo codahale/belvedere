@@ -11,7 +11,6 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	compute "google.golang.org/api/compute/v0.beta"
 )
@@ -44,11 +43,12 @@ type ReleaseService interface {
 }
 
 type releaseService struct {
-	project   string
-	dm        deployments.Manager
-	gce       *compute.Service
-	backends  backends.Service
-	resources resources.Builder
+	project       string
+	dm            deployments.Manager
+	gce           *compute.Service
+	backends      backends.Service
+	resources     resources.Builder
+	healthChecker check.HealthChecker
 }
 
 func (r *releaseService) List(ctx context.Context, app string) ([]Release, error) {
@@ -134,7 +134,7 @@ func (r *releaseService) Enable(ctx context.Context, app, name string, dryRun bo
 		return err
 	}
 
-	return waiter.Poll(ctx, interval, check.Health(ctx, r.gce, r.project, region, backendService, instanceGroup))
+	return r.healthChecker.Poll(ctx, r.project, region, backendService, instanceGroup, interval)
 }
 
 func (r *releaseService) Disable(ctx context.Context, app, name string, dryRun bool, interval time.Duration) error {

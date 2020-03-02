@@ -3,11 +3,30 @@ package check
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
 	compute "google.golang.org/api/compute/v0.beta"
 )
+
+type HealthChecker interface {
+	Poll(ctx context.Context, project, region, backendService, instanceGroup string, interval time.Duration) error
+}
+
+func NewHealthChecker(gce *compute.Service) HealthChecker {
+	return &healthChecker{
+		gce: gce,
+	}
+}
+
+type healthChecker struct {
+	gce *compute.Service
+}
+
+func (h *healthChecker) Poll(ctx context.Context, project, region, backendService, instanceGroup string, interval time.Duration) error {
+	return waiter.Poll(ctx, interval, Health(ctx, h.gce, project, region, backendService, instanceGroup))
+}
 
 // Health returns a waiter.Condition for the given instance group being stable and for all its
 // instances registering as healthy with the given backend service.

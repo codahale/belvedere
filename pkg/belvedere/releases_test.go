@@ -166,11 +166,74 @@ func TestReleaseService_Create(t *testing.T) {
 }
 
 func TestReleaseService_Enable(t *testing.T) {
-	t.Skip("not implemented")
+	defer gock.Off()
+	it.MockTokenSource()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	dm := mocks.NewDeploymentsManager(ctrl)
+	dm.EXPECT().
+		Get(gomock.Any(), "my-project", "belvedere-my-app").
+		Return(&deployments.Deployment{
+			Labels: deployments.Labels{
+				Region: "us-west1",
+			},
+		}, nil)
+
+	hc := mocks.NewMockHealthChecker(ctrl)
+	hc.EXPECT().
+		Poll(gomock.Any(), "my-project", "us-west1", "my-app-bes", "my-app-v1-ig", 10*time.Millisecond)
+
+	backendsService := mocks.NewBackendsService(ctrl)
+	backendsService.EXPECT().
+		Add(gomock.Any(), "my-project", "us-west1", "my-app-bes", "my-app-v1-ig", false, 10*time.Millisecond)
+
+	service := &releaseService{
+		project:       "my-project",
+		dm:            dm,
+		backends:      backendsService,
+		healthChecker: hc,
+	}
+
+	if err := service.Enable(
+		context.TODO(), "my-app", "v1", false, 10*time.Millisecond,
+	); err != nil {
+		t.Fatal()
+	}
 }
 
 func TestReleaseService_Disable(t *testing.T) {
-	t.Skip("not implemented")
+	defer gock.Off()
+	it.MockTokenSource()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	dm := mocks.NewDeploymentsManager(ctrl)
+	dm.EXPECT().
+		Get(gomock.Any(), "my-project", "belvedere-my-app").
+		Return(&deployments.Deployment{
+			Labels: deployments.Labels{
+				Region: "us-west1",
+			},
+		}, nil)
+
+	backendsService := mocks.NewBackendsService(ctrl)
+	backendsService.EXPECT().
+		Remove(gomock.Any(), "my-project", "us-west1", "my-app-bes", "my-app-v1-ig", false, 10*time.Millisecond)
+
+	service := &releaseService{
+		project:  "my-project",
+		dm:       dm,
+		backends: backendsService,
+	}
+
+	if err := service.Disable(
+		context.TODO(), "my-app", "v1", false, 10*time.Millisecond,
+	); err != nil {
+		t.Fatal()
+	}
 }
 
 func TestReleaseService_Delete(t *testing.T) {

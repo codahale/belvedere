@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
@@ -116,10 +117,11 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 			resources: res,
 		},
 		releases: &releaseService{
-			project:   name,
-			dm:        dm,
-			gce:       gce,
-			resources: res,
+			project:       name,
+			dm:            dm,
+			gce:           gce,
+			resources:     res,
+			healthChecker: check.NewHealthChecker(gce),
 		},
 		name:      name,
 		dm:        dm,
