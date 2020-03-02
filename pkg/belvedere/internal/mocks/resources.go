@@ -5,9 +5,9 @@
 package mocks
 
 import (
+	cfg "github.com/codahale/belvedere/pkg/belvedere/cfg"
 	deployments "github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	gomock "github.com/golang/mock/gomock"
-	compute "google.golang.org/api/compute/v0.beta"
 	dns "google.golang.org/api/dns/v1"
 	reflect "reflect"
 )
@@ -36,17 +36,17 @@ func (m *ResourceBuilder) EXPECT() *ResourceBuilderMockRecorder {
 }
 
 // App mocks base method
-func (m *ResourceBuilder) App(arg0, arg1 string, arg2 *dns.ManagedZone, arg3 *compute.BackendServiceCdnPolicy, arg4 *compute.BackendServiceIAP, arg5 []string) []deployments.Resource {
+func (m *ResourceBuilder) App(arg0, arg1 string, arg2 *dns.ManagedZone, arg3 *cfg.Config) []deployments.Resource {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "App", arg0, arg1, arg2, arg3, arg4, arg5)
+	ret := m.ctrl.Call(m, "App", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].([]deployments.Resource)
 	return ret0
 }
 
 // App indicates an expected call of App
-func (mr *ResourceBuilderMockRecorder) App(arg0, arg1, arg2, arg3, arg4, arg5 interface{}) *gomock.Call {
+func (mr *ResourceBuilderMockRecorder) App(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "App", reflect.TypeOf((*ResourceBuilder)(nil).App), arg0, arg1, arg2, arg3, arg4, arg5)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "App", reflect.TypeOf((*ResourceBuilder)(nil).App), arg0, arg1, arg2, arg3)
 }
 
 // Base mocks base method
@@ -64,15 +64,15 @@ func (mr *ResourceBuilderMockRecorder) Base(arg0 interface{}) *gomock.Call {
 }
 
 // Release mocks base method
-func (m *ResourceBuilder) Release(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7 string, arg8 int, arg9 *compute.AutoscalingPolicy) []deployments.Resource {
+func (m *ResourceBuilder) Release(arg0, arg1, arg2, arg3, arg4 string, arg5 *cfg.Config) []deployments.Resource {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Release", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+	ret := m.ctrl.Call(m, "Release", arg0, arg1, arg2, arg3, arg4, arg5)
 	ret0, _ := ret[0].([]deployments.Resource)
 	return ret0
 }
 
 // Release indicates an expected call of Release
-func (mr *ResourceBuilderMockRecorder) Release(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 interface{}) *gomock.Call {
+func (mr *ResourceBuilderMockRecorder) Release(arg0, arg1, arg2, arg3, arg4, arg5 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Release", reflect.TypeOf((*ResourceBuilder)(nil).Release), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Release", reflect.TypeOf((*ResourceBuilder)(nil).Release), arg0, arg1, arg2, arg3, arg4, arg5)
 }

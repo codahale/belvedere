@@ -4,20 +4,25 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/fixtures"
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
 func TestReleaseResources(t *testing.T) {
 	resources := NewBuilder().Release(
-		"my-project", "us-central1", "my-app", "v43",
-		"", "", "n1-standard-1", "echo woo",
-		20,
-		&compute.AutoscalingPolicy{
-			MinNumReplicas: 10,
-			MaxNumReplicas: 100,
-			LoadBalancingUtilization: &compute.AutoscalingPolicyLoadBalancingUtilization{
-				UtilizationTarget: 0.6,
+		"my-project", "us-central1", "my-app", "v43", "echo woo",
+		&cfg.Config{
+			Network:     "network",
+			Subnetwork:  "subnetwork",
+			MachineType: "n1-standard-1",
+			NumReplicas: 20,
+			AutoscalingPolicy: &compute.AutoscalingPolicy{
+				MinNumReplicas: 10,
+				MaxNumReplicas: 100,
+				LoadBalancingUtilization: &compute.AutoscalingPolicyLoadBalancingUtilization{
+					UtilizationTarget: 0.6,
+				},
 			},
 		},
 	)

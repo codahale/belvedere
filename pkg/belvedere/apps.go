@@ -86,7 +86,7 @@ func (s *appService) Create(ctx context.Context, region, name string, config *cf
 
 	// Create a deployment with all the app resources.
 	return s.dm.Insert(ctx, s.project, resources.Name(name),
-		s.resources.App(s.project, name, managedZone, config.CDNPolicy, config.IAP, config.IAMRoles),
+		s.resources.App(s.project, name, managedZone, config),
 		deployments.Labels{
 			Type:   "app",
 			App:    name,
@@ -112,7 +112,7 @@ func (s *appService) Update(ctx context.Context, name string, config *cfg.Config
 
 	// Update the deployment with the new app resources.
 	return s.dm.Update(ctx, s.project, resources.Name(name),
-		s.resources.App(s.project, name, managedZone, config.CDNPolicy, config.IAP, config.IAMRoles),
+		s.resources.App(s.project, name, managedZone, config),
 		dryRun, interval,
 	)
 }

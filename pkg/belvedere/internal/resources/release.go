@@ -3,16 +3,17 @@ package resources
 import (
 	"fmt"
 
+	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
-func (*builder) Release(project, region, app, release, network, subnetwork, machineType, userData string, replicas int, autoscalingPolicy *compute.AutoscalingPolicy) []deployments.Resource {
+func (*builder) Release(project, region, app, release, imageSHA256 string, config *cfg.Config) []deployments.Resource {
 	instanceTemplate := fmt.Sprintf("%s-%s-it", app, release)
 	instanceGroupManager := fmt.Sprintf("%s-%s-ig", app, release)
 	autoscaler := fmt.Sprintf("%s-%s-as", app, release)
-	if network == "" {
-		network = defaultNetwork
+	if config.Network == "" {
+		config.Network = defaultNetwork
 	}
 	dep := []deployments.Resource{
 		// An instance template for creating release instances.
@@ -37,7 +38,7 @@ func (*builder) Release(project, region, app, release, network, subnetwork, mach
 						"belvedere-app":     app,
 						"belvedere-release": release,
 					},
-					MachineType: machineType,
+					MachineType: config.MachineType,
 					Metadata: &compute.Metadata{
 						Items: []*compute.MetadataItems{
 							// https://cloud.google.com/compute/docs/storing-retrieving-metadata#querying
@@ -47,14 +48,14 @@ func (*builder) Release(project, region, app, release, network, subnetwork, mach
 							// Enable the Stackdriver Logging Agent for the instance.
 							metaData("google-logging-enable", "true"),
 							// Inject the cloud-init metadata.
-							metaData("user-data", userData),
+							metaData("user-data", config.CloudConfig(app, release, imageSHA256)),
 						},
 					},
 					// Enable outbound internet access for the instances.
 					NetworkInterfaces: []*compute.NetworkInterface{
 						{
-							Network:    network,
-							Subnetwork: subnetwork,
+							Network:    config.Network,
+							Subnetwork: config.Subnetwork,
 							AccessConfigs: []*compute.AccessConfig{
 								{
 									Name: "External NAT",
@@ -103,19 +104,19 @@ func (*builder) Release(project, region, app, release, network, subnetwork, mach
 						Port: 8443,
 					},
 				},
-				TargetSize: int64(replicas),
+				TargetSize: int64(config.NumReplicas),
 			},
 		},
 	}
 
 	// An optional autoscaler.
-	if autoscalingPolicy != nil {
+	if config.AutoscalingPolicy != nil {
 		dep = append(dep, deployments.Resource{
 			Name: autoscaler,
 			Type: "compute.beta.regionAutoscaler",
 			Properties: &compute.Autoscaler{
 				Name:              fmt.Sprintf("%s-%s", app, release),
-				AutoscalingPolicy: autoscalingPolicy,
+				AutoscalingPolicy: config.AutoscalingPolicy,
 				Region:            region,
 				Target:            deployments.SelfLink(instanceGroupManager),
 			},

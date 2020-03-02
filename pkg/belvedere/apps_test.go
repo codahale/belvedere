@@ -75,14 +75,14 @@ func TestAppService_Create(t *testing.T) {
 			Name: "res",
 		},
 	}
-	config := cfg.Config{}
+	config := &cfg.Config{}
 
 	setupService.EXPECT().
 		ManagedZone(gomock.Any(), "my-project").
 		Return(mz, nil)
 
 	resourceBuilder.EXPECT().
-		App("my-project", "my-app", mz, config.CDNPolicy, config.IAP, config.IAMRoles).
+		App("my-project", "my-app", mz, config).
 		Return(res)
 
 	dm.EXPECT().
@@ -100,7 +100,7 @@ func TestAppService_Create(t *testing.T) {
 		resources: resourceBuilder,
 		setup:     setupService,
 	}
-	if err := apps.Create(context.TODO(), "us-west1", "my-app", &config, false, 10*time.Millisecond); err != nil {
+	if err := apps.Create(context.TODO(), "us-west1", "my-app", config, false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -122,14 +122,14 @@ func TestAppService_Update(t *testing.T) {
 			Name: "res",
 		},
 	}
-	config := cfg.Config{}
+	config := &cfg.Config{}
 
 	setupService.EXPECT().
 		ManagedZone(gomock.Any(), "my-project").
 		Return(mz, nil)
 
 	resourceBuilder.EXPECT().
-		App("my-project", "my-app", mz, config.CDNPolicy, config.IAP, config.IAMRoles).
+		App("my-project", "my-app", mz, config).
 		Return(res)
 
 	dm.EXPECT().
@@ -141,7 +141,7 @@ func TestAppService_Update(t *testing.T) {
 		resources: resourceBuilder,
 		setup:     setupService,
 	}
-	if err := apps.Update(context.TODO(), "my-app", &config, false, 10*time.Millisecond); err != nil {
+	if err := apps.Update(context.TODO(), "my-app", config, false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/fixtures"
 	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/dns/v1"
@@ -15,14 +16,18 @@ func TestAppResources(t *testing.T) {
 		DnsName: "horse.club",
 	}
 	resources := NewBuilder().App("my-project", "my-app", zone,
-		&compute.BackendServiceCdnPolicy{
-			SignedUrlCacheMaxAgeSec: 200,
-		}, &compute.BackendServiceIAP{
-			Enabled:            true,
-			Oauth2ClientId:     "hello",
-			Oauth2ClientSecret: "world",
-		}, []string{
-			"roles/dogWalker.dog",
+		&cfg.Config{
+			CDNPolicy: &compute.BackendServiceCdnPolicy{
+				SignedUrlCacheMaxAgeSec: 200,
+			},
+			IAP: &compute.BackendServiceIAP{
+				Enabled:            true,
+				Oauth2ClientId:     "hello",
+				Oauth2ClientSecret: "world",
+			},
+			IAMRoles: []string{
+				"roles/dogWalker.dog",
+			},
 		},
 	)
 

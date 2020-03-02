@@ -37,7 +37,7 @@
               },
               {
                 "key": "user-data",
-                "value": "echo woo"
+                "value": "#cloud-config\n\n{\"write_files\":[{\"path\":\"/etc/systemd/system/docker-my-app.service\",\"permissions\":\"0644\",\"owner\":\"root\",\"content\":\"[Unit]\\nDescription=Start the my-app container\\nWants=gcr-online.target\\nAfter=gcr-online.target\\n\\n[Service]\\nEnvironment=\\\"HOME=/var/lib/docker\\\"\\nExecStartPre=/usr/bin/docker-credential-gcr configure-docker\\nExecStart=/usr/bin/docker run --rm --log-driver gcplogs --log-opt labels=app,release --name my-app --network host --oom-kill-disable --label app=my-app --label release=v43 --env RELEASE=v43 '@sha256:echo woo'\\nExecStop=/usr/bin/docker stop my-app\\nExecStopPost=/usr/bin/docker rm my-app\\n\"}],\"runcmd\":[\"iptables -w -A INPUT -p tcp --dport 8443 -j ACCEPT\",\"systemctl daemon-reload\",\"systemctl start docker-my-app.service\"]}"
               }
             ]
           },
@@ -49,7 +49,8 @@
                   "type": "ONE_TO_ONE_NAT"
                 }
               ],
-              "network": "global/networks/default"
+              "network": "network",
+              "subnetwork": "subnetwork"
             }
           ],
           "serviceAccounts": [

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
-	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/dns/v1"
 )
 
@@ -18,17 +18,10 @@ type Builder interface {
 	Base(dnsZone string) []deployments.Resource
 
 	// App returns a list of resources for an app deployment.
-	App(
-		project string, app string, managedZone *dns.ManagedZone,
-		cdn *compute.BackendServiceCdnPolicy, iap *compute.BackendServiceIAP,
-		iamRoles []string,
-	) []deployments.Resource
+	App(project string, app string, managedZone *dns.ManagedZone, config *cfg.Config) []deployments.Resource
 
 	// Release returns a list of resources for a release deployment.
-	Release(
-		project, region, app, release, network, subnetwork, machineType, userData string,
-		replicas int, autoscalingPolicy *compute.AutoscalingPolicy,
-	) []deployments.Resource
+	Release(project, region, app, release, imageSHA256 string, config *cfg.Config) []deployments.Resource
 }
 
 func NewBuilder() Builder {

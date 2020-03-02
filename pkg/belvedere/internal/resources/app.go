@@ -3,16 +3,13 @@ package resources
 import (
 	"fmt"
 
+	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/dns/v1"
 )
 
-func (*builder) App(
-	project string, app string, managedZone *dns.ManagedZone,
-	cdn *compute.BackendServiceCdnPolicy, iap *compute.BackendServiceIAP,
-	iamRoles []string,
-) []deployments.Resource {
+func (*builder) App(project string, app string, managedZone *dns.ManagedZone, config *cfg.Config) []deployments.Resource {
 	firewall := fmt.Sprintf("belvedere-allow-%s-lb", app)
 	healthcheck := fmt.Sprintf("%s-hc", app)
 	backendService := fmt.Sprintf("%s-bes", app)
@@ -62,12 +59,12 @@ func (*builder) App(
 			Name: backendService,
 			Type: "compute.beta.backendService",
 			Properties: &compute.BackendService{
-				EnableCDN: cdn != nil,
-				CdnPolicy: cdn,
+				EnableCDN: config.CDNPolicy != nil,
+				CdnPolicy: config.CDNPolicy,
 				ConnectionDraining: &compute.ConnectionDraining{
 					DrainingTimeoutSec: 60,
 				},
-				Iap: iap,
+				Iap: config.IAP,
 				// TODO move to v1 when LogConfig goes GA
 				LogConfig: &compute.BackendServiceLogConfig{
 					Enable: true,
@@ -173,7 +170,7 @@ func (*builder) App(
 		resources = append(resources, roleBinding(project, serviceAccount, role))
 	}
 
-	for _, role := range iamRoles {
+	for _, role := range config.IAMRoles {
 		resources = append(resources, roleBinding(project, serviceAccount, role))
 	}
 
