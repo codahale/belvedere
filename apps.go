@@ -26,12 +26,14 @@ func (AppsListCmd) Run(ctx context.Context, project belvedere.Project, tables Ta
 }
 
 type AppsCreateCmd struct {
-	App    string `arg:"" help:"The app's name."`
-	Region string `arg:"" help:"The app's region."`
-	Config string `arg:"" optional:"" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
+	App                string `arg:"" help:"The app's name."`
+	Region             string `arg:"" help:"The app's region."`
+	Config             string `arg:"" optional:"" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
+	ModifyOptions      `embed:""`
+	LongRunningOptions `embed:""`
 }
 
-func (cmd *AppsCreateCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+func (cmd *AppsCreateCmd) Run(ctx context.Context, project belvedere.Project) error {
 	b, err := readFile(ctx, cmd.Config)
 	if err != nil {
 		return err
@@ -41,15 +43,17 @@ func (cmd *AppsCreateCmd) Run(ctx context.Context, project belvedere.Project, o 
 	if err != nil {
 		return err
 	}
-	return project.Apps().Create(ctx, cmd.Region, cmd.App, config, o.DryRun, o.Interval)
+	return project.Apps().Create(ctx, cmd.Region, cmd.App, config, cmd.DryRun, cmd.Interval)
 }
 
 type AppsUpdateCmd struct {
-	App    string `arg:"" help:"The app's name."`
-	Config string `arg:"" optional:"" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
+	App                string `arg:"" help:"The app's name."`
+	Config             string `arg:"" optional:"" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
+	ModifyOptions      `embed:""`
+	LongRunningOptions `embed:""`
 }
 
-func (cmd *AppsUpdateCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+func (cmd *AppsUpdateCmd) Run(ctx context.Context, project belvedere.Project) error {
 	b, err := readFile(ctx, cmd.Config)
 	if err != nil {
 		return err
@@ -59,14 +63,16 @@ func (cmd *AppsUpdateCmd) Run(ctx context.Context, project belvedere.Project, o 
 	if err != nil {
 		return err
 	}
-	return project.Apps().Update(ctx, cmd.App, config, o.DryRun, o.Interval)
+	return project.Apps().Update(ctx, cmd.App, config, cmd.DryRun, cmd.Interval)
 }
 
 type AppsDeleteCmd struct {
-	App   string `arg:"" help:"The app's name."`
-	Async bool   `help:"Return without waiting for successful completion."`
+	App                string `arg:"" help:"The app's name."`
+	Async              bool   `help:"Return without waiting for successful completion."`
+	ModifyOptions      `embed:""`
+	LongRunningOptions `embed:""`
 }
 
-func (cmd *AppsDeleteCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
-	return project.Apps().Delete(ctx, cmd.App, o.DryRun, cmd.Async, o.Interval)
+func (cmd *AppsDeleteCmd) Run(ctx context.Context, project belvedere.Project) error {
+	return project.Apps().Delete(ctx, cmd.App, cmd.DryRun, cmd.Async, cmd.Interval)
 }

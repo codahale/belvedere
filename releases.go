@@ -28,14 +28,16 @@ func (cmd *ReleasesListCmd) Run(ctx context.Context, project belvedere.Project, 
 }
 
 type ReleasesCreateCmd struct {
-	App     string `arg:"" help:"The app's name."`
-	Release string `arg:"" help:"The release's name."`
-	SHA256  string `arg:"" help:"The app container's SHA256 hash."`
-	Config  string `arg:"" optional:"" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
-	Enable  bool   `help:"Put release into service once created."`
+	App                string `arg:"" help:"The app's name."`
+	Release            string `arg:"" help:"The release's name."`
+	SHA256             string `arg:"" help:"The app container's SHA256 hash."`
+	Config             string `arg:"" optional:"" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
+	Enable             bool   `help:"Put release into service once created."`
+	ModifyOptions      `embed:""`
+	LongRunningOptions `embed:""`
 }
 
-func (cmd *ReleasesCreateCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
+func (cmd *ReleasesCreateCmd) Run(ctx context.Context, project belvedere.Project) error {
 	b, err := readFile(ctx, cmd.Config)
 	if err != nil {
 		return err
@@ -46,13 +48,13 @@ func (cmd *ReleasesCreateCmd) Run(ctx context.Context, project belvedere.Project
 		return err
 	}
 
-	err = project.Releases().Create(ctx, cmd.App, cmd.Release, config, cmd.SHA256, o.DryRun, o.Interval)
+	err = project.Releases().Create(ctx, cmd.App, cmd.Release, config, cmd.SHA256, cmd.DryRun, cmd.Interval)
 	if err != nil {
 		return err
 	}
 
 	if cmd.Enable {
-		err = project.Releases().Enable(ctx, cmd.App, cmd.Release, o.DryRun, o.Interval)
+		err = project.Releases().Enable(ctx, cmd.App, cmd.Release, cmd.DryRun, cmd.Interval)
 		if err != nil {
 			return err
 		}
@@ -61,29 +63,35 @@ func (cmd *ReleasesCreateCmd) Run(ctx context.Context, project belvedere.Project
 }
 
 type ReleasesEnableCmd struct {
-	App     string `arg:"" help:"The app's name."`
-	Release string `arg:"" help:"The release's name."`
+	App                string `arg:"" help:"The app's name."`
+	Release            string `arg:"" help:"The release's name."`
+	ModifyOptions      `embed:""`
+	LongRunningOptions `embed:""`
 }
 
-func (cmd *ReleasesEnableCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
-	return project.Releases().Enable(ctx, cmd.App, cmd.Release, o.DryRun, o.Interval)
+func (cmd *ReleasesEnableCmd) Run(ctx context.Context, project belvedere.Project) error {
+	return project.Releases().Enable(ctx, cmd.App, cmd.Release, cmd.DryRun, cmd.Interval)
 }
 
 type ReleasesDisableCmd struct {
-	App     string `arg:"" help:"The app's name."`
-	Release string `arg:"" help:"The release's name."`
+	App                string `arg:"" help:"The app's name."`
+	Release            string `arg:"" help:"The release's name."`
+	ModifyOptions      `embed:""`
+	LongRunningOptions `embed:""`
 }
 
-func (cmd *ReleasesDisableCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
-	return project.Releases().Disable(ctx, cmd.App, cmd.Release, o.DryRun, o.Interval)
+func (cmd *ReleasesDisableCmd) Run(ctx context.Context, project belvedere.Project) error {
+	return project.Releases().Disable(ctx, cmd.App, cmd.Release, cmd.DryRun, cmd.Interval)
 }
 
 type ReleasesDeleteCmd struct {
-	App     string `arg:"" help:"The app's name."`
-	Release string `arg:"" help:"The release's name."`
-	Async   bool   `help:"Return without waiting for successful completion."`
+	App                string `arg:"" help:"The app's name."`
+	Release            string `arg:"" help:"The release's name."`
+	Async              bool   `help:"Return without waiting for successful completion."`
+	ModifyOptions      `embed:""`
+	LongRunningOptions `embed:""`
 }
 
-func (cmd *ReleasesDeleteCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
-	return project.Releases().Delete(ctx, cmd.App, cmd.Release, o.DryRun, cmd.Async, o.Interval)
+func (cmd *ReleasesDeleteCmd) Run(ctx context.Context, project belvedere.Project) error {
+	return project.Releases().Delete(ctx, cmd.App, cmd.Release, cmd.DryRun, cmd.Async, cmd.Interval)
 }

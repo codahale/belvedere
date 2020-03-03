@@ -57,14 +57,12 @@ func TestAppsCreateCmd_Run(t *testing.T) {
 		App:    "my-app",
 		Region: "us-west1",
 		Config: "pkg/belvedere/cfg/config-example.yaml",
+		LongRunningOptions: LongRunningOptions{
+			Interval: 10 * time.Millisecond,
+		},
 	}
 
-	options := &Options{
-		Interval: 10 * time.Millisecond,
-		Timeout:  1 * time.Second,
-	}
-
-	if err := cmd.Run(context.TODO(), project, options); err != nil {
+	if err := cmd.Run(context.TODO(), project); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -85,14 +83,12 @@ func TestAppsUpdateCmd_Run(t *testing.T) {
 	cmd := &AppsUpdateCmd{
 		App:    "my-app",
 		Config: "pkg/belvedere/cfg/config-example.yaml",
+		LongRunningOptions: LongRunningOptions{
+			Interval: 10 * time.Millisecond,
+		},
 	}
 
-	options := &Options{
-		Interval: 10 * time.Millisecond,
-		Timeout:  1 * time.Second,
-	}
-
-	if err := cmd.Run(context.TODO(), project, options); err != nil {
+	if err := cmd.Run(context.TODO(), project); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -113,14 +109,12 @@ func TestAppsDeleteCmd_Run(t *testing.T) {
 	cmd := &AppsDeleteCmd{
 		App:   "my-app",
 		Async: false,
+		LongRunningOptions: LongRunningOptions{
+			Interval: 10 * time.Millisecond,
+		},
 	}
 
-	options := &Options{
-		Interval: 10 * time.Millisecond,
-		Timeout:  1 * time.Second,
-	}
-
-	if err := cmd.Run(context.TODO(), project, options); err != nil {
+	if err := cmd.Run(context.TODO(), project); err != nil {
 		t.Fatal(err)
 	}
 }

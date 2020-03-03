@@ -12,19 +12,23 @@ import (
 )
 
 type SetupCmd struct {
-	DNSZone string `arg:"" required:"" help:"The DNS zone to be managed by this project."`
+	DNSZone            string `arg:"" required:"" help:"The DNS zone to be managed by this project."`
+	ModifyOptions      `embed:""`
+	LongRunningOptions `embed:""`
 }
 
-func (cmd *SetupCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
-	return project.Setup(ctx, cmd.DNSZone, o.DryRun, o.Interval)
+func (cmd *SetupCmd) Run(ctx context.Context, project belvedere.Project) error {
+	return project.Setup(ctx, cmd.DNSZone, cmd.DryRun, cmd.Interval)
 }
 
 type TeardownCmd struct {
-	Async bool `help:"Return without waiting for successful completion."`
+	Async              bool `help:"Return without waiting for successful completion."`
+	ModifyOptions      `embed:""`
+	LongRunningOptions `embed:""`
 }
 
-func (cmd *TeardownCmd) Run(ctx context.Context, project belvedere.Project, o *Options) error {
-	return project.Teardown(ctx, o.DryRun, cmd.Async, o.Interval)
+func (cmd *TeardownCmd) Run(ctx context.Context, project belvedere.Project) error {
+	return project.Teardown(ctx, cmd.DryRun, cmd.Async, cmd.Interval)
 }
 
 type DNSServersCmd struct {
@@ -68,7 +72,7 @@ type SSHCmd struct {
 	Args     []string `arg:"" optional:"" help:"Additional SSH arguments."`
 }
 
-func (cmd *SSHCmd) Run(o *Options) error {
+func (cmd *SSHCmd) Run(o *CLI) error {
 	// Find gcloud on the path.
 	gcloud, err := exec.LookPath("gcloud")
 	if err != nil {

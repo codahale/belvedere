@@ -23,7 +23,7 @@ import (
 
 func main() {
 	// ParseConfig the command line.
-	var opts Options
+	var opts CLI
 	cli := kong.Parse(&opts,
 		kong.Name("belvedere"),
 		kong.Vars{"version": version},
@@ -40,7 +40,7 @@ func main() {
 	}
 }
 
-func run(cli *kong.Context, opts *Options) error {
+func run(cli *kong.Context, opts *CLI) error {
 	// Enable trace logging.
 	opts.enableLogging()
 
@@ -75,15 +75,21 @@ var (
 	version = "unknown" // version is injected via the go:generate statement
 )
 
-type Options struct {
-	Debug    bool             `help:"Enable debug logging." short:"d"`
-	Quiet    bool             `help:"Disable all logging." short:"q"`
-	DryRun   bool             `help:"Print modifications instead of performing them."`
-	CSV      bool             `help:"Print tables as CSV."`
-	Interval time.Duration    `help:"Specify a polling interval for long-running operations." default:"10s"`
-	Timeout  time.Duration    `help:"Specify a timeout for long-running operations." default:"10m"`
-	Version  kong.VersionFlag `help:"Print version information and quit."`
-	Project  string           `help:"Specify a GCP project ID. Defaults to using the GCP SDK's active config'."`
+type ModifyOptions struct {
+	DryRun bool `help:"Print modifications instead of performing them."`
+}
+
+type LongRunningOptions struct {
+	Interval time.Duration `help:"Specify a polling interval for long-running operations." default:"10s"`
+}
+
+type CLI struct {
+	Debug   bool             `help:"Enable debug logging." short:"d"`
+	Quiet   bool             `help:"Disable all logging." short:"q"`
+	CSV     bool             `help:"Print tables as CSV."`
+	Timeout time.Duration    `help:"Specify a timeout for long-running operations." default:"10m"`
+	Version kong.VersionFlag `help:"Print version information and quit."`
+	Project string           `help:"Specify a GCP project ID. Defaults to using the GCP SDK's active config'."`
 
 	Setup        SetupCmd        `cmd:"" help:"Initialize a GCP project for use with Belvedere."`
 	Teardown     TeardownCmd     `cmd:"" help:"Remove all Belvedere resources from this project."`
@@ -99,9 +105,9 @@ type Options struct {
 	exit func() error
 }
 
-func (o *Options) rootSpan() (context.Context, context.CancelFunc, *trace.Span) {
+func (cli *CLI) rootSpan() (context.Context, context.CancelFunc, *trace.Span) {
 	// Initialize a context with a timeout and an interval.
-	ctx, cancel := context.WithTimeout(context.Background(), o.Timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), cli.Timeout)
 
 	// Create a root span.
 	ctx, span := trace.StartSpan(ctx, "belvedere.main")
@@ -117,18 +123,18 @@ func (o *Options) rootSpan() (context.Context, context.CancelFunc, *trace.Span) 
 	return ctx, cancel, span
 }
 
-func (o *Options) enableLogging() {
+func (cli *CLI) enableLogging() {
 	// Export all traces.
 	trace.ApplyConfig(trace.Config{
 		DefaultSampler: trace.AlwaysSample(),
 	})
 
-	if o.Debug {
+	if cli.Debug {
 		// Use the print exporter for debugging, as it prints everything.
 		pe := &exporter.PrintExporter{}
 		trace.RegisterExporter(pe)
 		view.RegisterExporter(pe)
-	} else if !o.Quiet {
+	} else if !cli.Quiet {
 		// Unless we're quiet, use the trace logger for more practical logging.
 		trace.RegisterExporter(&traceLogger{})
 	}
