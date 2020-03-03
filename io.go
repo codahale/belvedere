@@ -28,14 +28,14 @@ func (f *FileContentFlag) Decode(ctx *kong.DecodeContext) error {
 
 		data, err := ioutil.ReadAll(os.Stdin)
 		if err != nil {
-			return err
+			return fmt.Errorf("error reading from stdin: %w", err)
 		}
 		*f = data
 	} else {
 		filename = kong.ExpandPath(filename)
 		data, err := ioutil.ReadFile(filename)
 		if err != nil {
-			return fmt.Errorf("failed to open %q: %w", filename, err)
+			return fmt.Errorf("failed to read %q: %w", filename, err)
 		}
 		*f = data
 	}
