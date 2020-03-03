@@ -54,7 +54,8 @@ func run(cli *kong.Context, opts *CLI) error {
 	// Run the given command, passing in the context and options.
 	cli.BindTo(ctx, (*context.Context)(nil))
 	cli.BindTo(project, (*belvedere.Project)(nil))
-	cli.BindTo(&writer{csv: opts.CSV}, (*TableWriter)(nil))
+	cli.BindTo(&tableWriter{csv: opts.CSV}, (*TableWriter)(nil))
+	cli.BindTo(&fileReader{}, (*FileReader)(nil))
 	if err := cli.Run(&opts); err != nil {
 		span.SetStatus(trace.Status{
 			Code:    int32(code.Code_INTERNAL),

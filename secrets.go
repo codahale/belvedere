@@ -27,13 +27,17 @@ func (*SecretsListCmd) Run(ctx context.Context, project belvedere.Project, table
 }
 
 type SecretsCreateCmd struct {
-	Secret        string          `arg:"" help:"The secret's name."`
-	DataFile      FileContentFlag `arg:"" default:"-" optional:"" help:"File path from which to read secret data. Reads from STDIN if not specified."`
+	Secret        string `arg:"" help:"The secret's name."`
+	DataFile      string `arg:"" default:"-" optional:"" help:"File path from which to read secret data. Reads from STDIN if not specified."`
 	ModifyOptions `embed:""`
 }
 
-func (cmd *SecretsCreateCmd) Run(ctx context.Context, project belvedere.Project) error {
-	return project.Secrets().Create(ctx, cmd.Secret, cmd.DataFile, cmd.DryRun)
+func (cmd *SecretsCreateCmd) Run(ctx context.Context, project belvedere.Project, fr FileReader) error {
+	b, err := fr.Read(cmd.DataFile)
+	if err != nil {
+		return err
+	}
+	return project.Secrets().Create(ctx, cmd.Secret, b, cmd.DryRun)
 }
 
 type SecretsGrantCmd struct {
@@ -57,13 +61,17 @@ func (cmd *SecretsRevokeCmd) Run(ctx context.Context, project belvedere.Project)
 }
 
 type SecretsUpdateCmd struct {
-	Secret        string          `arg:"" help:"The secret's name."`
-	DataFile      FileContentFlag `arg:"" default:"-" optional:"" help:"File path from which to read secret data. Reads from STDIN if not specified."`
+	Secret        string `arg:"" help:"The secret's name."`
+	DataFile      string `arg:"" default:"-" optional:"" help:"File path from which to read secret data. Reads from STDIN if not specified."`
 	ModifyOptions `embed:""`
 }
 
-func (cmd *SecretsUpdateCmd) Run(ctx context.Context, project belvedere.Project) error {
-	return project.Secrets().Update(ctx, cmd.Secret, cmd.DataFile, cmd.DryRun)
+func (cmd *SecretsUpdateCmd) Run(ctx context.Context, project belvedere.Project, fr FileReader) error {
+	b, err := fr.Read(cmd.DataFile)
+	if err != nil {
+		return err
+	}
+	return project.Secrets().Update(ctx, cmd.Secret, b, cmd.DryRun)
 }
 
 type SecretsDeleteCmd struct {

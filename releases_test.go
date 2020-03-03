@@ -53,7 +53,7 @@ func TestReleasesCreateCmd_Run(t *testing.T) {
 		App:           "my-app",
 		Release:       "v1",
 		SHA256:        sha,
-		Config:        FileContentFlag(`{"numReplicas":100}`),
+		Config:        "config.yaml",
 		Enable:        false,
 		ModifyOptions: ModifyOptions{},
 		LongRunningOptions: LongRunningOptions{
@@ -74,7 +74,12 @@ func TestReleasesCreateCmd_Run(t *testing.T) {
 		Releases().
 		Return(releases)
 
-	if err := cmd.Run(context.Background(), project); err != nil {
+	fr := NewMockFileReader(ctrl)
+	fr.EXPECT().
+		Read("config.yaml").
+		Return([]byte(`{"numReplicas": 100}`), nil)
+
+	if err := cmd.Run(context.Background(), project, fr); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -88,7 +93,7 @@ func TestReleasesCreateCmd_Run_Enable(t *testing.T) {
 		App:           "my-app",
 		Release:       "v1",
 		SHA256:        sha,
-		Config:        FileContentFlag(`{"numReplicas":100}`),
+		Config:        "config.yaml",
 		Enable:        true,
 		ModifyOptions: ModifyOptions{},
 		LongRunningOptions: LongRunningOptions{
@@ -113,7 +118,12 @@ func TestReleasesCreateCmd_Run_Enable(t *testing.T) {
 		Return(releases).
 		AnyTimes()
 
-	if err := cmd.Run(context.Background(), project); err != nil {
+	fr := NewMockFileReader(ctrl)
+	fr.EXPECT().
+		Read("config.yaml").
+		Return([]byte(`{"numReplicas": 100}`), nil)
+
+	if err := cmd.Run(context.Background(), project, fr); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -45,7 +45,7 @@ func TestSecretsCreateCmd_Run(t *testing.T) {
 
 	cmd := &SecretsCreateCmd{
 		Secret:   "one",
-		DataFile: FileContentFlag(`value`),
+		DataFile: "secret.txt",
 	}
 
 	secrets := NewMockSecretsService(ctrl)
@@ -57,7 +57,12 @@ func TestSecretsCreateCmd_Run(t *testing.T) {
 		Secrets().
 		Return(secrets)
 
-	if err := cmd.Run(context.Background(), project); err != nil {
+	fr := NewMockFileReader(ctrl)
+	fr.EXPECT().
+		Read("secret.txt").
+		Return([]byte(`value`), nil)
+
+	if err := cmd.Run(context.Background(), project, fr); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -68,7 +73,7 @@ func TestSecretsUpdateCmd_Run(t *testing.T) {
 
 	cmd := &SecretsUpdateCmd{
 		Secret:   "one",
-		DataFile: FileContentFlag(`value`),
+		DataFile: "secret.txt",
 	}
 
 	secrets := NewMockSecretsService(ctrl)
@@ -80,7 +85,12 @@ func TestSecretsUpdateCmd_Run(t *testing.T) {
 		Secrets().
 		Return(secrets)
 
-	if err := cmd.Run(context.Background(), project); err != nil {
+	fr := NewMockFileReader(ctrl)
+	fr.EXPECT().
+		Read("secret.txt").
+		Return([]byte(`value`), nil)
+
+	if err := cmd.Run(context.Background(), project, fr); err != nil {
 		t.Fatal(err)
 	}
 }

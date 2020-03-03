@@ -58,16 +58,21 @@ func TestAppsCreateCmd_Run(t *testing.T) {
 		Apps().
 		Return(apps)
 
+	fr := NewMockFileReader(ctrl)
+	fr.EXPECT().
+		Read("config.yaml").
+		Return([]byte(`{"numReplicas": 100}`), nil)
+
 	cmd := &AppsCreateCmd{
 		App:    "my-app",
 		Region: "us-west1",
-		Config: FileContentFlag(`{"numReplicas": 100}`),
+		Config: "config.yaml",
 		LongRunningOptions: LongRunningOptions{
 			Interval: 10 * time.Millisecond,
 		},
 	}
 
-	if err := cmd.Run(context.Background(), project); err != nil {
+	if err := cmd.Run(context.Background(), project, fr); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -89,15 +94,20 @@ func TestAppsUpdateCmd_Run(t *testing.T) {
 		Apps().
 		Return(apps)
 
+	fr := NewMockFileReader(ctrl)
+	fr.EXPECT().
+		Read("config.yaml").
+		Return([]byte(`{"numReplicas": 100}`), nil)
+
 	cmd := &AppsUpdateCmd{
 		App:    "my-app",
-		Config: FileContentFlag(`{"numReplicas": 100}`),
+		Config: "config.yaml",
 		LongRunningOptions: LongRunningOptions{
 			Interval: 10 * time.Millisecond,
 		},
 	}
 
-	if err := cmd.Run(context.Background(), project); err != nil {
+	if err := cmd.Run(context.Background(), project, fr); err != nil {
 		t.Fatal(err)
 	}
 }

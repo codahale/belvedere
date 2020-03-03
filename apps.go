@@ -26,33 +26,45 @@ func (AppsListCmd) Run(ctx context.Context, project belvedere.Project, tables Ta
 }
 
 type AppsCreateCmd struct {
-	App                string          `arg:"" help:"The app's name."`
-	Region             string          `arg:"" help:"The app's region."`
-	Config             FileContentFlag `arg:"" optional:"" default:"-" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
+	App                string `arg:"" help:"The app's name."`
+	Region             string `arg:"" help:"The app's region."`
+	Config             string `arg:"" optional:"" default:"-" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
 	ModifyOptions      `embed:""`
 	LongRunningOptions `embed:""`
 }
 
-func (cmd *AppsCreateCmd) Run(ctx context.Context, project belvedere.Project) error {
-	config, err := cfg.Parse(cmd.Config)
+func (cmd *AppsCreateCmd) Run(ctx context.Context, project belvedere.Project, fr FileReader) error {
+	b, err := fr.Read(cmd.Config)
 	if err != nil {
 		return err
 	}
+
+	config, err := cfg.Parse(b)
+	if err != nil {
+		return err
+	}
+
 	return project.Apps().Create(ctx, cmd.Region, cmd.App, config, cmd.DryRun, cmd.Interval)
 }
 
 type AppsUpdateCmd struct {
-	App                string          `arg:"" help:"The app's name."`
-	Config             FileContentFlag `arg:"" optional:"" default:"-" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
+	App                string `arg:"" help:"The app's name."`
+	Config             string `arg:"" optional:"" default:"-" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
 	ModifyOptions      `embed:""`
 	LongRunningOptions `embed:""`
 }
 
-func (cmd *AppsUpdateCmd) Run(ctx context.Context, project belvedere.Project) error {
-	config, err := cfg.Parse(cmd.Config)
+func (cmd *AppsUpdateCmd) Run(ctx context.Context, project belvedere.Project, fr FileReader) error {
+	b, err := fr.Read(cmd.Config)
 	if err != nil {
 		return err
 	}
+
+	config, err := cfg.Parse(b)
+	if err != nil {
+		return err
+	}
+
 	return project.Apps().Update(ctx, cmd.App, config, cmd.DryRun, cmd.Interval)
 }
 

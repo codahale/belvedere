@@ -16,11 +16,11 @@ type TableWriter interface {
 	Print(v interface{}) error
 }
 
-type writer struct {
+type tableWriter struct {
 	csv bool
 }
 
-func (w *writer) Print(i interface{}) error {
+func (w *tableWriter) Print(i interface{}) error {
 	t := reflect.TypeOf(i)
 	if t.Kind() != reflect.Slice {
 		return nil
