@@ -7,7 +7,6 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/mocks"
 	"github.com/golang/mock/gomock"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -19,9 +18,9 @@ func TestProject_Setup(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	r := mocks.NewResourceBuilder(ctrl)
-	dm := mocks.NewDeploymentsManager(ctrl)
-	s := mocks.NewSetupService(ctrl)
+	r := NewResourceBuilder(ctrl)
+	dm := NewDeploymentsManager(ctrl)
+	s := NewSetupService(ctrl)
 	res := []deployments.Resource{
 		{
 			Name: "example",
@@ -57,7 +56,7 @@ func TestProject_Teardown(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	dm := mocks.NewDeploymentsManager(ctrl)
+	dm := NewDeploymentsManager(ctrl)
 
 	dm.EXPECT().
 		Delete(gomock.Any(), "my-project", "belvedere", false, false, 10*time.Millisecond)

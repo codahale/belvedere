@@ -9,7 +9,6 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	"gopkg.in/h2non/gock.v1"
@@ -22,7 +21,7 @@ func TestReleaseService_List(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	dm := mocks.NewDeploymentsManager(ctrl)
+	dm := NewDeploymentsManager(ctrl)
 
 	dm.EXPECT().
 		List(gomock.Any(), "my-project", `labels.belvedere-type eq "release"`).
@@ -69,7 +68,7 @@ func TestReleaseService_List_withApp(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	dm := mocks.NewDeploymentsManager(ctrl)
+	dm := NewDeploymentsManager(ctrl)
 
 	dm.EXPECT().
 		List(
@@ -129,7 +128,7 @@ func TestReleaseService_Create(t *testing.T) {
 	config := &cfg.Config{}
 	imageSHA256 := strings.Repeat("1", 64)
 
-	dm := mocks.NewDeploymentsManager(ctrl)
+	dm := NewDeploymentsManager(ctrl)
 	dm.EXPECT().
 		Get(gomock.Any(), "my-project", "belvedere-my-app").
 		Return(&deployments.Deployment{
@@ -147,7 +146,7 @@ func TestReleaseService_Create(t *testing.T) {
 				Hash:    strings.Repeat("1", 32),
 			}, false, 10*time.Millisecond)
 
-	resourceBuilder := mocks.NewResourceBuilder(ctrl)
+	resourceBuilder := NewResourceBuilder(ctrl)
 	resourceBuilder.EXPECT().
 		Release("my-project", "us-west1", "my-app", "v1", imageSHA256, config).
 		Return(res)
@@ -172,7 +171,7 @@ func TestReleaseService_Enable(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	dm := mocks.NewDeploymentsManager(ctrl)
+	dm := NewDeploymentsManager(ctrl)
 	dm.EXPECT().
 		Get(gomock.Any(), "my-project", "belvedere-my-app").
 		Return(&deployments.Deployment{
@@ -181,11 +180,11 @@ func TestReleaseService_Enable(t *testing.T) {
 			},
 		}, nil)
 
-	hc := mocks.NewMockHealthChecker(ctrl)
+	hc := NewMockHealthChecker(ctrl)
 	hc.EXPECT().
 		Poll(gomock.Any(), "my-project", "us-west1", "my-app-bes", "my-app-v1-ig", 10*time.Millisecond)
 
-	backendsService := mocks.NewBackendsService(ctrl)
+	backendsService := NewBackendsService(ctrl)
 	backendsService.EXPECT().
 		Add(gomock.Any(), "my-project", "us-west1", "my-app-bes", "my-app-v1-ig", false, 10*time.Millisecond)
 
@@ -210,7 +209,7 @@ func TestReleaseService_Disable(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	dm := mocks.NewDeploymentsManager(ctrl)
+	dm := NewDeploymentsManager(ctrl)
 	dm.EXPECT().
 		Get(gomock.Any(), "my-project", "belvedere-my-app").
 		Return(&deployments.Deployment{
@@ -219,7 +218,7 @@ func TestReleaseService_Disable(t *testing.T) {
 			},
 		}, nil)
 
-	backendsService := mocks.NewBackendsService(ctrl)
+	backendsService := NewBackendsService(ctrl)
 	backendsService.EXPECT().
 		Remove(gomock.Any(), "my-project", "us-west1", "my-app-bes", "my-app-v1-ig", false, 10*time.Millisecond)
 
@@ -243,7 +242,7 @@ func TestReleaseService_Delete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	dm := mocks.NewDeploymentsManager(ctrl)
+	dm := NewDeploymentsManager(ctrl)
 
 	dm.EXPECT().
 		Delete(gomock.Any(), "my-project", "belvedere-my-app-v1", false, false, 10*time.Millisecond)

@@ -8,7 +8,6 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/api/dns/v1"
@@ -22,7 +21,7 @@ func TestAppService_List(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	dm := mocks.NewDeploymentsManager(ctrl)
+	dm := NewDeploymentsManager(ctrl)
 	dm.EXPECT().
 		List(gomock.Any(), "my-project", `labels.belvedere-type eq "app"`).
 		Return([]deployments.Deployment{
@@ -65,9 +64,9 @@ func TestAppService_Create(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	resourceBuilder := mocks.NewResourceBuilder(ctrl)
-	dm := mocks.NewDeploymentsManager(ctrl)
-	setupService := mocks.NewSetupService(ctrl)
+	resourceBuilder := NewResourceBuilder(ctrl)
+	dm := NewDeploymentsManager(ctrl)
+	setupService := NewSetupService(ctrl)
 
 	mz := &dns.ManagedZone{}
 	res := []deployments.Resource{
@@ -112,9 +111,9 @@ func TestAppService_Update(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	resourceBuilder := mocks.NewResourceBuilder(ctrl)
-	dm := mocks.NewDeploymentsManager(ctrl)
-	setupService := mocks.NewSetupService(ctrl)
+	resourceBuilder := NewResourceBuilder(ctrl)
+	dm := NewDeploymentsManager(ctrl)
+	setupService := NewSetupService(ctrl)
 
 	mz := &dns.ManagedZone{}
 	res := []deployments.Resource{
@@ -153,7 +152,7 @@ func TestAppService_Delete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	dm := mocks.NewDeploymentsManager(ctrl)
+	dm := NewDeploymentsManager(ctrl)
 
 	dm.EXPECT().
 		Delete(gomock.Any(), "my-project", "belvedere-my-app", false, false, 10*time.Millisecond)
