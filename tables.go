@@ -66,8 +66,12 @@ func (w *writer) Print(i interface{}) error {
 		tw.Render()
 	} else {
 		cw := csv.NewWriter(os.Stdout)
-		_ = cw.Write(headers)
-		_ = cw.WriteAll(rows)
+		if err := cw.Write(headers); err != nil {
+			return err
+		}
+		if err := cw.WriteAll(rows); err != nil {
+			return err
+		}
 		cw.Flush()
 	}
 	return nil
