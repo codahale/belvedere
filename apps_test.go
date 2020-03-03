@@ -96,3 +96,31 @@ func TestAppsUpdateCmd_Run(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestAppsDeleteCmd_Run(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	apps := NewMockAppService(ctrl)
+	apps.EXPECT().
+		Delete(gomock.Any(), "my-app", false, false, 10*time.Millisecond)
+
+	project := NewMockProject(ctrl)
+	project.EXPECT().
+		Apps().
+		Return(apps)
+
+	cmd := &AppsDeleteCmd{
+		App:   "my-app",
+		Async: false,
+	}
+
+	options := &Options{
+		Interval: 10 * time.Millisecond,
+		Timeout:  1 * time.Second,
+	}
+
+	if err := cmd.Run(context.TODO(), project, options); err != nil {
+		t.Fatal(err)
+	}
+}
