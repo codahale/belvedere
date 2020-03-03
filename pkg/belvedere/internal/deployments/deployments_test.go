@@ -13,7 +13,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestLabels_toEntries(t *testing.T) {
+func TestLabelsToEntries(t *testing.T) {
 	expected := []*deploymentmanager.DeploymentLabelEntry{
 		{
 			Key:   "belvedere-app",
@@ -44,16 +44,15 @@ func TestLabels_toEntries(t *testing.T) {
 		Release: "v1",
 		Hash:    "12345",
 	}
-	actual := labels.toEntries()
+	actual := labelsToEntries(&labels)
 
 	if !cmp.Equal(expected, actual) {
 		t.Fatal(cmp.Diff(expected, actual))
 	}
 }
 
-func TestLabels_fromEntries(t *testing.T) {
-	var actual Labels
-	actual.fromEntries([]*deploymentmanager.DeploymentLabelEntry{
+func TestEntriesToLabels(t *testing.T) {
+	actual := entriesToLabels([]*deploymentmanager.DeploymentLabelEntry{
 		{
 			Key:   "belvedere-type",
 			Value: "release",

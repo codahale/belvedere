@@ -10,10 +10,13 @@ import (
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
+// HealthChecker provides methods for checking the health of an instance group registered with an
+// application's backend service.
 type HealthChecker interface {
 	Poll(ctx context.Context, project, region, backendService, instanceGroup string, interval time.Duration) error
 }
 
+// NewHealthChecker returns a new HealthChecker implementation using the given GCE client.
 func NewHealthChecker(gce *compute.Service) HealthChecker {
 	return &healthChecker{
 		gce: gce,

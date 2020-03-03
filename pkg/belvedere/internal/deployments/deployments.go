@@ -102,51 +102,13 @@ type Labels struct {
 	Hash    string
 }
 
-func (l *Labels) entry(k, v string) *deploymentmanager.DeploymentLabelEntry {
-	return &deploymentmanager.DeploymentLabelEntry{Key: k, Value: v}
-}
-
-func (l *Labels) toEntries() []*deploymentmanager.DeploymentLabelEntry {
-	var entries []*deploymentmanager.DeploymentLabelEntry
-	if l.App != "" {
-		entries = append(entries, l.entry("belvedere-app", l.App))
-	}
-	if l.Hash != "" {
-		entries = append(entries, l.entry("belvedere-hash", l.Hash))
-	}
-	if l.Region != "" {
-		entries = append(entries, l.entry("belvedere-region", l.Region))
-	}
-	if l.Release != "" {
-		entries = append(entries, l.entry("belvedere-release", l.Release))
-	}
-	entries = append(entries, l.entry("belvedere-type", l.Type))
-	return entries
-}
-
-func (l *Labels) fromEntries(labels []*deploymentmanager.DeploymentLabelEntry) {
-	for _, e := range labels {
-		switch e.Key {
-		case "belvedere-app":
-			l.App = e.Value
-		case "belvedere-hash":
-			l.Hash = e.Value
-		case "belvedere-region":
-			l.Region = e.Value
-		case "belvedere-release":
-			l.Release = e.Value
-		case "belvedere-type":
-			l.Type = e.Value
-		}
-	}
-}
-
 // Deployment represents a Belvedere-managed DM deployment.
 type Deployment struct {
 	Name string
 	Labels
 }
 
+// Manager provides methods for managing deployments.
 type Manager interface {
 	// Get returns the deployment with the given name.
 	Get(ctx context.Context, project, name string) (*Deployment, error)
@@ -189,12 +151,9 @@ func (m *manager) Get(ctx context.Context, project, name string) (*Deployment, e
 		return nil, err
 	}
 
-	var labels Labels
-	labels.fromEntries(d.Labels)
-
 	return &Deployment{
 		Name:   d.Name,
-		Labels: labels,
+		Labels: entriesToLabels(d.Labels),
 	}, nil
 }
 
@@ -228,7 +187,7 @@ func (m *manager) Insert(ctx context.Context, project, name string, resources []
 
 	// Insert the new deployment.
 	op, err := m.dm.Deployments.Insert(project, &deploymentmanager.Deployment{
-		Labels: labels.toEntries(),
+		Labels: labelsToEntries(&labels),
 		Name:   name,
 		Target: &deploymentmanager.TargetConfiguration{
 			Config: &deploymentmanager.ConfigFile{
@@ -331,9 +290,10 @@ func (m *manager) List(ctx context.Context, project, filter string) ([]Deploymen
 		func(list *deploymentmanager.DeploymentsListResponse) error {
 			// Convert labels to maps.
 			for _, d := range list.Deployments {
-				var labels Labels
-				labels.fromEntries(d.Labels)
-				deployments = append(deployments, Deployment{Name: d.Name, Labels: labels})
+				deployments = append(deployments, Deployment{
+					Name:   d.Name,
+					Labels: entriesToLabels(d.Labels),
+				})
 			}
 			return nil
 		},
@@ -344,4 +304,45 @@ func (m *manager) List(ctx context.Context, project, filter string) ([]Deploymen
 		return deployments[i].Name < deployments[j].Name
 	})
 	return deployments, nil
+}
+
+func entry(k, v string) *deploymentmanager.DeploymentLabelEntry {
+	return &deploymentmanager.DeploymentLabelEntry{Key: k, Value: v}
+}
+
+func labelsToEntries(l *Labels) []*deploymentmanager.DeploymentLabelEntry {
+	var entries []*deploymentmanager.DeploymentLabelEntry
+	if l.App != "" {
+		entries = append(entries, entry("belvedere-app", l.App))
+	}
+	if l.Hash != "" {
+		entries = append(entries, entry("belvedere-hash", l.Hash))
+	}
+	if l.Region != "" {
+		entries = append(entries, entry("belvedere-region", l.Region))
+	}
+	if l.Release != "" {
+		entries = append(entries, entry("belvedere-release", l.Release))
+	}
+	entries = append(entries, entry("belvedere-type", l.Type))
+	return entries
+}
+
+func entriesToLabels(entries []*deploymentmanager.DeploymentLabelEntry) Labels {
+	var l Labels
+	for _, e := range entries {
+		switch e.Key {
+		case "belvedere-app":
+			l.App = e.Value
+		case "belvedere-hash":
+			l.Hash = e.Value
+		case "belvedere-region":
+			l.Region = e.Value
+		case "belvedere-release":
+			l.Release = e.Value
+		case "belvedere-type":
+			l.Type = e.Value
+		}
+	}
+	return l
 }
