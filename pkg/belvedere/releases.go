@@ -24,6 +24,7 @@ type Release struct {
 	Hash    string
 }
 
+// ReleaseService provides methods for managing releases.
 type ReleaseService interface {
 	// List returns a list of releases in the given project for the given app, if any is passed.
 	List(ctx context.Context, app string) ([]Release, error)

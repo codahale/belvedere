@@ -12,6 +12,7 @@ import (
 	"go.opencensus.io/trace"
 )
 
+// AppService provides methods for managing applications.
 type AppService interface {
 	// List returns a list of apps which have been created in the project.
 	List(ctx context.Context) ([]App, error)

@@ -45,15 +45,16 @@ type Project interface {
 	// GCE region, if one is provided.
 	MachineTypes(ctx context.Context, region string) ([]MachineType, error)
 
-	// Logs returns a logs service.
+	// Logs provides methods for viewing application logs.
 	Logs() LogService
 
-	// Secrets returns a secrets service.
+	// Secrets provides methods for managing secrets.
 	Secrets() SecretsService
 
-	// Apps returns an apps service.
+	// Apps provides methods for managing applications.
 	Apps() AppService
 
+	// Releases provides methods for managing releases.
 	Releases() ReleaseService
 }
 
