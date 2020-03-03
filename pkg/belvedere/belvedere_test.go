@@ -33,8 +33,8 @@ func TestProject_DNSServers(t *testing.T) {
 	}
 
 	expected := []DNSServer{
-		{Server: "ns1.example.com"},
-		{Server: "ns2.example.com"},
+		{Hostname: "ns1.example.com"},
+		{Hostname: "ns2.example.com"},
 	}
 
 	if !cmp.Equal(expected, actual) {

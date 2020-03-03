@@ -60,7 +60,7 @@ type Project interface {
 
 // DNSServer is a DNS server run by Google.
 type DNSServer struct {
-	Server string
+	Hostname string
 }
 
 // NewProject returns a new Project instance for the given GCP project. If no project is provided,
@@ -221,7 +221,7 @@ func (p *project) DNSServers(ctx context.Context) ([]DNSServer, error) {
 	// Return the DNS servers.
 	servers := make([]DNSServer, 0, len(mz.NameServers))
 	for _, s := range mz.NameServers {
-		servers = append(servers, DNSServer{Server: s})
+		servers = append(servers, DNSServer{Hostname: s})
 	}
 	return servers, nil
 }
