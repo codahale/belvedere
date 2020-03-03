@@ -130,13 +130,6 @@ func TestReleaseService_Create(t *testing.T) {
 
 	dm := NewDeploymentsManager(ctrl)
 	dm.EXPECT().
-		Get(gomock.Any(), "my-project", "belvedere-my-app").
-		Return(&deployments.Deployment{
-			Labels: deployments.Labels{
-				Region: "us-west1",
-			},
-		}, nil)
-	dm.EXPECT().
 		Insert(gomock.Any(), "my-project", "belvedere-my-app-v1",
 			res, deployments.Labels{
 				Type:    "release",
@@ -145,6 +138,13 @@ func TestReleaseService_Create(t *testing.T) {
 				Release: "v1",
 				Hash:    strings.Repeat("1", 32),
 			}, false, 10*time.Millisecond)
+
+	apps := NewMockAppService(ctrl)
+	apps.EXPECT().
+		Get(gomock.Any(), "my-app").
+		Return(&App{
+			Region: "us-west1",
+		}, nil)
 
 	resourceBuilder := NewResourceBuilder(ctrl)
 	resourceBuilder.EXPECT().
@@ -155,6 +155,7 @@ func TestReleaseService_Create(t *testing.T) {
 		project:   "my-project",
 		dm:        dm,
 		resources: resourceBuilder,
+		apps:      apps,
 	}
 
 	if err := service.Create(
@@ -171,13 +172,11 @@ func TestReleaseService_Enable(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	dm := NewDeploymentsManager(ctrl)
-	dm.EXPECT().
-		Get(gomock.Any(), "my-project", "belvedere-my-app").
-		Return(&deployments.Deployment{
-			Labels: deployments.Labels{
-				Region: "us-west1",
-			},
+	apps := NewMockAppService(ctrl)
+	apps.EXPECT().
+		Get(gomock.Any(), "my-app").
+		Return(&App{
+			Region: "us-west1",
 		}, nil)
 
 	hc := NewMockHealthChecker(ctrl)
@@ -189,10 +188,10 @@ func TestReleaseService_Enable(t *testing.T) {
 		Add(gomock.Any(), "my-project", "us-west1", "my-app-bes", "my-app-v1-ig", false, 10*time.Millisecond)
 
 	service := &releaseService{
-		project:       "my-project",
-		dm:            dm,
-		backends:      backendsService,
-		healthChecker: hc,
+		project:  "my-project",
+		apps:     apps,
+		backends: backendsService,
+		health:   hc,
 	}
 
 	if err := service.Enable(
@@ -209,13 +208,11 @@ func TestReleaseService_Disable(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	dm := NewDeploymentsManager(ctrl)
-	dm.EXPECT().
-		Get(gomock.Any(), "my-project", "belvedere-my-app").
-		Return(&deployments.Deployment{
-			Labels: deployments.Labels{
-				Region: "us-west1",
-			},
+	apps := NewMockAppService(ctrl)
+	apps.EXPECT().
+		Get(gomock.Any(), "my-app").
+		Return(&App{
+			Region: "us-west1",
 		}, nil)
 
 	backendsService := NewBackendsService(ctrl)
@@ -224,7 +221,7 @@ func TestReleaseService_Disable(t *testing.T) {
 
 	service := &releaseService{
 		project:  "my-project",
-		dm:       dm,
+		apps:     apps,
 		backends: backendsService,
 	}
 

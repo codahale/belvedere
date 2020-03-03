@@ -14,6 +14,9 @@ import (
 
 // AppService provides methods for managing applications.
 type AppService interface {
+	// Get returns the app with the given name.
+	Get(ctx context.Context, name string) (*App, error)
+
 	// List returns a list of apps which have been created in the project.
 	List(ctx context.Context) ([]App, error)
 
@@ -42,6 +45,18 @@ type appService struct {
 }
 
 var _ AppService = &appService{}
+
+func (s *appService) Get(ctx context.Context, name string) (*App, error) {
+	dep, err := s.dm.Get(ctx, s.project, resources.Name(name))
+	if err != nil {
+		return nil, err
+	}
+	return &App{
+		Project: s.project,
+		Name:    dep.App,
+		Region:  dep.Region,
+	}, nil
+}
 
 func (s *appService) List(ctx context.Context) ([]App, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.apps.List")

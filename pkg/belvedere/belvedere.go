@@ -4,7 +4,6 @@ package belvedere
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"sort"
 	"strconv"
@@ -102,7 +101,14 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 	}
 
 	res := resources.NewBuilder()
+	hc := check.NewHealthChecker(gce)
 
+	apps := &appService{
+		project:   name,
+		dm:        dm,
+		setup:     s,
+		resources: res,
+	}
 	return &project{
 		logs: &logService{
 			project: name,
@@ -113,18 +119,14 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 			project: name,
 			sm:      sm,
 		},
-		apps: &appService{
+		apps: apps,
+		releases: &releaseService{
 			project:   name,
 			dm:        dm,
-			setup:     s,
+			gce:       gce,
 			resources: res,
-		},
-		releases: &releaseService{
-			project:       name,
-			dm:            dm,
-			gce:           gce,
-			resources:     res,
-			healthChecker: check.NewHealthChecker(gce),
+			health:    hc,
+			apps:      apps,
 		},
 		name:      name,
 		dm:        dm,
@@ -334,26 +336,4 @@ func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineTyp
 		return machineTypes[i].lexical() < machineTypes[j].lexical()
 	})
 	return machineTypes, nil
-}
-
-// findRegion returns the region the app was created in.
-func findRegion(ctx context.Context, dm deployments.Manager, project, app string) (string, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.project.findRegion")
-	span.AddAttributes(
-		trace.StringAttribute("project", project),
-		trace.StringAttribute("app", app),
-	)
-	defer span.End()
-
-	// Find the app deployment.
-	d, err := dm.Get(ctx, project, resources.Name(app))
-	if err != nil {
-		return "", err
-	}
-
-	if d.Region == "" {
-		return "", errors.New("no region found")
-	}
-
-	return d.Region, nil
 }

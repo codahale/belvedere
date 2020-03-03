@@ -44,12 +44,13 @@ type ReleaseService interface {
 }
 
 type releaseService struct {
-	project       string
-	dm            deployments.Manager
-	gce           *compute.Service
-	backends      backends.Service
-	resources     resources.Builder
-	healthChecker check.HealthChecker
+	project   string
+	dm        deployments.Manager
+	gce       *compute.Service
+	backends  backends.Service
+	resources resources.Builder
+	health    check.HealthChecker
+	apps      AppService
 }
 
 func (r *releaseService) List(ctx context.Context, app string) ([]Release, error) {
@@ -97,18 +98,18 @@ func (r *releaseService) Create(ctx context.Context, app, name string, config *c
 		return err
 	}
 
-	region, err := findRegion(ctx, r.dm, r.project, app)
+	a, err := r.apps.Get(ctx, app)
 	if err != nil {
 		return err
 	}
 
 	return r.dm.Insert(ctx, r.project, resources.Name(app, name),
-		r.resources.Release(r.project, region, app, name, imageSHA256, config),
+		r.resources.Release(r.project, a.Region, app, name, imageSHA256, config),
 		deployments.Labels{
 			Type:    "release",
 			App:     app,
 			Release: name,
-			Region:  region,
+			Region:  a.Region,
 			Hash:    imageSHA256[:32],
 		},
 		dryRun, interval,
@@ -124,18 +125,18 @@ func (r *releaseService) Enable(ctx context.Context, app, name string, dryRun bo
 	)
 	defer span.End()
 
-	region, err := findRegion(ctx, r.dm, r.project, app)
+	a, err := r.apps.Get(ctx, app)
 	if err != nil {
 		return err
 	}
 
 	backendService := fmt.Sprintf("%s-bes", app)
 	instanceGroup := fmt.Sprintf("%s-%s-ig", app, name)
-	if err := r.backends.Add(ctx, r.project, region, backendService, instanceGroup, dryRun, interval); err != nil {
+	if err := r.backends.Add(ctx, r.project, a.Region, backendService, instanceGroup, dryRun, interval); err != nil {
 		return err
 	}
 
-	return r.healthChecker.Poll(ctx, r.project, region, backendService, instanceGroup, interval)
+	return r.health.Poll(ctx, r.project, a.Region, backendService, instanceGroup, interval)
 }
 
 func (r *releaseService) Disable(ctx context.Context, app, name string, dryRun bool, interval time.Duration) error {
@@ -147,14 +148,14 @@ func (r *releaseService) Disable(ctx context.Context, app, name string, dryRun b
 	)
 	defer span.End()
 
-	region, err := findRegion(ctx, r.dm, r.project, app)
+	a, err := r.apps.Get(ctx, app)
 	if err != nil {
 		return err
 	}
 
 	backendService := fmt.Sprintf("%s-bes", app)
 	instanceGroup := fmt.Sprintf("%s-%s-ig", app, name)
-	return r.backends.Remove(ctx, r.project, region, backendService, instanceGroup, dryRun, interval)
+	return r.backends.Remove(ctx, r.project, a.Region, backendService, instanceGroup, dryRun, interval)
 }
 
 func (r *releaseService) Delete(ctx context.Context, app, name string, dryRun, async bool, interval time.Duration) error {

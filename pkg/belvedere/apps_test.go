@@ -14,6 +14,45 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
+func TestAppService_Get(t *testing.T) {
+	defer gock.Off()
+	it.MockTokenSource()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	dm := NewDeploymentsManager(ctrl)
+	dm.EXPECT().
+		Get(gomock.Any(), "my-project", "belvedere-my-app").
+		Return(&deployments.Deployment{
+			Labels: deployments.Labels{
+				Type:   "app",
+				App:    "app1",
+				Region: "us-west1",
+			},
+		}, nil)
+
+	as := &appService{
+		project: "my-project",
+		dm:      dm,
+	}
+
+	actual, err := as.Get(context.TODO(), "my-app")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected := &App{
+		Name:    "app1",
+		Project: "my-project",
+		Region:  "us-west1",
+	}
+
+	if !cmp.Equal(expected, actual) {
+		t.Fatal(cmp.Diff(expected, actual))
+	}
+}
+
 func TestAppService_List(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
