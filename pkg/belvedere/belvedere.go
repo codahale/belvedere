@@ -1,3 +1,5 @@
+// Package belvedere contains types and methods for deploying HTTP/2-based applications to Google
+// Cloud Platform and managing them using best practices.
 package belvedere
 
 import (

@@ -1,3 +1,4 @@
+// Package cfg provides common data structure for Belvedere app configuration.
 package cfg
 
 import (
