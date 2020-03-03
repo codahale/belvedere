@@ -28,7 +28,7 @@ func (AppsListCmd) Run(ctx context.Context, project belvedere.Project, tables Ta
 type AppsCreateCmd struct {
 	App                string          `arg:"" help:"The app's name."`
 	Region             string          `arg:"" help:"The app's region."`
-	Config             FileContentFlag `arg:"" optional:"" default:"" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
+	Config             FileContentFlag `arg:"" optional:"" default:"-" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
 	ModifyOptions      `embed:""`
 	LongRunningOptions `embed:""`
 }
@@ -43,7 +43,7 @@ func (cmd *AppsCreateCmd) Run(ctx context.Context, project belvedere.Project) er
 
 type AppsUpdateCmd struct {
 	App                string          `arg:"" help:"The app's name."`
-	Config             FileContentFlag `arg:"" optional:"" default:"" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
+	Config             FileContentFlag `arg:"" optional:"" default:"-" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
 	ModifyOptions      `embed:""`
 	LongRunningOptions `embed:""`
 }
