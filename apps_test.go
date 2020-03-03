@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere"
+	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/golang/mock/gomock"
 )
 
@@ -44,9 +45,13 @@ func TestAppsCreateCmd_Run(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	config := &cfg.Config{
+		NumReplicas: 100,
+	}
+
 	apps := NewMockAppService(ctrl)
 	apps.EXPECT().
-		Create(gomock.Any(), "us-west1", "my-app", gomock.Any(), false, 10*time.Millisecond)
+		Create(gomock.Any(), "us-west1", "my-app", config, false, 10*time.Millisecond)
 
 	project := NewMockProject(ctrl)
 	project.EXPECT().
@@ -56,7 +61,7 @@ func TestAppsCreateCmd_Run(t *testing.T) {
 	cmd := &AppsCreateCmd{
 		App:    "my-app",
 		Region: "us-west1",
-		Config: "pkg/belvedere/cfg/config-example.yaml",
+		Config: FileContentFlag(`{"numReplicas": 100}`),
 		LongRunningOptions: LongRunningOptions{
 			Interval: 10 * time.Millisecond,
 		},
@@ -71,9 +76,13 @@ func TestAppsUpdateCmd_Run(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	config := &cfg.Config{
+		NumReplicas: 100,
+	}
+
 	apps := NewMockAppService(ctrl)
 	apps.EXPECT().
-		Update(gomock.Any(), "my-app", gomock.Any(), false, 10*time.Millisecond)
+		Update(gomock.Any(), "my-app", config, false, 10*time.Millisecond)
 
 	project := NewMockProject(ctrl)
 	project.EXPECT().
@@ -82,7 +91,7 @@ func TestAppsUpdateCmd_Run(t *testing.T) {
 
 	cmd := &AppsUpdateCmd{
 		App:    "my-app",
-		Config: "pkg/belvedere/cfg/config-example.yaml",
+		Config: FileContentFlag(`{"numReplicas": 100}`),
 		LongRunningOptions: LongRunningOptions{
 			Interval: 10 * time.Millisecond,
 		},

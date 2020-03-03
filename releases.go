@@ -28,22 +28,17 @@ func (cmd *ReleasesListCmd) Run(ctx context.Context, project belvedere.Project, 
 }
 
 type ReleasesCreateCmd struct {
-	App                string `arg:"" help:"The app's name."`
-	Release            string `arg:"" help:"The release's name."`
-	SHA256             string `arg:"" help:"The app container's SHA256 hash."`
-	Config             string `arg:"" optional:"" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
-	Enable             bool   `help:"Put release into service once created."`
+	App                string          `arg:"" help:"The app's name."`
+	Release            string          `arg:"" help:"The release's name."`
+	SHA256             string          `arg:"" help:"The app container's SHA256 hash."`
+	Config             FileContentFlag `arg:"" optional:"" default:"-" help:"The path to the app's configuration file. Reads from STDIN if not specified."`
+	Enable             bool            `help:"Put release into service once created."`
 	ModifyOptions      `embed:""`
 	LongRunningOptions `embed:""`
 }
 
 func (cmd *ReleasesCreateCmd) Run(ctx context.Context, project belvedere.Project) error {
-	b, err := readFile(ctx, cmd.Config)
-	if err != nil {
-		return err
-	}
-
-	config, err := cfg.Parse(b)
+	config, err := cfg.Parse(cmd.Config)
 	if err != nil {
 		return err
 	}

@@ -13,7 +13,7 @@ require (
 	github.com/google/go-cmp v0.4.0
 	github.com/mattn/go-runewidth v0.0.8 // indirect
 	github.com/olekukonko/tablewriter v0.0.4
-	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.5.1 // indirect
 	go.opencensus.io v0.22.3
 	golang.org/x/crypto v0.0.0-20200221231518-2aa609cf4a9d

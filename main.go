@@ -4,12 +4,8 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"io"
-	"io/ioutil"
 	"os"
 	"os/user"
-	"syscall"
 	"time"
 
 	"github.com/alecthomas/kong"
@@ -17,7 +13,6 @@ import (
 	"go.opencensus.io/examples/exporter"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
-	"golang.org/x/crypto/ssh/terminal"
 	"google.golang.org/genproto/googleapis/rpc/code"
 )
 
@@ -138,39 +133,4 @@ func (cli *CLI) enableLogging() {
 		// Unless we're quiet, use the trace logger for more practical logging.
 		trace.RegisterExporter(&traceLogger{})
 	}
-}
-
-func readFile(ctx context.Context, name string) ([]byte, error) {
-	_, span := trace.StartSpan(ctx, "belvedere.readFile")
-	defer span.End()
-
-	// Either open the file or use STDIN.
-	var r io.ReadCloser
-	if name == "" {
-		span.AddAttributes(
-			trace.StringAttribute("name", "stdin"),
-		)
-		if terminal.IsTerminal(syscall.Stdin) {
-			return nil, fmt.Errorf("can't read from stdin")
-		}
-		r = os.Stdin
-	} else {
-		span.AddAttributes(
-			trace.StringAttribute("name", name),
-		)
-		f, err := os.Open(name)
-		if err != nil {
-			return nil, fmt.Errorf("error opening %s: %w", name, err)
-		}
-
-		r = f
-	}
-	defer func() { _ = r.Close() }()
-
-	// Read the entire input.
-	b, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, fmt.Errorf("error reading from %s: %w", name, err)
-	}
-	return b, nil
 }

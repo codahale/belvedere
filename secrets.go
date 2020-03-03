@@ -27,17 +27,13 @@ func (*SecretsListCmd) Run(ctx context.Context, project belvedere.Project, table
 }
 
 type SecretsCreateCmd struct {
-	Secret        string `arg:"" help:"The secret's name."`
-	DataFile      string `arg:"" optional:"" help:"File path from which to read secret data. Reads from STDIN if not specified."`
+	Secret        string          `arg:"" help:"The secret's name."`
+	DataFile      FileContentFlag `arg:"" default:"-" optional:"" help:"File path from which to read secret data. Reads from STDIN if not specified."`
 	ModifyOptions `embed:""`
 }
 
 func (cmd *SecretsCreateCmd) Run(ctx context.Context, project belvedere.Project) error {
-	b, err := readFile(ctx, cmd.DataFile)
-	if err != nil {
-		return err
-	}
-	return project.Secrets().Create(ctx, cmd.Secret, b, cmd.DryRun)
+	return project.Secrets().Create(ctx, cmd.Secret, cmd.DataFile, cmd.DryRun)
 }
 
 type SecretsGrantCmd struct {
@@ -61,17 +57,13 @@ func (cmd *SecretsRevokeCmd) Run(ctx context.Context, project belvedere.Project)
 }
 
 type SecretsUpdateCmd struct {
-	Secret        string `arg:"" help:"The secret's name."`
-	DataFile      string `arg:"" optional:"" help:"File path from which to read secret data. Reads from STDIN if not specified."`
+	Secret        string          `arg:"" help:"The secret's name."`
+	DataFile      FileContentFlag `arg:"" default:"-" optional:"" help:"File path from which to read secret data. Reads from STDIN if not specified."`
 	ModifyOptions `embed:""`
 }
 
 func (cmd *SecretsUpdateCmd) Run(ctx context.Context, project belvedere.Project) error {
-	b, err := readFile(ctx, cmd.DataFile)
-	if err != nil {
-		return err
-	}
-	return project.Secrets().Update(ctx, cmd.Secret, b, cmd.DryRun)
+	return project.Secrets().Update(ctx, cmd.Secret, cmd.DataFile, cmd.DryRun)
 }
 
 type SecretsDeleteCmd struct {
