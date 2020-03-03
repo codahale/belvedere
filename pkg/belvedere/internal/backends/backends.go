@@ -11,6 +11,8 @@ import (
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
+// Service provides methods for managing the backend services associated with an application's
+// load balancer.
 type Service interface {
 	// Add adds an instance group to a backend service. If the instance group is already registered as a
 	// backend, exits early.
@@ -23,6 +25,7 @@ type Service interface {
 		dryRun bool, interval time.Duration) error
 }
 
+// NewService returns a new Service implementation.
 func NewService(gce *compute.Service) Service {
 	return &service{gce: gce}
 }
