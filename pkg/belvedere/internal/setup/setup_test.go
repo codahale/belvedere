@@ -16,7 +16,7 @@ func TestService_ManagedZone(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	s, err := NewService(context.TODO())
+	s, err := NewService(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,7 +27,7 @@ func TestService_ManagedZone(t *testing.T) {
 			DnsName: "my-dns",
 		})
 
-	actual, err := s.ManagedZone(context.TODO(), "my-project")
+	actual, err := s.ManagedZone(context.Background(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}

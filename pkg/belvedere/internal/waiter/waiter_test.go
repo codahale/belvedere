@@ -14,7 +14,7 @@ func TestPoll(t *testing.T) {
 		return atomic.AddUint64(&n, 1) == 10, nil
 	}
 
-	ctx, cancel := context.WithTimeout(context.TODO(), 500*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Second)
 	defer cancel()
 	if err := Poll(ctx, 200*time.Millisecond, op); err != nil {
 		t.Fatal(err)
@@ -35,7 +35,7 @@ func TestPollError(t *testing.T) {
 		return i == 10, nil
 	}
 
-	ctx, cancel := context.WithTimeout(context.TODO(), 500*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Second)
 	defer cancel()
 
 	err := Poll(ctx, 200*time.Millisecond, op)
@@ -59,7 +59,7 @@ func TestPollTimeout(t *testing.T) {
 		return atomic.AddUint64(&n, 1) == 100, nil
 	}
 
-	ctx, cancel := context.WithTimeout(context.TODO(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 	err := Poll(ctx, 200*time.Millisecond, op)
 
@@ -78,7 +78,7 @@ func TestPollCancelled(t *testing.T) {
 		return atomic.AddUint64(&n, 1) == 100, nil
 	}
 
-	ctx, cancel := context.WithTimeout(context.TODO(), 500*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Second)
 	defer cancel()
 
 	go func() {

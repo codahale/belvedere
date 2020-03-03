@@ -41,7 +41,7 @@ func TestReleaseService_List(t *testing.T) {
 		project: "my-project",
 		dm:      dm,
 	}
-	actual, err := service.List(context.TODO(), "")
+	actual, err := service.List(context.Background(), "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,7 +92,7 @@ func TestReleaseService_List_withApp(t *testing.T) {
 		project: "my-project",
 		dm:      dm,
 	}
-	actual, err := service.List(context.TODO(), "my-app")
+	actual, err := service.List(context.Background(), "my-app")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -159,7 +159,7 @@ func TestReleaseService_Create(t *testing.T) {
 	}
 
 	if err := service.Create(
-		context.TODO(), "my-app", "v1", config, imageSHA256, false, 10*time.Millisecond,
+		context.Background(), "my-app", "v1", config, imageSHA256, false, 10*time.Millisecond,
 	); err != nil {
 		t.Fatal()
 	}
@@ -195,7 +195,7 @@ func TestReleaseService_Enable(t *testing.T) {
 	}
 
 	if err := service.Enable(
-		context.TODO(), "my-app", "v1", false, 10*time.Millisecond,
+		context.Background(), "my-app", "v1", false, 10*time.Millisecond,
 	); err != nil {
 		t.Fatal()
 	}
@@ -226,7 +226,7 @@ func TestReleaseService_Disable(t *testing.T) {
 	}
 
 	if err := service.Disable(
-		context.TODO(), "my-app", "v1", false, 10*time.Millisecond,
+		context.Background(), "my-app", "v1", false, 10*time.Millisecond,
 	); err != nil {
 		t.Fatal()
 	}
@@ -250,7 +250,7 @@ func TestReleaseService_Delete(t *testing.T) {
 	}
 
 	if err := service.Delete(
-		context.TODO(), "my-app", "v1", false, false, 10*time.Millisecond,
+		context.Background(), "my-app", "v1", false, false, 10*time.Millisecond,
 	); err != nil {
 		t.Fatal(err)
 	}

@@ -34,7 +34,7 @@ func TestSecretsListCmd_Run(t *testing.T) {
 	tables.EXPECT().
 		Print(secs)
 
-	if err := cmd.Run(context.TODO(), project, tables); err != nil {
+	if err := cmd.Run(context.Background(), project, tables); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -57,7 +57,7 @@ func TestSecretsCreateCmd_Run(t *testing.T) {
 		Secrets().
 		Return(secrets)
 
-	if err := cmd.Run(context.TODO(), project); err != nil {
+	if err := cmd.Run(context.Background(), project); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -80,7 +80,7 @@ func TestSecretsUpdateCmd_Run(t *testing.T) {
 		Secrets().
 		Return(secrets)
 
-	if err := cmd.Run(context.TODO(), project); err != nil {
+	if err := cmd.Run(context.Background(), project); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -103,7 +103,7 @@ func TestSecretsGrantCmd_Run(t *testing.T) {
 		Secrets().
 		Return(secrets)
 
-	if err := cmd.Run(context.TODO(), project); err != nil {
+	if err := cmd.Run(context.Background(), project); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -126,7 +126,7 @@ func TestSecretsRevokeCmd_Run(t *testing.T) {
 		Secrets().
 		Return(secrets)
 
-	if err := cmd.Run(context.TODO(), project); err != nil {
+	if err := cmd.Run(context.Background(), project); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -148,7 +148,7 @@ func TestSecretsDeleteCmd_Run(t *testing.T) {
 		Secrets().
 		Return(secrets)
 
-	if err := cmd.Run(context.TODO(), project); err != nil {
+	if err := cmd.Run(context.Background(), project); err != nil {
 		t.Fatal(err)
 	}
 }

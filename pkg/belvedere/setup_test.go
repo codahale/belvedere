@@ -44,7 +44,7 @@ func TestProject_Setup(t *testing.T) {
 		dm:        dm,
 	}
 
-	if err := p.Setup(context.TODO(), "dns", false, 10*time.Millisecond); err != nil {
+	if err := p.Setup(context.Background(), "dns", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -66,7 +66,7 @@ func TestProject_Teardown(t *testing.T) {
 		dm:   dm,
 	}
 
-	if err := p.Teardown(context.TODO(), false, false, 10*time.Millisecond); err != nil {
+	if err := p.Teardown(context.Background(), false, false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }

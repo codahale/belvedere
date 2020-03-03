@@ -119,12 +119,12 @@ func TestManager_Insert(t *testing.T) {
 			Status: "DONE",
 		})
 
-	dm, err := NewManager(context.TODO())
+	dm, err := NewManager(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := dm.Insert(context.TODO(), "my-project", "my-deployment",
+	if err := dm.Insert(context.Background(), "my-project", "my-deployment",
 		[]Resource{
 			{
 				Name: "my-instance",
@@ -165,12 +165,12 @@ func TestManager_Update(t *testing.T) {
 			Status: "DONE",
 		})
 
-	dm, err := NewManager(context.TODO())
+	dm, err := NewManager(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := dm.Update(context.TODO(), "my-project", "my-deployment",
+	if err := dm.Update(context.Background(), "my-project", "my-deployment",
 		[]Resource{
 			{
 				Name: "my-instance",
@@ -201,12 +201,12 @@ func TestManager_Delete(t *testing.T) {
 			Status: "DONE",
 		})
 
-	dm, err := NewManager(context.TODO())
+	dm, err := NewManager(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := dm.Delete(context.TODO(), "my-project", "my-deployment", false, false, 10*time.Millisecond); err != nil {
+	if err := dm.Delete(context.Background(), "my-project", "my-deployment", false, false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -248,12 +248,12 @@ func TestManager_List(t *testing.T) {
 			},
 		})
 
-	dm, err := NewManager(context.TODO())
+	dm, err := NewManager(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	actual, err := dm.List(context.TODO(), "my-project", "bobs eq 1")
+	actual, err := dm.List(context.Background(), "my-project", "bobs eq 1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -296,12 +296,12 @@ func TestManager_Get(t *testing.T) {
 			},
 		})
 
-	dm, err := NewManager(context.TODO())
+	dm, err := NewManager(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	actual, err := dm.Get(context.TODO(), "my-project", "belvedere-base")
+	actual, err := dm.Get(context.Background(), "my-project", "belvedere-base")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -36,7 +36,7 @@ func TestAppsListCmd_Run(t *testing.T) {
 
 	cmd := &AppsListCmd{}
 
-	if err := cmd.Run(context.TODO(), project, tables); err != nil {
+	if err := cmd.Run(context.Background(), project, tables); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -67,7 +67,7 @@ func TestAppsCreateCmd_Run(t *testing.T) {
 		},
 	}
 
-	if err := cmd.Run(context.TODO(), project); err != nil {
+	if err := cmd.Run(context.Background(), project); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -97,7 +97,7 @@ func TestAppsUpdateCmd_Run(t *testing.T) {
 		},
 	}
 
-	if err := cmd.Run(context.TODO(), project); err != nil {
+	if err := cmd.Run(context.Background(), project); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -123,7 +123,7 @@ func TestAppsDeleteCmd_Run(t *testing.T) {
 		},
 	}
 
-	if err := cmd.Run(context.TODO(), project); err != nil {
+	if err := cmd.Run(context.Background(), project); err != nil {
 		t.Fatal(err)
 	}
 }

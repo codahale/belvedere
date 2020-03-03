@@ -10,7 +10,7 @@ import (
 func TestMockTokenSource(t *testing.T) {
 	MockTokenSource()
 
-	source, err := google.DefaultTokenSource(context.TODO())
+	source, err := google.DefaultTokenSource(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}

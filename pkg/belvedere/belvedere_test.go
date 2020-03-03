@@ -22,12 +22,12 @@ func TestProject_DNSServers(t *testing.T) {
 			NameServers: []string{"ns1.example.com", "ns2.example.com"},
 		})
 
-	s, err := NewProject(context.TODO(), "my-project")
+	s, err := NewProject(context.Background(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	actual, err := s.DNSServers(context.TODO())
+	actual, err := s.DNSServers(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,12 +101,12 @@ func TestProject_Instances(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject(context.TODO(), "my-project")
+	s, err := NewProject(context.Background(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	actual, err := s.Instances(context.TODO(), "", "")
+	actual, err := s.Instances(context.Background(), "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -196,12 +196,12 @@ func TestProject_InstancesApp(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject(context.TODO(), "my-project")
+	s, err := NewProject(context.Background(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	actual, err := s.Instances(context.TODO(), "my-app", "")
+	actual, err := s.Instances(context.Background(), "my-app", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -285,12 +285,12 @@ func TestProject_InstancesAppRelease(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject(context.TODO(), "my-project")
+	s, err := NewProject(context.Background(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	actual, err := s.Instances(context.TODO(), "my-app", "v2")
+	actual, err := s.Instances(context.Background(), "my-app", "v2")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -353,12 +353,12 @@ func TestProject_MachineTypes(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject(context.TODO(), "my-project")
+	s, err := NewProject(context.Background(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	actual, err := s.MachineTypes(context.TODO(), "us-central1")
+	actual, err := s.MachineTypes(context.Background(), "us-central1")
 	if err != nil {
 		t.Fatal(err)
 	}

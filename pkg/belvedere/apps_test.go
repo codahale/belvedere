@@ -37,7 +37,7 @@ func TestAppService_Get(t *testing.T) {
 		dm:      dm,
 	}
 
-	actual, err := as.Get(context.TODO(), "my-app")
+	actual, err := as.Get(context.Background(), "my-app")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +78,7 @@ func TestAppService_List(t *testing.T) {
 		dm:      dm,
 	}
 
-	actual, err := as.List(context.TODO())
+	actual, err := as.List(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -138,7 +138,7 @@ func TestAppService_Create(t *testing.T) {
 		resources: resourceBuilder,
 		setup:     setupService,
 	}
-	if err := apps.Create(context.TODO(), "us-west1", "my-app", config, false, 10*time.Millisecond); err != nil {
+	if err := apps.Create(context.Background(), "us-west1", "my-app", config, false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -179,7 +179,7 @@ func TestAppService_Update(t *testing.T) {
 		resources: resourceBuilder,
 		setup:     setupService,
 	}
-	if err := apps.Update(context.TODO(), "my-app", config, false, 10*time.Millisecond); err != nil {
+	if err := apps.Update(context.Background(), "my-app", config, false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -200,7 +200,7 @@ func TestAppService_Delete(t *testing.T) {
 		project: "my-project",
 		dm:      dm,
 	}
-	if err := apps.Delete(context.TODO(), "my-app", false, false, 10*time.Millisecond); err != nil {
+	if err := apps.Delete(context.Background(), "my-app", false, false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }

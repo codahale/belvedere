@@ -39,7 +39,7 @@ func TestReleasesListCmd_Run(t *testing.T) {
 	tables.EXPECT().
 		Print(rels)
 
-	if err := cmd.Run(context.TODO(), project, tables); err != nil {
+	if err := cmd.Run(context.Background(), project, tables); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -74,7 +74,7 @@ func TestReleasesCreateCmd_Run(t *testing.T) {
 		Releases().
 		Return(releases)
 
-	if err := cmd.Run(context.TODO(), project); err != nil {
+	if err := cmd.Run(context.Background(), project); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -113,7 +113,7 @@ func TestReleasesCreateCmd_Run_Enable(t *testing.T) {
 		Return(releases).
 		AnyTimes()
 
-	if err := cmd.Run(context.TODO(), project); err != nil {
+	if err := cmd.Run(context.Background(), project); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -141,7 +141,7 @@ func TestReleasesEnableCmd_Run(t *testing.T) {
 		Return(releases).
 		AnyTimes()
 
-	if err := cmd.Run(context.TODO(), project); err != nil {
+	if err := cmd.Run(context.Background(), project); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -169,7 +169,7 @@ func TestReleasesDisableCmd_Run(t *testing.T) {
 		Return(releases).
 		AnyTimes()
 
-	if err := cmd.Run(context.TODO(), project); err != nil {
+	if err := cmd.Run(context.Background(), project); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -197,7 +197,7 @@ func TestReleasesDeleteCmd_Run(t *testing.T) {
 		Return(releases).
 		AnyTimes()
 
-	if err := cmd.Run(context.TODO(), project); err != nil {
+	if err := cmd.Run(context.Background(), project); err != nil {
 		t.Fatal(err)
 	}
 }

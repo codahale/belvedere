@@ -37,7 +37,7 @@ func TestLogService_List(t *testing.T) {
 			},
 		})
 
-	logs, err := logging.NewService(context.TODO())
+	logs, err := logging.NewService(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +50,7 @@ func TestLogService_List(t *testing.T) {
 		},
 	}
 
-	actual, err := s.List(context.TODO(), "my-app", "", "", 15*time.Minute, []string{"health"})
+	actual, err := s.List(context.Background(), "my-app", "", "", 15*time.Minute, []string{"health"})
 	if err != nil {
 		t.Fatal(err)
 	}

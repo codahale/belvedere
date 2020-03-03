@@ -81,14 +81,14 @@ func TestManager_SetDMPerms(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(cloudresourcemanager.Policy{})
 
-	crm, err := cloudresourcemanager.NewService(context.TODO())
+	crm, err := cloudresourcemanager.NewService(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	m := &service{crm: crm}
 
-	if err := m.SetDMPerms(context.TODO(), "my-project", false); err != nil {
+	if err := m.SetDMPerms(context.Background(), "my-project", false); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -119,14 +119,14 @@ func TestManager_SetDMPermsExisting(t *testing.T) {
 			Etag: "300",
 		})
 
-	crm, err := cloudresourcemanager.NewService(context.TODO())
+	crm, err := cloudresourcemanager.NewService(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	m := &service{crm: crm}
 
-	if err := m.SetDMPerms(context.TODO(), "my-project", false); err != nil {
+	if err := m.SetDMPerms(context.Background(), "my-project", false); err != nil {
 		t.Fatal(err)
 	}
 }

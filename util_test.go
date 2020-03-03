@@ -24,7 +24,7 @@ func TestSetupCmd_Run(t *testing.T) {
 	project.EXPECT().
 		Setup(gomock.Any(), "cornbread.club", false, 10*time.Millisecond)
 
-	if err := cmd.Run(context.TODO(), project); err != nil {
+	if err := cmd.Run(context.Background(), project); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -44,7 +44,7 @@ func TestTeardownCmd_Run(t *testing.T) {
 	project.EXPECT().
 		Teardown(gomock.Any(), false, false, 10*time.Millisecond)
 
-	if err := cmd.Run(context.TODO(), project); err != nil {
+	if err := cmd.Run(context.Background(), project); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -73,7 +73,7 @@ func TestInstancesCmd_Run(t *testing.T) {
 	tables.EXPECT().
 		Print(ins)
 
-	if err := cmd.Run(context.TODO(), project, tables); err != nil {
+	if err := cmd.Run(context.Background(), project, tables); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -101,7 +101,7 @@ func TestMachineTypesCmd_Run(t *testing.T) {
 	tables.EXPECT().
 		Print(mt)
 
-	if err := cmd.Run(context.TODO(), project, tables); err != nil {
+	if err := cmd.Run(context.Background(), project, tables); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -127,7 +127,7 @@ func TestDNSServersCmd_Run(t *testing.T) {
 	tables.EXPECT().
 		Print(servers)
 
-	if err := cmd.Run(context.TODO(), project, tables); err != nil {
+	if err := cmd.Run(context.Background(), project, tables); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -165,7 +165,7 @@ func TestLogsCmd_Run(t *testing.T) {
 	tables.EXPECT().
 		Print(entries)
 
-	if err := cmd.Run(context.TODO(), project, tables); err != nil {
+	if err := cmd.Run(context.Background(), project, tables); err != nil {
 		t.Fatal(err)
 	}
 }

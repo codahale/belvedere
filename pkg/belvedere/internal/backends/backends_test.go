@@ -56,14 +56,14 @@ func TestService_Add(t *testing.T) {
 			Status: "DONE",
 		})
 
-	gce, err := compute.NewService(context.TODO())
+	gce, err := compute.NewService(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	s := NewService(gce)
 
-	if err := s.Add(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
+	if err := s.Add(context.Background(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -89,14 +89,14 @@ func TestService_AddExisting(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	gce, err := compute.NewService(context.TODO())
+	gce, err := compute.NewService(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	s := NewService(gce)
 
-	if err := s.Add(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
+	if err := s.Add(context.Background(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -122,14 +122,14 @@ func TestService_AddDryRun(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	gce, err := compute.NewService(context.TODO())
+	gce, err := compute.NewService(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	s := NewService(gce)
 
-	if err := s.Add(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", true, 10*time.Millisecond); err != nil {
+	if err := s.Add(context.Background(), "my-project", "us-central1", "bes-1", "ig-1", true, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -178,14 +178,14 @@ func TestService_Remove(t *testing.T) {
 			Status: "DONE",
 		})
 
-	gce, err := compute.NewService(context.TODO())
+	gce, err := compute.NewService(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	s := NewService(gce)
 
-	if err := s.Remove(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
+	if err := s.Remove(context.Background(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -224,14 +224,14 @@ func TestSetup_RemoveLast(t *testing.T) {
 			Status: "DONE",
 		})
 
-	gce, err := compute.NewService(context.TODO())
+	gce, err := compute.NewService(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	s := NewService(gce)
 
-	if err := s.Remove(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
+	if err := s.Remove(context.Background(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -257,14 +257,14 @@ func TestSetup_RemoveMissing(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	gce, err := compute.NewService(context.TODO())
+	gce, err := compute.NewService(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	s := NewService(gce)
 
-	if err := s.Remove(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
+	if err := s.Remove(context.Background(), "my-project", "us-central1", "bes-1", "ig-1", false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -293,14 +293,14 @@ func TestSetup_RemoveDryRun(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	gce, err := compute.NewService(context.TODO())
+	gce, err := compute.NewService(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	s := NewService(gce)
 
-	if err := s.Remove(context.TODO(), "my-project", "us-central1", "bes-1", "ig-1", true, 10*time.Millisecond); err != nil {
+	if err := s.Remove(context.Background(), "my-project", "us-central1", "bes-1", "ig-1", true, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }

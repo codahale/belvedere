@@ -28,7 +28,7 @@ func TestSecretsService_List(t *testing.T) {
 			},
 		})
 
-	sm, err := secretmanager.NewService(context.TODO())
+	sm, err := secretmanager.NewService(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +38,7 @@ func TestSecretsService_List(t *testing.T) {
 		sm:      sm,
 	}
 
-	actual, err := secrets.List(context.TODO())
+	actual, err := secrets.List(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +79,7 @@ func TestSecretsService_Create(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.SecretVersion{})
 
-	sm, err := secretmanager.NewService(context.TODO())
+	sm, err := secretmanager.NewService(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,7 +89,7 @@ func TestSecretsService_Create(t *testing.T) {
 		sm:      sm,
 	}
 
-	if err := secrets.Create(context.TODO(), "my-secret", []byte("secret"), false); err != nil {
+	if err := secrets.Create(context.Background(), "my-secret", []byte("secret"), false); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -107,7 +107,7 @@ func TestSecretsService_Update(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.SecretVersion{})
 
-	sm, err := secretmanager.NewService(context.TODO())
+	sm, err := secretmanager.NewService(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -117,7 +117,7 @@ func TestSecretsService_Update(t *testing.T) {
 		sm:      sm,
 	}
 
-	if err := secrets.Update(context.TODO(), "my-secret", []byte("secret"), false); err != nil {
+	if err := secrets.Update(context.Background(), "my-secret", []byte("secret"), false); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -131,7 +131,7 @@ func TestSecretsService_Delete(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.Empty{})
 
-	sm, err := secretmanager.NewService(context.TODO())
+	sm, err := secretmanager.NewService(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,7 +141,7 @@ func TestSecretsService_Delete(t *testing.T) {
 		sm:      sm,
 	}
 
-	if err := secrets.Delete(context.TODO(), "my-secret", false); err != nil {
+	if err := secrets.Delete(context.Background(), "my-secret", false); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -174,7 +174,7 @@ func TestSecretsService_Grant(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{})
 
-	sm, err := secretmanager.NewService(context.TODO())
+	sm, err := secretmanager.NewService(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -184,7 +184,7 @@ func TestSecretsService_Grant(t *testing.T) {
 		sm:      sm,
 	}
 
-	if err := secrets.Grant(context.TODO(), "my-secret", "my-app", false); err != nil {
+	if err := secrets.Grant(context.Background(), "my-secret", "my-app", false); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -217,7 +217,7 @@ func TestSecretsService_Revoke(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{})
 
-	sm, err := secretmanager.NewService(context.TODO())
+	sm, err := secretmanager.NewService(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -227,7 +227,7 @@ func TestSecretsService_Revoke(t *testing.T) {
 		sm:      sm,
 	}
 
-	if err := secrets.Revoke(context.TODO(), "my-secret", "my-app", false); err != nil {
+	if err := secrets.Revoke(context.Background(), "my-secret", "my-app", false); err != nil {
 		t.Fatal(err)
 	}
 }
