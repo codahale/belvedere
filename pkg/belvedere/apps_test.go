@@ -2,6 +2,7 @@ package belvedere
 
 import (
 	"context"
+	"net/http"
 	"testing"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
+	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/dns/v1"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -100,6 +102,12 @@ func TestAppService_Create(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
+	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-west1?alt=json&prettyPrint=false").
+		Reply(http.StatusOK).
+		JSON(&compute.Region{
+			Name: "us-west1",
+		})
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -132,17 +140,56 @@ func TestAppService_Create(t *testing.T) {
 			},
 			false, 10*time.Millisecond)
 
+	gce, err := compute.NewService(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	apps := &appService{
 		project:   "my-project",
 		dm:        dm,
 		resources: resourceBuilder,
 		setup:     setupService,
+		gce:       gce,
 	}
 	if err := apps.Create(context.Background(), "us-west1", "my-app", config, false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 }
 
+func TestAppService_Create_BadRegion(t *testing.T) {
+	defer gock.Off()
+	it.MockTokenSource()
+
+	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-west1?alt=json&prettyPrint=false").
+		Reply(http.StatusNotFound)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	resourceBuilder := NewResourceBuilder(ctrl)
+	dm := NewDeploymentsManager(ctrl)
+	setupService := NewSetupService(ctrl)
+
+	config := &cfg.Config{}
+
+	gce, err := compute.NewService(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	apps := &appService{
+		project:   "my-project",
+		dm:        dm,
+		resources: resourceBuilder,
+		setup:     setupService,
+		gce:       gce,
+	}
+	err = apps.Create(context.Background(), "us-west1", "my-app", config, false, 10*time.Millisecond)
+	if err == nil {
+		t.Fatal("no error")
+	}
+}
 func TestAppService_Update(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()

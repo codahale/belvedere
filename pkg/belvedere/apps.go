@@ -2,6 +2,7 @@ package belvedere
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
@@ -10,6 +11,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/setup"
 	"go.opencensus.io/trace"
+	compute "google.golang.org/api/compute/v0.beta"
 )
 
 // AppService provides methods for managing applications.
@@ -42,6 +44,7 @@ type appService struct {
 	setup     setup.Service
 	dm        deployments.Manager
 	resources resources.Builder
+	gce       *compute.Service
 }
 
 var _ AppService = &appService{}
@@ -92,6 +95,11 @@ func (s *appService) Create(ctx context.Context, region, name string, config *cf
 	// Validate the app name.
 	if err := gcp.ValidateRFC1035(name); err != nil {
 		return err
+	}
+
+	// Validate the region name.
+	if _, err := s.gce.Regions.Get(s.project, region).Context(ctx).Do(); err != nil {
+		return fmt.Errorf("invalid region %q: %w", region, err)
 	}
 
 	// Find the project's managed zone.

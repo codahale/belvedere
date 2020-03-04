@@ -107,6 +107,7 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 		project:   name,
 		dm:        dm,
 		setup:     s,
+		gce:       gce,
 		resources: res,
 	}
 	return &project{
