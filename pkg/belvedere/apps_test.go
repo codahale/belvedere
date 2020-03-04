@@ -105,7 +105,7 @@ func TestAppService_Create(t *testing.T) {
 	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-west1?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(&compute.Region{
-			Name: "us-west1",
+			Status: "UP",
 		})
 
 	ctrl := gomock.NewController(t)
@@ -154,6 +154,42 @@ func TestAppService_Create(t *testing.T) {
 	}
 	if err := apps.Create(context.Background(), "us-west1", "my-app", config, false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestAppService_Create_DownRegion(t *testing.T) {
+	defer gock.Off()
+	it.MockTokenSource()
+
+	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-west1?alt=json&prettyPrint=false").
+		Reply(http.StatusOK).
+		JSON(&compute.Region{
+			Status: "DOWN",
+		})
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	resourceBuilder := NewResourceBuilder(ctrl)
+	dm := NewDeploymentsManager(ctrl)
+	setupService := NewSetupService(ctrl)
+
+	config := &cfg.Config{}
+	gce, err := compute.NewService(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	apps := &appService{
+		project:   "my-project",
+		dm:        dm,
+		resources: resourceBuilder,
+		setup:     setupService,
+		gce:       gce,
+	}
+	err = apps.Create(context.Background(), "us-west1", "my-app", config, false, 10*time.Millisecond)
+	if err == nil {
+		t.Fatal("no error")
 	}
 }
 

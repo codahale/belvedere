@@ -97,9 +97,13 @@ func (s *appService) Create(ctx context.Context, region, name string, config *cf
 		return err
 	}
 
-	// Validate the region name.
-	if _, err := s.gce.Regions.Get(s.project, region).Context(ctx).Do(); err != nil {
+	// Validate the region name and status.
+	r, err := s.gce.Regions.Get(s.project, region).Context(ctx).Fields("status").Do()
+	if err != nil {
 		return fmt.Errorf("invalid region %q: %w", region, err)
+	}
+	if r.Status != "UP" {
+		return fmt.Errorf("region %q is down", region)
 	}
 
 	// Find the project's managed zone.
