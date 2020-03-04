@@ -3,6 +3,7 @@ package belvedere
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
@@ -84,6 +85,8 @@ func (r *releaseService) List(ctx context.Context, app string) ([]Release, error
 	return releases, nil
 }
 
+var imageHashFormat = regexp.MustCompile(`^[a-f0-9]{64}$`)
+
 func (r *releaseService) Create(ctx context.Context, app, name string, config *cfg.Config, imageSHA256 string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.releases.Create")
 	span.AddAttributes(
@@ -96,6 +99,10 @@ func (r *releaseService) Create(ctx context.Context, app, name string, config *c
 
 	if err := gcp.ValidateRFC1035(name); err != nil {
 		return err
+	}
+
+	if !imageHashFormat.MatchString(imageSHA256) {
+		return fmt.Errorf("invalid SHA-256 digest: %q", imageSHA256)
 	}
 
 	a, err := r.apps.Get(ctx, app)
