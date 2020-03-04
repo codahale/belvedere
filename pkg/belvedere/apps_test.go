@@ -190,6 +190,7 @@ func TestAppService_Create_BadRegion(t *testing.T) {
 		t.Fatal("no error")
 	}
 }
+
 func TestAppService_Update(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
