@@ -18,7 +18,7 @@ require (
 	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	google.golang.org/api v0.20.0
-	google.golang.org/genproto v0.0.0-20200305110556-506484158171
+	google.golang.org/genproto v0.0.0-20200306153348-d950eab6f860
 	gopkg.in/h2non/gock.v1 v1.0.15
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
