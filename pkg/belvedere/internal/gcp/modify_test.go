@@ -11,7 +11,7 @@ import (
 	"google.golang.org/api/googleapi"
 )
 
-func TestModifyLoopSuccess(t *testing.T) {
+func TestModifyLoop_Success(t *testing.T) {
 	n := 0
 	err := ModifyLoop(10*time.Millisecond, 1*time.Second, func() error {
 		n++
@@ -27,12 +27,12 @@ func TestModifyLoopSuccess(t *testing.T) {
 	}
 }
 
-func TestModifyLoopInitialFailure(t *testing.T) {
+func TestModifyLoop_PreconditionFailed(t *testing.T) {
 	n := 0
 	err := ModifyLoop(10*time.Millisecond, 1*time.Second, func() error {
 		n++
 		if n < 3 {
-			return &googleapi.Error{Code: 409}
+			return &googleapi.Error{Code: http.StatusPreconditionFailed}
 		}
 		return nil
 	})
@@ -46,7 +46,26 @@ func TestModifyLoopInitialFailure(t *testing.T) {
 	}
 }
 
-func TestModifyLoopFinalFailure(t *testing.T) {
+func TestModifyLoop_InitialFailure(t *testing.T) {
+	n := 0
+	err := ModifyLoop(10*time.Millisecond, 1*time.Second, func() error {
+		n++
+		if n < 3 {
+			return &googleapi.Error{Code: http.StatusConflict}
+		}
+		return nil
+	})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if expected, actual := 3, n; expected != actual {
+		t.Fatal(cmp.Diff(expected, actual))
+	}
+}
+
+func TestModifyLoop_FinalFailure(t *testing.T) {
 	n := 0
 	err := ModifyLoop(10*time.Millisecond, 100*time.Millisecond, func() error {
 		n++

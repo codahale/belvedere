@@ -22,7 +22,7 @@ func ModifyLoop(interval, timeout time.Duration, f func() error) error {
 
 		if e, ok := err.(*googleapi.Error); ok {
 			// If the operation resulted in a conflict, back off and retry.
-			if e.Code == http.StatusConflict {
+			if e.Code == http.StatusConflict || e.Code == http.StatusPreconditionFailed {
 				d := bo.NextBackOff()
 				if d == backoff.Stop {
 					// If the total time has elapsed, return an error.
