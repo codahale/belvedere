@@ -1,16 +1,18 @@
-package main
+package apps
 
 import (
 	"context"
 	"testing"
 	"time"
 
+	"github.com/codahale/belvedere/cmd/belvedere/internal/cmd"
+	"github.com/codahale/belvedere/cmd/belvedere/internal/mocks"
 	"github.com/codahale/belvedere/pkg/belvedere"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/golang/mock/gomock"
 )
 
-func TestAppsListCmd_Run(t *testing.T) {
+func TestListCmd_Run(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -20,28 +22,27 @@ func TestAppsListCmd_Run(t *testing.T) {
 		},
 	}
 
-	apps := NewMockAppService(ctrl)
+	apps := mocks.NewMockAppService(ctrl)
 	apps.EXPECT().
 		List(gomock.Any()).
 		Return(list, nil)
 
-	tables := NewMockTableWriter(ctrl)
+	tables := mocks.NewMockTableWriter(ctrl)
 	tables.EXPECT().
 		Print(list)
 
-	project := NewMockProject(ctrl)
+	project := mocks.NewMockProject(ctrl)
 	project.EXPECT().
 		Apps().
 		Return(apps)
 
-	cmd := &AppsListCmd{}
-
-	if err := cmd.Run(context.Background(), project, tables); err != nil {
+	listCmd := &ListCmd{}
+	if err := listCmd.Run(context.Background(), project, tables); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestAppsCreateCmd_Run(t *testing.T) {
+func TestCreateCmd_Run(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -49,35 +50,34 @@ func TestAppsCreateCmd_Run(t *testing.T) {
 		NumReplicas: 100,
 	}
 
-	apps := NewMockAppService(ctrl)
+	apps := mocks.NewMockAppService(ctrl)
 	apps.EXPECT().
 		Create(gomock.Any(), "us-west1", "my-app", config, false, 10*time.Millisecond)
 
-	project := NewMockProject(ctrl)
+	project := mocks.NewMockProject(ctrl)
 	project.EXPECT().
 		Apps().
 		Return(apps)
 
-	fr := NewMockFileReader(ctrl)
+	fr := mocks.NewMockFileReader(ctrl)
 	fr.EXPECT().
 		Read("config.yaml").
 		Return([]byte(`{"numReplicas": 100}`), nil)
 
-	cmd := &AppsCreateCmd{
+	createCmd := &CreateCmd{
 		App:    "my-app",
 		Region: "us-west1",
 		Config: "config.yaml",
-		LongRunningOptions: LongRunningOptions{
+		LongRunningOptions: cmd.LongRunningOptions{
 			Interval: 10 * time.Millisecond,
 		},
 	}
-
-	if err := cmd.Run(context.Background(), project, fr); err != nil {
+	if err := createCmd.Run(context.Background(), project, fr); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestAppsUpdateCmd_Run(t *testing.T) {
+func TestUpdateCmd_Run(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -85,55 +85,53 @@ func TestAppsUpdateCmd_Run(t *testing.T) {
 		NumReplicas: 100,
 	}
 
-	apps := NewMockAppService(ctrl)
+	apps := mocks.NewMockAppService(ctrl)
 	apps.EXPECT().
 		Update(gomock.Any(), "my-app", config, false, 10*time.Millisecond)
 
-	project := NewMockProject(ctrl)
+	project := mocks.NewMockProject(ctrl)
 	project.EXPECT().
 		Apps().
 		Return(apps)
 
-	fr := NewMockFileReader(ctrl)
+	fr := mocks.NewMockFileReader(ctrl)
 	fr.EXPECT().
 		Read("config.yaml").
 		Return([]byte(`{"numReplicas": 100}`), nil)
 
-	cmd := &AppsUpdateCmd{
+	updateCmd := &UpdateCmd{
 		App:    "my-app",
 		Config: "config.yaml",
-		LongRunningOptions: LongRunningOptions{
+		LongRunningOptions: cmd.LongRunningOptions{
 			Interval: 10 * time.Millisecond,
 		},
 	}
-
-	if err := cmd.Run(context.Background(), project, fr); err != nil {
+	if err := updateCmd.Run(context.Background(), project, fr); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestAppsDeleteCmd_Run(t *testing.T) {
+func TestDeleteCmd_Run(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	apps := NewMockAppService(ctrl)
+	apps := mocks.NewMockAppService(ctrl)
 	apps.EXPECT().
 		Delete(gomock.Any(), "my-app", false, false, 10*time.Millisecond)
 
-	project := NewMockProject(ctrl)
+	project := mocks.NewMockProject(ctrl)
 	project.EXPECT().
 		Apps().
 		Return(apps)
 
-	cmd := &AppsDeleteCmd{
+	deleteCmd := &DeleteCmd{
 		App:   "my-app",
 		Async: false,
-		LongRunningOptions: LongRunningOptions{
+		LongRunningOptions: cmd.LongRunningOptions{
 			Interval: 10 * time.Millisecond,
 		},
 	}
-
-	if err := cmd.Run(context.Background(), project); err != nil {
+	if err := deleteCmd.Run(context.Background(), project); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"fmt"
@@ -14,7 +14,9 @@ type traceLogger struct {
 	m sync.Mutex
 }
 
-var _ trace.Exporter = &traceLogger{}
+func NewTraceLogger() trace.Exporter {
+	return &traceLogger{}
+}
 
 func (l *traceLogger) ExportSpan(s *trace.SpanData) {
 	l.m.Lock()

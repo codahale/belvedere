@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"encoding/csv"
@@ -14,6 +14,10 @@ import (
 
 type TableWriter interface {
 	Print(v interface{}) error
+}
+
+func NewTableWriter(csv bool) TableWriter {
+	return &tableWriter{csv: csv}
 }
 
 type tableWriter struct {

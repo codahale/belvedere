@@ -9,6 +9,10 @@ import (
 	"time"
 
 	"github.com/alecthomas/kong"
+	"github.com/codahale/belvedere/cmd/belvedere/internal/apps"
+	"github.com/codahale/belvedere/cmd/belvedere/internal/cmd"
+	"github.com/codahale/belvedere/cmd/belvedere/internal/releases"
+	"github.com/codahale/belvedere/cmd/belvedere/internal/secrets"
 	"github.com/codahale/belvedere/pkg/belvedere"
 	"go.opencensus.io/examples/exporter"
 	"go.opencensus.io/stats/view"
@@ -54,8 +58,8 @@ func run(cli *kong.Context, opts *CLI) error {
 	// Run the given command, passing in the context and options.
 	cli.BindTo(ctx, (*context.Context)(nil))
 	cli.BindTo(project, (*belvedere.Project)(nil))
-	cli.BindTo(&tableWriter{csv: opts.CSV}, (*TableWriter)(nil))
-	cli.BindTo(&fileReader{}, (*FileReader)(nil))
+	cli.BindTo(cmd.NewTableWriter(opts.CSV), (*cmd.TableWriter)(nil))
+	cli.BindTo(cmd.NewFileReader(), (*cmd.FileReader)(nil))
 	if err := cli.Run(&opts); err != nil {
 		span.SetStatus(trace.Status{
 			Code:    int32(code.Code_INTERNAL),
@@ -71,14 +75,6 @@ var (
 	version = "unknown" // version is injected via the go:generate statement
 )
 
-type ModifyOptions struct {
-	DryRun bool `help:"Print modifications instead of performing them."`
-}
-
-type LongRunningOptions struct {
-	Interval time.Duration `help:"Specify a polling interval for long-running operations." default:"10s"`
-}
-
 type CLI struct {
 	Debug   bool             `help:"Enable debug logging." short:"d"`
 	Quiet   bool             `help:"Disable all logging." short:"q"`
@@ -87,16 +83,16 @@ type CLI struct {
 	Version kong.VersionFlag `help:"Print version information and quit."`
 	Project string           `help:"Specify a GCP project ID. Defaults to using the GCP SDK's active config'."`
 
-	Setup        SetupCmd        `cmd:"" help:"Initialize a GCP project for use with Belvedere."`
-	Teardown     TeardownCmd     `cmd:"" help:"Remove all Belvedere resources from this project."`
-	DNSServers   DNSServersCmd   `cmd:"" help:"List the DNS servers for this project."`
-	Instances    InstancesCmd    `cmd:"" help:"List running instances."`
-	MachineTypes MachineTypesCmd `cmd:"" help:"List available GCE machine types."`
-	Logs         LogsCmd         `cmd:"" help:"Display application logs."`
-	SSH          SSHCmd          `cmd:"" help:"SSH to an instance over IAP."`
-	Apps         AppsCmd         `cmd:"" help:"Commands for managing apps."`
-	Releases     ReleasesCmd     `cmd:"" help:"Commands for managing releases."`
-	Secrets      SecretsCmd      `cmd:"" help:"Commands for managing secrets."`
+	Setup        SetupCmd         `cmd:"" help:"Initialize a GCP project for use with Belvedere."`
+	Teardown     TeardownCmd      `cmd:"" help:"Remove all Belvedere resources from this project."`
+	DNSServers   DNSServersCmd    `cmd:"" help:"List the DNS servers for this project."`
+	Instances    InstancesCmd     `cmd:"" help:"List running instances."`
+	MachineTypes MachineTypesCmd  `cmd:"" help:"List available GCE machine types."`
+	Logs         LogsCmd          `cmd:"" help:"Display application logs."`
+	SSH          SSHCmd           `cmd:"" help:"SSH to an instance over IAP."`
+	Apps         apps.RootCmd     `cmd:"" help:"Commands for managing apps."`
+	Releases     releases.RootCmd `cmd:"" help:"Commands for managing releases."`
+	Secrets      secrets.RootCmd  `cmd:"" help:"Commands for managing secrets."`
 
 	exit func() error
 }
@@ -132,6 +128,6 @@ func (cli *CLI) enableLogging() {
 		view.RegisterExporter(pe)
 	} else if !cli.Quiet {
 		// Unless we're quiet, use the trace logger for more practical logging.
-		trace.RegisterExporter(&traceLogger{})
+		trace.RegisterExporter(cmd.NewTraceLogger())
 	}
 }

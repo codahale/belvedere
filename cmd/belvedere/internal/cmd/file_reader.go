@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"fmt"
@@ -12,6 +12,10 @@ import (
 
 type FileReader interface {
 	Read(path string) ([]byte, error)
+}
+
+func NewFileReader() FileReader {
+	return &fileReader{}
 }
 
 type fileReader struct {

@@ -8,13 +8,14 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/codahale/belvedere/cmd/belvedere/internal/cmd"
 	"github.com/codahale/belvedere/pkg/belvedere"
 )
 
 type SetupCmd struct {
-	DNSZone            string `arg:"" required:"" help:"The DNS zone to be managed by this project."`
-	ModifyOptions      `embed:""`
-	LongRunningOptions `embed:""`
+	DNSZone                string `arg:"" required:"" help:"The DNS zone to be managed by this project."`
+	cmd.ModifyOptions      `embed:""`
+	cmd.LongRunningOptions `embed:""`
 }
 
 func (cmd *SetupCmd) Run(ctx context.Context, project belvedere.Project) error {
@@ -22,9 +23,9 @@ func (cmd *SetupCmd) Run(ctx context.Context, project belvedere.Project) error {
 }
 
 type TeardownCmd struct {
-	Async              bool `help:"Return without waiting for successful completion."`
-	ModifyOptions      `embed:""`
-	LongRunningOptions `embed:""`
+	Async                  bool `help:"Return without waiting for successful completion."`
+	cmd.ModifyOptions      `embed:""`
+	cmd.LongRunningOptions `embed:""`
 }
 
 func (cmd *TeardownCmd) Run(ctx context.Context, project belvedere.Project) error {
@@ -34,7 +35,7 @@ func (cmd *TeardownCmd) Run(ctx context.Context, project belvedere.Project) erro
 type DNSServersCmd struct {
 }
 
-func (cmd *DNSServersCmd) Run(ctx context.Context, project belvedere.Project, tables TableWriter) error {
+func (cmd *DNSServersCmd) Run(ctx context.Context, project belvedere.Project, tables cmd.TableWriter) error {
 	servers, err := project.DNSServers(ctx)
 	if err != nil {
 		return err
@@ -46,7 +47,7 @@ type MachineTypesCmd struct {
 	Region string `help:"Limit types to those available in the given region."`
 }
 
-func (cmd *MachineTypesCmd) Run(ctx context.Context, project belvedere.Project, tables TableWriter) error {
+func (cmd *MachineTypesCmd) Run(ctx context.Context, project belvedere.Project, tables cmd.TableWriter) error {
 	machineTypes, err := project.MachineTypes(ctx, cmd.Region)
 	if err != nil {
 		return err
@@ -59,7 +60,7 @@ type InstancesCmd struct {
 	Release string `arg:"" optional:"" help:"Limit instances to those running the given release."`
 }
 
-func (cmd *InstancesCmd) Run(ctx context.Context, project belvedere.Project, tables TableWriter) error {
+func (cmd *InstancesCmd) Run(ctx context.Context, project belvedere.Project, tables cmd.TableWriter) error {
 	instances, err := project.Instances(ctx, cmd.App, cmd.Release)
 	if err != nil {
 		return err
@@ -99,7 +100,7 @@ type LogsCmd struct {
 	Freshness time.Duration `default:"5m" help:"Limit logs to the last period of time."`
 }
 
-func (cmd *LogsCmd) Run(ctx context.Context, project belvedere.Project, tables TableWriter) error {
+func (cmd *LogsCmd) Run(ctx context.Context, project belvedere.Project, tables cmd.TableWriter) error {
 	entries, err := project.Logs().List(ctx, cmd.App, cmd.Release, cmd.Instance, cmd.Freshness, cmd.Filters)
 	if err != nil {
 		return err
