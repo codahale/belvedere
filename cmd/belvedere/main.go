@@ -90,10 +90,10 @@ type CLI struct {
 	Setup        SetupCmd        `cmd:"" help:"Initialize a GCP project for use with Belvedere."`
 	Teardown     TeardownCmd     `cmd:"" help:"Remove all Belvedere resources from this project."`
 	DNSServers   DNSServersCmd   `cmd:"" help:"List the DNS servers for this project."`
-	MachineTypes MachineTypesCmd `cmd:"" help:"List available GCE machine types."`
 	Instances    InstancesCmd    `cmd:"" help:"List running instances."`
-	SSH          SSHCmd          `cmd:"" help:"SSH to an instance over IAP."`
+	MachineTypes MachineTypesCmd `cmd:"" help:"List available GCE machine types."`
 	Logs         LogsCmd         `cmd:"" help:"Display application logs."`
+	SSH          SSHCmd          `cmd:"" help:"SSH to an instance over IAP."`
 	Apps         AppsCmd         `cmd:"" help:"Commands for managing apps."`
 	Releases     ReleasesCmd     `cmd:"" help:"Commands for managing releases."`
 	Secrets      SecretsCmd      `cmd:"" help:"Commands for managing secrets."`
