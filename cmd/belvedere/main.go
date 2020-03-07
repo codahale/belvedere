@@ -1,9 +1,8 @@
 package main
 
-//go:generate bash ./version.sh
-
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/user"
 	"time"
@@ -25,7 +24,7 @@ func main() {
 	var opts CLI
 	cli := kong.Parse(&opts,
 		kong.Name("belvedere"),
-		kong.Vars{"version": version},
+		kong.Vars{"version": buildVersion(version, commit, date, builtBy)},
 		kong.Description("A small lookout tower (usually square) on the roof of a house."),
 		kong.UsageOnError(),
 	)
@@ -71,8 +70,12 @@ func run(cli *kong.Context, opts *CLI) error {
 	return nil
 }
 
+// nolint: gochecknoglobals
 var (
-	version = "unknown" // version is injected via the go:generate statement
+	version = "dev"
+	commit  = ""
+	date    = ""
+	builtBy = ""
 )
 
 type CLI struct {
@@ -130,4 +133,18 @@ func (cli *CLI) enableLogging() {
 		// Unless we're quiet, use the trace logger for more practical logging.
 		trace.RegisterExporter(cmd.NewTraceLogger())
 	}
+}
+
+func buildVersion(version, commit, date, builtBy string) string {
+	var result = fmt.Sprintf("version: %s", version)
+	if commit != "" {
+		result = fmt.Sprintf("%s\ncommit: %s", result, commit)
+	}
+	if date != "" {
+		result = fmt.Sprintf("%s\nbuilt at: %s", result, date)
+	}
+	if builtBy != "" {
+		result = fmt.Sprintf("%s\nbuilt by: %s", result, builtBy)
+	}
+	return result
 }
