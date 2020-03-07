@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/alessio/shellescape"
 	"go.opencensus.io/trace"
 )
 
@@ -27,13 +28,13 @@ func (l *traceLogger) ExportSpan(s *trace.SpanData) {
 		_, _ = fmt.Fprintf(os.Stderr, " code=%d", s.Code)
 	}
 	if s.Message != "" {
-		_, _ = fmt.Fprintf(os.Stderr, " message=%s", s.Message)
+		_, _ = fmt.Fprintf(os.Stderr, " message=%s", shellescape.Quote(s.Message))
 	}
 	l.printAttributes(s.Attributes)
 	_, _ = fmt.Fprintln(os.Stderr)
 
 	for _, a := range s.Annotations {
-		_, _ = fmt.Fprintf(os.Stderr, "  %s", a.Message)
+		_, _ = fmt.Fprintf(os.Stderr, "  %s", shellescape.Quote(a.Message))
 		l.printAttributes(a.Attributes)
 		_, _ = fmt.Fprintln(os.Stderr)
 	}
@@ -46,6 +47,10 @@ func (l *traceLogger) printAttributes(attributes map[string]interface{}) {
 	}
 	sort.Stable(sort.StringSlice(keys))
 	for _, k := range keys {
-		_, _ = fmt.Fprintf(os.Stderr, " %v=%v", k, attributes[k])
+		v := attributes[k]
+		if s, ok := v.(string); ok {
+			v = shellescape.Quote(s)
+		}
+		_, _ = fmt.Fprintf(os.Stderr, " %v=%v", k, v)
 	}
 }
