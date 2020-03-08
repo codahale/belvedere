@@ -1,73 +1,121 @@
 package main
 
 import (
-	"context"
+	"flag"
 	"fmt"
 	"os"
-	"os/user"
-	"time"
+	"strings"
 
-	"github.com/alecthomas/kong"
-	"github.com/codahale/belvedere/cmd/belvedere/internal/apps"
+	"github.com/alessio/shellescape"
+	"github.com/codahale/belvedere/cmd/belvedere/internal/appscmd"
 	"github.com/codahale/belvedere/cmd/belvedere/internal/cmd"
-	"github.com/codahale/belvedere/cmd/belvedere/internal/releases"
-	"github.com/codahale/belvedere/cmd/belvedere/internal/secrets"
+	"github.com/codahale/belvedere/cmd/belvedere/internal/dnsserverscmd"
+	"github.com/codahale/belvedere/cmd/belvedere/internal/instancescmd"
+	"github.com/codahale/belvedere/cmd/belvedere/internal/logscmd"
+	"github.com/codahale/belvedere/cmd/belvedere/internal/machinetypescmd"
+	"github.com/codahale/belvedere/cmd/belvedere/internal/releasescmd"
+	"github.com/codahale/belvedere/cmd/belvedere/internal/rootcmd"
+	"github.com/codahale/belvedere/cmd/belvedere/internal/secretscmd"
+	"github.com/codahale/belvedere/cmd/belvedere/internal/setupcmd"
+	"github.com/codahale/belvedere/cmd/belvedere/internal/sshcmd"
+	"github.com/codahale/belvedere/cmd/belvedere/internal/teardowncmd"
+	"github.com/codahale/belvedere/cmd/belvedere/internal/versioncmd"
 	"github.com/codahale/belvedere/pkg/belvedere"
-	"go.opencensus.io/examples/exporter"
-	"go.opencensus.io/stats/view"
+	"github.com/peterbourgon/ff/v2/ffcli"
 	"go.opencensus.io/trace"
 	"google.golang.org/genproto/googleapis/rpc/code"
 )
 
 func main() {
-	// ParseConfig the command line.
-	var opts CLI
-	cli := kong.Parse(&opts,
-		kong.Name("belvedere"),
-		kong.Vars{"version": buildVersion(version, commit, date, builtBy)},
-		kong.Description("A small lookout tower (usually square) on the roof of a house."),
-		kong.UsageOnError(),
-	)
+	callback, err := run()
+	if err != nil {
+		if err == flag.ErrHelp {
+			os.Exit(2)
+		} else {
+			_, _ = fmt.Fprintln(os.Stderr, err)
+			os.Exit(-1)
+		}
+	}
 
-	// Run the given command.
-	cli.FatalIfErrorf(run(cli, &opts))
-
-	// Run any post-command hook.
-	if opts.exit != nil {
-		cli.FatalIfErrorf(opts.exit())
+	if callback != nil {
+		err = callback()
+		_, _ = fmt.Fprintln(os.Stderr, err)
+		os.Exit(-1)
 	}
 }
 
-func run(cli *kong.Context, opts *CLI) error {
+func run() (func() error, error) {
+	// Initialize root command.
+	rootCommand, rootConfig := rootcmd.New()
+
+	// Populate subcommands.
+	rootCommand.Subcommands = []*ffcli.Command{
+		setupcmd.New(rootConfig),
+		teardowncmd.New(rootConfig),
+		dnsserverscmd.New(rootConfig),
+		instancescmd.New(rootConfig),
+		logscmd.New(rootConfig),
+		machinetypescmd.New(rootConfig),
+		sshcmd.New(rootConfig),
+		appscmd.New(rootConfig),
+		releasescmd.New(rootConfig),
+		secretscmd.New(rootConfig),
+		versioncmd.New(rootConfig, version, commit, date, builtBy),
+	}
+
+	// Parse flags and args.
+	if err := rootCommand.Parse(os.Args[1:]); err != nil {
+		// TODO handle no-op commands, e.g. belvedere apps
+		return nil, err
+	}
+
 	// Enable trace logging.
-	opts.enableLogging()
+	rootConfig.EnableLogging()
 
 	// Create a root span.
-	ctx, cancel, span := opts.rootSpan()
+	ctx, cancel, span := rootConfig.RootSpan()
 	defer cancel()
 	defer span.End()
 
 	// Create a Belvedere project.
-	project, err := belvedere.NewProject(ctx, opts.Project)
+	project, err := belvedere.NewProject(ctx, rootConfig.ProjectName)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	span.AddAttributes(trace.StringAttribute("project", project.Name()))
+	span.AddAttributes(
+		trace.StringAttribute("project", project.Name()),
+		trace.StringAttribute("args", escapeArgs(os.Args[1:])),
+	)
+	rootConfig.Project = project
 
-	// Run the given command, passing in the context and options.
-	cli.BindTo(ctx, (*context.Context)(nil))
-	cli.BindTo(project, (*belvedere.Project)(nil))
-	cli.BindTo(cmd.NewTableWriter(opts.CSV), (*cmd.TableWriter)(nil))
-	cli.BindTo(cmd.NewFileReader(), (*cmd.FileReader)(nil))
-	if err := cli.Run(&opts); err != nil {
-		span.SetStatus(trace.Status{
-			Code:    int32(code.Code_INTERNAL),
-			Message: err.Error(),
-		})
-		return err
+	// Initialize helpers.
+	rootConfig.Tables = cmd.NewTableWriter(rootConfig.CSV)
+	rootConfig.Files = cmd.NewFileReader()
+
+	// Run the actual command.
+	if err := rootCommand.Run(ctx); err != nil {
+		if err == flag.ErrHelp {
+			span.SetStatus(trace.Status{
+				Code:    int32(code.Code_INVALID_ARGUMENT),
+				Message: "invalid argument",
+			})
+		} else {
+			span.SetStatus(trace.Status{
+				Code:    int32(code.Code_INTERNAL),
+				Message: err.Error(),
+			})
+		}
+		return nil, err
 	}
+	return rootConfig.Callback, nil
+}
 
-	return nil
+func escapeArgs(args []string) string {
+	escaped := make([]string, len(args))
+	for i, s := range args {
+		escaped[i] = shellescape.Quote(s)
+	}
+	return strings.Join(escaped, " ")
 }
 
 // nolint: gochecknoglobals
@@ -77,74 +125,3 @@ var (
 	date    = ""
 	builtBy = ""
 )
-
-type CLI struct {
-	Debug   bool             `help:"Enable debug logging." short:"d"`
-	Quiet   bool             `help:"Disable all logging." short:"q"`
-	CSV     bool             `help:"Print tables as CSV."`
-	Timeout time.Duration    `help:"Specify a timeout for long-running operations." default:"10m"`
-	Version kong.VersionFlag `help:"Print version information and quit."`
-	Project string           `help:"Specify a GCP project ID. Defaults to using the GCP SDK's active config'."`
-
-	Setup        SetupCmd         `cmd:"" help:"Initialize a GCP project for use with Belvedere."`
-	Teardown     TeardownCmd      `cmd:"" help:"Remove all Belvedere resources from this project."`
-	DNSServers   DNSServersCmd    `cmd:"" help:"List the DNS servers for this project."`
-	Instances    InstancesCmd     `cmd:"" help:"List running instances."`
-	MachineTypes MachineTypesCmd  `cmd:"" help:"List available GCE machine types."`
-	Logs         LogsCmd          `cmd:"" help:"Display application logs."`
-	SSH          SSHCmd           `cmd:"" help:"SSH to an instance over IAP."`
-	Apps         apps.RootCmd     `cmd:"" help:"Commands for managing apps."`
-	Releases     releases.RootCmd `cmd:"" help:"Commands for managing releases."`
-	Secrets      secrets.RootCmd  `cmd:"" help:"Commands for managing secrets."`
-
-	exit func() error
-}
-
-func (cli *CLI) rootSpan() (context.Context, context.CancelFunc, *trace.Span) {
-	// Initialize a context with a timeout and an interval.
-	ctx, cancel := context.WithTimeout(context.Background(), cli.Timeout)
-
-	// Create a root span.
-	ctx, span := trace.StartSpan(ctx, "belvedere.main")
-	if hostname, err := os.Hostname(); err == nil {
-		span.AddAttributes(trace.StringAttribute("hostname", hostname))
-	}
-	if u, err := user.Current(); err == nil {
-		span.AddAttributes(
-			trace.StringAttribute("username", u.Username),
-			trace.StringAttribute("uid", u.Uid),
-		)
-	}
-	return ctx, cancel, span
-}
-
-func (cli *CLI) enableLogging() {
-	// Export all traces.
-	trace.ApplyConfig(trace.Config{
-		DefaultSampler: trace.AlwaysSample(),
-	})
-
-	if cli.Debug {
-		// Use the print exporter for debugging, as it prints everything.
-		pe := &exporter.PrintExporter{}
-		trace.RegisterExporter(pe)
-		view.RegisterExporter(pe)
-	} else if !cli.Quiet {
-		// Unless we're quiet, use the trace logger for more practical logging.
-		trace.RegisterExporter(cmd.NewTraceLogger())
-	}
-}
-
-func buildVersion(version, commit, date, builtBy string) string {
-	var result = fmt.Sprintf("version: %s", version)
-	if commit != "" {
-		result = fmt.Sprintf("%s\ncommit: %s", result, commit)
-	}
-	if date != "" {
-		result = fmt.Sprintf("%s\nbuilt at: %s", result, date)
-	}
-	if builtBy != "" {
-		result = fmt.Sprintf("%s\nbuilt by: %s", result, builtBy)
-	}
-	return result
-}

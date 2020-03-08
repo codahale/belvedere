@@ -38,8 +38,8 @@ type Project interface {
 	// DNSServers returns a list of DNS servers which handle the project's managed zone.
 	DNSServers(ctx context.Context) ([]DNSServer, error)
 
-	// Instances returns a list of running instances in the project. If an app or release are
-	// provided, limits the results to instances running the given app or release.
+	// Instances returns a list of running instances in the project. If an application or release
+	// are provided, limits the results to instances running the given app or release.
 	Instances(ctx context.Context, app, release string) ([]Instance, error)
 
 	// MachineTypes returns a list of GCE machine types which are available for the given project or

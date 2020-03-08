@@ -28,24 +28,24 @@ To get a list of the DNS servers to use, run:
 belvedere dns-servers
 ```
 
-It's important that this be done before creating any apps, as creating an app involves provisioning a Google-managed TLS certificate.
-In order for that provisioning to be successful, the hostname associated with the app (e.g. `my-app.cornbread.club`) must resolve to the load balancer's IP address.
+It's important that this be done before creating any apps, as creating an application involves provisioning a Google-managed TLS certificate.
+In order for that provisioning to be successful, the hostname associated with the application (e.g. `my-app.cornbread.club`) must resolve to the load balancer's IP address.
 In order to do that, the domain registration needs to provide the servers listed via `dns-servers` as the DNS servers for that hostname.
-If this isn't the case when an app is created, the certificate will take much longer to provision.
+If this isn't the case when an application is created, the certificate will take much longer to provision.
 
 ## Apps
 
 Belvedere apps are HTTP2 apps packaged as containers in a registry, running on virtual machines with optional sidecars.
-Belvedere requires that the app (or a sidecar reverse proxy) listen on port `8443` for HTTP2 requests.
-The app can use self-signed certs, but it must use TLS.
-The app must return a `200 OK` response to `GET` requests for `/healthz`
+Belvedere requires that the application (or a sidecar reverse proxy) listen on port `8443` for HTTP2 requests.
+The application can use self-signed certs, but it must use TLS.
+The application must return a `200 OK` response to `GET` requests for `/healthz`
 
 ### Building An App
 
-This repository has an example "Hello, world!" app in the `examples` directory.
-It consists of an HTTP/1.1 Go app and an Nginx-based frontend proxy.
+This repository has an example "Hello, world!" application in the `examples` directory.
+It consists of an HTTP/1.1 Go application and an Nginx-based frontend proxy.
 
-To build the app using Google Cloud Build, run:
+To build the application using Google Cloud Build, run:
 
 ```shell script
 gcloud builds submit --config ./examples/helloworld/cloudbuild.yaml ./examples/helloworld/
@@ -57,11 +57,11 @@ To build the Nginx frontend using Google Cloud Build, run:
 gcloud builds submit --config ./examples/nginx-frontend/cloudbuild.yaml ./examples/nginx-frontend/
 ```
 
-This will result in images for the app and the frontend proxy being built and pushed to Google Container Registry in the GCP project.
+This will result in images for the application and the frontend proxy being built and pushed to Google Container Registry in the GCP project.
 
 ### Configuration
 
-App configuration lives in a YAML file.
+Application configuration lives in a YAML file.
 Check out `examples/helloworld.yaml` for an example.
 Belvedere requires a Google Compute Engine machine type and a Docker image URL for the app's main container.
 
@@ -104,9 +104,9 @@ belvedere releases create my-app v1 $SHA256 ./my-app.yaml
 
 This will create a Deployment Manager deployment with some more goodies:
 
-* an instance template for creating instances running the app inside Docker on Google Container-Optimized OS
+* an instance template for creating instances running the application inside Docker on Google Container-Optimized OS
 * an instance group manager for manging those instances
-* an autoscaler for scaling the number of app instances up or down based on load balancer utilization
+* an autoscaler for scaling the number of application instances up or down based on load balancer utilization
 
 Once this is done, the release has been created but is not in service.
 
@@ -130,7 +130,7 @@ To remove a release from service, disable it by running:
 belvedere releases disable my-app v1
 ```
 
-This will remove the app from service and drain any existing connections.
+This will remove the application from service and drain any existing connections.
 
 ### Deleting A Release
 
@@ -186,7 +186,7 @@ belvedere ssh my-app-v43-hxht
 ```
 
 This will use `gcloud` to automatically configure an SSH key, inject it into the instance, and tunnel an SSH connection over GCP's Identity-Aware Proxy (IAP) to the instance.
-IAP tunneling is used because it allows for public SSH access to app instances to be disabled.
+IAP tunneling is used because it allows for public SSH access to application instances to be disabled.
 Only IAP tunnels are allowed, and IAP tunnels require that the initiator be an authenticated member of the GCP project.
 
 You can also pass arguments to SSH:
@@ -197,14 +197,14 @@ belvedere ssh my-app-v43-hxht ls -al
 
 ### Viewing Logs
 
-To view the logs for an app and its sidecar containers, run:
+To view the logs for an application and its sidecar containers, run:
 
 ```shell script
 belvedere logs my-app
 belvedere logs my-app v43
 belvedere logs my-app v43 my-app-v43-hxht
-belvedere logs my-app v43 my-app-v43-hxht --freshness=1h
-belvedere logs my-app v43 my-app-v43-hxht --freshness=1h --filter="/login/"
+belvedere logs my-app v43 my-app-v43-hxht -max-age=1h
+belvedere logs my-app v43 my-app-v43-hxht -max-age=1h -filter="/login/"
 ```
 
 ### Secrets

@@ -1,8 +1,8 @@
-# The machine type the app will run on. Use `belvedere machine-types` to see a list.
+# The machine type the application will run on. Use `belvedere machine-types` to see a list.
 machineType: n1-standard-1
 
-# The number of app instances to keep running. If an autoscaling policy is specified below, this
-# will be the number of instances initially started.
+# The number of application instances to keep running. If an autoscaling policy is specified below,
+# this will be the number of instances initially started.
 numReplicas: 2
 
 # The app's container. Releases of this container will be pinned to specific builds using the
@@ -14,14 +14,14 @@ container:
 #  env: {}
 #  dockerOptions: []
 
-# Optionally, sidecar containers to be run alongside the app on the instance. These can be used for
-# TLS termination, etc.
+# Optionally, sidecar containers to be run alongside the application on the instance. These can be
+# used for TLS termination, etc.
 sidecars:
   nginx-frontend:
     image: gcr.io/cloudslap/nginx-frontend
 
-# Optionally, an autoscaling policy. If specified, the app will be equipped with an autoscaler with
-# the given policy. Full documentation on the parameters can be found here:
+# Optionally, an autoscaling policy. If specified, the application will be equipped with an
+# autoscaler with the given policy. Full documentation on the parameters can be found here:
 #   https://cloud.google.com/compute/docs/reference/rest/v1/autoscalers
 #
 #autoscalingPolicy:
@@ -64,7 +64,7 @@ sidecars:
 iamRoles:
   - roles/cloudkms.cryptoKeyDecrypter
 
-# Optionally, the URL of a specific VPC network and subnetwork. If not specified, the app instances
-# will be automatically placed in the default network.
+# Optionally, the URL of a specific VPC network and subnetwork. If not specified, the application
+# instances will be automatically placed in the default network.
 #network: projects/project/global/networks/network
 #subnetwork: regions/region/subnetworks/subnetwork

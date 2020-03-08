@@ -16,23 +16,23 @@ import (
 
 // AppService provides methods for managing applications.
 type AppService interface {
-	// Get returns the app with the given name.
+	// Get returns the application with the given name.
 	Get(ctx context.Context, name string) (*App, error)
 
-	// List returns a list of apps which have been created in the project.
+	// List returns a list of applications which have been created in the project.
 	List(ctx context.Context) ([]App, error)
 
-	// Create creates an app in the given region with the given name and configuration.
+	// Create creates an application in the given region with the given name and configuration.
 	Create(ctx context.Context, region, name string, config *cfg.Config, dryRun bool, interval time.Duration) error
 
-	// Update updates the resources for the given app to match the given configuration.
+	// Update updates the resources for the given application to match the given configuration.
 	Update(ctx context.Context, name string, config *cfg.Config, dryRun bool, interval time.Duration) error
 
-	// Delete deletes all the resources associated with the given app.
+	// Delete deletes all the resources associated with the given application.
 	Delete(ctx context.Context, name string, dryRun, async bool, interval time.Duration) error
 }
 
-// App is a Belvedere app.
+// App is a Belvedere application.
 type App struct {
 	Project string
 	Region  string
@@ -71,7 +71,7 @@ func (s *appService) List(ctx context.Context) ([]App, error) {
 		return nil, err
 	}
 
-	// Pul app metadata from the labels.
+	// Pul application metadata from the labels.
 	apps := make([]App, len(list))
 	for i, dep := range list {
 		apps[i] = App{
@@ -92,7 +92,7 @@ func (s *appService) Create(ctx context.Context, region, name string, config *cf
 	)
 	defer span.End()
 
-	// Validate the app name.
+	// Validate the application name.
 	if err := gcp.ValidateRFC1035(name); err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func (s *appService) Create(ctx context.Context, region, name string, config *cf
 		return err
 	}
 
-	// Create a deployment with all the app resources.
+	// Create a deployment with all the application resources.
 	return s.dm.Insert(ctx, s.project, resources.Name(name),
 		s.resources.App(s.project, name, managedZone, config),
 		deployments.Labels{
@@ -138,7 +138,7 @@ func (s *appService) Update(ctx context.Context, name string, config *cfg.Config
 		return err
 	}
 
-	// Update the deployment with the new app resources.
+	// Update the deployment with the new application resources.
 	return s.dm.Update(ctx, s.project, resources.Name(name),
 		s.resources.App(s.project, name, managedZone, config),
 		dryRun, interval,
@@ -154,6 +154,6 @@ func (s *appService) Delete(ctx context.Context, name string, dryRun, async bool
 	)
 	defer span.End()
 
-	// Delete the app deployment.
+	// Delete the application deployment.
 	return s.dm.Delete(ctx, s.project, resources.Name(name), dryRun, async, interval)
 }

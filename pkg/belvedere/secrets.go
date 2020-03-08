@@ -140,7 +140,7 @@ func (s *secretsService) Grant(ctx context.Context, secret, app string, dryRun b
 	sa := fmt.Sprintf("serviceAccount:%s-sa@%s.iam.gserviceaccount.com", app, s.project)
 	return s.modifyIAMPolicy(ctx, fmt.Sprintf("projects/%s/secrets/%s", s.project, secret),
 		func(policy *secretmanager.Policy) *secretmanager.Policy {
-			// Look for an existing IAM binding giving the app access to the secret.
+			// Look for an existing IAM binding giving the application access to the secret.
 			for _, binding := range policy.Bindings {
 				if binding.Role == accessor {
 					for _, member := range binding.Members {
@@ -188,7 +188,7 @@ func (s *secretsService) Revoke(ctx context.Context, secret, app string, dryRun 
 		func(policy *secretmanager.Policy) *secretmanager.Policy {
 			var bindings []*secretmanager.Binding
 
-			// Copy everything that's not an IAM binding giving the app access to the secret.
+			// Copy everything that's not an IAM binding giving the application access to the secret.
 			for _, binding := range policy.Bindings {
 				if binding.Role == accessor {
 					remove := false

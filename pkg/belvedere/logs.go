@@ -11,7 +11,7 @@ import (
 	"google.golang.org/api/logging/v2"
 )
 
-// LogEntry represents an app log entry.
+// LogEntry represents an application log entry.
 type LogEntry struct {
 	Timestamp time.Time
 	Release   string
@@ -22,7 +22,7 @@ type LogEntry struct {
 
 // LogService manages access to application logs.
 type LogService interface {
-	// List returns log entries from the given app which match the other optional criteria.
+	// List returns log entries from the given application which match the other optional criteria.
 	List(ctx context.Context, app, release, instance string, maxAge time.Duration, filters []string) ([]LogEntry, error)
 }
 

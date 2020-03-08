@@ -21,7 +21,8 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 	dnsRecord := fmt.Sprintf("%s-rrs", app)
 	dnsName := fmt.Sprintf("%s.%s", app, managedZone.DnsName)
 	resources := []deployments.Resource{
-		// A firewall rule allowing access from the load balancer to app instances on port 8443.
+		// A firewall rule allowing access from the load balancer to application instances on port
+		// 8443.
 		{
 			Name: firewall,
 			Type: "compute.beta.firewall",
@@ -177,7 +178,7 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 	return resources
 }
 
-// requiresRoles is a list of IAM role which are added to app service accounts by default.
+// requiresRoles is a list of IAM role which are added to application service accounts by default.
 var requiredRoles = []string{
 	"roles/clouddebugger.agent",
 	"roles/cloudprofiler.agent",

@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/user"
+	"path/filepath"
+	"strings"
 	"syscall"
 
-	"github.com/alecthomas/kong"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
@@ -36,10 +38,28 @@ func (f *fileReader) Read(path string) ([]byte, error) {
 		return data, nil
 	}
 
-	path = kong.ExpandPath(path)
+	path = expandPath(path)
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read %q: %w", path, err)
 	}
 	return data, nil
+}
+
+func expandPath(path string) string {
+	if filepath.IsAbs(path) {
+		return path
+	}
+	if strings.HasPrefix(path, "~/") {
+		u, err := user.Current()
+		if err != nil {
+			return path
+		}
+		return filepath.Join(u.HomeDir, path[2:])
+	}
+	abspath, err := filepath.Abs(path)
+	if err != nil {
+		return path
+	}
+	return abspath
 }
