@@ -92,6 +92,7 @@ func TestTraceLogger_ExportSpan2(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
 			out := bytes.NewBuffer(nil)
 			exporter := NewTraceLogger(out)
