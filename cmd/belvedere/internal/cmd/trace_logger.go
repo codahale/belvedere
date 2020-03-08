@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"os"
+	"io"
 	"sort"
 	"sync"
 	"time"
@@ -13,30 +13,31 @@ import (
 
 type traceLogger struct {
 	m sync.Mutex
+	w io.Writer
 }
 
-func NewTraceLogger() trace.Exporter {
-	return &traceLogger{}
+func NewTraceLogger(w io.Writer) trace.Exporter {
+	return &traceLogger{w: w}
 }
 
 func (l *traceLogger) ExportSpan(s *trace.SpanData) {
 	l.m.Lock()
 	defer l.m.Unlock()
 
-	_, _ = fmt.Fprintf(os.Stderr, "%s: %s (%s)", s.EndTime.Format(time.Stamp), s.Name, s.SpanID)
+	_, _ = fmt.Fprintf(l.w, "%s: %s (%s)", s.EndTime.Format(time.Stamp), s.Name, s.SpanID)
 	if s.Code != 0 {
-		_, _ = fmt.Fprintf(os.Stderr, " code=%d", s.Code)
+		_, _ = fmt.Fprintf(l.w, " code=%d", s.Code)
 	}
 	if s.Message != "" {
-		_, _ = fmt.Fprintf(os.Stderr, " message=%s", shellescape.Quote(s.Message))
+		_, _ = fmt.Fprintf(l.w, " message=%s", shellescape.Quote(s.Message))
 	}
 	l.printAttributes(s.Attributes)
-	_, _ = fmt.Fprintln(os.Stderr)
+	_, _ = fmt.Fprintln(l.w)
 
 	for _, a := range s.Annotations {
-		_, _ = fmt.Fprintf(os.Stderr, "  %s", shellescape.Quote(a.Message))
+		_, _ = fmt.Fprintf(l.w, "  %s: %s", a.Time.Format(time.Stamp), shellescape.Quote(a.Message))
 		l.printAttributes(a.Attributes)
-		_, _ = fmt.Fprintln(os.Stderr)
+		_, _ = fmt.Fprintln(l.w)
 	}
 }
 
@@ -51,6 +52,6 @@ func (l *traceLogger) printAttributes(attributes map[string]interface{}) {
 		if s, ok := v.(string); ok {
 			v = shellescape.Quote(s)
 		}
-		_, _ = fmt.Fprintf(os.Stderr, " %v=%v", k, v)
+		_, _ = fmt.Fprintf(l.w, " %v=%v", k, v)
 	}
 }

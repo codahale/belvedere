@@ -74,7 +74,7 @@ func (c *Config) EnableLogging() {
 		view.RegisterExporter(pe)
 	} else if !c.Quiet {
 		// Unless we're quiet, use the trace logger for more practical logging.
-		trace.RegisterExporter(cmd.NewTraceLogger())
+		trace.RegisterExporter(cmd.NewTraceLogger(os.Stderr))
 	}
 }
 
