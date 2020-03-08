@@ -72,9 +72,11 @@ func (c *Config) Exec(ctx context.Context, args []string) error {
 		instance = args[2]
 	}
 
-	instances, err := c.root.Project.Logs().List(ctx, app, release, instance, c.maxAge, c.filters)
+	filters := make([]string, len(c.filters)) // we're copying the filters to make gomock happy
+	copy(filters, c.filters)
+	entries, err := c.root.Project.Logs().List(ctx, app, release, instance, c.maxAge, filters)
 	if err != nil {
 		return err
 	}
-	return c.root.Tables.Print(instances)
+	return c.root.Tables.Print(entries)
 }
