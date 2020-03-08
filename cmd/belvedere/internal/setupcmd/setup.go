@@ -42,6 +42,5 @@ func (c *Config) Exec(ctx context.Context, args []string) error {
 	if len(args) != 1 {
 		return flag.ErrHelp
 	}
-
 	return c.root.Project.Setup(ctx, args[0], c.DryRun, c.Interval)
 }
