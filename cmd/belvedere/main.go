@@ -60,7 +60,7 @@ func run() (func() error, error) {
 		appscmd.New(rootConfig),
 		releasescmd.New(rootConfig),
 		secretscmd.New(rootConfig),
-		versioncmd.New(rootConfig, version, commit, date, builtBy),
+		versioncmd.New(rootConfig, os.Stdout, version, commit, date, builtBy),
 	}
 
 	// Parse flags and args.

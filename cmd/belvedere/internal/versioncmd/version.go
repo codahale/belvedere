@@ -4,13 +4,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 
 	"github.com/codahale/belvedere/cmd/belvedere/internal/cmd"
 	"github.com/codahale/belvedere/cmd/belvedere/internal/rootcmd"
 	"github.com/peterbourgon/ff/v2/ffcli"
 )
 
-func New(root *rootcmd.Config, version, commit, date, builtBy string) *ffcli.Command {
+func New(root *rootcmd.Config, w io.Writer, version, commit, date, builtBy string) *ffcli.Command {
 	fs := flag.NewFlagSet("belvedere version", flag.ExitOnError)
 	root.RegisterFlags(fs)
 
@@ -23,7 +24,7 @@ func New(root *rootcmd.Config, version, commit, date, builtBy string) *ffcli.Com
 For released binaries, this includes the commit hash, the build date, and the builder.`),
 		FlagSet: fs,
 		Exec: func(ctx context.Context, args []string) error {
-			_, err := fmt.Println(buildVersion(version, commit, date, builtBy))
+			_, err := fmt.Fprintln(w, buildVersion(version, commit, date, builtBy))
 			return err
 		},
 	}
