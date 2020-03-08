@@ -21,11 +21,29 @@ func TestSetup(t *testing.T) {
 	command := New(&rootcmd.Config{
 		Project: project,
 	})
-	if err := command.ParseAndRun(context.Background(),
-		[]string{
-			"cloudslap.club.",
-		},
-	); err != nil {
+	if err := command.ParseAndRun(context.Background(), []string{
+		"cloudslap.club.",
+	}); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestSetup_Flags(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	project := mocks.NewMockProject(ctrl)
+	project.EXPECT().
+		Setup(gomock.Any(), "cloudslap.club.", true, 1*time.Minute)
+
+	command := New(&rootcmd.Config{
+		Project: project,
+	})
+	if err := command.ParseAndRun(context.Background(), []string{
+		"-dry-run",
+		"-interval=1m",
+		"cloudslap.club.",
+	}); err != nil {
 		t.Fatal(err)
 	}
 }
