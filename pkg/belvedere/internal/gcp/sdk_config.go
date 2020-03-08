@@ -68,6 +68,7 @@ func parseINI(ini io.Reader) (map[string]map[string]string, error) {
 	return result, nil
 }
 
+// nolint:gochecknoglobals
 var sdkPath = func() (string, error) {
 	if runtime.GOOS == "windows" {
 		return filepath.Join(os.Getenv("APPDATA"), "gcloud"), nil

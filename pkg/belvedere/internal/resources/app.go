@@ -179,6 +179,7 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 }
 
 // requiresRoles is a list of IAM role which are added to application service accounts by default.
+// nolint:gochecknoglobals
 var requiredRoles = []string{
 	"roles/clouddebugger.agent",
 	"roles/cloudprofiler.agent",

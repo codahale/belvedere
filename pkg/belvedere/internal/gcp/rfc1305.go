@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	rfc1035 = regexp.MustCompile(`^[a-z]([-a-z0-9]*[a-z0-9])?$`)
+	rfc1035 = regexp.MustCompile(`^[a-z]([-a-z0-9]*[a-z0-9])?$`) // nolint:gochecknoglobals
 )
 
 // ValidateRFC1035 returns an error if the given name is not a valid RFC1035 DNS name.

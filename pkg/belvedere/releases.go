@@ -85,6 +85,7 @@ func (r *releaseService) List(ctx context.Context, app string) ([]Release, error
 	return releases, nil
 }
 
+// nolint:gochecknoglobals
 var imageHashFormat = regexp.MustCompile(`^[a-f0-9]{64}$`)
 
 func (r *releaseService) Create(ctx context.Context, app, name string, config *cfg.Config, imageSHA256 string, dryRun bool, interval time.Duration) error {
