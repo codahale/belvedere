@@ -89,7 +89,7 @@ func run() (func() error, error) {
 	rootConfig.Project = project
 
 	// Initialize helpers.
-	rootConfig.Tables = cmd.NewTableWriter(rootConfig.CSV)
+	rootConfig.Tables = cmd.NewTableWriter(os.Stdout, rootConfig.CSV)
 	rootConfig.Files = cmd.NewFileReader()
 
 	// Run the actual command.

@@ -3,25 +3,24 @@ package cmd
 import (
 	"encoding/csv"
 	"fmt"
-	"os"
+	"io"
 	"reflect"
-	"syscall"
 	"time"
 
 	"github.com/olekukonko/tablewriter"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 type TableWriter interface {
 	Print(v interface{}) error
 }
 
-func NewTableWriter(csv bool) TableWriter {
-	return &tableWriter{csv: csv}
+func NewTableWriter(w io.Writer, csv bool) TableWriter {
+	return &tableWriter{csv: csv, w: w}
 }
 
 type tableWriter struct {
 	csv bool
+	w   io.Writer
 }
 
 func (w *tableWriter) Print(i interface{}) error {
@@ -61,15 +60,8 @@ func (w *tableWriter) Print(i interface{}) error {
 		rows = append(rows, row)
 	}
 
-	if terminal.IsTerminal(syscall.Stdout) && !w.csv {
-		tw := tablewriter.NewWriter(os.Stdout)
-		tw.SetAutoFormatHeaders(false)
-		tw.SetAutoWrapText(false)
-		tw.SetHeader(headers)
-		tw.AppendBulk(rows)
-		tw.Render()
-	} else {
-		cw := csv.NewWriter(os.Stdout)
+	if w.csv {
+		cw := csv.NewWriter(w.w)
 		if err := cw.Write(headers); err != nil {
 			return err
 		}
@@ -77,6 +69,13 @@ func (w *tableWriter) Print(i interface{}) error {
 			return err
 		}
 		cw.Flush()
+	} else {
+		tw := tablewriter.NewWriter(w.w)
+		tw.SetAutoFormatHeaders(false)
+		tw.SetAutoWrapText(false)
+		tw.SetHeader(headers)
+		tw.AppendBulk(rows)
+		tw.Render()
 	}
 	return nil
 }
