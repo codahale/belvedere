@@ -52,11 +52,11 @@ func (c *Config) Exec(ctx context.Context, args []string) error {
 	}
 	app := args[0]
 	name := args[1]
-	digest := args[3]
+	digest := args[2]
 
 	path := "-"
 	if len(args) > 3 {
-		path = args[4]
+		path = args[3]
 	}
 
 	b, err := c.root.Files.Read(path)
