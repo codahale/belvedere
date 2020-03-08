@@ -43,7 +43,7 @@ func (c *Config) Exec(ctx context.Context, args []string) error {
 	name := args[0]
 	path := "-"
 	if len(args) > 1 {
-		path = args[2]
+		path = args[1]
 	}
 
 	b, err := c.root.Files.Read(path)
