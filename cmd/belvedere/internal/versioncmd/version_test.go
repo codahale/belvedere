@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func TestNew(t *testing.T) {
+func TestVersion(t *testing.T) {
 	out := bytes.NewBuffer(nil)
 	command := New(&rootcmd.Config{}, out, "1.2.3", "abcdef", "2020-03-08", "coda")
 	if err := command.ParseAndRun(context.Background(), nil); err != nil {
