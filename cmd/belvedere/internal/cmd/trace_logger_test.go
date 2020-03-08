@@ -9,7 +9,7 @@ import (
 	"go.opencensus.io/trace"
 )
 
-func TestTraceLogger_ExportSpan2(t *testing.T) {
+func TestTraceLogger_ExportSpan(t *testing.T) {
 	tests := []struct {
 		name   string
 		output string
