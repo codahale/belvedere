@@ -17,12 +17,12 @@ type Config struct {
 }
 
 func New(root *rootcmd.Config) *ffcli.Command {
-	cfg := Config{root: root}
+	config := Config{root: root}
 
 	fs := flag.NewFlagSet("belvedere apps update", flag.ExitOnError)
 	root.RegisterFlags(fs)
-	cfg.ModifyOptions.RegisterFlags(fs)
-	cfg.LongRunningOptions.RegisterFlags(fs)
+	config.ModifyOptions.RegisterFlags(fs)
+	config.LongRunningOptions.RegisterFlags(fs)
 
 	return &ffcli.Command{
 		Name:       "update",
@@ -33,7 +33,7 @@ func New(root *rootcmd.Config) *ffcli.Command {
 If config-file is not specified (or is specified as '-'), the configuration file is read from STDIN
 instead.`),
 		FlagSet: fs,
-		Exec:    cfg.Exec,
+		Exec:    config.Exec,
 	}
 }
 

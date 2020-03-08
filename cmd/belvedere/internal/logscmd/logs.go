@@ -29,11 +29,11 @@ type Config struct {
 }
 
 func New(root *rootcmd.Config) *ffcli.Command {
-	cfg := Config{root: root}
+	config := Config{root: root}
 
 	fs := flag.NewFlagSet("belvedere logs", flag.ExitOnError)
 	root.RegisterFlags(fs)
-	cfg.RegisterFlags(fs)
+	config.RegisterFlags(fs)
 
 	return &ffcli.Command{
 		Name:       "logs",
@@ -46,7 +46,7 @@ also be filtered by the release name, the instance name, and any additional Goog
 filters. For more information on filter syntax, see
 https://cloud.google.com/logging/docs/view/advanced-queries#advanced_logs_query_syntax.`),
 		FlagSet: fs,
-		Exec:    cfg.Exec,
+		Exec:    config.Exec,
 	}
 }
 

@@ -16,12 +16,12 @@ type Config struct {
 }
 
 func New(root *rootcmd.Config) *ffcli.Command {
-	cfg := Config{root: root}
+	config := Config{root: root}
 
 	fs := flag.NewFlagSet("belvedere setup", flag.ExitOnError)
 	root.RegisterFlags(fs)
-	cfg.ModifyOptions.RegisterFlags(fs)
-	cfg.LongRunningOptions.RegisterFlags(fs)
+	config.ModifyOptions.RegisterFlags(fs)
+	config.LongRunningOptions.RegisterFlags(fs)
 
 	return &ffcli.Command{
 		Name:       "setup",
@@ -34,7 +34,7 @@ creates a Deployment Manager deployment with the base resources and configuratio
 create, deploy, and manage applications with Belvedere.`,
 		),
 		FlagSet: fs,
-		Exec:    cfg.Exec,
+		Exec:    config.Exec,
 	}
 }
 

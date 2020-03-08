@@ -14,7 +14,7 @@ type Config struct {
 }
 
 func New(root *rootcmd.Config) *ffcli.Command {
-	cfg := Config{root: root}
+	config := Config{root: root}
 
 	fs := flag.NewFlagSet("belvedere machine-types", flag.ExitOnError)
 	root.RegisterFlags(fs)
@@ -28,7 +28,7 @@ func New(root *rootcmd.Config) *ffcli.Command {
 Machine types can be filtered by region. For more information on pricing and billing models, see
 https://cloud.google.com/compute/vm-instance-pricing.`),
 		FlagSet: fs,
-		Exec:    cfg.Exec,
+		Exec:    config.Exec,
 	}
 }
 

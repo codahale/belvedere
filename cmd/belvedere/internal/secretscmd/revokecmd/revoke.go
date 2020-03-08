@@ -15,11 +15,11 @@ type Config struct {
 }
 
 func New(root *rootcmd.Config) *ffcli.Command {
-	cfg := Config{root: root}
+	config := Config{root: root}
 
 	fs := flag.NewFlagSet("belvedere secrets revoke", flag.ExitOnError)
 	root.RegisterFlags(fs)
-	cfg.ModifyOptions.RegisterFlags(fs)
+	config.ModifyOptions.RegisterFlags(fs)
 
 	return &ffcli.Command{
 		Name:       "grant",
@@ -30,7 +30,7 @@ func New(root *rootcmd.Config) *ffcli.Command {
 This modifies the secret's IAM policy to disallow the application's service account access to the
 secrets' value.`),
 		FlagSet: fs,
-		Exec:    cfg.Exec,
+		Exec:    config.Exec,
 	}
 }
 

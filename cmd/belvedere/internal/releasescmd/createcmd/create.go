@@ -6,7 +6,7 @@ import (
 
 	"github.com/codahale/belvedere/cmd/belvedere/internal/cmd"
 	"github.com/codahale/belvedere/cmd/belvedere/internal/rootcmd"
-	bcfg "github.com/codahale/belvedere/pkg/belvedere/cfg"
+	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/peterbourgon/ff/v2/ffcli"
 )
 
@@ -18,13 +18,13 @@ type Config struct {
 }
 
 func New(root *rootcmd.Config) *ffcli.Command {
-	cfg := Config{root: root}
+	config := Config{root: root}
 
 	fs := flag.NewFlagSet("belvedere releases create", flag.ExitOnError)
 	root.RegisterFlags(fs)
-	cfg.ModifyOptions.RegisterFlags(fs)
-	cfg.LongRunningOptions.RegisterFlags(fs)
-	cfg.RegisterFlags(fs)
+	config.ModifyOptions.RegisterFlags(fs)
+	config.LongRunningOptions.RegisterFlags(fs)
+	config.RegisterFlags(fs)
 
 	return &ffcli.Command{
 		Name:       "create",
@@ -38,7 +38,7 @@ deploy, and the application configuration.
 If config-file is not specified (or is specified as '-'), the configuration file is read from STDIN
 instead.`),
 		FlagSet: fs,
-		Exec:    cfg.Exec,
+		Exec:    config.Exec,
 	}
 }
 
@@ -64,7 +64,7 @@ func (c *Config) Exec(ctx context.Context, args []string) error {
 		return err
 	}
 
-	config, err := bcfg.Parse(b)
+	config, err := cfg.Parse(b)
 	if err != nil {
 		return err
 	}

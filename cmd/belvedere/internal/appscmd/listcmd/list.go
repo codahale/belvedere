@@ -14,7 +14,7 @@ type Config struct {
 }
 
 func New(root *rootcmd.Config) *ffcli.Command {
-	cfg := Config{root: root}
+	config := Config{root: root}
 
 	fs := flag.NewFlagSet("belvedere apps list", flag.ExitOnError)
 	root.RegisterFlags(fs)
@@ -27,7 +27,7 @@ func New(root *rootcmd.Config) *ffcli.Command {
 
 Prints a table of provisioned applications in the current project.`),
 		FlagSet: fs,
-		Exec:    cfg.Exec,
+		Exec:    config.Exec,
 	}
 }
 

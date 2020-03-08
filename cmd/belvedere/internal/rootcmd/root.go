@@ -31,10 +31,10 @@ type Config struct {
 }
 
 func New() (*ffcli.Command, *Config) {
-	var cfg Config
+	var config Config
 
 	fs := flag.NewFlagSet("belvedere", flag.ExitOnError)
-	cfg.RegisterFlags(fs)
+	config.RegisterFlags(fs)
 
 	return &ffcli.Command{
 		Name:       "belvedere",
@@ -45,8 +45,8 @@ Belvedere provides an easy and reliable way of deploying and managing HTTP2 appl
 Cloud Platform. It handles load balancing, DNS, TLS, blue/green deploys, auto-scaling, CDN
 configuration, access control, secret management, configuration, and more.`),
 		FlagSet: fs,
-		Exec:    cfg.Exec,
-	}, &cfg
+		Exec:    config.Exec,
+	}, &config
 }
 
 func (c *Config) RegisterFlags(fs *flag.FlagSet) {

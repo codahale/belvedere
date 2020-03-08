@@ -14,7 +14,7 @@ type Config struct {
 }
 
 func New(root *rootcmd.Config) *ffcli.Command {
-	cfg := Config{root: root}
+	config := Config{root: root}
 
 	fs := flag.NewFlagSet("belvedere dns-servers", flag.ExitOnError)
 	root.RegisterFlags(fs)
@@ -28,7 +28,7 @@ func New(root *rootcmd.Config) *ffcli.Command {
 These DNS servers should be registered in the domain's WHOIS record or otherwise have DNS requests
 forwarded to them in order to resolve application hostnames to the load balancer IPs.`),
 		FlagSet: fs,
-		Exec:    cfg.Exec,
+		Exec:    config.Exec,
 	}
 }
 

@@ -16,12 +16,12 @@ type Config struct {
 }
 
 func New(root *rootcmd.Config) *ffcli.Command {
-	cfg := Config{root: root}
+	config := Config{root: root}
 
 	fs := flag.NewFlagSet("belvedere releases disable", flag.ExitOnError)
 	root.RegisterFlags(fs)
-	cfg.ModifyOptions.RegisterFlags(fs)
-	cfg.LongRunningOptions.RegisterFlags(fs)
+	config.ModifyOptions.RegisterFlags(fs)
+	config.LongRunningOptions.RegisterFlags(fs)
 
 	return &ffcli.Command{
 		Name:       "disable",
@@ -33,7 +33,7 @@ Disabling a release unregisters the release's managed instance group from the ap
 balancer, removing it from service. This is used on old releases to roll a deploy forward or on new
 releases which did not pass health checks in order to roll a deploy back.`),
 		FlagSet: fs,
-		Exec:    cfg.Exec,
+		Exec:    config.Exec,
 	}
 }
 

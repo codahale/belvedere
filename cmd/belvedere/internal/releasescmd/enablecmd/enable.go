@@ -16,12 +16,12 @@ type Config struct {
 }
 
 func New(root *rootcmd.Config) *ffcli.Command {
-	cfg := Config{root: root}
+	config := Config{root: root}
 
 	fs := flag.NewFlagSet("belvedere releases enable", flag.ExitOnError)
 	root.RegisterFlags(fs)
-	cfg.ModifyOptions.RegisterFlags(fs)
-	cfg.LongRunningOptions.RegisterFlags(fs)
+	config.ModifyOptions.RegisterFlags(fs)
+	config.LongRunningOptions.RegisterFlags(fs)
 
 	return &ffcli.Command{
 		Name:       "enable",
@@ -33,7 +33,7 @@ Enabling a release registers the release's managed instance group with the appli
 balancer and waits for the instances to pass health checks and go into service. Use the -timeout
 flag to bound the amount of time allowed for health checks to pass.`),
 		FlagSet: fs,
-		Exec:    cfg.Exec,
+		Exec:    config.Exec,
 	}
 }
 

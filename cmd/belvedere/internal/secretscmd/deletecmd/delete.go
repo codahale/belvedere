@@ -15,11 +15,11 @@ type Config struct {
 }
 
 func New(root *rootcmd.Config) *ffcli.Command {
-	cfg := Config{root: root}
+	config := Config{root: root}
 
 	fs := flag.NewFlagSet("belvedere secrets delete", flag.ExitOnError)
 	root.RegisterFlags(fs)
-	cfg.ModifyOptions.RegisterFlags(fs)
+	config.ModifyOptions.RegisterFlags(fs)
 
 	return &ffcli.Command{
 		Name:       "delete",
@@ -29,7 +29,7 @@ func New(root *rootcmd.Config) *ffcli.Command {
 
 This deletes all versions of the secret as well, and cannot be undone.`),
 		FlagSet: fs,
-		Exec:    cfg.Exec,
+		Exec:    config.Exec,
 	}
 }
 

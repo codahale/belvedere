@@ -14,7 +14,7 @@ type Config struct {
 }
 
 func New(root *rootcmd.Config) *ffcli.Command {
-	cfg := Config{root: root}
+	config := Config{root: root}
 
 	fs := flag.NewFlagSet("belvedere releases list", flag.ExitOnError)
 	root.RegisterFlags(fs)
@@ -27,7 +27,7 @@ func New(root *rootcmd.Config) *ffcli.Command {
 
 The list of releases can by filtered by application.`),
 		FlagSet: fs,
-		Exec:    cfg.Exec,
+		Exec:    config.Exec,
 	}
 }
 

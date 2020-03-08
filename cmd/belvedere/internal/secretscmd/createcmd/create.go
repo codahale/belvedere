@@ -15,11 +15,11 @@ type Config struct {
 }
 
 func New(root *rootcmd.Config) *ffcli.Command {
-	cfg := Config{root: root}
+	config := Config{root: root}
 
 	fs := flag.NewFlagSet("belvedere secrets create", flag.ExitOnError)
 	root.RegisterFlags(fs)
-	cfg.ModifyOptions.RegisterFlags(fs)
+	config.ModifyOptions.RegisterFlags(fs)
 
 	return &ffcli.Command{
 		Name:       "create",
@@ -32,7 +32,7 @@ Creates a new secret with a value that is the contents of data-file, read as a b
 If data-file is not specified (or is specified as '-'), the secret's value is read from STDIN
 instead.`),
 		FlagSet: fs,
-		Exec:    cfg.Exec,
+		Exec:    config.Exec,
 	}
 }
 

@@ -17,13 +17,13 @@ type Config struct {
 }
 
 func New(root *rootcmd.Config) *ffcli.Command {
-	cfg := Config{root: root}
+	config := Config{root: root}
 
 	fs := flag.NewFlagSet("belvedere releases delete", flag.ExitOnError)
 	root.RegisterFlags(fs)
-	cfg.ModifyOptions.RegisterFlags(fs)
-	cfg.LongRunningOptions.RegisterFlags(fs)
-	cfg.AsyncOptions.RegisterFlags(fs)
+	config.ModifyOptions.RegisterFlags(fs)
+	config.LongRunningOptions.RegisterFlags(fs)
+	config.AsyncOptions.RegisterFlags(fs)
 
 	return &ffcli.Command{
 		Name:       "delete",
@@ -34,7 +34,7 @@ func New(root *rootcmd.Config) *ffcli.Command {
 This deletes the managed instance group running the given release. Releases must be disabled before
 they can be deleted.`),
 		FlagSet: fs,
-		Exec:    cfg.Exec,
+		Exec:    config.Exec,
 	}
 }
 
