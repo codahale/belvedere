@@ -11,8 +11,8 @@ import (
 
 type Config struct {
 	root *rootcmd.Config
-	cmd.ModifyOptions
 	cmd.LongRunningOptions
+	cmd.ModifyOptions
 	cmd.AsyncOptions
 }
 

@@ -1,0 +1,3 @@
+linters-settings:
+  maligned:
+    suggest-new: true
