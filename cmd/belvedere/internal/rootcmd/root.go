@@ -9,7 +9,7 @@ import (
 
 	"github.com/codahale/belvedere/cmd/belvedere/internal/cmd"
 	"github.com/codahale/belvedere/pkg/belvedere"
-	"github.com/peterbourgon/ff/v2/ffcli"
+	"github.com/peterbourgon/ff/v3/ffcli"
 	"go.opencensus.io/examples/exporter"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"

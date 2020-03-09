@@ -11,7 +11,7 @@ import (
 	"github.com/codahale/belvedere/cmd/belvedere/internal/secretscmd/listcmd"
 	"github.com/codahale/belvedere/cmd/belvedere/internal/secretscmd/revokecmd"
 	"github.com/codahale/belvedere/cmd/belvedere/internal/secretscmd/updatecmd"
-	"github.com/peterbourgon/ff/v2/ffcli"
+	"github.com/peterbourgon/ff/v3/ffcli"
 )
 
 func New(root *rootcmd.Config) *ffcli.Command {

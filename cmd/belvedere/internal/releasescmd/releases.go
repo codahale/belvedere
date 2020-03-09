@@ -10,7 +10,7 @@ import (
 	"github.com/codahale/belvedere/cmd/belvedere/internal/releasescmd/enablecmd"
 	"github.com/codahale/belvedere/cmd/belvedere/internal/releasescmd/listcmd"
 	"github.com/codahale/belvedere/cmd/belvedere/internal/rootcmd"
-	"github.com/peterbourgon/ff/v2/ffcli"
+	"github.com/peterbourgon/ff/v3/ffcli"
 )
 
 func New(root *rootcmd.Config) *ffcli.Command {

@@ -6,7 +6,7 @@ import (
 
 	"github.com/codahale/belvedere/cmd/belvedere/internal/cmd"
 	"github.com/codahale/belvedere/cmd/belvedere/internal/rootcmd"
-	"github.com/peterbourgon/ff/v2/ffcli"
+	"github.com/peterbourgon/ff/v3/ffcli"
 )
 
 type Config struct {

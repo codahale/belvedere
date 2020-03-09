@@ -21,7 +21,7 @@ import (
 	"github.com/codahale/belvedere/cmd/belvedere/internal/teardowncmd"
 	"github.com/codahale/belvedere/cmd/belvedere/internal/versioncmd"
 	"github.com/codahale/belvedere/pkg/belvedere"
-	"github.com/peterbourgon/ff/v2/ffcli"
+	"github.com/peterbourgon/ff/v3/ffcli"
 	"go.opencensus.io/trace"
 	"google.golang.org/genproto/googleapis/rpc/code"
 )
@@ -65,7 +65,10 @@ func run() (func() error, error) {
 
 	// Parse flags and args.
 	if err := rootCommand.Parse(os.Args[1:]); err != nil {
-		// TODO handle no-op commands, e.g. belvedere apps
+		if e, ok := err.(ffcli.NoExecError); ok {
+			e.Command.FlagSet.Usage()
+			return nil, flag.ErrHelp
+		}
 		return nil, err
 	}
 

@@ -11,7 +11,7 @@ require (
 	github.com/google/go-cmp v0.4.0
 	github.com/mattn/go-runewidth v0.0.8 // indirect
 	github.com/olekukonko/tablewriter v0.0.4
-	github.com/peterbourgon/ff/v2 v2.0.0
+	github.com/peterbourgon/ff/v3 v3.0.0
 	go.opencensus.io v0.22.3
 	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
