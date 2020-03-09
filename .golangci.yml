@@ -38,9 +38,9 @@ linters:
     - unused
     - varcheck
     - whitespace
+    - funlen
 #    - gomnd
 #    - wsl
-#    - funlen
 #    - lll
 
 linters-settings:
@@ -49,3 +49,5 @@ linters-settings:
   godox:
     keywords:
       - XXX
+  funlen:
+    lines: 100
