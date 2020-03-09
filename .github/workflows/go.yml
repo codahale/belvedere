@@ -26,4 +26,4 @@ jobs:
     - name: Lint
       run: |
         curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.23.8
-        $(go env GOPATH)/bin/golangci-lint run --enable-all --disable=gomnd --disable=lll --disable=wsl --disable=funlen --disable=godox
+        $(go env GOPATH)/bin/golangci-lint run --enable-all --disable=gomnd --disable=lll --disable=wsl --disable=funlen

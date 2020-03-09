@@ -1,3 +1,6 @@
 linters-settings:
   maligned:
     suggest-new: true
+  godox:
+    keywords:
+      - XXX
