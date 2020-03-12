@@ -13,10 +13,10 @@ require (
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/peterbourgon/ff/v3 v3.0.0
 	go.opencensus.io v0.22.3
-	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073
+	golang.org/x/crypto v0.0.0-20200311171314-f7b00557c8c4
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	google.golang.org/api v0.20.0
-	google.golang.org/genproto v0.0.0-20200311144346-b662892dd51b
+	google.golang.org/genproto v0.0.0-20200312145019-da6875a35672
 	google.golang.org/grpc v1.28.0 // indirect
 	gopkg.in/h2non/gock.v1 v1.0.15
 	gopkg.in/yaml.v2 v2.2.8 // indirect
