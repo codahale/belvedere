@@ -14,11 +14,11 @@ require (
 	github.com/peterbourgon/ff/v3 v3.0.0
 	go.opencensus.io v0.22.3
 	golang.org/x/crypto v0.0.0-20200320181102-891825fb96df
-	golang.org/x/net v0.0.0-20200319234117-63522dbf7eec // indirect
+	golang.org/x/net v0.0.0-20200320220750-118fecf932d8 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	golang.org/x/sys v0.0.0-20200320181252-af34d8274f85 // indirect
+	golang.org/x/sys v0.0.0-20200321134203-328b4cd54aae // indirect
 	google.golang.org/api v0.20.0
-	google.golang.org/genproto v0.0.0-20200319113533-08878b785e9c
+	google.golang.org/genproto v0.0.0-20200323114720-3f67cca34472
 	gopkg.in/h2non/gock.v1 v1.0.15
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
