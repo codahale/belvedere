@@ -15,7 +15,7 @@ import (
 func Compare(t *testing.T, filename string, actual []byte) {
 	if ok, _ := strconv.ParseBool(os.Getenv("OVERWRITE")); ok {
 		t.Logf("overwriting %s", filename)
-		err := ioutil.WriteFile(filename, actual, 0644)
+		err := ioutil.WriteFile(filename, actual, 0644) //nolint:gosec
 		if err != nil {
 			t.Fatal(err)
 		}
