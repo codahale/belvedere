@@ -9,7 +9,7 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/mock v1.4.3
 	github.com/golang/protobuf v1.4.2 // indirect
-	github.com/google/go-cmp v0.4.0
+	github.com/google/go-cmp v0.4.1
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/peterbourgon/ff/v3 v3.0.0
