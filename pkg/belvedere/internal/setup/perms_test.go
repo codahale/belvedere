@@ -7,6 +7,7 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	"google.golang.org/api/cloudresourcemanager/v1"
+	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -81,7 +82,7 @@ func TestManager_SetDMPerms(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(cloudresourcemanager.Policy{})
 
-	crm, err := cloudresourcemanager.NewService(context.Background())
+	crm, err := cloudresourcemanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -119,7 +120,7 @@ func TestManager_SetDMPermsExisting(t *testing.T) {
 			Etag: "300",
 		})
 
-	crm, err := cloudresourcemanager.NewService(context.Background())
+	crm, err := cloudresourcemanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}

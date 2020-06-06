@@ -7,6 +7,7 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	"github.com/google/go-cmp/cmp"
+	"google.golang.org/api/option"
 	"google.golang.org/api/secretmanager/v1"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -28,7 +29,7 @@ func TestSecretsService_List(t *testing.T) {
 			},
 		})
 
-	sm, err := secretmanager.NewService(context.Background())
+	sm, err := secretmanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +80,7 @@ func TestSecretsService_Create(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.SecretVersion{})
 
-	sm, err := secretmanager.NewService(context.Background())
+	sm, err := secretmanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,7 +108,7 @@ func TestSecretsService_Update(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.SecretVersion{})
 
-	sm, err := secretmanager.NewService(context.Background())
+	sm, err := secretmanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -131,7 +132,7 @@ func TestSecretsService_Delete(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.Empty{})
 
-	sm, err := secretmanager.NewService(context.Background())
+	sm, err := secretmanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -174,7 +175,7 @@ func TestSecretsService_Grant(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{})
 
-	sm, err := secretmanager.NewService(context.Background())
+	sm, err := secretmanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -217,7 +218,7 @@ func TestSecretsService_Revoke(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{})
 
-	sm, err := secretmanager.NewService(context.Background())
+	sm, err := secretmanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}

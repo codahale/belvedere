@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
+	"google.golang.org/api/option"
 	"google.golang.org/api/serviceusage/v1"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -45,7 +46,7 @@ func TestManager_EnableAPIs(t *testing.T) {
 			Done: true,
 		})
 
-	su, err := serviceusage.NewService(context.Background())
+	su, err := serviceusage.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal()
 	}

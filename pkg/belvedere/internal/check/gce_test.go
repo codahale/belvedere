@@ -9,6 +9,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	"github.com/google/go-cmp/cmp"
 	compute "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -22,7 +23,7 @@ func TestGCERunning(t *testing.T) {
 			Status: "RUNNING",
 		})
 
-	gce, err := compute.NewService(context.Background())
+	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +49,7 @@ func TestGCEDone(t *testing.T) {
 			Status: "DONE",
 		})
 
-	gce, err := compute.NewService(context.Background())
+	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,7 +84,7 @@ func TestGCEError(t *testing.T) {
 			},
 		})
 
-	gce, err := compute.NewService(context.Background())
+	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}

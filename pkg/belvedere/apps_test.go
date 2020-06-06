@@ -13,6 +13,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/dns/v1"
+	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -140,7 +141,7 @@ func TestAppService_Create(t *testing.T) {
 			},
 			false, 10*time.Millisecond)
 
-	gce, err := compute.NewService(context.Background())
+	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}

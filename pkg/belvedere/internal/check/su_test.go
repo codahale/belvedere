@@ -7,6 +7,7 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	"github.com/google/go-cmp/cmp"
+	"google.golang.org/api/option"
 	"google.golang.org/api/serviceusage/v1"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -21,7 +22,7 @@ func TestSURunning(t *testing.T) {
 			Done: false,
 		})
 
-	su, err := serviceusage.NewService(context.Background())
+	su, err := serviceusage.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +48,7 @@ func TestSUDone(t *testing.T) {
 			Done: true,
 		})
 
-	su, err := serviceusage.NewService(context.Background())
+	su, err := serviceusage.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,7 +78,7 @@ func TestSUError(t *testing.T) {
 			},
 		})
 
-	su, err := serviceusage.NewService(context.Background())
+	su, err := serviceusage.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}

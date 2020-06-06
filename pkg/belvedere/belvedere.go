@@ -18,6 +18,7 @@ import (
 	"go.opencensus.io/trace"
 	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/logging/v2"
+	"google.golang.org/api/option"
 	"google.golang.org/api/secretmanager/v1"
 )
 
@@ -66,7 +67,7 @@ type DNSServer struct {
 
 // NewProject returns a new Project instance for the given GCP project. If no project is provided,
 // the active project configured for the Google Cloud SDK is used.
-func NewProject(ctx context.Context, name string) (Project, error) {
+func NewProject(ctx context.Context, name string, opts ...option.ClientOption) (Project, error) {
 	if name == "" {
 		s, err := activeProject()
 		if err != nil {
@@ -75,27 +76,27 @@ func NewProject(ctx context.Context, name string) (Project, error) {
 		name = s
 	}
 
-	ls, err := logging.NewService(ctx)
+	ls, err := logging.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	sm, err := secretmanager.NewService(ctx)
+	sm, err := secretmanager.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	dm, err := deployments.NewManager(ctx)
+	dm, err := deployments.NewManager(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	gce, err := compute.NewService(ctx)
+	gce, err := compute.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	s, err := setup.NewService(ctx)
+	s, err := setup.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}

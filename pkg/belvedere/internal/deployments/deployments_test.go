@@ -10,6 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/deploymentmanager/v2"
+	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -118,7 +119,7 @@ func TestManager_Insert(t *testing.T) {
 			Status: "DONE",
 		})
 
-	dm, err := NewManager(context.Background())
+	dm, err := NewManager(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -164,7 +165,7 @@ func TestManager_Update(t *testing.T) {
 			Status: "DONE",
 		})
 
-	dm, err := NewManager(context.Background())
+	dm, err := NewManager(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,7 +201,7 @@ func TestManager_Delete(t *testing.T) {
 			Status: "DONE",
 		})
 
-	dm, err := NewManager(context.Background())
+	dm, err := NewManager(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -247,7 +248,7 @@ func TestManager_List(t *testing.T) {
 			},
 		})
 
-	dm, err := NewManager(context.Background())
+	dm, err := NewManager(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -295,7 +296,7 @@ func TestManager_Get(t *testing.T) {
 			},
 		})
 
-	dm, err := NewManager(context.Background())
+	dm, err := NewManager(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}

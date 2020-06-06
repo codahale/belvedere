@@ -10,6 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/logging/v2"
+	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -37,7 +38,7 @@ func TestLogService_List(t *testing.T) {
 			},
 		})
 
-	logs, err := logging.NewService(context.Background())
+	logs, err := logging.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}

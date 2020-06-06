@@ -9,6 +9,7 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	compute "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -56,7 +57,7 @@ func TestService_Add(t *testing.T) {
 			Status: "DONE",
 		})
 
-	gce, err := compute.NewService(context.Background())
+	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,7 +90,7 @@ func TestService_AddExisting(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	gce, err := compute.NewService(context.Background())
+	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,7 +123,7 @@ func TestService_AddDryRun(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	gce, err := compute.NewService(context.Background())
+	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -178,7 +179,7 @@ func TestService_Remove(t *testing.T) {
 			Status: "DONE",
 		})
 
-	gce, err := compute.NewService(context.Background())
+	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -224,7 +225,7 @@ func TestSetup_RemoveLast(t *testing.T) {
 			Status: "DONE",
 		})
 
-	gce, err := compute.NewService(context.Background())
+	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -257,7 +258,7 @@ func TestSetup_RemoveMissing(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	gce, err := compute.NewService(context.Background())
+	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -293,7 +294,7 @@ func TestSetup_RemoveDryRun(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	gce, err := compute.NewService(context.Background())
+	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}

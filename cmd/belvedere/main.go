@@ -23,6 +23,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere"
 	"github.com/peterbourgon/ff/v3/ffcli"
 	"go.opencensus.io/trace"
+	"google.golang.org/api/option"
 	"google.golang.org/genproto/googleapis/rpc/code"
 )
 
@@ -81,7 +82,8 @@ func run() (func() error, error) {
 	defer span.End()
 
 	// Create a Belvedere project.
-	project, err := belvedere.NewProject(ctx, rootConfig.ProjectName)
+	project, err := belvedere.NewProject(ctx, rootConfig.ProjectName,
+		option.WithUserAgent(fmt.Sprintf("belvedere/%s", version)))
 	if err != nil {
 		return nil, err
 	}

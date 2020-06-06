@@ -7,6 +7,7 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	compute "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -22,7 +23,7 @@ func TestHealthNotStable(t *testing.T) {
 			},
 		})
 
-	gce, err := compute.NewService(context.Background())
+	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +64,7 @@ func TestHealthNotRegistered(t *testing.T) {
 			HealthStatus: []*compute.HealthStatus{},
 		})
 
-	gce, err := compute.NewService(context.Background())
+	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -113,7 +114,7 @@ func TestHealthNotHealthy(t *testing.T) {
 			},
 		})
 
-	gce, err := compute.NewService(context.Background())
+	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -163,7 +164,7 @@ func TestHealthDone(t *testing.T) {
 			},
 		})
 
-	gce, err := compute.NewService(context.Background())
+	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}

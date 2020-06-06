@@ -9,6 +9,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/api/deploymentmanager/v2"
+	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -22,7 +23,7 @@ func TestDMRunning(t *testing.T) {
 			Status: "RUNNING",
 		})
 
-	dm, err := deploymentmanager.NewService(context.Background())
+	dm, err := deploymentmanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +49,7 @@ func TestDMDone(t *testing.T) {
 			Status: "DONE",
 		})
 
-	dm, err := deploymentmanager.NewService(context.Background())
+	dm, err := deploymentmanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,7 +84,7 @@ func TestDMError(t *testing.T) {
 			},
 		})
 
-	dm, err := deploymentmanager.NewService(context.Background())
+	dm, err := deploymentmanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}

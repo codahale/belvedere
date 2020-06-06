@@ -9,6 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/dns/v1"
+	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -22,7 +23,8 @@ func TestProject_DNSServers(t *testing.T) {
 			NameServers: []string{"ns1.example.com", "ns2.example.com"},
 		})
 
-	s, err := NewProject(context.Background(), "my-project")
+	s, err := NewProject(context.Background(), "my-project",
+		option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,7 +103,8 @@ func TestProject_Instances(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject(context.Background(), "my-project")
+	s, err := NewProject(context.Background(), "my-project",
+		option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -196,7 +199,8 @@ func TestProject_InstancesApp(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject(context.Background(), "my-project")
+	s, err := NewProject(context.Background(), "my-project",
+		option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -285,7 +289,8 @@ func TestProject_InstancesAppRelease(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject(context.Background(), "my-project")
+	s, err := NewProject(context.Background(), "my-project",
+		option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -353,7 +358,8 @@ func TestProject_MachineTypes(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject(context.Background(), "my-project")
+	s, err := NewProject(context.Background(), "my-project",
+		option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}

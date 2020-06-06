@@ -9,6 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/googleapi"
+	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -16,7 +17,7 @@ func TestService_ManagedZone(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	s, err := NewService(context.Background())
+	s, err := NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		t.Fatal(err)
 	}

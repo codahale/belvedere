@@ -8,6 +8,7 @@ import (
 	"go.opencensus.io/trace"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/dns/v1"
+	"google.golang.org/api/option"
 	"google.golang.org/api/serviceusage/v1"
 )
 
@@ -24,18 +25,18 @@ type Service interface {
 	ManagedZone(ctx context.Context, project string) (*dns.ManagedZone, error)
 }
 
-func NewService(ctx context.Context) (Service, error) {
-	crm, err := cloudresourcemanager.NewService(ctx)
+func NewService(ctx context.Context, opts ...option.ClientOption) (Service, error) {
+	crm, err := cloudresourcemanager.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	su, err := serviceusage.NewService(ctx)
+	su, err := serviceusage.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	ds, err := dns.NewService(ctx)
+	ds, err := dns.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}

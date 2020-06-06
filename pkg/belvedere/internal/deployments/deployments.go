@@ -12,6 +12,7 @@ import (
 	"go.opencensus.io/trace"
 	"google.golang.org/api/deploymentmanager/v2"
 	"google.golang.org/api/dns/v1"
+	"google.golang.org/api/option"
 )
 
 // Ref returns a reference to the named resource's property.
@@ -126,8 +127,8 @@ type Manager interface {
 	List(ctx context.Context, project, filter string) ([]Deployment, error)
 }
 
-func NewManager(ctx context.Context) (Manager, error) {
-	dm, err := deploymentmanager.NewService(ctx)
+func NewManager(ctx context.Context, opts ...option.ClientOption) (Manager, error) {
+	dm, err := deploymentmanager.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
