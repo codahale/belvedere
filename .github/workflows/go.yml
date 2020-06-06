@@ -36,3 +36,12 @@ jobs:
       uses: golangci/golangci-lint-action@v1
       with:
         version: v1.26
+
+    - name: Release
+      uses: goreleaser/goreleaser-action@v2
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        version: latest
+        args: release --rm-dist
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
