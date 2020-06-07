@@ -7,9 +7,6 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
-	"syscall"
-
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 type FileReader interface {
@@ -25,7 +22,7 @@ type fileReader struct {
 
 func (f *fileReader) Read(path string) ([]byte, error) {
 	if path == "-" {
-		if terminal.IsTerminal(syscall.Stdin) {
+		if !isStdInReadable() {
 			return nil, fmt.Errorf("can't read from stdin")
 		}
 

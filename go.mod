@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	cloud.google.com/go v0.57.0 // indirect
+	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78
 	github.com/alessio/shellescape v1.2.2
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/ghodss/yaml v1.0.0
