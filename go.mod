@@ -3,7 +3,7 @@ module github.com/codahale/belvedere
 go 1.14
 
 require (
-	cloud.google.com/go v0.57.0 // indirect
+	cloud.google.com/go v0.58.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78
 	github.com/alessio/shellescape v1.2.2
 	github.com/cenkalti/backoff v2.2.1+incompatible
@@ -21,7 +21,7 @@ require (
 	golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980 // indirect
 	google.golang.org/api v0.26.0
 	google.golang.org/appengine v1.6.6 // indirect
-	google.golang.org/genproto v0.0.0-20200605102947-12044bf5ea91
+	google.golang.org/genproto v0.0.0-20200608115520-7c474a2e3482
 	google.golang.org/grpc v1.29.1 // indirect
 	gopkg.in/h2non/gock.v1 v1.0.15
 	gopkg.in/yaml.v2 v2.3.0 // indirect
