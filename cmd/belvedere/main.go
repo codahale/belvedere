@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/alessio/shellescape"
@@ -61,7 +62,7 @@ func run() (func() error, error) {
 		appscmd.New(rootConfig),
 		releasescmd.New(rootConfig),
 		secretscmd.New(rootConfig),
-		versioncmd.New(rootConfig, os.Stdout, version, commit, date, builtBy),
+		versioncmd.New(rootConfig, os.Stdout, version, commit, date, builtBy, runtime.Version()),
 	}
 
 	// Parse flags and args.

@@ -11,7 +11,7 @@ import (
 	"github.com/peterbourgon/ff/v3/ffcli"
 )
 
-func New(root *rootcmd.Config, w io.Writer, version, commit, date, builtBy string) *ffcli.Command {
+func New(root *rootcmd.Config, w io.Writer, version, commit, date, builtBy, builtWith string) *ffcli.Command {
 	fs := flag.NewFlagSet("belvedere version", flag.ExitOnError)
 	root.RegisterFlags(fs)
 
@@ -24,22 +24,25 @@ func New(root *rootcmd.Config, w io.Writer, version, commit, date, builtBy strin
 For released binaries, this includes the commit hash, the build date, and the builder.`),
 		FlagSet: fs,
 		Exec: func(ctx context.Context, args []string) error {
-			_, err := fmt.Fprintln(w, buildVersion(version, commit, date, builtBy))
+			_, err := fmt.Fprintln(w, buildVersion(version, commit, date, builtBy, builtWith))
 			return err
 		},
 	}
 }
 
-func buildVersion(version, commit, date, builtBy string) string {
-	var result = fmt.Sprintf("version: %s", version)
+func buildVersion(version, commit, date, builtBy, builtWith string) string {
+	var result = fmt.Sprintf("version:    %s", version)
 	if commit != "" {
-		result = fmt.Sprintf("%s\ncommit: %s", result, commit)
+		result = fmt.Sprintf("%s\ncommit:     %s", result, commit)
 	}
 	if date != "" {
-		result = fmt.Sprintf("%s\nbuilt at: %s", result, date)
+		result = fmt.Sprintf("%s\nbuilt at:   %s", result, date)
 	}
 	if builtBy != "" {
-		result = fmt.Sprintf("%s\nbuilt by: %s", result, builtBy)
+		result = fmt.Sprintf("%s\nbuilt by:   %s", result, builtBy)
+	}
+	if builtWith != "" {
+		result = fmt.Sprintf("%s\nbuilt with: %s", result, builtWith)
 	}
 	return result
 }
