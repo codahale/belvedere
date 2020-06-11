@@ -13,9 +13,8 @@ jobs:
 
       - name: Check out code
         uses: actions/checkout@v2
-
-      - name: Fetch code history
-        run: git fetch --prune --unshallow
+        with:
+          fetch-depth: 0
 
       - name: Get dependencies
         run: |
