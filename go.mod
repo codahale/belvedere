@@ -9,7 +9,6 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/mock v1.4.3
-	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/google/go-cmp v0.4.1
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/olekukonko/tablewriter v0.0.4
@@ -20,9 +19,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sys v0.0.0-20200610111108-226ff32320da // indirect
 	google.golang.org/api v0.26.0
-	google.golang.org/appengine v1.6.6 // indirect
-	google.golang.org/genproto v0.0.0-20200610212329-df9b449b0ff2
-	google.golang.org/grpc v1.29.1 // indirect
+	google.golang.org/genproto v0.0.0-20200611194920-44ba362f84c1
 	gopkg.in/h2non/gock.v1 v1.0.15
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
