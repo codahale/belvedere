@@ -24,7 +24,7 @@ type fileReader struct {
 
 func (f *fileReader) Read(path string) ([]byte, error) {
 	if path == "-" {
-		if !isStdInReadable() {
+		if isTerminal(os.Stdin.Fd()) {
 			return nil, fmt.Errorf("can't read from stdin")
 		}
 
@@ -63,6 +63,6 @@ func expandPath(path string) string {
 	return abspath
 }
 
-func isStdInReadable() bool {
-	return !(isatty.IsTerminal(os.Stdin.Fd()) || isatty.IsCygwinTerminal(os.Stdin.Fd()))
+func isTerminal(fd uintptr) bool {
+	return isatty.IsTerminal(fd) || isatty.IsCygwinTerminal(fd)
 }
