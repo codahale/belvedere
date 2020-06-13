@@ -7,6 +7,8 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
+
+	"github.com/mattn/go-isatty"
 )
 
 type FileReader interface {
@@ -59,4 +61,8 @@ func expandPath(path string) string {
 		return path
 	}
 	return abspath
+}
+
+func isStdInReadable() bool {
+	return !(isatty.IsTerminal(os.Stdin.Fd()) || isatty.IsCygwinTerminal(os.Stdin.Fd()))
 }
