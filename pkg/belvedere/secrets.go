@@ -30,9 +30,9 @@ type SecretsService interface {
 	// Delete deletes the given secret.
 	Delete(ctx context.Context, name string, dryRun bool) error
 	// Grant modifies the given secret's IAM policy to grant read access to the given app.
-	Grant(ctx context.Context, secret, app string, dryRun bool) error
+	Grant(ctx context.Context, name, app string, dryRun bool) error
 	// Revoke modifies the given secret's IAM policy to revoke read access from the given app.
-	Revoke(ctx context.Context, secret, app string, dryRun bool) error
+	Revoke(ctx context.Context, name, app string, dryRun bool) error
 }
 
 type secretsService struct {
@@ -129,16 +129,16 @@ func (s *secretsService) Delete(ctx context.Context, name string, dryRun bool) e
 	return err
 }
 
-func (s *secretsService) Grant(ctx context.Context, secret, app string, dryRun bool) error {
+func (s *secretsService) Grant(ctx context.Context, name, app string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.Grant")
 	span.AddAttributes(
-		trace.StringAttribute("secret", secret),
+		trace.StringAttribute("name", name),
 		trace.StringAttribute("app", app),
 	)
 	defer span.End()
 
 	sa := fmt.Sprintf("serviceAccount:%s-sa@%s.iam.gserviceaccount.com", app, s.project)
-	return s.modifyIAMPolicy(ctx, fmt.Sprintf("projects/%s/secrets/%s", s.project, secret),
+	return s.modifyIAMPolicy(ctx, fmt.Sprintf("projects/%s/secrets/%s", s.project, name),
 		func(policy *secretmanager.Policy) *secretmanager.Policy {
 			// Look for an existing IAM binding giving the application access to the secret.
 			for _, binding := range policy.Bindings {
@@ -175,16 +175,16 @@ func (s *secretsService) Grant(ctx context.Context, secret, app string, dryRun b
 	)
 }
 
-func (s *secretsService) Revoke(ctx context.Context, secret, app string, dryRun bool) error {
+func (s *secretsService) Revoke(ctx context.Context, name, app string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.Revoke")
 	span.AddAttributes(
+		trace.StringAttribute("name", name),
 		trace.StringAttribute("app", app),
-		trace.StringAttribute("secret", secret),
 	)
 	defer span.End()
 
 	sa := fmt.Sprintf("serviceAccount:%s-sa@%s.iam.gserviceaccount.com", app, s.project)
-	return s.modifyIAMPolicy(ctx, fmt.Sprintf("projects/%s/secrets/%s", s.project, secret),
+	return s.modifyIAMPolicy(ctx, fmt.Sprintf("projects/%s/secrets/%s", s.project, name),
 		func(policy *secretmanager.Policy) *secretmanager.Policy {
 			var bindings []*secretmanager.Binding
 

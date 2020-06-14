@@ -1,127 +1,57 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"runtime"
-	"strings"
 
-	"github.com/alessio/shellescape"
-	"github.com/codahale/belvedere/cmd/belvedere/internal/appscmd"
-	"github.com/codahale/belvedere/cmd/belvedere/internal/cmd"
-	"github.com/codahale/belvedere/cmd/belvedere/internal/dnsserverscmd"
-	"github.com/codahale/belvedere/cmd/belvedere/internal/instancescmd"
-	"github.com/codahale/belvedere/cmd/belvedere/internal/logscmd"
-	"github.com/codahale/belvedere/cmd/belvedere/internal/machinetypescmd"
-	"github.com/codahale/belvedere/cmd/belvedere/internal/releasescmd"
-	"github.com/codahale/belvedere/cmd/belvedere/internal/rootcmd"
-	"github.com/codahale/belvedere/cmd/belvedere/internal/secretscmd"
-	"github.com/codahale/belvedere/cmd/belvedere/internal/setupcmd"
-	"github.com/codahale/belvedere/cmd/belvedere/internal/sshcmd"
-	"github.com/codahale/belvedere/cmd/belvedere/internal/teardowncmd"
-	"github.com/codahale/belvedere/cmd/belvedere/internal/versioncmd"
+	"github.com/codahale/belvedere/cmd/belvedere/internal/cli"
 	"github.com/codahale/belvedere/pkg/belvedere"
-	"github.com/peterbourgon/ff/v3/ffcli"
-	"go.opencensus.io/trace"
-	"google.golang.org/api/option"
-	"google.golang.org/genproto/googleapis/rpc/code"
+	"github.com/spf13/cobra"
 )
 
 func main() {
-	callback, err := run()
-	if err != nil {
-		if err == flag.ErrHelp {
-			os.Exit(2)
-		} else {
-			_, _ = fmt.Fprintln(os.Stderr, err)
-			os.Exit(-1)
-		}
-	}
-
-	if callback != nil {
-		err = callback()
-		_, _ = fmt.Fprintln(os.Stderr, err)
-		os.Exit(-1)
+	cobra.EnableCommandSorting = false
+	version := buildVersion(version, commit, date, builtBy)
+	root := newRootCmd(version).ToCobra(belvedere.NewProject, cli.NewTableWriter, cli.NewFs())
+	if err := root.Execute(); err != nil {
+		_, _ = fmt.Fprint(os.Stderr, err)
+		os.Exit(1)
 	}
 }
 
-func run() (func() error, error) {
-	// Initialize root command.
-	rootCommand, rootConfig := rootcmd.New()
+func newRootCmd(version string) *cli.Command {
+	return &cli.Command{
+		UI: cobra.Command{
+			Use:   "belvedere",
+			Short: "A small lookout tower (usually square) on the roof of a house",
+			Long: `A small lookout tower (usually square) on the roof of a house.
 
-	// Populate subcommands.
-	rootCommand.Subcommands = []*ffcli.Command{
-		setupcmd.New(rootConfig),
-		teardowncmd.New(rootConfig),
-		dnsserverscmd.New(rootConfig),
-		instancescmd.New(rootConfig),
-		logscmd.New(rootConfig),
-		machinetypescmd.New(rootConfig),
-		sshcmd.New(rootConfig),
-		appscmd.New(rootConfig),
-		releasescmd.New(rootConfig),
-		secretscmd.New(rootConfig),
-		versioncmd.New(rootConfig, os.Stdout, version, commit, date, builtBy, runtime.Version()),
+Belvedere provides an easy and reliable way of deploying and managing HTTP2 applications on Google
+Cloud Platform. It handles load balancing, DNS, TLS, blue/green deploys, auto-scaling, CDN
+configuration, access control, secret management, configuration, and more.`,
+			Version: version,
+		},
+		Subcommands: []*cli.Command{
+			newSetupCmd(),
+			newTeardownCmd(),
+			newDNSServersCmd(),
+			newInstancesCmd(),
+			newLogsCmd(),
+			newMachineTypesCmd(),
+			newSSHCmd(),
+			newAppsCmd(),
+			newReleasesCmd(),
+			newSecretsCmd(),
+		},
 	}
-
-	// Parse flags and args.
-	if err := rootCommand.Parse(os.Args[1:]); err != nil {
-		if e, ok := err.(ffcli.NoExecError); ok {
-			e.Command.FlagSet.Usage()
-			return nil, flag.ErrHelp
-		}
-		return nil, err
-	}
-
-	// Enable trace logging.
-	rootConfig.EnableLogging()
-
-	// Create a root span.
-	ctx, cancel, span := rootConfig.RootSpan()
-	defer cancel()
-	defer span.End()
-
-	// Create a Belvedere project.
-	project, err := belvedere.NewProject(ctx, rootConfig.ProjectName,
-		option.WithUserAgent(fmt.Sprintf("belvedere/%s", version)))
-	if err != nil {
-		return nil, err
-	}
-	span.AddAttributes(
-		trace.StringAttribute("project", project.Name()),
-		trace.StringAttribute("args", escapeArgs(os.Args[1:])),
-	)
-	rootConfig.Project = project
-
-	// Initialize helpers.
-	rootConfig.Tables = cmd.NewTableWriter(os.Stdout, rootConfig.CSV)
-	rootConfig.Files = cmd.NewFileReader()
-
-	// Run the actual command.
-	if err := rootCommand.Run(ctx); err != nil {
-		if err == flag.ErrHelp {
-			span.SetStatus(trace.Status{
-				Code:    int32(code.Code_INVALID_ARGUMENT),
-				Message: "invalid argument",
-			})
-		} else {
-			span.SetStatus(trace.Status{
-				Code:    int32(code.Code_INTERNAL),
-				Message: err.Error(),
-			})
-		}
-		return nil, err
-	}
-	return rootConfig.Callback, nil
 }
 
-func escapeArgs(args []string) string {
-	escaped := make([]string, len(args))
-	for i, s := range args {
-		escaped[i] = shellescape.Quote(s)
+func buildVersion(version, commit, date, builtBy string) string {
+	if version == "dev" {
+		return fmt.Sprintf("%s (%s)", version, runtime.Version())
 	}
-	return strings.Join(escaped, " ")
+	return fmt.Sprintf("%s (commit %.8s, %s, %s, %s)", version, commit, date, builtBy, runtime.Version())
 }
 
 // nolint: gochecknoglobals

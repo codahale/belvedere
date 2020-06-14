@@ -41,7 +41,7 @@ type ReleaseService interface {
 	Disable(ctx context.Context, app, name string, dryRun bool, interval time.Duration) error
 
 	// Delete deletes the release's deployment and waits for all underlying resources to be deleted.
-	Delete(ctx context.Context, app, release string, dryRun, async bool, interval time.Duration) error
+	Delete(ctx context.Context, app, name string, dryRun, async bool, interval time.Duration) error
 }
 
 type releaseService struct {

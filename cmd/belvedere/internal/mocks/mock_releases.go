@@ -94,15 +94,15 @@ func (mr *MockReleaseServiceMockRecorder) Disable(ctx, app, name, dryRun, interv
 }
 
 // Delete mocks base method
-func (m *MockReleaseService) Delete(ctx context.Context, app, release string, dryRun, async bool, interval time.Duration) error {
+func (m *MockReleaseService) Delete(ctx context.Context, app, name string, dryRun, async bool, interval time.Duration) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", ctx, app, release, dryRun, async, interval)
+	ret := m.ctrl.Call(m, "Delete", ctx, app, name, dryRun, async, interval)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockReleaseServiceMockRecorder) Delete(ctx, app, release, dryRun, async, interval interface{}) *gomock.Call {
+func (mr *MockReleaseServiceMockRecorder) Delete(ctx, app, name, dryRun, async, interval interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockReleaseService)(nil).Delete), ctx, app, release, dryRun, async, interval)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockReleaseService)(nil).Delete), ctx, app, name, dryRun, async, interval)
 }
