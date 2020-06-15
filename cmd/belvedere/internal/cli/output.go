@@ -21,7 +21,7 @@ func NewOutput(w io.Writer, format string) (Output, error) {
 	case "table":
 		return &tableOutput{w: w}, nil
 	case "csv":
-		return &csvOutput{w: w}, nil
+		return &csvOutput{tableOutput: tableOutput{w: w}}, nil
 	case "json":
 		return &jsonOutput{w: w}, nil
 	case "prettyjson":
@@ -36,9 +36,18 @@ type tableOutput struct {
 }
 
 func (o *tableOutput) Print(v interface{}) error {
-	headers, cols, rows, err := toRows(v)
+	tw, err := o.buildWriter(v)
 	if err != nil {
 		return err
+	}
+	_, err = fmt.Fprintln(o.w, tw.Render())
+	return err
+}
+
+func (o *tableOutput) buildWriter(v interface{}) (table.Writer, error) {
+	headers, cols, rows, err := toRows(v)
+	if err != nil {
+		return nil, err
 	}
 
 	tw := table.NewWriter()
@@ -47,25 +56,18 @@ func (o *tableOutput) Print(v interface{}) error {
 	tw.SetColumnConfigs(cols)
 	tw.AppendSeparator()
 	tw.AppendRows(rows)
-	_, err = fmt.Fprintln(o.w, tw.Render())
-	return err
+	return tw, err
 }
 
 type csvOutput struct {
-	w io.Writer
+	tableOutput
 }
 
 func (o *csvOutput) Print(v interface{}) error {
-	headers, cols, rows, err := toRows(v)
+	tw, err := o.buildWriter(v)
 	if err != nil {
 		return err
 	}
-
-	tw := table.NewWriter()
-	tw.AppendHeader(headers)
-	tw.SetColumnConfigs(cols)
-	tw.AppendSeparator()
-	tw.AppendRows(rows)
 	_, err = fmt.Fprintln(o.w, tw.RenderCSV())
 	return err
 }

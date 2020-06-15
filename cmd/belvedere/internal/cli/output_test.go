@@ -45,7 +45,7 @@ func TestTableOutput_Print(t *testing.T) {
 
 func TestCSVOutput_Print(t *testing.T) {
 	buf := bytes.NewBuffer(nil)
-	output := &csvOutput{w: buf}
+	output := &csvOutput{tableOutput: tableOutput{w: buf}}
 	if err := output.Print([]example{
 		{
 			Name:  "one",
