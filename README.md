@@ -28,7 +28,7 @@ To get a list of the DNS servers to use, run:
 belvedere dns-servers
 ```
 
-It's important that this be done before creating any apps, as creating an application involves provisioning a Google-managed TLS certificate.
+It's important this be done before creating any apps, as creating an application involves provisioning a Google-managed TLS certificate.
 In order for that provisioning to be successful, the hostname associated with the application (e.g. `my-app.cornbread.club`) must resolve to the load balancer's IP address.
 In order to do that, the domain registration needs to provide the servers listed via `dns-servers` as the DNS servers for that hostname.
 If this isn't the case when an application is created, the certificate will take much longer to provision.
@@ -38,7 +38,7 @@ If this isn't the case when an application is created, the certificate will take
 Belvedere apps are HTTP2 apps packaged as containers in a registry, running on virtual machines with optional sidecars.
 Belvedere requires that the application (or a sidecar reverse proxy) listen on port `8443` for HTTP2 requests.
 The application can use self-signed certs, but it must use TLS.
-The application must return a `200 OK` response to `GET` requests for `/healthz`
+The application must return a `200 OK` response to `GET` requests for `/healthz`.
 
 ### Building An App
 
@@ -134,7 +134,7 @@ This will remove the application from service and drain any existing connections
 
 ### Deleting A Release
 
-To delete all of the resources associated with a release, including the instances, run:
+To delete all the resources associated with a release, including the instances, run:
 
 ```shell script
 belvedere releases delete my-app v1
@@ -142,7 +142,7 @@ belvedere releases delete my-app v1
 
 ### Deleting An App
 
-To delete all of the resources associated with an app, run:
+To delete all the resources associated with an app, run:
 
 ```shell script
 belvedere apps delete my-app
@@ -186,8 +186,8 @@ belvedere ssh my-app-v43-hxht
 ```
 
 This will use `gcloud` to automatically configure an SSH key, inject it into the instance, and tunnel an SSH connection over GCP's Identity-Aware Proxy (IAP) to the instance.
-IAP tunneling is used because it allows for public SSH access to application instances to be disabled.
-Only IAP tunnels are allowed, and IAP tunnels require that the initiator be an authenticated member of the GCP project.
+This uses IAP tunneling because it allows for public SSH access to application instances to be disabled.
+Belvedere's configuration only allows SSH over IAP tunnels, and IAP tunnels require that the initiator be an authenticated member of the GCP project.
 
 You can also pass arguments to SSH:
 
