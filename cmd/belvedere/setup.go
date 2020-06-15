@@ -28,7 +28,7 @@ create, deploy, and manage applications with Belvedere.`,
 			mf.Register(fs)
 			lrf.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, tables cli.TableWriter, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
 			dnsZone := args[0]
 			return project.Setup(ctx, dnsZone, mf.DryRun, lrf.Interval)
 		},

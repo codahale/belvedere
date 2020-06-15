@@ -30,7 +30,7 @@ https://cloud.google.com/logging/docs/view/advanced-queries#advanced_logs_query_
 			fs.StringSliceVar(&filters, "filter", nil, "limit entries to the given filter")
 			fs.DurationVar(&maxAge, "max-age", 10*time.Minute, "limit entries by maximum age")
 		},
-		Run: func(ctx context.Context, project belvedere.Project, tables cli.TableWriter, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
 			app := args[0]
 
 			var release string
@@ -47,7 +47,7 @@ https://cloud.google.com/logging/docs/view/advanced-queries#advanced_logs_query_
 			if err != nil {
 				return err
 			}
-			return tables.Print(entries)
+			return output.Print(entries)
 		},
 	}
 }

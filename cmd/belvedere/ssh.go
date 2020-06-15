@@ -27,7 +27,7 @@ requires GCP credentials and access to your GCP project. For more information on
 https://cloud.google.com/iap/docs/tcp-forwarding-overview.`,
 			Args: cobra.MinimumNArgs(1),
 		},
-		RunCallback: func(ctx context.Context, project belvedere.Project, tables cli.TableWriter, fs afero.Fs, args []string) (func() error, error) {
+		RunCallback: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) (func() error, error) {
 			instance := args[0]
 
 			// Find gcloud on the path.

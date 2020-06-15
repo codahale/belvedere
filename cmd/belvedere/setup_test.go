@@ -12,12 +12,12 @@ func TestSetup(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, tf := mockFactories(ctrl)
+	project, _, fs, pf, of := mockFactories(ctrl)
 
 	project.EXPECT().
 		Setup(gomock.Any(), "cloudslap.club.", true, 1*time.Minute)
 
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"setup",
@@ -34,8 +34,9 @@ func TestSetup_Missing_DNS_Name(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	_, _, fs, pf, tf := mockFactories(ctrl)
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	_, _, fs, pf, of := mockFactories(ctrl)
+
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"setup",

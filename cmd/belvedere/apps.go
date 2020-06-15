@@ -39,12 +39,12 @@ func newAppsListCmd() *cli.Command {
 Prints a table of provisioned applications in the current project.`,
 			Args: cobra.NoArgs,
 		},
-		Run: func(ctx context.Context, project belvedere.Project, tables cli.TableWriter, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
 			apps, err := project.Apps().List(ctx)
 			if err != nil {
 				return err
 			}
-			return tables.Print(apps)
+			return output.Print(apps)
 		},
 	}
 }
@@ -70,7 +70,7 @@ instead.`,
 			mf.Register(fs)
 			lrf.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, tables cli.TableWriter, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
 			region := args[0]
 			name := args[1]
 			path := "-"
@@ -111,7 +111,7 @@ instead.`,
 			mf.Register(fs)
 			lrf.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, tables cli.TableWriter, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
 			name := args[0]
 			path := "-"
 			if len(args) > 1 {
@@ -151,7 +151,7 @@ An application must not have any releases before being deleted.`,
 			lrf.Register(fs)
 			af.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, tables cli.TableWriter, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
 			name := args[0]
 			return project.Apps().Delete(ctx, name, mf.DryRun, af.Async, lrf.Interval)
 		},

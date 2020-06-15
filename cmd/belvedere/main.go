@@ -13,7 +13,7 @@ import (
 func main() {
 	cobra.EnableCommandSorting = false
 	version := buildVersion(version, commit, date, builtBy)
-	root := newRootCmd(version).ToCobra(belvedere.NewProject, cli.NewTableWriter, cli.NewFs())
+	root := newRootCmd(version).ToCobra(belvedere.NewProject, cli.NewOutput, cli.NewFs())
 	if err := root.Execute(); err != nil {
 		_, _ = fmt.Fprint(os.Stderr, err)
 		os.Exit(1)

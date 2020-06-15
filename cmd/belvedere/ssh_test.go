@@ -13,8 +13,9 @@ func TestSSH(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	_, _, fs, pf, tf := mockFactories(ctrl)
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	_, _, fs, pf, of := mockFactories(ctrl)
+
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"ssh",

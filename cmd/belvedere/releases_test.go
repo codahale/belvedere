@@ -16,7 +16,7 @@ func TestReleasesList(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, tables, fs, pf, tf := mockFactories(ctrl)
+	project, output, fs, pf, of := mockFactories(ctrl)
 
 	list := []belvedere.Release{
 		{
@@ -31,10 +31,10 @@ func TestReleasesList(t *testing.T) {
 
 	project.EXPECT().Releases().Return(releases)
 
-	tables.EXPECT().
+	output.EXPECT().
 		Print(list)
 
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"releases",
@@ -50,7 +50,7 @@ func TestReleasesCreate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, tf := mockFactories(ctrl)
+	project, _, fs, pf, of := mockFactories(ctrl)
 
 	config := cfg.Config{
 		NumReplicas: 10,
@@ -66,7 +66,7 @@ func TestReleasesCreate(t *testing.T) {
 
 	project.EXPECT().Releases().Return(releases)
 
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"releases",
@@ -86,7 +86,7 @@ func TestReleasesCreate_AndEnable(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, tf := mockFactories(ctrl)
+	project, _, fs, pf, of := mockFactories(ctrl)
 
 	config := cfg.Config{
 		NumReplicas: 10,
@@ -106,7 +106,7 @@ func TestReleasesCreate_AndEnable(t *testing.T) {
 
 	project.EXPECT().Releases().Return(releases).AnyTimes()
 
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"releases",
@@ -127,7 +127,7 @@ func TestReleasesCreate_WithFilename(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, tf := mockFactories(ctrl)
+	project, _, fs, pf, of := mockFactories(ctrl)
 
 	config := cfg.Config{
 		NumReplicas: 10,
@@ -143,7 +143,7 @@ func TestReleasesCreate_WithFilename(t *testing.T) {
 
 	project.EXPECT().Releases().Return(releases)
 
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"releases",
@@ -164,7 +164,7 @@ func TestReleasesEnable(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, tf := mockFactories(ctrl)
+	project, _, fs, pf, of := mockFactories(ctrl)
 
 	releases := mocks.NewMockReleaseService(ctrl)
 	releases.EXPECT().
@@ -172,7 +172,7 @@ func TestReleasesEnable(t *testing.T) {
 
 	project.EXPECT().Releases().Return(releases)
 
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"releases",
@@ -191,7 +191,7 @@ func TestReleasesDisable(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, tf := mockFactories(ctrl)
+	project, _, fs, pf, of := mockFactories(ctrl)
 
 	releases := mocks.NewMockReleaseService(ctrl)
 	releases.EXPECT().
@@ -199,7 +199,7 @@ func TestReleasesDisable(t *testing.T) {
 
 	project.EXPECT().Releases().Return(releases)
 
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"releases",
@@ -218,7 +218,7 @@ func TestReleasesDelete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, tf := mockFactories(ctrl)
+	project, _, fs, pf, of := mockFactories(ctrl)
 
 	releases := mocks.NewMockReleaseService(ctrl)
 	releases.EXPECT().
@@ -226,7 +226,7 @@ func TestReleasesDelete(t *testing.T) {
 
 	project.EXPECT().Releases().Return(releases)
 
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"releases",

@@ -12,16 +12,16 @@ import (
 	"google.golang.org/api/option"
 )
 
-func mockFactories(ctrl *gomock.Controller) (*mocks.MockProject, *mocks.MockTableWriter, afero.Fs, cli.ProjectFactory, cli.TableWriterFactory) {
+func mockFactories(ctrl *gomock.Controller) (*mocks.MockProject, *mocks.MockOutput, afero.Fs, cli.ProjectFactory, cli.OutputFactory) {
 	project := mocks.NewMockProject(ctrl)
 	project.EXPECT().Name().Return("my-project").AnyTimes()
-	tables := mocks.NewMockTableWriter(ctrl)
+	output := mocks.NewMockOutput(ctrl)
 	fs := afero.NewMemMapFs()
-	return project, tables, fs,
+	return project, output, fs,
 		func(ctx context.Context, name string, opts ...option.ClientOption) (belvedere.Project, error) {
 			return project, nil
 		},
-		func(w io.Writer, csv bool) cli.TableWriter {
-			return tables
+		func(w io.Writer, csv bool) cli.Output {
+			return output
 		}
 }

@@ -16,7 +16,7 @@ func TestAppsList(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, tables, fs, pf, tf := mockFactories(ctrl)
+	project, output, fs, pf, of := mockFactories(ctrl)
 
 	list := []belvedere.App{
 		{
@@ -31,10 +31,10 @@ func TestAppsList(t *testing.T) {
 
 	project.EXPECT().Apps().Return(apps)
 
-	tables.EXPECT().
+	output.EXPECT().
 		Print(list)
 
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"apps",
@@ -49,7 +49,7 @@ func TestAppsCreate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, tf := mockFactories(ctrl)
+	project, _, fs, pf, of := mockFactories(ctrl)
 
 	config := cfg.Config{
 		NumReplicas: 10,
@@ -66,7 +66,7 @@ func TestAppsCreate(t *testing.T) {
 
 	project.EXPECT().Apps().Return(apps)
 
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"apps",
@@ -85,7 +85,7 @@ func TestAppsCreate_WithFilename(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, tf := mockFactories(ctrl)
+	project, _, fs, pf, of := mockFactories(ctrl)
 
 	config := cfg.Config{
 		NumReplicas: 10,
@@ -102,7 +102,7 @@ func TestAppsCreate_WithFilename(t *testing.T) {
 
 	project.EXPECT().Apps().Return(apps)
 
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"apps",
@@ -122,7 +122,7 @@ func TestAppsUpdate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, tf := mockFactories(ctrl)
+	project, _, fs, pf, of := mockFactories(ctrl)
 
 	config := cfg.Config{
 		NumReplicas: 10,
@@ -139,7 +139,7 @@ func TestAppsUpdate(t *testing.T) {
 
 	project.EXPECT().Apps().Return(apps)
 
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"apps",
@@ -157,7 +157,7 @@ func TestAppsUpdate_WithFilename(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, tf := mockFactories(ctrl)
+	project, _, fs, pf, of := mockFactories(ctrl)
 
 	config := cfg.Config{
 		NumReplicas: 10,
@@ -174,7 +174,7 @@ func TestAppsUpdate_WithFilename(t *testing.T) {
 
 	project.EXPECT().Apps().Return(apps)
 
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"apps",
@@ -193,7 +193,7 @@ func TestAppsDelete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, tf := mockFactories(ctrl)
+	project, _, fs, pf, of := mockFactories(ctrl)
 
 	apps := mocks.NewMockAppService(ctrl)
 	apps.EXPECT().
@@ -202,7 +202,7 @@ func TestAppsDelete(t *testing.T) {
 
 	project.EXPECT().Apps().Return(apps)
 
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"apps",

@@ -14,7 +14,7 @@ type example struct {
 
 func TestTableWriter_ASCII(t *testing.T) {
 	out := bytes.NewBuffer(nil)
-	tw := NewTableWriter(out, false)
+	tw := NewOutput(out, false)
 	if err := tw.Print([]example{
 		{
 			Name:  "one",
@@ -40,7 +40,7 @@ func TestTableWriter_ASCII(t *testing.T) {
 
 func TestTableWriter_CSV(t *testing.T) {
 	out := bytes.NewBuffer(nil)
-	tw := NewTableWriter(out, true)
+	tw := NewOutput(out, true)
 	if err := tw.Print([]example{
 		{
 			Name:  "one",

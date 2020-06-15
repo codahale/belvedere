@@ -12,7 +12,7 @@ func TestInstances(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, tables, fs, pf, tf := mockFactories(ctrl)
+	project, output, fs, pf, of := mockFactories(ctrl)
 
 	instances := []belvedere.Instance{
 		{
@@ -24,10 +24,10 @@ func TestInstances(t *testing.T) {
 		Instances(gomock.Any(), "", "").
 		Return(instances, nil)
 
-	tables.EXPECT().
+	output.EXPECT().
 		Print(instances)
 
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"instances",
@@ -41,7 +41,7 @@ func TestInstances_WithApp(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, tables, fs, pf, tf := mockFactories(ctrl)
+	project, output, fs, pf, of := mockFactories(ctrl)
 
 	instances := []belvedere.Instance{
 		{
@@ -53,10 +53,10 @@ func TestInstances_WithApp(t *testing.T) {
 		Instances(gomock.Any(), "my-app", "").
 		Return(instances, nil)
 
-	tables.EXPECT().
+	output.EXPECT().
 		Print(instances)
 
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"instances",
@@ -71,7 +71,7 @@ func TestInstances_WithAppAndRelease(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, tables, fs, pf, tf := mockFactories(ctrl)
+	project, output, fs, pf, of := mockFactories(ctrl)
 
 	instances := []belvedere.Instance{
 		{
@@ -83,10 +83,10 @@ func TestInstances_WithAppAndRelease(t *testing.T) {
 		Instances(gomock.Any(), "my-app", "my-release").
 		Return(instances, nil)
 
-	tables.EXPECT().
+	output.EXPECT().
 		Print(instances)
 
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"instances",

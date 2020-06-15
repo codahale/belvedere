@@ -22,18 +22,18 @@ import (
 )
 
 type CommandFunc func(
-	ctx context.Context, project belvedere.Project, tables TableWriter, fs afero.Fs,
+	ctx context.Context, project belvedere.Project, output Output, fs afero.Fs,
 	args []string,
 ) error
 
 type CallbackFunc func(
-	ctx context.Context, project belvedere.Project, tables TableWriter, fs afero.Fs,
+	ctx context.Context, project belvedere.Project, output Output, fs afero.Fs,
 	args []string,
 ) (func() error, error)
 
 type ProjectFactory func(ctx context.Context, name string, opts ...option.ClientOption) (belvedere.Project, error)
 
-type TableWriterFactory func(w io.Writer, csv bool) TableWriter
+type OutputFactory func(w io.Writer, csv bool) Output
 
 type Command struct {
 	UI          cobra.Command
@@ -43,7 +43,7 @@ type Command struct {
 	Subcommands []*Command
 }
 
-func (c *Command) ToCobra(pf ProjectFactory, tf TableWriterFactory, fs afero.Fs) *cobra.Command {
+func (c *Command) ToCobra(pf ProjectFactory, of OutputFactory, fs afero.Fs) *cobra.Command {
 	cmd := c.UI
 
 	// Populate the command's flags.
@@ -57,7 +57,7 @@ func (c *Command) ToCobra(pf ProjectFactory, tf TableWriterFactory, fs afero.Fs)
 	// Add subcommands, if any, and return.
 	if len(c.Subcommands) > 0 {
 		for _, sc := range c.Subcommands {
-			cmd.AddCommand(sc.ToCobra(pf, tf, fs))
+			cmd.AddCommand(sc.ToCobra(pf, of, fs))
 		}
 		return &cmd
 	}
@@ -71,12 +71,12 @@ func (c *Command) ToCobra(pf ProjectFactory, tf TableWriterFactory, fs afero.Fs)
 		panic("both a run func and a run callback func")
 	case c.Run != nil:
 		// If it's a regular command, wrap it to return a nil callback func.
-		cmd.RunE = global.wrap(pf, tf, fs, func(ctx context.Context, project belvedere.Project, tables TableWriter, fs afero.Fs, args []string) (func() error, error) {
-			return nil, c.Run(ctx, project, tables, fs, args)
+		cmd.RunE = global.wrap(pf, of, fs, func(ctx context.Context, project belvedere.Project, output Output, fs afero.Fs, args []string) (func() error, error) {
+			return nil, c.Run(ctx, project, output, fs, args)
 		})
 	case c.RunCallback != nil:
 		// Otherwise, just wrap the func.
-		cmd.RunE = global.wrap(pf, tf, fs, c.RunCallback)
+		cmd.RunE = global.wrap(pf, of, fs, c.RunCallback)
 	default:
 		panic("no subcommands or run func")
 	}
@@ -99,7 +99,7 @@ func (gf *GlobalFlags) Register(fs *pflag.FlagSet) {
 	fs.BoolVar(&gf.CSV, "csv", false, "format output as CSV")
 }
 
-func (gf *GlobalFlags) wrap(pf ProjectFactory, tf TableWriterFactory, fs afero.Fs, f CallbackFunc) func(*cobra.Command, []string) error {
+func (gf *GlobalFlags) wrap(pf ProjectFactory, tf OutputFactory, fs afero.Fs, f CallbackFunc) func(*cobra.Command, []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		// Wrap this in a func to make our defers work.
 		callback, err := func() (func() error, error) {

@@ -10,20 +10,20 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-type TableWriter interface {
+type Output interface {
 	Print(v interface{}) error
 }
 
-func NewTableWriter(w io.Writer, csv bool) TableWriter {
-	return &tableWriter{csv: csv, w: w}
+func NewOutput(w io.Writer, csv bool) Output {
+	return &output{csv: csv, w: w}
 }
 
-type tableWriter struct {
+type output struct {
 	csv bool
 	w   io.Writer
 }
 
-func (w *tableWriter) Print(i interface{}) error {
+func (w *output) Print(i interface{}) error {
 	t := reflect.TypeOf(i)
 	if t.Kind() != reflect.Slice {
 		return nil

@@ -12,7 +12,7 @@ func TestDNSServers(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, tables, fs, pf, tf := mockFactories(ctrl)
+	project, output, fs, pf, of := mockFactories(ctrl)
 
 	servers := []belvedere.DNSServer{
 		{
@@ -24,10 +24,10 @@ func TestDNSServers(t *testing.T) {
 		DNSServers(gomock.Any()).
 		Return(servers, nil)
 
-	tables.EXPECT().
+	output.EXPECT().
 		Print(servers)
 
-	cmd := newRootCmd("test").ToCobra(pf, tf, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of, fs)
 	cmd.SetOut(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"dns-servers",
