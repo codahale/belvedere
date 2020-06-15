@@ -9,8 +9,8 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/mock v1.4.3
 	github.com/google/go-cmp v0.4.1
+	github.com/jedib0t/go-pretty/v6 v6.0.4
 	github.com/mattn/go-isatty v0.0.12
-	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/spf13/afero v1.2.2
 	github.com/spf13/cobra v1.0.0

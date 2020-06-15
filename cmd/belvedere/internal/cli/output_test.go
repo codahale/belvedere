@@ -9,39 +9,44 @@ import (
 
 type example struct {
 	Name  string
-	Weird string `table:"Regular"`
+	Weird string `table:"Regular,ralign"`
 }
 
-func TestTableWriter_ASCII(t *testing.T) {
-	out := bytes.NewBuffer(nil)
-	tw := NewOutput(out, false)
-	if err := tw.Print([]example{
+func TestTableOutput_Print(t *testing.T) {
+	buf := bytes.NewBuffer(nil)
+	output := &tableOutput{w: buf}
+	if err := output.Print([]example{
 		{
 			Name:  "one",
 			Weird: "two",
+		},
+		{
+			Name:  "three",
+			Weird: "four five",
 		},
 	}); err != nil {
 		t.Fatal(err)
 	}
 
 	expected := `
-+------+---------+
-| Name | Regular |
-+------+---------+
-| one  | two     |
-+------+---------+
++-------+-----------+
+| Name  | Regular   |
++-------+-----------+
+| one   |       two |
+| three | four five |
++-------+-----------+
 `
-	actual := "\n" + out.String()
+	actual := "\n" + buf.String()
 
 	if !cmp.Equal(expected, actual) {
 		t.Fatal(cmp.Diff(expected, actual))
 	}
 }
 
-func TestTableWriter_CSV(t *testing.T) {
-	out := bytes.NewBuffer(nil)
-	tw := NewOutput(out, true)
-	if err := tw.Print([]example{
+func TestCSVOutput_Print(t *testing.T) {
+	buf := bytes.NewBuffer(nil)
+	output := &csvOutput{w: buf}
+	if err := output.Print([]example{
 		{
 			Name:  "one",
 			Weird: "two",
@@ -54,7 +59,54 @@ func TestTableWriter_CSV(t *testing.T) {
 Name,Regular
 one,two
 `
-	actual := "\n" + out.String()
+	actual := "\n" + buf.String()
+
+	if !cmp.Equal(expected, actual) {
+		t.Fatal(cmp.Diff(expected, actual))
+	}
+}
+
+func TestJSONOutput_Print(t *testing.T) {
+	buf := bytes.NewBuffer(nil)
+	output := &jsonOutput{w: buf}
+	if err := output.Print([]example{
+		{
+			Name:  "one",
+			Weird: "two",
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	expected := `
+{"Name":"one","Weird":"two"}
+`
+	actual := "\n" + buf.String()
+
+	if !cmp.Equal(expected, actual) {
+		t.Fatal(cmp.Diff(expected, actual))
+	}
+}
+
+func TestPrettyJSONOutput_Print(t *testing.T) {
+	buf := bytes.NewBuffer(nil)
+	output := &prettyJSONOutput{w: buf}
+	if err := output.Print([]example{
+		{
+			Name:  "one",
+			Weird: "two",
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	expected := `
+{
+  "Name": "one",
+  "Weird": "two"
+}
+`
+	actual := "\n" + buf.String()
 
 	if !cmp.Equal(expected, actual) {
 		t.Fatal(cmp.Diff(expected, actual))

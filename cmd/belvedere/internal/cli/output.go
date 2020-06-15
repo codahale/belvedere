@@ -1,52 +1,157 @@
 package cli
 
 import (
-	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"io"
 	"reflect"
+	"strings"
 	"time"
 
-	"github.com/olekukonko/tablewriter"
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
 )
 
 type Output interface {
 	Print(v interface{}) error
 }
 
-func NewOutput(w io.Writer, csv bool) Output {
-	return &output{csv: csv, w: w}
+func NewOutput(w io.Writer, format string) (Output, error) {
+	switch strings.ToLower(format) {
+	case "table":
+		return &tableOutput{w: w}, nil
+	case "csv":
+		return &csvOutput{w: w}, nil
+	case "json":
+		return &jsonOutput{w: w}, nil
+	case "prettyjson":
+		return &prettyJSONOutput{w: w}, nil
+	default:
+		return nil, fmt.Errorf("%q is not a valid format (must be one of: table, csv, json, prettyjson", format)
+	}
 }
 
-type output struct {
-	csv bool
-	w   io.Writer
+type tableOutput struct {
+	w io.Writer
 }
 
-func (w *output) Print(i interface{}) error {
-	t := reflect.TypeOf(i)
+func (o *tableOutput) Print(v interface{}) error {
+	headers, cols, rows, err := toRows(v)
+	if err != nil {
+		return err
+	}
+
+	tw := table.NewWriter()
+	tw.Style().Format.Header = text.FormatDefault
+	tw.AppendHeader(headers)
+	tw.SetColumnConfigs(cols)
+	tw.AppendSeparator()
+	tw.AppendRows(rows)
+	_, err = fmt.Fprintln(o.w, tw.Render())
+	return err
+}
+
+type csvOutput struct {
+	w io.Writer
+}
+
+func (o *csvOutput) Print(v interface{}) error {
+	headers, cols, rows, err := toRows(v)
+	if err != nil {
+		return err
+	}
+
+	tw := table.NewWriter()
+	tw.AppendHeader(headers)
+	tw.SetColumnConfigs(cols)
+	tw.AppendSeparator()
+	tw.AppendRows(rows)
+	_, err = fmt.Fprintln(o.w, tw.RenderCSV())
+	return err
+}
+
+type jsonOutput struct {
+	w io.Writer
+}
+
+func (o *jsonOutput) Print(v interface{}) error {
+	t := reflect.TypeOf(v)
 	if t.Kind() != reflect.Slice {
-		return nil
+		return fmt.Errorf("not a slice of structs")
+	}
+
+	iv := reflect.ValueOf(v)
+	for i := 0; i < iv.Len(); i++ {
+		b, err := json.Marshal(iv.Index(i).Interface())
+		if err != nil {
+			return err
+		}
+
+		if _, err := fmt.Fprintf(o.w, "%s\n", string(b)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+type prettyJSONOutput struct {
+	w io.Writer
+}
+
+func (o *prettyJSONOutput) Print(v interface{}) error {
+	t := reflect.TypeOf(v)
+	if t.Kind() != reflect.Slice {
+		return fmt.Errorf("not a slice of structs")
+	}
+
+	iv := reflect.ValueOf(v)
+	for i := 0; i < iv.Len(); i++ {
+		b, err := json.MarshalIndent(iv.Index(i).Interface(), "", "  ")
+		if err != nil {
+			return err
+		}
+
+		if _, err := fmt.Fprintf(o.w, "%s\n", string(b)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func toRows(v interface{}) (table.Row, []table.ColumnConfig, []table.Row, error) {
+	t := reflect.TypeOf(v)
+	if t.Kind() != reflect.Slice {
+		return nil, nil, nil, fmt.Errorf("not a slice of structs")
 	}
 
 	t = t.Elem()
 	if t.Kind() != reflect.Struct {
-		return nil
+		return nil, nil, nil, fmt.Errorf("not a slice of structs")
 	}
 
-	var headers []string
+	var headers table.Row
+	var cols []table.ColumnConfig
 	for i := 0; i < t.NumField(); i++ {
 		s := t.Field(i).Tag.Get("table")
 		if s == "" {
 			s = t.Field(i).Name
 		}
-		headers = append(headers, s)
+
+		parts := strings.Split(s, ",")
+
+		headers = append(headers, parts[0])
+		if strings.Contains(s, ",ralign") {
+			cols = append(cols, table.ColumnConfig{
+				Name:  parts[0],
+				Align: text.AlignRight,
+			})
+		}
 	}
 
-	var rows [][]string
-	iv := reflect.ValueOf(i)
+	var rows []table.Row
+	iv := reflect.ValueOf(v)
 	for i := 0; i < iv.Len(); i++ {
-		var row []string
+		var row table.Row
 		ev := iv.Index(i)
 		for j := range headers {
 			f := ev.Field(j)
@@ -60,22 +165,5 @@ func (w *output) Print(i interface{}) error {
 		rows = append(rows, row)
 	}
 
-	if w.csv {
-		cw := csv.NewWriter(w.w)
-		if err := cw.Write(headers); err != nil {
-			return err
-		}
-		if err := cw.WriteAll(rows); err != nil {
-			return err
-		}
-		cw.Flush()
-	} else {
-		tw := tablewriter.NewWriter(w.w)
-		tw.SetAutoFormatHeaders(false)
-		tw.SetAutoWrapText(false)
-		tw.SetHeader(headers)
-		tw.AppendBulk(rows)
-		tw.Render()
-	}
-	return nil
+	return headers, cols, rows, nil
 }

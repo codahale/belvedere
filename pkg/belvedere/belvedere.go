@@ -262,15 +262,7 @@ type Instance struct {
 type Memory int64
 
 func (m Memory) String() string {
-	if m < 1024 {
-		return fmt.Sprintf("%6d MiB", m)
-	}
-
-	if m < (1024 * 1024) {
-		return fmt.Sprintf("%6.2f GiB", float64(m)/1024)
-	}
-
-	return fmt.Sprintf("%6.2f TiB", float64(m)/1024/1024)
+	return fmt.Sprintf("%.2f", float64(m)/1024)
 }
 
 var _ fmt.Stringer = Memory(0)
@@ -278,8 +270,8 @@ var _ fmt.Stringer = Memory(0)
 // MachineType is a GCE machine type which can run VMs.
 type MachineType struct {
 	Name   string
-	CPU    int
-	Memory Memory
+	CPU    int    `table:"CPU,ralign"`
+	Memory Memory `table:"Memory (GiB),ralign"`
 }
 
 func (mt MachineType) lexical() string {

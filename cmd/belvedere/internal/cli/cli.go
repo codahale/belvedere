@@ -33,7 +33,7 @@ type CallbackFunc func(
 
 type ProjectFactory func(ctx context.Context, name string, opts ...option.ClientOption) (belvedere.Project, error)
 
-type OutputFactory func(w io.Writer, csv bool) Output
+type OutputFactory func(w io.Writer, format string) (Output, error)
 
 type Command struct {
 	UI          cobra.Command
@@ -89,6 +89,7 @@ type GlobalFlags struct {
 	CSV     bool
 	Timeout time.Duration
 	Project string
+	Format  string
 }
 
 func (gf *GlobalFlags) Register(fs *pflag.FlagSet) {
@@ -97,9 +98,10 @@ func (gf *GlobalFlags) Register(fs *pflag.FlagSet) {
 	fs.DurationVar(&gf.Timeout, "timeout", 10*time.Minute, "maximum time allowed for total execution")
 	fs.StringVar(&gf.Project, "project", "", "specify a Google Cloud Platform project ID")
 	fs.BoolVar(&gf.CSV, "csv", false, "format output as CSV")
+	fs.StringVar(&gf.Format, "format", "table", "specify an output format (table, csv, json, prettyjson)")
 }
 
-func (gf *GlobalFlags) wrap(pf ProjectFactory, tf OutputFactory, fs afero.Fs, f CallbackFunc) func(*cobra.Command, []string) error {
+func (gf *GlobalFlags) wrap(pf ProjectFactory, of OutputFactory, fs afero.Fs, f CallbackFunc) func(*cobra.Command, []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		// Wrap this in a func to make our defers work.
 		callback, err := func() (func() error, error) {
@@ -147,9 +149,12 @@ func (gf *GlobalFlags) wrap(pf ProjectFactory, tf OutputFactory, fs afero.Fs, f 
 				trace.StringAttribute("args", escapeArgs(args)),
 			)
 
-			return f(ctx, project, tf(os.Stdout, gf.CSV), fs, args)
+			output, err := of(os.Stdout, gf.Format)
+			if err != nil {
+				return nil, err
+			}
+			return f(ctx, project, output, fs, args)
 		}()
-
 		if err != nil {
 			return err
 		}

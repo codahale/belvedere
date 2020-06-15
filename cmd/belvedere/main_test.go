@@ -21,7 +21,7 @@ func mockFactories(ctrl *gomock.Controller) (*mocks.MockProject, *mocks.MockOutp
 		func(ctx context.Context, name string, opts ...option.ClientOption) (belvedere.Project, error) {
 			return project, nil
 		},
-		func(w io.Writer, csv bool) cli.Output {
-			return output
+		func(w io.Writer, format string) (cli.Output, error) {
+			return output, nil
 		}
 }
