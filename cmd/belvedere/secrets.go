@@ -72,7 +72,7 @@ instead.`,
 		},
 		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
 			name := args[0]
-			path := "-"
+			path := cli.StdIn
 			if len(args) > 1 {
 				path = args[1]
 			}
@@ -106,7 +106,7 @@ instead.`,
 		},
 		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
 			name := args[0]
-			path := "-"
+			path := cli.StdIn
 			if len(args) > 1 {
 				path = args[1]
 			}

@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/codahale/belvedere/cmd/belvedere/internal/cli"
 	"github.com/codahale/belvedere/cmd/belvedere/internal/mocks"
 	"github.com/codahale/belvedere/pkg/belvedere"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
@@ -56,7 +57,7 @@ func TestReleasesCreate(t *testing.T) {
 		NumReplicas: 10,
 	}
 
-	if err := afero.WriteFile(fs, "-", []byte(`{"numReplicas":10}`), 0644); err != nil {
+	if err := afero.WriteFile(fs, cli.StdIn, []byte(`{"numReplicas":10}`), 0644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -92,7 +93,7 @@ func TestReleasesCreate_AndEnable(t *testing.T) {
 		NumReplicas: 10,
 	}
 
-	if err := afero.WriteFile(fs, "-", []byte(`{"numReplicas":10}`), 0644); err != nil {
+	if err := afero.WriteFile(fs, cli.StdIn, []byte(`{"numReplicas":10}`), 0644); err != nil {
 		t.Fatal(err)
 	}
 

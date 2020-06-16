@@ -82,7 +82,7 @@ instead.`,
 			name := args[1]
 			digest := args[2]
 
-			path := "-"
+			path := cli.StdIn
 			if len(args) > 3 {
 				path = args[3]
 			}

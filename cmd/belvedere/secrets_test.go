@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/codahale/belvedere/cmd/belvedere/internal/cli"
 	"github.com/codahale/belvedere/cmd/belvedere/internal/mocks"
 	"github.com/codahale/belvedere/pkg/belvedere"
 	"github.com/golang/mock/gomock"
@@ -50,7 +51,7 @@ func TestSecretsCreate(t *testing.T) {
 	project, _, fs, pf, of := mockFactories(ctrl)
 
 	value := []byte(`secret`)
-	if err := afero.WriteFile(fs, "-", value, 0644); err != nil {
+	if err := afero.WriteFile(fs, cli.StdIn, value, 0644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -111,7 +112,7 @@ func TestSecretsUpdate(t *testing.T) {
 	project, _, fs, pf, of := mockFactories(ctrl)
 
 	value := []byte(`secret`)
-	if err := afero.WriteFile(fs, "-", value, 0644); err != nil {
+	if err := afero.WriteFile(fs, cli.StdIn, value, 0644); err != nil {
 		t.Fatal(err)
 	}
 

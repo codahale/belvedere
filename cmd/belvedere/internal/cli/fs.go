@@ -12,12 +12,14 @@ func NewFs() afero.Fs {
 	return afero.Fs(stdInFs{Fs: afero.NewOsFs()})
 }
 
+const StdIn = "-"
+
 type stdInFs struct {
 	afero.Fs
 }
 
 func (fs stdInFs) Open(name string) (afero.File, error) {
-	if name == "-" {
+	if name == StdIn {
 		if isTerminal(os.Stdin.Fd()) {
 			return nil, fmt.Errorf("can't read from stdin")
 		}
