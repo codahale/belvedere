@@ -86,7 +86,6 @@ func (c *Command) ToCobra(pf ProjectFactory, of OutputFactory, fs afero.Fs) *cob
 type GlobalFlags struct {
 	Quiet   bool
 	Debug   bool
-	CSV     bool
 	Timeout time.Duration
 	Project string
 	Format  string
@@ -97,7 +96,6 @@ func (gf *GlobalFlags) Register(fs *pflag.FlagSet) {
 	fs.BoolVar(&gf.Debug, "debug", false, "log verbose output")
 	fs.DurationVar(&gf.Timeout, "timeout", 10*time.Minute, "maximum time allowed for total execution")
 	fs.StringVar(&gf.Project, "project", "", "specify a Google Cloud Platform project ID")
-	fs.BoolVar(&gf.CSV, "csv", false, "format output as CSV")
 	fs.StringVar(&gf.Format, "format", "table", "specify an output format (table, csv, json, prettyjson)")
 }
 
