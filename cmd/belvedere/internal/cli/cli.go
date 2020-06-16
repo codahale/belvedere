@@ -71,9 +71,11 @@ func (c *Command) ToCobra(pf ProjectFactory, of OutputFactory, fs afero.Fs) *cob
 		panic("both a run func and a run callback func")
 	case c.Run != nil:
 		// If it's a regular command, wrap it to return a nil callback func.
-		cmd.RunE = global.wrap(pf, of, fs, func(ctx context.Context, project belvedere.Project, output Output, fs afero.Fs, args []string) (func() error, error) {
-			return nil, c.Run(ctx, project, output, fs, args)
-		})
+		cmd.RunE = global.wrap(pf, of, fs,
+			func(ctx context.Context, project belvedere.Project, output Output, fs afero.Fs, args []string) (func() error, error) {
+				return nil, c.Run(ctx, project, output, fs, args)
+			},
+		)
 	case c.RunCallback != nil:
 		// Otherwise, just wrap the func.
 		cmd.RunE = global.wrap(pf, of, fs, c.RunCallback)
