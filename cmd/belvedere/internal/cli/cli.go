@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/user"
 	"strings"
-	"time"
 
 	"github.com/alessio/shellescape"
 	"github.com/codahale/belvedere/pkg/belvedere"
@@ -52,7 +51,7 @@ func (c *Command) ToCobra(pf ProjectFactory, of OutputFactory, fs afero.Fs) *cob
 	}
 
 	// Wrap the command's main docs.
-	cmd.Long = wrap(cmd.Long)
+	cmd.Long = fmtText(cmd.Long)
 
 	// Add subcommands, if any, and return.
 	if len(c.Subcommands) > 0 {
@@ -63,45 +62,29 @@ func (c *Command) ToCobra(pf ProjectFactory, of OutputFactory, fs afero.Fs) *cob
 	}
 
 	// Register the global flags for each command.
-	var global GlobalFlags
-	global.Register(cmd.Flags())
+	var gf GlobalFlags
+	gf.Register(cmd.Flags())
 
 	switch {
 	case c.Run != nil && c.RunCallback != nil:
 		panic("both a run func and a run callback func")
 	case c.Run != nil:
 		// If it's a regular command, wrap it to return a nil callback func.
-		cmd.RunE = global.wrap(pf, of, fs,
+		cmd.RunE = runE(&gf, pf, of, fs,
 			func(ctx context.Context, project belvedere.Project, output Output, fs afero.Fs, args []string) (func() error, error) {
 				return nil, c.Run(ctx, project, output, fs, args)
 			},
 		)
 	case c.RunCallback != nil:
 		// Otherwise, just wrap the func.
-		cmd.RunE = global.wrap(pf, of, fs, c.RunCallback)
+		cmd.RunE = runE(&gf, pf, of, fs, c.RunCallback)
 	default:
 		panic("no subcommands or run func")
 	}
 	return &cmd
 }
 
-type GlobalFlags struct {
-	Quiet   bool
-	Debug   bool
-	Timeout time.Duration
-	Project string
-	Format  string
-}
-
-func (gf *GlobalFlags) Register(fs *pflag.FlagSet) {
-	fs.BoolVarP(&gf.Quiet, "quiet", "q", false, "disable logging entirely")
-	fs.BoolVar(&gf.Debug, "debug", false, "log verbose output")
-	fs.DurationVar(&gf.Timeout, "timeout", 10*time.Minute, "maximum time allowed for total execution")
-	fs.StringVar(&gf.Project, "project", "", "specify a Google Cloud Platform project ID")
-	fs.StringVar(&gf.Format, "format", "table", "specify an output format (table, csv, json, prettyjson)")
-}
-
-func (gf *GlobalFlags) wrap(pf ProjectFactory, of OutputFactory, fs afero.Fs, f CallbackFunc) func(*cobra.Command, []string) error {
+func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, fs afero.Fs, f CallbackFunc) func(*cobra.Command, []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		// Wrap this in a func to make our defers work.
 		callback, err := func() (func() error, error) {
@@ -169,31 +152,7 @@ func (gf *GlobalFlags) wrap(pf ProjectFactory, of OutputFactory, fs afero.Fs, f 
 	}
 }
 
-type ModifyFlags struct {
-	DryRun bool
-}
-
-func (m *ModifyFlags) Register(fs *pflag.FlagSet) {
-	fs.BoolVar(&m.DryRun, "dry-run", false, "print modifications instead of performing them")
-}
-
-type LongRunningFlags struct {
-	Interval time.Duration
-}
-
-func (l *LongRunningFlags) Register(fs *pflag.FlagSet) {
-	fs.DurationVar(&l.Interval, "interval", 10*time.Second, "the polling interval for long-running operations")
-}
-
-type AsyncFlags struct {
-	Async bool
-}
-
-func (a *AsyncFlags) Register(fs *pflag.FlagSet) {
-	fs.BoolVar(&a.Async, "async", false, "return without waiting for completion")
-}
-
-func wrap(doc string) string {
+func fmtText(doc string) string {
 	parts := strings.Split(doc, "\n\n")
 	wrapped := make([]string, len(parts))
 	for i, part := range parts {
