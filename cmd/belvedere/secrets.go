@@ -36,8 +36,9 @@ are versioned, allowing for update rollouts and rollbacks.
 func newSecretsListCmd() *cli.Command {
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:   "list",
-			Short: "List secrets",
+			Use:     "list",
+			Example: "belvedere secrets list",
+			Short:   "List secrets",
 			Long: `List secrets.
 
 Because applications may share secrets (e.g. two applications both need to use the same API key),
@@ -57,8 +58,9 @@ func newSecretsCreateCmd() *cli.Command {
 	var mf cli.ModifyFlags
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:   "create <name> [<data-file>]",
-			Short: "Create a secret",
+			Use:     "create <name> [<data-file>]",
+			Example: "echo \"magic\" | belvedere secrets create my-secret",
+			Short:   "Create a secret",
 			Long: `Create a secret.
 
 Creates a new secret with a value that is the contents of data-file, read as a bytestring.
@@ -88,8 +90,9 @@ func newSecretsUpdateCmd() *cli.Command {
 	var mf cli.ModifyFlags
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:   "update <name> [<data-file>]",
-			Short: "Update a secret",
+			Use:     "update <name> [<data-file>]",
+			Example: "echo \"magic\" | belvedere secrets create my-secret",
+			Short:   "Update a secret",
 			Long: `Update a secret.
 
 Updates the secret's value to be the contents of data-file, read as a bytestring.
@@ -119,8 +122,9 @@ func newSecretsDeleteCmd() *cli.Command {
 	var mf cli.ModifyFlags
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:   "delete <name>",
-			Short: "Delete a secret",
+			Use:     "delete <name>",
+			Example: "belvedere secrets delete my-secret",
+			Short:   "Delete a secret",
 			Long: `Delete a secret.
 
 This deletes all versions of the secret as well, and cannot be undone.`,
@@ -140,8 +144,9 @@ func newSecretsGrantCmd() *cli.Command {
 	var mf cli.ModifyFlags
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:   "grant <name> <app>",
-			Short: "Grant an application access to a secret",
+			Use:     "grant <name> <app>",
+			Example: "belvedere secrets grant my-secret my-app",
+			Short:   "Grant an application access to a secret",
 			Long: `Grant an application access to a secret.
 
 This modifies the secret's IAM policy to allow the application's service account access to the
@@ -163,8 +168,9 @@ func newSecretsRevokeCmd() *cli.Command {
 	var mf cli.ModifyFlags
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:   "revoke <name> <app>",
-			Short: "Revoke an application's access to a secret",
+			Use:     "revoke <name> <app>",
+			Example: "belvedere secrets revoke my-secret my-app",
+			Short:   "Revoke an application's access to a secret",
 			Long: `Revoke an application's access to a secret.
 
 This modifies the secret's IAM policy to disallow the application's service account access to the

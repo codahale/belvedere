@@ -15,8 +15,9 @@ func newSetupCmd() *cli.Command {
 	var lrf cli.LongRunningFlags
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:   "setup <dns-zone>",
-			Short: "Initialize a GCP project for use with Belvedere",
+			Use:     "setup <dns-zone>",
+			Example: "belvedere setup example.com.",
+			Short:   "Initialize a GCP project for use with Belvedere",
 			Long: `Initialize a GCP project for use with Belvedere.
 
 Enables all required GCP APIs, grants Deployment Manager access to manage IAM permissions, and

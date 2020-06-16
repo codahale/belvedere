@@ -34,8 +34,9 @@ of GCE instances running the Docker image.`,
 func newReleasesListCmd() *cli.Command {
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:   "list [<app>]",
-			Short: "List releases",
+			Use:     "list [<app>]",
+			Example: "belvedere releases list my-app",
+			Short:   "List releases",
 			Long: `List releases.
 
 The list of releases can by filtered by application.`,
@@ -61,8 +62,9 @@ func newReleasesCreateCmd() *cli.Command {
 	var enable bool
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:   "create <app> <name> <sha-256> [<config-file>]",
-			Short: "Create a release",
+			Use:     "create <app> <name> <sha-256> [<config-file>]",
+			Example: "belvedere releases create my-app v1 5fb4ba1a651bae8057ec6b5cdafc93fa7e0b7d944d6f02a4b751de4e15464def my-app.yaml",
+			Short:   "Create a release",
 			Long: `Create a release.
 
 This requires the application name, a release name, the SHA-256 digest of the Docker image to
@@ -110,8 +112,9 @@ func newReleasesEnableCmd() *cli.Command {
 	var lrf cli.LongRunningFlags
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:   "enable <app> <name>",
-			Short: "Enable a release",
+			Use:     "enable <app> <name>",
+			Example: "belvedere releases enable my-app v1",
+			Short:   "Enable a release",
 			Long: `Enable a release.
 
 Enabling a release registers the release's managed instance group with the application's load
@@ -136,8 +139,9 @@ func newReleasesDisableCmd() *cli.Command {
 	var lrf cli.LongRunningFlags
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:   "disable <app> <name>",
-			Short: "Disable a release",
+			Use:     "disable <app> <name>",
+			Example: "belvedere releases disable my-app v1",
+			Short:   "Disable a release",
 			Long: `Disable a release.
 
 Disabling a release unregisters the release's managed instance group from the application's load
@@ -163,8 +167,9 @@ func newReleasesDeleteCmd() *cli.Command {
 	var af cli.AsyncFlags
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:   "delete <app> <name>",
-			Short: "Delete a release",
+			Use:     "delete <app> <name>",
+			Example: "belvedere releases delete my-app v1",
+			Short:   "Delete a release",
 			Long: `Delete a release.
 
 This deletes the managed instance group running the given release. Releases must be disabled before

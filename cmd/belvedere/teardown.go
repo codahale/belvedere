@@ -16,8 +16,9 @@ func newTeardownCmd() *cli.Command {
 	var af cli.AsyncFlags
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:   "teardown",
-			Short: "Remove all Belvedere resources from this project",
+			Use:     "teardown",
+			Example: "belvedere teardown",
+			Short:   "Remove all Belvedere resources from this project",
 			Long: `Remove all Belvedere resources from this project.
 
 Deletes the base Deployment Manager deployment.`,

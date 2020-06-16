@@ -12,8 +12,9 @@ import (
 func newDNSServersCmd() *cli.Command {
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:   "dns-servers",
-			Short: "List the project's DNS servers",
+			Use:     "dns-servers",
+			Example: "belvedere dns-servers",
+			Short:   "List the project's DNS servers",
 			Long: `List the project's DNS servers.
 
 These DNS servers should be registered in the domain's WHOIS record or otherwise have DNS requests
