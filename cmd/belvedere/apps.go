@@ -73,10 +73,7 @@ instead.`,
 		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
 			region := args[0]
 			name := args[1]
-			path := cli.StdIn
-			if len(args) > 2 {
-				path = args[2]
-			}
+			path := cli.PathFromArgs(args, 2)
 
 			b, err := afero.ReadFile(fs, path)
 			if err != nil {
@@ -113,10 +110,7 @@ instead.`,
 		},
 		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
 			name := args[0]
-			path := cli.StdIn
-			if len(args) > 1 {
-				path = args[1]
-			}
+			path := cli.PathFromArgs(args, 1)
 
 			b, err := afero.ReadFile(fs, path)
 			if err != nil {

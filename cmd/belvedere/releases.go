@@ -81,11 +81,7 @@ instead.`,
 			app := args[0]
 			name := args[1]
 			digest := args[2]
-
-			path := cli.StdIn
-			if len(args) > 3 {
-				path = args[3]
-			}
+			path := cli.PathFromArgs(args, 3)
 
 			b, err := afero.ReadFile(fs, path)
 			if err != nil {

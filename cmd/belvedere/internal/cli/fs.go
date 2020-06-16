@@ -18,6 +18,13 @@ type stdInFs struct {
 	afero.Fs
 }
 
+func PathFromArgs(args []string, idx int) string {
+	if len(args) <= idx {
+		return StdIn
+	}
+	return args[idx]
+}
+
 func (fs stdInFs) Open(name string) (afero.File, error) {
 	if name == StdIn {
 		if isTerminal(os.Stdin.Fd()) {
