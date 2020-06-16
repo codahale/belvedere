@@ -27,7 +27,7 @@ func NewOutput(w io.Writer, format string) (Output, error) {
 	case "prettyjson":
 		return &prettyJSONOutput{w: w}, nil
 	default:
-		return nil, fmt.Errorf("%q is not a valid format (must be one of: table, csv, json, prettyjson", format)
+		return nil, fmt.Errorf("%q is not a valid format (must be one of: table, csv, json, prettyjson)", format)
 	}
 }
 
