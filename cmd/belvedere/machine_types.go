@@ -12,9 +12,9 @@ import (
 func newMachineTypesCmd() *cli.Command {
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:     "machine-types [<region>]",
-			Example: "belvedere machine-types us-west1",
-			Short:   "List available virtual machine types",
+			Use:     `machine-types [<region>]`,
+			Example: `belvedere machine-types us-west1`,
+			Short:   `List available virtual machine types`,
 			Long: `List available virtual machine types.
 
 Machine types can be filtered by region. For more information on pricing and billing models, see

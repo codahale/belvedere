@@ -16,9 +16,9 @@ func newLogsCmd() *cli.Command {
 	var maxAge time.Duration
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:     "logs <app> [<release>] [<instance>] [--filter=<filter>...]",
-			Example: "belvedere logs my-app v43 my-app-v43-hxht --max-age=1h --filter=\"/login/\"\n",
-			Short:   "Display application logs",
+			Use:     `logs <app> [<release>] [<instance>] [--filter=<filter>...]`,
+			Example: `belvedere logs my-app v43 my-app-v43-hxht --max-age=1h --filter="login"`,
+			Short:   `Display application logs`,
 			Long: `Display application logs.
 
 Log entries are bounded by the -max-age parameter and filtered by the application name. They can

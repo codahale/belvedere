@@ -23,8 +23,8 @@ func main() {
 func newRootCmd(version string) *cli.Command {
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:   "belvedere",
-			Short: "A small lookout tower (usually square) on the roof of a house",
+			Use:   `belvedere`,
+			Short: `A small lookout tower (usually square) on the roof of a house`,
 			Long: `A small lookout tower (usually square) on the roof of a house.
 
 Belvedere provides an easy and reliable way of deploying and managing HTTP2 applications on Google

@@ -14,8 +14,8 @@ import (
 func newAppsCmd() *cli.Command {
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:   "apps",
-			Short: "Commands for managing applications",
+			Use:   `apps`,
+			Short: `Commands for managing applications`,
 			Long: `Commands for managing applications.
 
 A Belvedere application is anything in a Docker container which accepts HTTP2 connections.`,
@@ -32,9 +32,9 @@ A Belvedere application is anything in a Docker container which accepts HTTP2 co
 func newAppsListCmd() *cli.Command {
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:     "list",
-			Example: "belvedere apps list",
-			Short:   "List applications",
+			Use:     `list`,
+			Example: `belvedere apps list`,
+			Short:   `List applications`,
 			Long: `List applications.
 
 Prints a table of provisioned applications in the current project.`,
@@ -56,9 +56,9 @@ func newAppsCreateCmd() *cli.Command {
 
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:     "create <region> <name> [<config-file>]",
-			Example: "belvedere apps create us-west1 my-app my-app.yaml",
-			Short:   "Create an application",
+			Use:     `create <region> <name> [<config-file>]`,
+			Example: `belvedere apps create us-west1 my-app my-app.yaml`,
+			Short:   `Create an application`,
 			Long: `Create an application.
 
 The resources which run an application are provisioned inside a GCP region (e.g. us-west1), and this
@@ -98,9 +98,9 @@ func newAppsUpdateCmd() *cli.Command {
 
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:     "update <name> [<config-file>]",
-			Example: "belvedere apps update my-app my-app.yaml",
-			Short:   "Update an application",
+			Use:     `update <name> [<config-file>]`,
+			Example: `belvedere apps update my-app my-app.yaml`,
+			Short:   `Update an application`,
 			Long: `Update an application.
 
 If config-file is not specified (or is specified as '-'), the configuration file is read from STDIN
@@ -136,8 +136,9 @@ func newAppsDeleteCmd() *cli.Command {
 	var af cli.AsyncFlags
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:     "delete <name>",
-			Example: "belvedere apps delete my-app",
+			Use:     `delete <name>`,
+			Example: `belvedere apps delete my-app`,
+			Short:   `Delete an application`,
 			Long: `Delete an application.
 
 An application must not have any releases before being deleted.`,

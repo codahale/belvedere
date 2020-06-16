@@ -16,9 +16,9 @@ import (
 func newSSHCmd() *cli.Command {
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:     "ssh <instance> [<ssh-arg>...]",
-			Example: "ssh my-app-v43-hxht -- ls -al",
-			Short:   "SSH to an instance",
+			Use:     `ssh <instance> [<ssh-arg>...]`,
+			Example: `ssh my-app-v43-hxht -- ls -al`,
+			Short:   `SSH to an instance`,
 			Long: `SSH to an instance.
 
 This uses the Google Cloud SDK (gcloud) to open an SSH connection to the specified instance. It does
