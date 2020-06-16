@@ -30,7 +30,7 @@ jobs:
 
       - name: Cross-compile
         uses: goreleaser/goreleaser-action@v2
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         with:
           version: latest
           args: build --snapshot
