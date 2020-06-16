@@ -192,7 +192,7 @@ Belvedere's configuration only allows SSH over IAP tunnels, and IAP tunnels requ
 You can also pass arguments to SSH:
 
 ```shell script
-belvedere ssh my-app-v43-hxht ls -al
+belvedere ssh my-app-v43-hxht -- ls -al
 ```
 
 ### Viewing Logs
