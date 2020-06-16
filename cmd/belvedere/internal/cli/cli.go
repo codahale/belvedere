@@ -88,6 +88,7 @@ func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, fs afero.Fs, f C
 	return func(cmd *cobra.Command, args []string) error {
 		// Wrap this in a func to make our defers work.
 		callback, err := func() (func() error, error) {
+			// Enable trace logging.
 			enableLogging(cmd.OutOrStderr(), gf.Debug, gf.Quiet)
 
 			// Initialize a context with a timeout and an interval.
@@ -109,16 +110,20 @@ func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, fs afero.Fs, f C
 				trace.StringAttribute("args", escapeArgs(args)),
 			)
 
+			// Construct output instance.
 			output, err := of(os.Stdout, gf.Format)
 			if err != nil {
 				return nil, err
 			}
+
+			// Execute command.
 			return f(ctx, project, output, fs, args)
 		}()
 		if err != nil {
 			return err
 		}
 
+		// Execute the callback, if any.
 		if callback != nil {
 			return callback()
 		}
