@@ -120,9 +120,7 @@ func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, fs afero.Fs, f C
 		}
 
 		if callback != nil {
-			cmd.PostRunE = func(cmd *cobra.Command, args []string) error {
-				return callback()
-			}
+			return callback()
 		}
 
 		return nil
