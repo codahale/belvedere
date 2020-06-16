@@ -203,8 +203,8 @@ To view the logs for an application and its sidecar containers, run:
 belvedere logs my-app
 belvedere logs my-app v43
 belvedere logs my-app v43 my-app-v43-hxht
-belvedere logs my-app v43 my-app-v43-hxht -max-age=1h
-belvedere logs my-app v43 my-app-v43-hxht -max-age=1h -filter="/login/"
+belvedere logs my-app v43 my-app-v43-hxht --max-age=1h
+belvedere logs my-app v43 my-app-v43-hxht --max-age=1h --filter="/login/"
 ```
 
 ### Secrets
