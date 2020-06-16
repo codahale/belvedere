@@ -88,38 +88,15 @@ func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, fs afero.Fs, f C
 	return func(cmd *cobra.Command, args []string) error {
 		// Wrap this in a func to make our defers work.
 		callback, err := func() (func() error, error) {
-			// Export all traces.
-			trace.ApplyConfig(trace.Config{
-				DefaultSampler: trace.AlwaysSample(),
-			})
-
-			// Enable trace logging.
-			if gf.Debug {
-				// Use the print exporter for debugging, as it prints everything.
-				pe := &exporter.PrintExporter{}
-				trace.RegisterExporter(pe)
-				view.RegisterExporter(pe)
-			} else if !gf.Quiet {
-				// Unless we're quiet, use the trace logger for more practical logging.
-				trace.RegisterExporter(NewTraceLogger(cmd.OutOrStderr()))
-			}
+			enableLogging(cmd.OutOrStderr(), gf.Debug, gf.Quiet)
 
 			// Initialize a context with a timeout and an interval.
 			ctx, cancel := context.WithTimeout(context.Background(), gf.Timeout)
 			defer cancel()
 
 			// Create a root span.
-			ctx, span := trace.StartSpan(ctx, "belvedere.main")
+			ctx, span := rootSpan(ctx)
 			defer span.End()
-			if hostname, err := os.Hostname(); err == nil {
-				span.AddAttributes(trace.StringAttribute("hostname", hostname))
-			}
-			if u, err := user.Current(); err == nil {
-				span.AddAttributes(
-					trace.StringAttribute("username", u.Username),
-					trace.StringAttribute("uid", u.Uid),
-				)
-			}
 
 			// Create a Belvedere project.
 			project, err := pf(ctx, gf.Project,
@@ -149,6 +126,38 @@ func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, fs afero.Fs, f C
 		}
 
 		return nil
+	}
+}
+
+func rootSpan(ctx context.Context) (context.Context, *trace.Span) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.main")
+	if hostname, err := os.Hostname(); err == nil {
+		span.AddAttributes(trace.StringAttribute("hostname", hostname))
+	}
+	if u, err := user.Current(); err == nil {
+		span.AddAttributes(
+			trace.StringAttribute("username", u.Username),
+			trace.StringAttribute("uid", u.Uid),
+		)
+	}
+	return ctx, span
+}
+
+func enableLogging(stderr io.Writer, debug, quiet bool) {
+	// Export all traces.
+	trace.ApplyConfig(trace.Config{
+		DefaultSampler: trace.AlwaysSample(),
+	})
+
+	// Enable trace logging.
+	if debug {
+		// Use the print exporter for debugging, as it prints everything.
+		pe := &exporter.PrintExporter{}
+		trace.RegisterExporter(pe)
+		view.RegisterExporter(pe)
+	} else if !quiet {
+		// Unless we're quiet, use the trace logger for more practical logging.
+		trace.RegisterExporter(NewTraceLogger(stderr))
 	}
 }
 
