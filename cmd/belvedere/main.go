@@ -43,6 +43,7 @@ configuration, access control, secret management, configuration, and more.`,
 			newAppsCmd(),
 			newReleasesCmd(),
 			newSecretsCmd(),
+			newDocsCmd(),
 		},
 	}
 }

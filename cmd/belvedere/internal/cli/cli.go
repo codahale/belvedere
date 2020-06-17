@@ -66,6 +66,8 @@ func (c *Command) ToCobra(pf ProjectFactory, of OutputFactory, fs afero.Fs) *cob
 	gf.Register(cmd.Flags())
 
 	switch {
+	case cmd.RunE != nil:
+		// don't do anything, it's fine
 	case c.Run != nil && c.RunCallback != nil:
 		panic("both a run func and a run callback func")
 	case c.Run != nil:
