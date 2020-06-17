@@ -12,15 +12,16 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.0.4
 	github.com/mattn/go-isatty v0.0.12
 	github.com/olekukonko/tablewriter v0.0.4
-	github.com/spf13/afero v1.2.2
+	github.com/spf13/afero v1.3.0
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
-	go.opencensus.io v0.22.3
+	go.opencensus.io v0.22.4
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1 // indirect
-	google.golang.org/api v0.26.0
-	google.golang.org/genproto v0.0.0-20200615140333-fd031eab31e7 // indirect
+	golang.org/x/text v0.3.3 // indirect
+	google.golang.org/api v0.27.0
+	google.golang.org/genproto v0.0.0-20200617032506-f1bdc9086088 // indirect
 	gopkg.in/h2non/gock.v1 v1.0.15
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
