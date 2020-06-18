@@ -174,32 +174,38 @@ func (p *project) Instances(ctx context.Context, app, release string) ([]Instanc
 	)
 	defer span.End()
 
-	var instances []Instance
+	// Construct filter set, always limiting results to Belvedere app instances.
+	filters := []string{`labels.belvedere-app!=""`}
+	if app != "" {
+		filters = append(filters, fmt.Sprintf("labels.belvedere-app=%q", app))
+	}
+	if release != "" {
+		filters = append(filters, fmt.Sprintf("labels.belvedere-release=%q", release))
+	}
+
 	// List all instances.
-	if err := p.gce.Instances.AggregatedList(p.name).Pages(ctx,
-		func(list *compute.InstanceAggregatedList) error {
-			for _, items := range list.Items {
-				for _, inst := range items.Instances {
-					// Filter by app and release. Limit to belvedere instances only.
-					if s, ok := inst.Labels["belvedere-app"]; ok && (s == app || app == "") {
-						if s, ok := inst.Labels["belvedere-release"]; ok && (s == release || release == "") {
-							mt := inst.MachineType
-							mt = mt[strings.LastIndex(mt, "/")+1:]
-							zone := inst.Zone
-							zone = zone[strings.LastIndex(zone, "/")+1:]
-							instances = append(instances, Instance{
-								Name:        inst.Name,
-								MachineType: mt,
-								Zone:        zone,
-								Status:      inst.Status,
-							})
-						}
+	var instances []Instance
+	if err := p.gce.Instances.AggregatedList(p.name).
+		Filter(strings.Join(filters, " AND ")).
+		Pages(ctx,
+			func(list *compute.InstanceAggregatedList) error {
+				for _, items := range list.Items {
+					for _, inst := range items.Instances {
+						mt := inst.MachineType
+						mt = mt[strings.LastIndex(mt, "/")+1:]
+						zone := inst.Zone
+						zone = zone[strings.LastIndex(zone, "/")+1:]
+						instances = append(instances, Instance{
+							Name:        inst.Name,
+							MachineType: mt,
+							Zone:        zone,
+							Status:      inst.Status,
+						})
 					}
 				}
-			}
-			return nil
-		},
-	); err != nil {
+				return nil
+			},
+		); err != nil {
 		return nil, fmt.Errorf("error listing instances: %w", err)
 	}
 

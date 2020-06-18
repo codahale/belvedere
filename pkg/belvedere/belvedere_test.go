@@ -48,17 +48,12 @@ func TestProject_Instances(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/instances?alt=json&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/instances?alt=json&filter=labels.belvedere-app%21%3D%22%22&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(&compute.InstanceAggregatedList{
 			Items: map[string]compute.InstancesScopedList{
 				"us-west-1a": {
 					Instances: []*compute.Instance{
-						{
-							Name:        "non-belvedere-1",
-							MachineType: "n1-standard-1",
-							Status:      "RUNNING",
-						},
 						{
 							Name:        "my-app-1",
 							Zone:        "us-west-1a",
@@ -73,11 +68,6 @@ func TestProject_Instances(t *testing.T) {
 				},
 				"us-west-1b": {
 					Instances: []*compute.Instance{
-						{
-							Name:        "non-belvedere-2",
-							MachineType: "n1-standard-1",
-							Status:      "RUNNING",
-						},
 						{
 							Name:        "my-app-2",
 							Zone:        "us-west-1a",
@@ -144,17 +134,12 @@ func TestProject_InstancesApp(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/instances?alt=json&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/instances?alt=json&filter=labels.belvedere-app%21%3D%22%22+AND+labels.belvedere-app%3D%22my-app%22&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(&compute.InstanceAggregatedList{
 			Items: map[string]compute.InstancesScopedList{
 				"us-west-1a": {
 					Instances: []*compute.Instance{
-						{
-							Name:        "non-belvedere-1",
-							MachineType: "n1-standard-1",
-							Status:      "RUNNING",
-						},
 						{
 							Name:        "my-app-1",
 							Zone:        "us-west-1a",
@@ -170,11 +155,6 @@ func TestProject_InstancesApp(t *testing.T) {
 				"us-west-1b": {
 					Instances: []*compute.Instance{
 						{
-							Name:        "non-belvedere-2",
-							MachineType: "n1-standard-1",
-							Status:      "RUNNING",
-						},
-						{
 							Name:        "my-app-2",
 							Zone:        "us-west-1a",
 							MachineType: "n1-standard-1",
@@ -182,16 +162,6 @@ func TestProject_InstancesApp(t *testing.T) {
 							Labels: map[string]string{
 								"belvedere-app":     "my-app",
 								"belvedere-release": "v2",
-							},
-						},
-						{
-							Name:        "another-app-1",
-							Zone:        "us-west-1a",
-							MachineType: "n1-standard-1",
-							Status:      "RUNNING",
-							Labels: map[string]string{
-								"belvedere-app":     "another-app",
-								"belvedere-release": "v1",
 							},
 						},
 					},
@@ -234,36 +204,12 @@ func TestProject_InstancesAppRelease(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/instances?alt=json&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/aggregated/instances?alt=json&filter=labels.belvedere-app%21%3D%22%22+AND+labels.belvedere-app%3D%22my-app%22+AND+labels.belvedere-release%3D%22v2%22&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(&compute.InstanceAggregatedList{
 			Items: map[string]compute.InstancesScopedList{
-				"us-west-1a": {
-					Instances: []*compute.Instance{
-						{
-							Name:        "non-belvedere-1",
-							MachineType: "n1-standard-1",
-							Status:      "RUNNING",
-						},
-						{
-							Name:        "my-app-1",
-							Zone:        "us-west-1a",
-							MachineType: "n1-standard-1",
-							Status:      "RUNNING",
-							Labels: map[string]string{
-								"belvedere-app":     "my-app",
-								"belvedere-release": "v1",
-							},
-						},
-					},
-				},
 				"us-west-1b": {
 					Instances: []*compute.Instance{
-						{
-							Name:        "non-belvedere-2",
-							MachineType: "n1-standard-1",
-							Status:      "RUNNING",
-						},
 						{
 							Name:        "my-app-2",
 							Zone:        "us-west-1a",
@@ -272,16 +218,6 @@ func TestProject_InstancesAppRelease(t *testing.T) {
 							Labels: map[string]string{
 								"belvedere-app":     "my-app",
 								"belvedere-release": "v2",
-							},
-						},
-						{
-							Name:        "another-app-1",
-							Zone:        "us-west-1a",
-							MachineType: "n1-standard-1",
-							Status:      "RUNNING",
-							Labels: map[string]string{
-								"belvedere-app":     "another-app",
-								"belvedere-release": "v1",
 							},
 						},
 					},
