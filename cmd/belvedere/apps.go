@@ -6,7 +6,6 @@ import (
 	"github.com/codahale/belvedere/cmd/belvedere/internal/cli"
 	"github.com/codahale/belvedere/pkg/belvedere"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
-	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -40,12 +39,12 @@ func newAppsListCmd() *cli.Command {
 Prints a table of provisioned applications in the current project.`,
 			Args: cobra.NoArgs,
 		},
-		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
 			apps, err := project.Apps().List(ctx)
 			if err != nil {
 				return err
 			}
-			return output.Print(apps)
+			return out.Print(apps)
 		},
 	}
 }
@@ -72,12 +71,11 @@ instead.`,
 			mf.Register(fs)
 			lrf.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
 			region := args[0]
 			name := args[1]
-			path := cli.PathFromArgs(args, 2)
 
-			b, err := afero.ReadFile(fs, path)
+			b, err := in.ReadFile(args, 2)
 			if err != nil {
 				return err
 			}
@@ -111,11 +109,10 @@ instead.`,
 			mf.Register(fs)
 			lrf.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
 			name := args[0]
-			path := cli.PathFromArgs(args, 1)
 
-			b, err := afero.ReadFile(fs, path)
+			b, err := in.ReadFile(args, 1)
 			if err != nil {
 				return err
 			}
@@ -149,7 +146,7 @@ An application must not have any releases before being deleted.`,
 			lrf.Register(fs)
 			af.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
 			name := args[0]
 			return project.Apps().Delete(ctx, name, mf.DryRun, af.Async, lrf.Interval)
 		},

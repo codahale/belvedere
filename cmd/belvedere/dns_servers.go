@@ -5,7 +5,6 @@ import (
 
 	"github.com/codahale/belvedere/cmd/belvedere/internal/cli"
 	"github.com/codahale/belvedere/pkg/belvedere"
-	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
@@ -21,12 +20,12 @@ These DNS servers should be registered in the domain's WHOIS record or otherwise
 forwarded to them in order to resolve application hostnames to the load balancer IPs.`,
 			Args: cobra.NoArgs,
 		},
-		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
 			servers, err := project.DNSServers(ctx)
 			if err != nil {
 				return err
 			}
-			return output.Print(servers)
+			return out.Print(servers)
 		},
 	}
 }

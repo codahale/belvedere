@@ -4,18 +4,16 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/codahale/belvedere/cmd/belvedere/internal/cli"
 	"github.com/codahale/belvedere/cmd/belvedere/internal/mocks"
 	"github.com/codahale/belvedere/pkg/belvedere"
 	"github.com/golang/mock/gomock"
-	"github.com/spf13/afero"
 )
 
 func TestSecretsList(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, output, fs, pf, of := mockFactories(ctrl)
+	project, output, pf, of := mockFactories(ctrl)
 
 	list := []belvedere.Secret{
 		{
@@ -33,8 +31,9 @@ func TestSecretsList(t *testing.T) {
 	output.EXPECT().
 		Print(list)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"secrets",
 		"list",
@@ -48,12 +47,9 @@ func TestSecretsCreate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, of := mockFactories(ctrl)
+	project, _, pf, of := mockFactories(ctrl)
 
 	value := []byte(`secret`)
-	if err := afero.WriteFile(fs, cli.StdIn, value, 0644); err != nil {
-		t.Fatal(err)
-	}
 
 	secrets := mocks.NewMockSecretsService(ctrl)
 	secrets.EXPECT().
@@ -61,8 +57,10 @@ func TestSecretsCreate(t *testing.T) {
 
 	project.EXPECT().Secrets().Return(secrets)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
+	cmd.SetIn(bytes.NewBuffer(value))
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"secrets",
 		"create",
@@ -78,12 +76,9 @@ func TestSecretsCreate_WithFilename(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, of := mockFactories(ctrl)
+	project, _, pf, of := mockFactories(ctrl)
 
-	value := []byte(`secret`)
-	if err := afero.WriteFile(fs, "secret.txt", value, 0644); err != nil {
-		t.Fatal(err)
-	}
+	value := []byte("secret\n")
 
 	secrets := mocks.NewMockSecretsService(ctrl)
 	secrets.EXPECT().
@@ -91,8 +86,9 @@ func TestSecretsCreate_WithFilename(t *testing.T) {
 
 	project.EXPECT().Secrets().Return(secrets)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"secrets",
 		"create",
@@ -109,12 +105,9 @@ func TestSecretsUpdate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, of := mockFactories(ctrl)
+	project, _, pf, of := mockFactories(ctrl)
 
 	value := []byte(`secret`)
-	if err := afero.WriteFile(fs, cli.StdIn, value, 0644); err != nil {
-		t.Fatal(err)
-	}
 
 	secrets := mocks.NewMockSecretsService(ctrl)
 	secrets.EXPECT().
@@ -122,8 +115,10 @@ func TestSecretsUpdate(t *testing.T) {
 
 	project.EXPECT().Secrets().Return(secrets)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
+	cmd.SetIn(bytes.NewBuffer(value))
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"secrets",
 		"update",
@@ -139,12 +134,9 @@ func TestSecretsUpdate_WithFilename(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, of := mockFactories(ctrl)
+	project, _, pf, of := mockFactories(ctrl)
 
-	value := []byte(`secret`)
-	if err := afero.WriteFile(fs, "secret.txt", value, 0644); err != nil {
-		t.Fatal(err)
-	}
+	value := []byte("secret\n")
 
 	secrets := mocks.NewMockSecretsService(ctrl)
 	secrets.EXPECT().
@@ -152,8 +144,9 @@ func TestSecretsUpdate_WithFilename(t *testing.T) {
 
 	project.EXPECT().Secrets().Return(secrets)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"secrets",
 		"update",
@@ -170,7 +163,7 @@ func TestSecretsGrant(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, of := mockFactories(ctrl)
+	project, _, pf, of := mockFactories(ctrl)
 
 	secrets := mocks.NewMockSecretsService(ctrl)
 	secrets.EXPECT().
@@ -178,8 +171,9 @@ func TestSecretsGrant(t *testing.T) {
 
 	project.EXPECT().Secrets().Return(secrets)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"secrets",
 		"grant",
@@ -196,7 +190,7 @@ func TestSecretsRevoke(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, of := mockFactories(ctrl)
+	project, _, pf, of := mockFactories(ctrl)
 
 	secrets := mocks.NewMockSecretsService(ctrl)
 	secrets.EXPECT().
@@ -204,8 +198,9 @@ func TestSecretsRevoke(t *testing.T) {
 
 	project.EXPECT().Secrets().Return(secrets)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"secrets",
 		"revoke",
@@ -222,7 +217,7 @@ func TestSecretsDelete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, of := mockFactories(ctrl)
+	project, _, pf, of := mockFactories(ctrl)
 
 	secrets := mocks.NewMockSecretsService(ctrl)
 	secrets.EXPECT().
@@ -230,8 +225,9 @@ func TestSecretsDelete(t *testing.T) {
 
 	project.EXPECT().Secrets().Return(secrets)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"secrets",
 		"delete",

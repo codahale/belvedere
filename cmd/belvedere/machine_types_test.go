@@ -12,7 +12,7 @@ func TestMachineTypes(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, output, fs, pf, of := mockFactories(ctrl)
+	project, output, pf, of := mockFactories(ctrl)
 
 	machineTypes := []belvedere.MachineType{
 		{
@@ -27,8 +27,9 @@ func TestMachineTypes(t *testing.T) {
 	output.EXPECT().
 		Print(machineTypes)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"machine-types",
 	})
@@ -41,7 +42,7 @@ func TestMachineTypes_WithRegion(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, output, fs, pf, of := mockFactories(ctrl)
+	project, output, pf, of := mockFactories(ctrl)
 
 	machineTypes := []belvedere.MachineType{
 		{
@@ -56,8 +57,9 @@ func TestMachineTypes_WithRegion(t *testing.T) {
 	output.EXPECT().
 		Print(machineTypes)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"machine-types",
 		"us-west1",

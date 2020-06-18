@@ -5,19 +5,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codahale/belvedere/cmd/belvedere/internal/cli"
 	"github.com/codahale/belvedere/cmd/belvedere/internal/mocks"
 	"github.com/codahale/belvedere/pkg/belvedere"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/golang/mock/gomock"
-	"github.com/spf13/afero"
 )
 
 func TestReleasesList(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, output, fs, pf, of := mockFactories(ctrl)
+	project, output, pf, of := mockFactories(ctrl)
 
 	list := []belvedere.Release{
 		{
@@ -35,8 +33,9 @@ func TestReleasesList(t *testing.T) {
 	output.EXPECT().
 		Print(list)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"releases",
 		"list",
@@ -51,14 +50,10 @@ func TestReleasesCreate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, of := mockFactories(ctrl)
+	project, _, pf, of := mockFactories(ctrl)
 
 	config := cfg.Config{
 		NumReplicas: 10,
-	}
-
-	if err := afero.WriteFile(fs, cli.StdIn, []byte(`{"numReplicas":10}`), 0644); err != nil {
-		t.Fatal(err)
 	}
 
 	releases := mocks.NewMockReleaseService(ctrl)
@@ -67,8 +62,10 @@ func TestReleasesCreate(t *testing.T) {
 
 	project.EXPECT().Releases().Return(releases)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
+	cmd.SetIn(bytes.NewBufferString(`numReplicas: 10`))
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"releases",
 		"create",
@@ -87,14 +84,10 @@ func TestReleasesCreate_AndEnable(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, of := mockFactories(ctrl)
+	project, _, pf, of := mockFactories(ctrl)
 
 	config := cfg.Config{
 		NumReplicas: 10,
-	}
-
-	if err := afero.WriteFile(fs, cli.StdIn, []byte(`{"numReplicas":10}`), 0644); err != nil {
-		t.Fatal(err)
 	}
 
 	releases := mocks.NewMockReleaseService(ctrl)
@@ -107,8 +100,10 @@ func TestReleasesCreate_AndEnable(t *testing.T) {
 
 	project.EXPECT().Releases().Return(releases).AnyTimes()
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
+	cmd.SetIn(bytes.NewBufferString(`numReplicas: 10`))
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"releases",
 		"create",
@@ -128,14 +123,10 @@ func TestReleasesCreate_WithFilename(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, of := mockFactories(ctrl)
+	project, _, pf, of := mockFactories(ctrl)
 
 	config := cfg.Config{
 		NumReplicas: 10,
-	}
-
-	if err := afero.WriteFile(fs, "app.yaml", []byte(`{"numReplicas":10}`), 0644); err != nil {
-		t.Fatal(err)
 	}
 
 	releases := mocks.NewMockReleaseService(ctrl)
@@ -144,15 +135,16 @@ func TestReleasesCreate_WithFilename(t *testing.T) {
 
 	project.EXPECT().Releases().Return(releases)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"releases",
 		"create",
 		"my-app",
 		"my-release",
 		"12345",
-		"app.yaml",
+		"example.yaml",
 		"--dry-run",
 		"--interval=5m",
 	})
@@ -165,7 +157,7 @@ func TestReleasesEnable(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, of := mockFactories(ctrl)
+	project, _, pf, of := mockFactories(ctrl)
 
 	releases := mocks.NewMockReleaseService(ctrl)
 	releases.EXPECT().
@@ -173,8 +165,9 @@ func TestReleasesEnable(t *testing.T) {
 
 	project.EXPECT().Releases().Return(releases)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"releases",
 		"enable",
@@ -192,7 +185,7 @@ func TestReleasesDisable(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, of := mockFactories(ctrl)
+	project, _, pf, of := mockFactories(ctrl)
 
 	releases := mocks.NewMockReleaseService(ctrl)
 	releases.EXPECT().
@@ -200,8 +193,9 @@ func TestReleasesDisable(t *testing.T) {
 
 	project.EXPECT().Releases().Return(releases)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"releases",
 		"disable",
@@ -219,7 +213,7 @@ func TestReleasesDelete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, _, fs, pf, of := mockFactories(ctrl)
+	project, _, pf, of := mockFactories(ctrl)
 
 	releases := mocks.NewMockReleaseService(ctrl)
 	releases.EXPECT().
@@ -227,8 +221,9 @@ func TestReleasesDelete(t *testing.T) {
 
 	project.EXPECT().Releases().Return(releases)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"releases",
 		"delete",

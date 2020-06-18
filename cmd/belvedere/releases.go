@@ -6,7 +6,6 @@ import (
 	"github.com/codahale/belvedere/cmd/belvedere/internal/cli"
 	"github.com/codahale/belvedere/pkg/belvedere"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
-	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -42,7 +41,7 @@ func newReleasesListCmd() *cli.Command {
 The list of releases can by filtered by application.`,
 			Args: cobra.MinimumNArgs(1),
 		},
-		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
 			var app string
 			if len(args) > 0 {
 				app = args[0]
@@ -51,7 +50,7 @@ The list of releases can by filtered by application.`,
 			if err != nil {
 				return err
 			}
-			return output.Print(releases)
+			return out.Print(releases)
 		},
 	}
 }
@@ -79,13 +78,12 @@ instead.`,
 			lrf.Register(fs)
 			fs.BoolVar(&enable, "enable", false, "enable the release after its successful creation")
 		},
-		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
 			app := args[0]
 			name := args[1]
 			digest := args[2]
-			path := cli.PathFromArgs(args, 3)
 
-			b, err := afero.ReadFile(fs, path)
+			b, err := in.ReadFile(args, 3)
 			if err != nil {
 				return err
 			}
@@ -126,7 +124,7 @@ flag to bound the amount of time allowed for health checks to pass.`,
 			mf.Register(fs)
 			lrf.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
 			app := args[0]
 			name := args[1]
 			return project.Releases().Enable(ctx, app, name, mf.DryRun, lrf.Interval)
@@ -153,7 +151,7 @@ releases which did not pass health checks in order to roll a deploy back.`,
 			mf.Register(fs)
 			lrf.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
 			app := args[0]
 			name := args[1]
 			return project.Releases().Disable(ctx, app, name, mf.DryRun, lrf.Interval)
@@ -181,7 +179,7 @@ they can be deleted.`,
 			lrf.Register(fs)
 			af.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
 			app := args[0]
 			name := args[1]
 			return project.Releases().Delete(ctx, app, name, mf.DryRun, af.Async, lrf.Interval)

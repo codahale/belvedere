@@ -5,7 +5,6 @@ import (
 
 	"github.com/codahale/belvedere/cmd/belvedere/internal/cli"
 	"github.com/codahale/belvedere/pkg/belvedere"
-	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +20,7 @@ Machine types can be filtered by region. For more information on pricing and bil
 https://cloud.google.com/compute/vm-instance-pricing.`,
 			Args: cobra.MaximumNArgs(1),
 		},
-		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
 			var region string
 			if len(args) > 0 {
 				region = args[0]
@@ -31,7 +30,7 @@ https://cloud.google.com/compute/vm-instance-pricing.`,
 			if err != nil {
 				return err
 			}
-			return output.Print(machineTypes)
+			return out.Print(machineTypes)
 		},
 	}
 }

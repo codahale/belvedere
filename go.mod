@@ -12,7 +12,6 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.0.4
 	github.com/mattn/go-isatty v0.0.12
 	github.com/olekukonko/tablewriter v0.0.4
-	github.com/spf13/afero v1.3.0
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
 	go.opencensus.io v0.22.4

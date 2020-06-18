@@ -14,7 +14,7 @@ func TestLogs(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, output, fs, pf, of := mockFactories(ctrl)
+	project, output, pf, of := mockFactories(ctrl)
 
 	entries := []belvedere.LogEntry{
 		{
@@ -32,8 +32,9 @@ func TestLogs(t *testing.T) {
 	output.EXPECT().
 		Print(entries)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"logs",
 		"my-app",
@@ -49,7 +50,7 @@ func TestLogs_WithRelease(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, output, fs, pf, of := mockFactories(ctrl)
+	project, output, pf, of := mockFactories(ctrl)
 
 	entries := []belvedere.LogEntry{
 		{
@@ -67,8 +68,9 @@ func TestLogs_WithRelease(t *testing.T) {
 	output.EXPECT().
 		Print(entries)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"logs",
 		"my-app",
@@ -85,7 +87,7 @@ func TestLogs_WithReleaseAndInstance(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	project, output, fs, pf, of := mockFactories(ctrl)
+	project, output, pf, of := mockFactories(ctrl)
 
 	entries := []belvedere.LogEntry{
 		{
@@ -103,8 +105,9 @@ func TestLogs_WithReleaseAndInstance(t *testing.T) {
 	output.EXPECT().
 		Print(entries)
 
-	cmd := newRootCmd("test").ToCobra(pf, of, fs)
+	cmd := newRootCmd("test").ToCobra(pf, of)
 	cmd.SetOut(bytes.NewBuffer(nil))
+	cmd.SetErr(bytes.NewBuffer(nil))
 	cmd.SetArgs([]string{
 		"logs",
 		"my-app",

@@ -5,7 +5,6 @@ import (
 
 	"github.com/codahale/belvedere/cmd/belvedere/internal/cli"
 	"github.com/codahale/belvedere/pkg/belvedere"
-	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +19,7 @@ func newInstancesCmd() *cli.Command {
 Instances can be filtered by application name and release name.`,
 			Args: cobra.RangeArgs(0, 2),
 		},
-		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
 			var app string
 			if len(args) > 0 {
 				app = args[0]
@@ -35,7 +34,7 @@ Instances can be filtered by application name and release name.`,
 			if err != nil {
 				return err
 			}
-			return output.Print(instances)
+			return out.Print(instances)
 		},
 	}
 }

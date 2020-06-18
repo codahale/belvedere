@@ -5,7 +5,6 @@ import (
 
 	"github.com/codahale/belvedere/cmd/belvedere/internal/cli"
 	"github.com/codahale/belvedere/pkg/belvedere"
-	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -29,7 +28,7 @@ Deletes the base Deployment Manager deployment.`,
 			lrf.Register(fs)
 			af.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
 			return project.Teardown(ctx, mf.DryRun, af.Async, lrf.Interval)
 		},
 	}

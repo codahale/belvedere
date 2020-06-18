@@ -11,7 +11,6 @@ import (
 	"github.com/alessio/shellescape"
 	"github.com/codahale/belvedere/pkg/belvedere"
 	"github.com/olekukonko/tablewriter"
-	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"go.opencensus.io/examples/exporter"
@@ -21,8 +20,7 @@ import (
 )
 
 type CommandFunc func(
-	ctx context.Context, project belvedere.Project, output Output, fs afero.Fs,
-	args []string,
+	ctx context.Context, project belvedere.Project, in Input, out Output, args []string,
 ) error
 
 type ProjectFactory func(ctx context.Context, name string, opts ...option.ClientOption) (belvedere.Project, error)
@@ -36,7 +34,7 @@ type Command struct {
 	Subcommands []*Command
 }
 
-func (c *Command) ToCobra(pf ProjectFactory, of OutputFactory, fs afero.Fs) *cobra.Command {
+func (c *Command) ToCobra(pf ProjectFactory, of OutputFactory) *cobra.Command {
 	cmd := c.UI
 
 	// Populate the command's flags.
@@ -50,7 +48,7 @@ func (c *Command) ToCobra(pf ProjectFactory, of OutputFactory, fs afero.Fs) *cob
 	// Add subcommands, if any, and return.
 	if len(c.Subcommands) > 0 {
 		for _, sc := range c.Subcommands {
-			cmd.AddCommand(sc.ToCobra(pf, of, fs))
+			cmd.AddCommand(sc.ToCobra(pf, of))
 		}
 		return &cmd
 	}
@@ -61,16 +59,16 @@ func (c *Command) ToCobra(pf ProjectFactory, of OutputFactory, fs afero.Fs) *cob
 
 	// Wrap the func, if one is provided.
 	if c.Run != nil {
-		cmd.RunE = runE(&gf, pf, of, fs, c.Run)
+		cmd.RunE = runE(&gf, pf, of, c.Run)
 	}
 
 	return &cmd
 }
 
-func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, fs afero.Fs, f CommandFunc) func(*cobra.Command, []string) error {
+func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, f CommandFunc) func(*cobra.Command, []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		// Enable trace logging.
-		enableLogging(cmd.OutOrStderr(), gf.Debug, gf.Quiet)
+		enableLogging(cmd.ErrOrStderr(), gf.Debug, gf.Quiet)
 
 		// Initialize a context with a timeout and an interval.
 		ctx, cancel := context.WithTimeout(context.Background(), gf.Timeout)
@@ -92,13 +90,13 @@ func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, fs afero.Fs, f C
 		)
 
 		// Construct output instance.
-		output, err := of(os.Stdout, gf.Format)
+		output, err := of(cmd.OutOrStdout(), gf.Format)
 		if err != nil {
 			return err
 		}
 
 		// Execute command.
-		return f(ctx, project, output, fs, args)
+		return f(ctx, project, &input{stdin: cmd.InOrStdin()}, output, args)
 	}
 }
 

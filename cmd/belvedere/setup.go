@@ -5,7 +5,6 @@ import (
 
 	"github.com/codahale/belvedere/cmd/belvedere/internal/cli"
 	"github.com/codahale/belvedere/pkg/belvedere"
-	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -29,7 +28,7 @@ create, deploy, and manage applications with Belvedere.`,
 			mf.Register(fs)
 			lrf.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, output cli.Output, fs afero.Fs, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
 			dnsZone := args[0]
 			return project.Setup(ctx, dnsZone, mf.DryRun, lrf.Interval)
 		},
