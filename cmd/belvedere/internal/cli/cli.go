@@ -25,11 +25,6 @@ type CommandFunc func(
 	args []string,
 ) error
 
-type CallbackFunc func(
-	ctx context.Context, project belvedere.Project, output Output, fs afero.Fs,
-	args []string,
-) (func() error, error)
-
 type ProjectFactory func(ctx context.Context, name string, opts ...option.ClientOption) (belvedere.Project, error)
 
 type OutputFactory func(w io.Writer, format string) (Output, error)
@@ -38,7 +33,6 @@ type Command struct {
 	UI          cobra.Command
 	Flags       func(fs *pflag.FlagSet)
 	Run         CommandFunc
-	RunCallback CallbackFunc
 	Subcommands []*Command
 }
 
@@ -65,72 +59,46 @@ func (c *Command) ToCobra(pf ProjectFactory, of OutputFactory, fs afero.Fs) *cob
 	var gf GlobalFlags
 	gf.Register(cmd.Flags())
 
-	switch {
-	case cmd.RunE != nil:
-		// don't do anything, it's fine
-	case c.Run != nil && c.RunCallback != nil:
-		panic("both a run func and a run callback func")
-	case c.Run != nil:
-		// If it's a regular command, wrap it to return a nil callback func.
-		cmd.RunE = runE(&gf, pf, of, fs,
-			func(ctx context.Context, project belvedere.Project, output Output, fs afero.Fs, args []string) (func() error, error) {
-				return nil, c.Run(ctx, project, output, fs, args)
-			},
-		)
-	case c.RunCallback != nil:
-		// Otherwise, just wrap the func.
-		cmd.RunE = runE(&gf, pf, of, fs, c.RunCallback)
-	default:
-		panic("no subcommands or run func")
+	// Wrap the func, if one is provided.
+	if c.Run != nil {
+		cmd.RunE = runE(&gf, pf, of, fs, c.Run)
 	}
+
 	return &cmd
 }
 
-func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, fs afero.Fs, f CallbackFunc) func(*cobra.Command, []string) error {
+func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, fs afero.Fs, f CommandFunc) func(*cobra.Command, []string) error {
 	return func(cmd *cobra.Command, args []string) error {
-		// Wrap this in a func to make our defers work.
-		callback, err := func() (func() error, error) {
-			// Enable trace logging.
-			enableLogging(cmd.OutOrStderr(), gf.Debug, gf.Quiet)
+		// Enable trace logging.
+		enableLogging(cmd.OutOrStderr(), gf.Debug, gf.Quiet)
 
-			// Initialize a context with a timeout and an interval.
-			ctx, cancel := context.WithTimeout(context.Background(), gf.Timeout)
-			defer cancel()
+		// Initialize a context with a timeout and an interval.
+		ctx, cancel := context.WithTimeout(context.Background(), gf.Timeout)
+		defer cancel()
 
-			// Create a root span.
-			ctx, span := rootSpan(ctx)
-			defer span.End()
+		// Create a root span.
+		ctx, span := rootSpan(ctx)
+		defer span.End()
 
-			// Create a Belvedere project.
-			project, err := pf(ctx, gf.Project,
-				option.WithUserAgent(fmt.Sprintf("belvedere/%s", cmd.Root().Version)))
-			if err != nil {
-				return nil, err
-			}
-			span.AddAttributes(
-				trace.StringAttribute("project", project.Name()),
-				trace.StringAttribute("args", escapeArgs(args)),
-			)
+		// Create a Belvedere project.
+		project, err := pf(ctx, gf.Project,
+			option.WithUserAgent(fmt.Sprintf("belvedere/%s", cmd.Root().Version)))
+		if err != nil {
+			return err
+		}
+		span.AddAttributes(
+			trace.StringAttribute("project", project.Name()),
+			trace.StringAttribute("args", escapeArgs(args)),
+		)
 
-			// Construct output instance.
-			output, err := of(os.Stdout, gf.Format)
-			if err != nil {
-				return nil, err
-			}
-
-			// Execute command.
-			return f(ctx, project, output, fs, args)
-		}()
+		// Construct output instance.
+		output, err := of(os.Stdout, gf.Format)
 		if err != nil {
 			return err
 		}
 
-		// Execute the callback, if any.
-		if callback != nil {
-			return callback()
-		}
-
-		return nil
+		// Execute command.
+		return f(ctx, project, output, fs, args)
 	}
 }
 
