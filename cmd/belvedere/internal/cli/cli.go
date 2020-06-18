@@ -19,9 +19,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-type CommandFunc func(
-	ctx context.Context, project belvedere.Project, in Input, out Output, args []string,
-) error
+type CommandFunc func(ctx context.Context, project belvedere.Project, in Args, out Output) error
 
 type ProjectFactory func(ctx context.Context, name string, opts ...option.ClientOption) (belvedere.Project, error)
 
@@ -66,7 +64,7 @@ func (c *Command) ToCobra(pf ProjectFactory, of OutputFactory) *cobra.Command {
 }
 
 func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, f CommandFunc) func(*cobra.Command, []string) error {
-	return func(cmd *cobra.Command, args []string) error {
+	return func(cmd *cobra.Command, cmdArgs []string) error {
 		// Enable trace logging.
 		enableLogging(cmd.ErrOrStderr(), gf.Debug, gf.Quiet)
 
@@ -86,8 +84,14 @@ func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, f CommandFunc) f
 		}
 		span.AddAttributes(
 			trace.StringAttribute("project", project.Name()),
-			trace.StringAttribute("args", escapeArgs(args)),
+			trace.StringAttribute("args", escapeArgs(cmdArgs)),
 		)
+
+		// Construct args instance.
+		input := &args{
+			stdin: cmd.InOrStdin(),
+			args:  cmdArgs,
+		}
 
 		// Construct output instance.
 		output, err := of(cmd.OutOrStdout(), gf.Format)
@@ -96,7 +100,7 @@ func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, f CommandFunc) f
 		}
 
 		// Execute command.
-		return f(ctx, project, &input{stdin: cmd.InOrStdin()}, output, args)
+		return f(ctx, project, input, output)
 	}
 }
 

@@ -43,7 +43,7 @@ func newSecretsListCmd() *cli.Command {
 Because applications may share secrets (e.g. two applications both need to use the same API key),
 secrets exist in their own namespace.`,
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
 			apps, err := project.Secrets().List(ctx)
 			if err != nil {
 				return err
@@ -71,10 +71,9 @@ instead.`,
 		Flags: func(fs *pflag.FlagSet) {
 			mf.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
-			name := args[0]
-
-			b, err := in.ReadFile(args, 1)
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
+			name := args.String(0)
+			b, err := args.File(1)
 			if err != nil {
 				return err
 			}
@@ -102,10 +101,9 @@ instead.`,
 		Flags: func(fs *pflag.FlagSet) {
 			mf.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
-			name := args[0]
-
-			b, err := in.ReadFile(args, 1)
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
+			name := args.String(0)
+			b, err := args.File(1)
 			if err != nil {
 				return err
 			}
@@ -130,8 +128,8 @@ This deletes all versions of the secret as well, and cannot be undone.`,
 		Flags: func(fs *pflag.FlagSet) {
 			mf.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
-			name := args[0]
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
+			name := args.String(0)
 			return project.Secrets().Delete(ctx, name, mf.DryRun)
 		},
 	}
@@ -153,9 +151,9 @@ secrets' value.`,
 		Flags: func(fs *pflag.FlagSet) {
 			mf.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
-			name := args[0]
-			app := args[1]
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
+			name := args.String(0)
+			app := args.String(1)
 			return project.Secrets().Grant(ctx, name, app, mf.DryRun)
 		},
 	}
@@ -177,9 +175,9 @@ secrets' value.`,
 		Flags: func(fs *pflag.FlagSet) {
 			mf.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
-			name := args[0]
-			app := args[1]
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
+			name := args.String(0)
+			app := args.String(1)
 			return project.Secrets().Revoke(ctx, name, app, mf.DryRun)
 		},
 	}

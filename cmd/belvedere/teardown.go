@@ -28,7 +28,7 @@ Deletes the base Deployment Manager deployment.`,
 			lrf.Register(fs)
 			af.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
 			return project.Teardown(ctx, mf.DryRun, af.Async, lrf.Interval)
 		},
 	}

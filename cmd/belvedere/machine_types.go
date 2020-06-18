@@ -20,11 +20,8 @@ Machine types can be filtered by region. For more information on pricing and bil
 https://cloud.google.com/compute/vm-instance-pricing.`,
 			Args: cobra.MaximumNArgs(1),
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
-			var region string
-			if len(args) > 0 {
-				region = args[0]
-			}
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
+			region := args.String(0)
 
 			machineTypes, err := project.MachineTypes(ctx, region)
 			if err != nil {

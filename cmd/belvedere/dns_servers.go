@@ -20,7 +20,7 @@ These DNS servers should be registered in the domain's WHOIS record or otherwise
 forwarded to them in order to resolve application hostnames to the load balancer IPs.`,
 			Args: cobra.NoArgs,
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
 			servers, err := project.DNSServers(ctx)
 			if err != nil {
 				return err

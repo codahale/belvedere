@@ -30,18 +30,10 @@ https://cloud.google.com/logging/docs/view/advanced-queries#advanced_logs_query_
 			fs.StringSliceVar(&filters, "filter", nil, "limit entries to the given filter")
 			fs.DurationVar(&maxAge, "max-age", 10*time.Minute, "limit entries by maximum age")
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
-			app := args[0]
-
-			var release string
-			if len(args) > 1 {
-				release = args[1]
-			}
-
-			var instance string
-			if len(args) > 2 {
-				instance = args[2]
-			}
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
+			app := args.String(0)
+			release := args.String(1)
+			instance := args.String(2)
 
 			entries, err := project.Logs().List(ctx, app, release, instance, maxAge, filters)
 			if err != nil {

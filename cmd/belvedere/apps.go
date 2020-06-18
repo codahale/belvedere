@@ -39,7 +39,7 @@ func newAppsListCmd() *cli.Command {
 Prints a table of provisioned applications in the current project.`,
 			Args: cobra.NoArgs,
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
 			apps, err := project.Apps().List(ctx)
 			if err != nil {
 				return err
@@ -71,11 +71,10 @@ instead.`,
 			mf.Register(fs)
 			lrf.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
-			region := args[0]
-			name := args[1]
-
-			b, err := in.ReadFile(args, 2)
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
+			region := args.String(0)
+			name := args.String(1)
+			b, err := args.File(2)
 			if err != nil {
 				return err
 			}
@@ -109,10 +108,9 @@ instead.`,
 			mf.Register(fs)
 			lrf.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
-			name := args[0]
-
-			b, err := in.ReadFile(args, 1)
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
+			name := args.String(0)
+			b, err := args.File(1)
 			if err != nil {
 				return err
 			}
@@ -146,8 +144,8 @@ An application must not have any releases before being deleted.`,
 			lrf.Register(fs)
 			af.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
-			name := args[0]
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
+			name := args.String(0)
 			return project.Apps().Delete(ctx, name, mf.DryRun, af.Async, lrf.Interval)
 		},
 	}

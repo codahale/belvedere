@@ -9,17 +9,26 @@ import (
 	"github.com/mattn/go-isatty"
 )
 
-type Input interface {
-	ReadFile(args []string, argIdx int) ([]byte, error)
+type Args interface {
+	String(idx int) string
+	File(idx int) ([]byte, error)
 }
 
-type input struct {
+type args struct {
+	args  []string
 	stdin io.Reader
 }
 
-func (i *input) ReadFile(args []string, argIdx int) ([]byte, error) {
-	if len(args) > argIdx {
-		return ioutil.ReadFile(args[argIdx])
+func (i *args) String(idx int) string {
+	if len(i.args) > idx {
+		return i.args[idx]
+	}
+	return ""
+}
+
+func (i *args) File(idx int) ([]byte, error) {
+	if len(i.args) > idx {
+		return ioutil.ReadFile(i.args[idx])
 	}
 
 	if isTerminal(i.stdin) {

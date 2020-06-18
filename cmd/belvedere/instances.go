@@ -19,16 +19,9 @@ func newInstancesCmd() *cli.Command {
 Instances can be filtered by application name and release name.`,
 			Args: cobra.RangeArgs(0, 2),
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
-			var app string
-			if len(args) > 0 {
-				app = args[0]
-			}
-
-			var release string
-			if len(args) > 1 {
-				release = args[1]
-			}
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
+			app := args.String(0)
+			release := args.String(1)
 
 			instances, err := project.Instances(ctx, app, release)
 			if err != nil {

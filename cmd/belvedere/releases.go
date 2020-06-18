@@ -41,11 +41,9 @@ func newReleasesListCmd() *cli.Command {
 The list of releases can by filtered by application.`,
 			Args: cobra.MinimumNArgs(1),
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
-			var app string
-			if len(args) > 0 {
-				app = args[0]
-			}
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
+			app := args.String(0)
+
 			releases, err := project.Releases().List(ctx, app)
 			if err != nil {
 				return err
@@ -78,12 +76,11 @@ instead.`,
 			lrf.Register(fs)
 			fs.BoolVar(&enable, "enable", false, "enable the release after its successful creation")
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
-			app := args[0]
-			name := args[1]
-			digest := args[2]
-
-			b, err := in.ReadFile(args, 3)
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
+			app := args.String(0)
+			name := args.String(1)
+			digest := args.String(2)
+			b, err := args.File(3)
 			if err != nil {
 				return err
 			}
@@ -124,9 +121,9 @@ flag to bound the amount of time allowed for health checks to pass.`,
 			mf.Register(fs)
 			lrf.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
-			app := args[0]
-			name := args[1]
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
+			app := args.String(0)
+			name := args.String(1)
 			return project.Releases().Enable(ctx, app, name, mf.DryRun, lrf.Interval)
 		},
 	}
@@ -151,9 +148,9 @@ releases which did not pass health checks in order to roll a deploy back.`,
 			mf.Register(fs)
 			lrf.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
-			app := args[0]
-			name := args[1]
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
+			app := args.String(0)
+			name := args.String(1)
 			return project.Releases().Disable(ctx, app, name, mf.DryRun, lrf.Interval)
 		},
 	}
@@ -179,9 +176,9 @@ they can be deleted.`,
 			lrf.Register(fs)
 			af.Register(fs)
 		},
-		Run: func(ctx context.Context, project belvedere.Project, in cli.Input, out cli.Output, args []string) error {
-			app := args[0]
-			name := args[1]
+		Run: func(ctx context.Context, project belvedere.Project, args cli.Args, out cli.Output) error {
+			app := args.String(0)
+			name := args.String(1)
 			return project.Releases().Delete(ctx, app, name, mf.DryRun, af.Async, lrf.Interval)
 		},
 	}
