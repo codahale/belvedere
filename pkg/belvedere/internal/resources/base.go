@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
-	compute "google.golang.org/api/compute/v0.beta"
+	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/dns/v1"
 )
 
@@ -23,7 +23,7 @@ func (*builder) Base(dnsZone string) []deployments.Resource {
 		// A firewall rule which denies all SSH traffic to belvedere-managed instances.
 		{
 			Name: "belvedere-deny-ssh",
-			Type: "compute.beta.firewall",
+			Type: "compute.v1.firewall",
 			Properties: &compute.Firewall{
 				Denied: []*compute.FirewallDenied{
 					{
@@ -41,7 +41,7 @@ func (*builder) Base(dnsZone string) []deployments.Resource {
 		// A firewall rule which allows all IAP tunnel traffic to belvedere-managed instances.
 		{
 			Name: "belvedere-allow-iap-tunneling",
-			Type: "compute.beta.firewall",
+			Type: "compute.v1.firewall",
 			Properties: &compute.Firewall{
 				Allowed: []*compute.FirewallAllowed{
 					{

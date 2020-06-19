@@ -9,7 +9,7 @@ import (
 	"github.com/alessio/shellescape"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
-	compute "google.golang.org/api/compute/v0.beta"
+	compute "google.golang.org/api/compute/v1"
 )
 
 func (*builder) Release(project, region, app, release, imageSHA256 string, config *cfg.Config) []deployments.Resource { // nolint:funlen
@@ -23,7 +23,7 @@ func (*builder) Release(project, region, app, release, imageSHA256 string, confi
 		// An instance template for creating release instances.
 		{
 			Name: instanceTemplate,
-			Type: "compute.beta.instanceTemplate",
+			Type: "compute.v1.instanceTemplate",
 			Properties: &compute.InstanceTemplate{
 				Properties: &compute.InstanceProperties{
 					// Use Google Container-Optimized OS with a default disk size.
@@ -78,9 +78,8 @@ func (*builder) Release(project, region, app, release, imageSHA256 string, confi
 							},
 						},
 					},
-					// TODO move to v1 when shielded VMs goes GA
 					// Enable all Shielded VM options.
-					ShieldedVmConfig: &compute.ShieldedVmConfig{
+					ShieldedInstanceConfig: &compute.ShieldedInstanceConfig{
 						EnableIntegrityMonitoring: true,
 						EnableSecureBoot:          true,
 						EnableVtpm:                true,
@@ -97,7 +96,7 @@ func (*builder) Release(project, region, app, release, imageSHA256 string, confi
 		// An instance manager to start and stop instances as needed.
 		{
 			Name: instanceGroupManager,
-			Type: "compute.beta.regionInstanceGroupManager",
+			Type: "compute.v1.regionInstanceGroupManager",
 			Properties: &compute.InstanceGroupManager{
 				BaseInstanceName: fmt.Sprintf("%s-%s", app, release),
 				InstanceTemplate: deployments.SelfLink(instanceTemplate),
@@ -117,7 +116,7 @@ func (*builder) Release(project, region, app, release, imageSHA256 string, confi
 	if config.AutoscalingPolicy != nil {
 		dep = append(dep, deployments.Resource{
 			Name: autoscaler,
-			Type: "compute.beta.regionAutoscaler",
+			Type: "compute.v1.regionAutoscaler",
 			Properties: &compute.Autoscaler{
 				Name:              fmt.Sprintf("%s-%s", app, release),
 				AutoscalingPolicy: config.AutoscalingPolicy,

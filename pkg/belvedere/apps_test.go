@@ -11,7 +11,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
-	compute "google.golang.org/api/compute/v0.beta"
+	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
@@ -103,7 +103,7 @@ func TestAppService_Create(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-west1?alt=json&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-west1?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(&compute.Region{
 			Status: "UP",
@@ -162,7 +162,7 @@ func TestAppService_Create_DownRegion(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-west1?alt=json&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-west1?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(&compute.Region{
 			Status: "DOWN",
@@ -198,7 +198,7 @@ func TestAppService_Create_BadRegion(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-west1?alt=json&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-west1?alt=json&prettyPrint=false").
 		Reply(http.StatusNotFound)
 
 	ctrl := gomock.NewController(t)

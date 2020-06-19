@@ -11,7 +11,7 @@
     },
     {
       "name": "belvedere-deny-ssh",
-      "type": "compute.beta.firewall",
+      "type": "compute.v1.firewall",
       "properties": {
         "denied": [
           {
@@ -34,7 +34,7 @@
     },
     {
       "name": "belvedere-allow-iap-tunneling",
-      "type": "compute.beta.firewall",
+      "type": "compute.v1.firewall",
       "properties": {
         "allowed": [
           {

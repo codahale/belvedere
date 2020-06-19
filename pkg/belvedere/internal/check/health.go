@@ -7,7 +7,7 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
-	compute "google.golang.org/api/compute/v0.beta"
+	compute "google.golang.org/api/compute/v1"
 )
 
 // HealthChecker provides methods for checking the health of an instance group registered with an

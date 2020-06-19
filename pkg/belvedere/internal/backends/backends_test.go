@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
-	compute "google.golang.org/api/compute/v0.beta"
+	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -17,7 +17,7 @@ func TestService_Add(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(compute.BackendService{
 			Backends: []*compute.Backend{
@@ -28,13 +28,13 @@ func TestService_Add(t *testing.T) {
 			Fingerprint: "fp",
 		})
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(compute.InstanceGroup{
 			SelfLink: "http://ig-1",
 		})
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/global/backendServices/bes-1?alt=json&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/backendServices/bes-1?alt=json&prettyPrint=false").
 		JSON(compute.BackendService{
 			Backends: []*compute.Backend{
 				{
@@ -51,7 +51,7 @@ func TestService_Add(t *testing.T) {
 			Name: "op1",
 		})
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(compute.Operation{
 			Status: "DONE",
@@ -73,7 +73,7 @@ func TestService_AddExisting(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(compute.BackendService{
 			Backends: []*compute.Backend{
@@ -84,7 +84,7 @@ func TestService_AddExisting(t *testing.T) {
 			Fingerprint: "fp",
 		})
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(compute.InstanceGroup{
 			SelfLink: "http://ig-1",
@@ -106,7 +106,7 @@ func TestService_AddDryRun(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(compute.BackendService{
 			Backends: []*compute.Backend{
@@ -117,7 +117,7 @@ func TestService_AddDryRun(t *testing.T) {
 			Fingerprint: "fp",
 		})
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(compute.InstanceGroup{
 			SelfLink: "http://ig-1",
@@ -139,7 +139,7 @@ func TestService_Remove(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(compute.BackendService{
 			Backends: []*compute.Backend{
@@ -153,13 +153,13 @@ func TestService_Remove(t *testing.T) {
 			Fingerprint: "fp",
 		})
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(compute.InstanceGroup{
 			SelfLink: "http://ig-1",
 		})
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/global/backendServices/bes-1?alt=json&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/backendServices/bes-1?alt=json&prettyPrint=false").
 		JSON(compute.BackendService{
 			Backends: []*compute.Backend{
 				{
@@ -173,7 +173,7 @@ func TestService_Remove(t *testing.T) {
 			Name: "op1",
 		})
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(compute.Operation{
 			Status: "DONE",
@@ -195,7 +195,7 @@ func TestSetup_RemoveLast(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(compute.BackendService{
 			Backends: []*compute.Backend{
@@ -206,20 +206,20 @@ func TestSetup_RemoveLast(t *testing.T) {
 			Fingerprint: "fp",
 		})
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(compute.InstanceGroup{
 			SelfLink: "http://ig-1",
 		})
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/global/backendServices/bes-1?alt=json&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/backendServices/bes-1?alt=json&prettyPrint=false").
 		JSON(json.RawMessage(`{"backends":[],"fingerprint":"fp"}`)).
 		Reply(http.StatusOK).
 		JSON(compute.Operation{
 			Name: "op1",
 		})
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(compute.Operation{
 			Status: "DONE",
@@ -241,7 +241,7 @@ func TestSetup_RemoveMissing(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(compute.BackendService{
 			Backends: []*compute.Backend{
@@ -252,7 +252,7 @@ func TestSetup_RemoveMissing(t *testing.T) {
 			Fingerprint: "fp",
 		})
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(compute.InstanceGroup{
 			SelfLink: "http://ig-1",
@@ -274,7 +274,7 @@ func TestSetup_RemoveDryRun(t *testing.T) {
 	defer gock.Off()
 	it.MockTokenSource()
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(compute.BackendService{
 			Backends: []*compute.Backend{
@@ -288,7 +288,7 @@ func TestSetup_RemoveDryRun(t *testing.T) {
 			Fingerprint: "fp",
 		})
 
-	gock.New("https://compute.googleapis.com/compute/beta/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(compute.InstanceGroup{
 			SelfLink: "http://ig-1",

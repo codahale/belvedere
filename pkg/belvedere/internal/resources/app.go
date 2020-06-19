@@ -5,7 +5,7 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
-	compute "google.golang.org/api/compute/v0.beta"
+	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/dns/v1"
 )
 
@@ -25,7 +25,7 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 		// 8443.
 		{
 			Name: firewall,
-			Type: "compute.beta.firewall",
+			Type: "compute.v1.firewall",
 			Properties: &compute.Firewall{
 				Allowed: []*compute.FirewallAllowed{
 					{
@@ -46,7 +46,7 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 		// /healthz.
 		{
 			Name: healthcheck,
-			Type: "compute.beta.healthCheck",
+			Type: "compute.v1.healthCheck",
 			Properties: &compute.HealthCheck{
 				Type: "HTTP2",
 				Http2HealthCheck: &compute.HTTP2HealthCheck{
@@ -58,7 +58,7 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 		// An HTTP2 backend service connected to the healthcheck.
 		{
 			Name: backendService,
-			Type: "compute.beta.backendService",
+			Type: "compute.v1.backendService",
 			Properties: &compute.BackendService{
 				EnableCDN: config.CDNPolicy != nil,
 				CdnPolicy: config.CDNPolicy,
@@ -66,7 +66,6 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 					DrainingTimeoutSec: 60,
 				},
 				Iap: config.IAP,
-				// TODO move to v1 when LogConfig goes GA
 				LogConfig: &compute.BackendServiceLogConfig{
 					Enable: true,
 				},
@@ -81,7 +80,7 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 		// app's health check URL.
 		{
 			Name: urlMap,
-			Type: "compute.beta.urlMap",
+			Type: "compute.v1.urlMap",
 			Properties: &compute.UrlMap{
 				DefaultService: deployments.SelfLink(backendService),
 				// TODO add WAF rule turning /healthz from external sources into 404
@@ -108,9 +107,8 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 		// A TLS certificate.
 		{
 			Name: sslCertificate,
-			Type: "compute.beta.sslCertificate",
+			Type: "compute.v1.sslCertificate",
 			Properties: &compute.SslCertificate{
-				// TODO move to v1 when managed certs goes GA
 				Managed: &compute.SslCertificateManagedSslCertificate{
 					Domains: []string{dnsName},
 				},
@@ -121,7 +119,7 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 		// the URL map.
 		{
 			Name: targetProxy,
-			Type: "compute.beta.targetHttpsProxy",
+			Type: "compute.v1.targetHttpsProxy",
 			Properties: &compute.TargetHttpsProxy{
 				SslCertificates: []string{
 					deployments.SelfLink(sslCertificate),
@@ -133,7 +131,7 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 		// A global forwarding rule directing TCP:443 to the target proxy.
 		{
 			Name: forwardingRule,
-			Type: "compute.beta.globalForwardingRule",
+			Type: "compute.v1.globalForwardingRule",
 			Properties: &compute.ForwardingRule{
 				IPProtocol: "TCP",
 				PortRange:  "443",

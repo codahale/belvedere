@@ -8,7 +8,7 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	"github.com/google/go-cmp/cmp"
-	compute "google.golang.org/api/compute/v0.beta"
+	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/deploymentmanager/v2"
 	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
@@ -104,7 +104,7 @@ func TestManager_Insert(t *testing.T) {
 			},
 			Target: &deploymentmanager.TargetConfiguration{
 				Config: &deploymentmanager.ConfigFile{
-					Content: `{"resources":[{"name":"my-instance","type":"compute.beta.instance","properties":{"machineType":"n1-standard-1"}}]}`,
+					Content: `{"resources":[{"name":"my-instance","type":"compute.v1.instance","properties":{"machineType":"n1-standard-1"}}]}`,
 				},
 			},
 		}).
@@ -128,7 +128,7 @@ func TestManager_Insert(t *testing.T) {
 		[]Resource{
 			{
 				Name: "my-instance",
-				Type: "compute.beta.instance",
+				Type: "compute.v1.instance",
 				Properties: &compute.Instance{
 					MachineType: "n1-standard-1",
 				},
@@ -150,7 +150,7 @@ func TestManager_Update(t *testing.T) {
 		JSON(deploymentmanager.Deployment{
 			Target: &deploymentmanager.TargetConfiguration{
 				Config: &deploymentmanager.ConfigFile{
-					Content: `{"resources":[{"name":"my-instance","type":"compute.beta.instance","properties":{"machineType":"n1-standard-1"}}]}`,
+					Content: `{"resources":[{"name":"my-instance","type":"compute.v1.instance","properties":{"machineType":"n1-standard-1"}}]}`,
 				},
 			},
 		}).
@@ -174,7 +174,7 @@ func TestManager_Update(t *testing.T) {
 		[]Resource{
 			{
 				Name: "my-instance",
-				Type: "compute.beta.instance",
+				Type: "compute.v1.instance",
 				Properties: &compute.Instance{
 					MachineType: "n1-standard-1",
 				},

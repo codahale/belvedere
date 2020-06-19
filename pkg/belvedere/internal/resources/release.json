@@ -2,7 +2,7 @@
   "resources": [
     {
       "name": "my-app-v43-it",
-      "type": "compute.beta.instanceTemplate",
+      "type": "compute.v1.instanceTemplate",
       "properties": {
         "properties": {
           "disks": [
@@ -61,7 +61,7 @@
               ]
             }
           ],
-          "shieldedVmConfig": {
+          "shieldedInstanceConfig": {
             "enableIntegrityMonitoring": true,
             "enableSecureBoot": true,
             "enableVtpm": true
@@ -77,7 +77,7 @@
     },
     {
       "name": "my-app-v43-ig",
-      "type": "compute.beta.regionInstanceGroupManager",
+      "type": "compute.v1.regionInstanceGroupManager",
       "properties": {
         "baseInstanceName": "my-app-v43",
         "instanceTemplate": "$(ref.my-app-v43-it.selfLink)",
@@ -93,7 +93,7 @@
     },
     {
       "name": "my-app-v43-as",
-      "type": "compute.beta.regionAutoscaler",
+      "type": "compute.v1.regionAutoscaler",
       "properties": {
         "autoscalingPolicy": {
           "loadBalancingUtilization": {

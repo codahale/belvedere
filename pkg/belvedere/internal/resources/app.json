@@ -2,7 +2,7 @@
   "resources": [
     {
       "name": "belvedere-allow-my-app-lb",
-      "type": "compute.beta.firewall",
+      "type": "compute.v1.firewall",
       "properties": {
         "allowed": [
           {
@@ -23,7 +23,7 @@
     },
     {
       "name": "my-app-hc",
-      "type": "compute.beta.healthCheck",
+      "type": "compute.v1.healthCheck",
       "properties": {
         "http2HealthCheck": {
           "portName": "svc-https",
@@ -34,7 +34,7 @@
     },
     {
       "name": "my-app-bes",
-      "type": "compute.beta.backendService",
+      "type": "compute.v1.backendService",
       "properties": {
         "cdnPolicy": {
           "signedUrlCacheMaxAgeSec": "200"
@@ -60,14 +60,14 @@
     },
     {
       "name": "my-app-urlmap",
-      "type": "compute.beta.urlMap",
+      "type": "compute.v1.urlMap",
       "properties": {
         "defaultService": "$(ref.my-app-bes.selfLink)"
       }
     },
     {
       "name": "my-app-cert",
-      "type": "compute.beta.sslCertificate",
+      "type": "compute.v1.sslCertificate",
       "properties": {
         "managed": {
           "domains": [
@@ -79,7 +79,7 @@
     },
     {
       "name": "my-app-tp",
-      "type": "compute.beta.targetHttpsProxy",
+      "type": "compute.v1.targetHttpsProxy",
       "properties": {
         "quicOverride": "ENABLE",
         "sslCertificates": [
@@ -90,7 +90,7 @@
     },
     {
       "name": "my-app-fr",
-      "type": "compute.beta.globalForwardingRule",
+      "type": "compute.v1.globalForwardingRule",
       "properties": {
         "IPProtocol": "TCP",
         "portRange": "443",

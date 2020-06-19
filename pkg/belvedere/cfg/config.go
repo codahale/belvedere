@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/ghodss/yaml"
-	compute "google.golang.org/api/compute/v0.beta"
+	compute "google.golang.org/api/compute/v1"
 )
 
 // Config contains all the mutable parameters of an app's configuration.
