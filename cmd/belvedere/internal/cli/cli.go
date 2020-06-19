@@ -19,7 +19,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-type CommandFunc func(ctx context.Context, project belvedere.Project, in Args, out Output) error
+type CommandFunc func(ctx context.Context, project belvedere.Project, args Args, out Output) error
 
 type ProjectFactory func(ctx context.Context, name string, opts ...option.ClientOption) (belvedere.Project, error)
 
