@@ -191,14 +191,10 @@ func (p *project) Instances(ctx context.Context, app, release string) ([]Instanc
 			func(list *compute.InstanceAggregatedList) error {
 				for _, items := range list.Items {
 					for _, inst := range items.Instances {
-						mt := inst.MachineType
-						mt = mt[strings.LastIndex(mt, "/")+1:]
-						zone := inst.Zone
-						zone = zone[strings.LastIndex(zone, "/")+1:]
 						instances = append(instances, Instance{
 							Name:        inst.Name,
-							MachineType: mt,
-							Zone:        zone,
+							MachineType: lastPathComponent(inst.MachineType),
+							Zone:        lastPathComponent(inst.Zone),
 							Status:      inst.Status,
 						})
 					}
@@ -336,4 +332,12 @@ func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineTyp
 		return machineTypes[i].lexical() < machineTypes[j].lexical()
 	})
 	return machineTypes, nil
+}
+
+func lastPathComponent(s string) string {
+	idx := strings.LastIndex(s, "/")
+	if idx < 0 {
+		return s
+	}
+	return s[idx+1:]
 }
