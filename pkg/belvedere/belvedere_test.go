@@ -56,8 +56,8 @@ func TestProject_Instances(t *testing.T) {
 					Instances: []*compute.Instance{
 						{
 							Name:        "my-app-1",
-							Zone:        "us-west-1a",
-							MachineType: "n1-standard-1",
+							Zone:        "zones/us-west1-a",
+							MachineType: "zones/us-west1-a/machineTypes/n1-standard-1",
 							Status:      "RUNNING",
 							Labels: map[string]string{
 								"belvedere-app":     "my-app",
@@ -70,8 +70,8 @@ func TestProject_Instances(t *testing.T) {
 					Instances: []*compute.Instance{
 						{
 							Name:        "my-app-2",
-							Zone:        "us-west-1a",
-							MachineType: "n1-standard-1",
+							Zone:        "zones/us-west1-a",
+							MachineType: "zones/us-west1-a/machineTypes/n1-standard-1",
 							Status:      "RUNNING",
 							Labels: map[string]string{
 								"belvedere-app":     "my-app",
@@ -80,8 +80,8 @@ func TestProject_Instances(t *testing.T) {
 						},
 						{
 							Name:        "another-app-1",
-							Zone:        "us-west-1a",
-							MachineType: "n1-standard-1",
+							Zone:        "zones/us-west1-a",
+							MachineType: "zones/us-west1-a/machineTypes/n1-standard-1",
 							Status:      "RUNNING",
 							Labels: map[string]string{
 								"belvedere-app":     "another-app",
@@ -109,19 +109,19 @@ func TestProject_Instances(t *testing.T) {
 			Name:        "another-app-1",
 			MachineType: "n1-standard-1",
 			Status:      "RUNNING",
-			Zone:        "us-west-1a",
+			Zone:        "us-west1-a",
 		},
 		{
 			Name:        "my-app-1",
 			MachineType: "n1-standard-1",
 			Status:      "RUNNING",
-			Zone:        "us-west-1a",
+			Zone:        "us-west1-a",
 		},
 		{
 			Name:        "my-app-2",
 			MachineType: "n1-standard-1",
 			Status:      "RUNNING",
-			Zone:        "us-west-1a",
+			Zone:        "us-west1-a",
 		},
 	}
 
@@ -142,8 +142,8 @@ func TestProject_InstancesApp(t *testing.T) {
 					Instances: []*compute.Instance{
 						{
 							Name:        "my-app-1",
-							Zone:        "us-west-1a",
-							MachineType: "n1-standard-1",
+							Zone:        "zones/us-west1-a",
+							MachineType: "zones/us-west1-a/machineTypes/n1-standard-1",
 							Status:      "RUNNING",
 							Labels: map[string]string{
 								"belvedere-app":     "my-app",
@@ -156,8 +156,8 @@ func TestProject_InstancesApp(t *testing.T) {
 					Instances: []*compute.Instance{
 						{
 							Name:        "my-app-2",
-							Zone:        "us-west-1a",
-							MachineType: "n1-standard-1",
+							Zone:        "zones/us-west1-a",
+							MachineType: "zones/us-west1-a/machineTypes/n1-standard-1",
 							Status:      "RUNNING",
 							Labels: map[string]string{
 								"belvedere-app":     "my-app",
@@ -185,13 +185,13 @@ func TestProject_InstancesApp(t *testing.T) {
 			Name:        "my-app-1",
 			MachineType: "n1-standard-1",
 			Status:      "RUNNING",
-			Zone:        "us-west-1a",
+			Zone:        "us-west1-a",
 		},
 		{
 			Name:        "my-app-2",
 			MachineType: "n1-standard-1",
 			Status:      "RUNNING",
-			Zone:        "us-west-1a",
+			Zone:        "us-west1-a",
 		},
 	}
 
@@ -212,8 +212,8 @@ func TestProject_InstancesAppRelease(t *testing.T) {
 					Instances: []*compute.Instance{
 						{
 							Name:        "my-app-2",
-							Zone:        "us-west-1a",
-							MachineType: "n1-standard-1",
+							Zone:        "zones/us-west1-a",
+							MachineType: "zones/us-west1-a/machineTypes/n1-standard-1",
 							Status:      "RUNNING",
 							Labels: map[string]string{
 								"belvedere-app":     "my-app",
@@ -241,7 +241,7 @@ func TestProject_InstancesAppRelease(t *testing.T) {
 			Name:        "my-app-2",
 			MachineType: "n1-standard-1",
 			Status:      "RUNNING",
-			Zone:        "us-west-1a",
+			Zone:        "us-west1-a",
 		},
 	}
 
