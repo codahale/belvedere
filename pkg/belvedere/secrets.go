@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
@@ -49,9 +48,8 @@ func (s *secretsService) List(ctx context.Context) ([]Secret, error) {
 	if err := s.sm.Projects.Secrets.List(name).Fields("secrets.name").Pages(ctx,
 		func(list *secretmanager.ListSecretsResponse) error {
 			for _, s := range list.Secrets {
-				parts := strings.Split(s.Name, "/")
 				secrets = append(secrets, Secret{
-					Name: parts[len(parts)-1],
+					Name: lastPathComponent(s.Name),
 				})
 			}
 			return nil
