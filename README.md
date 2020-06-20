@@ -14,7 +14,7 @@ Make sure it has a billing account associated with it.
 Once the project is created, pick a DNS zone in which the apps will live.
 Let's say you've recently registered the domain `cornbread.club`.
 
-```shell script
+```
 belvedere setup cornbread.club
 ```
 
@@ -24,7 +24,7 @@ This will enable all the required GCP APIs, grant Deployment Manager permissions
 Once `setup` has been run, the domain's DNS settings will need to be configured at the register.
 To get a list of the DNS servers to use, run:
 
-```shell script
+```
 belvedere dns-servers
 ```
 
@@ -47,13 +47,13 @@ It consists of an HTTP/1.1 Go application and an Nginx-based frontend proxy.
 
 To build the application using Google Cloud Build, run:
 
-```shell script
+```
 gcloud builds submit --config ./examples/helloworld/cloudbuild.yaml ./examples/helloworld/
 ```
 
 To build the Nginx frontend using Google Cloud Build, run:
 
-```shell script
+```
 gcloud builds submit --config ./examples/nginx-frontend/cloudbuild.yaml ./examples/nginx-frontend/
 ```
 
@@ -69,7 +69,7 @@ Belvedere requires a Google Compute Engine machine type and a Docker image URL f
 
 To create an app, pick a GCE region (e.g. `us-central1`) and run:
 
-```shell script
+```
 belevedere apps create my-app us-central1 ./my-app.yaml
 ```
 
@@ -98,7 +98,7 @@ The load balancer and DNS stuff will take 10-30 minutes to fully provision.
 
 To create a release for an app, get the SHA256 hash of the container image and run:
 
-```shell script
+```
 belvedere releases create my-app v1 $SHA256 ./my-app.yaml 
 ```
 
@@ -114,7 +114,7 @@ Once this is done, the release has been created but is not in service.
 
 To direct traffic to the instances in a release, enable the release by running:
 
-```shell script
+```
 belvedere releases enable my-app v1
 ```
 
@@ -126,7 +126,7 @@ pass health checks, and go into service. If the instances aren't healthy after 5
 
 To remove a release from service, disable it by running:
 
-```shell script
+```
 belvedere releases disable my-app v1
 ```
 
@@ -136,7 +136,7 @@ This will remove the application from service and drain any existing connections
 
 To delete all the resources associated with a release, including the instances, run:
 
-```shell script
+```
 belvedere releases delete my-app v1
 ```
 
@@ -144,7 +144,7 @@ belvedere releases delete my-app v1
 
 To delete all the resources associated with an app, run:
 
-```shell script
+```
 belvedere apps delete my-app
 ```
 
@@ -154,7 +154,7 @@ belvedere apps delete my-app
 
 To list all the apps in the project, run:
 
-```shell script
+```
 belvedere apps list
 ```
 
@@ -162,7 +162,7 @@ belvedere apps list
 
 To list all the releases in the project, run:
 
-```shell script
+```
 belvedere releases list
 belvedere releases list my-app
 ```
@@ -171,7 +171,7 @@ belvedere releases list my-app
 
 To list all the running instances in the project, run:
 
-```shell script
+```
 belvedere instances
 belvedere instances my-app
 belvedere instances my-app v43
@@ -181,7 +181,7 @@ belvedere instances my-app v43
 
 To SSH into a particular instance, run:
 
-```shell script
+```
 belvedere ssh my-app-v43-hxht
 ```
 
@@ -191,7 +191,7 @@ Belvedere's configuration only allows SSH over IAP tunnels, and IAP tunnels requ
 
 You can also pass arguments to SSH:
 
-```shell script
+```
 belvedere ssh my-app-v43-hxht -- ls -al
 ```
 
@@ -199,7 +199,7 @@ belvedere ssh my-app-v43-hxht -- ls -al
 
 To view the logs for an application and its sidecar containers, run:
 
-```shell script
+```
 belvedere logs my-app
 belvedere logs my-app v43
 belvedere logs my-app v43 my-app-v43-hxht
@@ -216,7 +216,7 @@ This provides you with encryption at rest, encryption in flight, access control,
 
 You can create a secret with an initial value of a file's contents:
 
-```shell script
+```
 belvedere secrets create my-secret secret-value.txt
 ```
 
@@ -228,7 +228,7 @@ echo "super secret" | belvedere secrets create my-secret
 
 Updating a secret's value works similarly:
 
-```shell script
+```
 belvedere secrets update my-secret secret-value.txt
 ```
 
@@ -236,7 +236,7 @@ belvedere secrets update my-secret secret-value.txt
 
 It's about what you'd expect:
 
-```shell script
+```
 belvedere secrets list
 belvedere secrets delete my-secret
 ```
@@ -245,7 +245,7 @@ belvedere secrets delete my-secret
 
 You can quickly grant or revoke an app's access to a secret:
 
-```shell script
+```
 belvedere secrets grant secret1 my-app
 belvedere secrets revoke secret1 my-app
 ```
