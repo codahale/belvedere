@@ -2,6 +2,7 @@ package resources
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
@@ -19,6 +20,7 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 	forwardingRule := fmt.Sprintf("%s-fr", app)
 	serviceAccount := fmt.Sprintf("%s-sa", app)
 	dnsRecord := fmt.Sprintf("%s-rrs", app)
+	securityPolicy := fmt.Sprintf("%s-secpol", app)
 	dnsName := fmt.Sprintf("%s.%s", app, managedZone.DnsName)
 	resources := []deployments.Resource{
 		// A firewall rule allowing access from the load balancer to application instances on port
@@ -60,20 +62,21 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 			Name: backendService,
 			Type: "compute.v1.backendService",
 			Properties: &compute.BackendService{
-				EnableCDN: config.CDNPolicy != nil,
 				CdnPolicy: config.CDNPolicy,
 				ConnectionDraining: &compute.ConnectionDraining{
 					DrainingTimeoutSec: 60,
+				},
+				EnableCDN: config.CDNPolicy != nil,
+				HealthChecks: []string{
+					deployments.SelfLink(healthcheck),
 				},
 				Iap: config.IAP,
 				LogConfig: &compute.BackendServiceLogConfig{
 					Enable: true,
 				},
-				Protocol: "HTTP2",
-				PortName: "svc-https",
-				HealthChecks: []string{
-					deployments.SelfLink(healthcheck),
-				},
+				PortName:       "svc-https",
+				Protocol:       "HTTP2",
+				SecurityPolicy: deployments.SelfLink(securityPolicy),
 			},
 		},
 		// A URL map directing requests to the backend service while blocking access to the
@@ -83,25 +86,6 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 			Type: "compute.v1.urlMap",
 			Properties: &compute.UrlMap{
 				DefaultService: deployments.SelfLink(backendService),
-				// TODO add WAF rule turning /healthz from external sources into 404
-				//PathMatchers: []*compute.PathMatcher{
-				//	{
-				//		Name: "deny-external-healthchecks",
-				//		PathRules: []*compute.PathRule{
-				//			{
-				//				Paths:   []string{"/healthz"},
-				//				Service: deployments.SelfLink("backend-service"),
-				//				RouteAction: &compute.HttpRouteAction{
-				//					FaultInjectionPolicy: &compute.HttpFaultInjection{
-				//						Abort: &compute.HttpFaultAbort{
-				//							HttpStatus: 404,
-				//						},
-				//					},
-				//				},
-				//			},
-				//		},
-				//	},
-				//},
 			},
 		},
 		// A TLS certificate.
@@ -159,6 +143,38 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 						Type:    "A",
 						Rrdatas: []string{deployments.Ref(forwardingRule, "IPAddress")},
 						Ttl:     50,
+					},
+				},
+			},
+		},
+		// The Cloud WAF security policy.
+		{
+			Name: securityPolicy,
+			Type: "compute.v1.securityPolicy",
+			Properties: &compute.SecurityPolicy{
+				Description: fmt.Sprintf("WAF rules for Belvedere app %s", app),
+				Rules: []*compute.SecurityPolicyRule{
+					{
+						Action:      "deny-404",
+						Description: "Deny external access to healthchecks.",
+						Match: &compute.SecurityPolicyRuleMatcher{
+							Expr: &compute.Expr{
+								Expression: "request.path.matches('^/healthz/')",
+							},
+						},
+						Priority: 100,
+					},
+					{
+						Action:      "allow",
+						Description: "Allow all access by default.",
+						Match: &compute.SecurityPolicyRuleMatcher{
+							Config: &compute.SecurityPolicyRuleMatcherConfig{
+								SrcIpRanges: []string{"*"},
+							},
+							VersionedExpr: "SRC_IPS_V1",
+						},
+
+						Priority: math.MaxInt32,
 					},
 				},
 			},
