@@ -112,3 +112,27 @@ func TestPrettyJSONOutput_Print(t *testing.T) {
 		t.Fatal(cmp.Diff(expected, actual))
 	}
 }
+
+func TestYamlOutput_Print(t *testing.T) {
+	buf := bytes.NewBuffer(nil)
+	output := &yamlOutput{w: buf}
+	if err := output.Print([]example{
+		{
+			Name:  "one",
+			Weird: "two",
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	expected := `
+Name: one
+Weird: two
+
+`
+	actual := "\n" + buf.String()
+
+	if !cmp.Equal(expected, actual) {
+		t.Fatal(cmp.Diff(expected, actual))
+	}
+}

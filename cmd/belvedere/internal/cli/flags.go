@@ -19,7 +19,7 @@ func (gf *GlobalFlags) Register(fs *pflag.FlagSet) {
 	fs.BoolVar(&gf.Debug, "debug", false, "log verbose output")
 	fs.DurationVar(&gf.Timeout, "timeout", 10*time.Minute, "maximum time allowed for total execution")
 	fs.StringVar(&gf.Project, "project", "", "specify a Google Cloud Platform project ID")
-	fs.StringVar(&gf.Format, "format", "table", "specify an output format (table, csv, json, prettyjson)")
+	fs.StringVar(&gf.Format, "format", "table", "specify an output format (table, csv, json, prettyjson, yaml)")
 }
 
 type ModifyFlags struct {

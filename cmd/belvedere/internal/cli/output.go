@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ghodss/yaml"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
 )
@@ -26,8 +27,10 @@ func NewOutput(w io.Writer, format string) (Output, error) {
 		return &jsonOutput{w: w}, nil
 	case "prettyjson":
 		return &prettyJSONOutput{w: w}, nil
+	case "yaml":
+		return &yamlOutput{w: w}, nil
 	default:
-		return nil, fmt.Errorf("%q is not a valid format (must be one of: table, csv, json, prettyjson)", format)
+		return nil, fmt.Errorf("%q is not a valid format (must be one of: table, csv, json, prettyjson, yaml)", format)
 	}
 }
 
@@ -109,6 +112,30 @@ func (o *prettyJSONOutput) Print(v interface{}) error {
 	iv := reflect.ValueOf(v)
 	for i := 0; i < iv.Len(); i++ {
 		b, err := json.MarshalIndent(iv.Index(i).Interface(), "", "  ")
+		if err != nil {
+			return err
+		}
+
+		if _, err := fmt.Fprintf(o.w, "%s\n", string(b)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+type yamlOutput struct {
+	w io.Writer
+}
+
+func (o *yamlOutput) Print(v interface{}) error {
+	t := reflect.TypeOf(v)
+	if t.Kind() != reflect.Slice {
+		return fmt.Errorf("not a slice of structs")
+	}
+
+	iv := reflect.ValueOf(v)
+	for i := 0; i < iv.Len(); i++ {
+		b, err := yaml.Marshal(iv.Index(i).Interface())
 		if err != nil {
 			return err
 		}
