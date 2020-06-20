@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/codahale/belvedere/internal/assert"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/option"
@@ -34,9 +35,7 @@ func TestHealthNotStable(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if done {
-		t.Error("shouldn't have been done but was")
-	}
+	assert.Equal(t, "Health()", false, done)
 }
 
 func TestHealthNotRegistered(t *testing.T) {
@@ -75,9 +74,7 @@ func TestHealthNotRegistered(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if done {
-		t.Error("shouldn't have been done but was")
-	}
+	assert.Equal(t, "Health()", false, done)
 }
 
 func TestHealthNotHealthy(t *testing.T) {
@@ -125,9 +122,7 @@ func TestHealthNotHealthy(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if done {
-		t.Error("shouldn't have been done but was")
-	}
+	assert.Equal(t, "Health()", false, done)
 }
 
 func TestHealthDone(t *testing.T) {
@@ -175,7 +170,5 @@ func TestHealthDone(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !done {
-		t.Error("should have been done but wasn't")
-	}
+	assert.Equal(t, "Health()", true, done)
 }

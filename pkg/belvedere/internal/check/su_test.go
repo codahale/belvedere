@@ -33,9 +33,7 @@ func TestSURunning(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if done {
-		t.Error("shouldn't have been done but was")
-	}
+	assert.Equal(t, "SU()", false, done)
 }
 
 func TestSUDone(t *testing.T) {
@@ -59,9 +57,7 @@ func TestSUDone(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !done {
-		t.Error("should have been done but wasn't")
-	}
+	assert.Equal(t, "SU()", true, done)
 }
 
 func TestSUError(t *testing.T) {

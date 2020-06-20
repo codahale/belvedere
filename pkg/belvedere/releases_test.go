@@ -157,7 +157,7 @@ func TestReleaseService_Create(t *testing.T) {
 	if err := service.Create(
 		context.Background(), "my-app", "v1", config, imageSHA256, false, 10*time.Millisecond,
 	); err != nil {
-		t.Fatal()
+		t.Fatal(err)
 	}
 }
 
@@ -193,7 +193,7 @@ func TestReleaseService_Enable(t *testing.T) {
 	if err := service.Enable(
 		context.Background(), "my-app", "v1", false, 10*time.Millisecond,
 	); err != nil {
-		t.Fatal()
+		t.Fatal(err)
 	}
 }
 
@@ -224,7 +224,7 @@ func TestReleaseService_Disable(t *testing.T) {
 	if err := service.Disable(
 		context.Background(), "my-app", "v1", false, 10*time.Millisecond,
 	); err != nil {
-		t.Fatal()
+		t.Fatal(err)
 	}
 }
 

@@ -48,7 +48,7 @@ func TestManager_EnableAPIs(t *testing.T) {
 
 	su, err := serviceusage.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
-		t.Fatal()
+		t.Fatal(err)
 	}
 
 	m := &service{su: su}

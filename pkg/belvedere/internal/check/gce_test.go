@@ -33,9 +33,7 @@ func TestGCERunning(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if done {
-		t.Error("shouldn't have been done, but was")
-	}
+	assert.Equal(t, "GCE()", false, done)
 }
 
 func TestGCEDone(t *testing.T) {
@@ -59,9 +57,7 @@ func TestGCEDone(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !done {
-		t.Error("should have been done, but wasn't")
-	}
+	assert.Equal(t, "GCE()", true, done)
 }
 
 func TestGCEError(t *testing.T) {

@@ -33,9 +33,7 @@ func TestDMRunning(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if done {
-		t.Error("was done but shouldn't have been")
-	}
+	assert.Equal(t, "DM()", false, done)
 }
 
 func TestDMDone(t *testing.T) {
@@ -59,9 +57,7 @@ func TestDMDone(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !done {
-		t.Error("wasn't done but should have been")
-	}
+	assert.Equal(t, "DM()", true, done)
 }
 
 func TestDMError(t *testing.T) {
