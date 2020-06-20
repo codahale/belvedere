@@ -6,7 +6,6 @@ import (
 
 	"github.com/codahale/belvedere/internal/assert"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/fixtures"
 	compute "google.golang.org/api/compute/v1"
 )
 
@@ -28,14 +27,14 @@ func TestReleaseResources(t *testing.T) {
 		},
 	)
 
-	actual, err := json.MarshalIndent(map[string]interface{}{
+	got, err := json.MarshalIndent(map[string]interface{}{
 		"resources": resources,
 	}, "", "  ")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	fixtures.Compare(t, "release.json", actual)
+	assert.EqualFixture(t, "Release()", "release.json", got)
 }
 
 func TestDockerArgs(t *testing.T) {
@@ -143,6 +142,6 @@ func TestCloudConfig(t *testing.T) {
 		},
 	}
 
-	actual := cloudConfig(config, "my-app", "v43", "abcdef0123456789")
-	fixtures.Compare(t, "cloudconfig.yaml", []byte(actual))
+	got := cloudConfig(config, "my-app", "v43", "abcdef0123456789")
+	assert.EqualFixture(t, "cloudConfig()", "cloudconfig.yaml", []byte(got))
 }

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/codahale/belvedere/internal/assert"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/fixtures"
 	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/dns/v1"
 )
@@ -31,12 +31,12 @@ func TestAppResources(t *testing.T) {
 		},
 	)
 
-	actual, err := json.MarshalIndent(map[string]interface{}{
+	got, err := json.MarshalIndent(map[string]interface{}{
 		"resources": resources,
 	}, "", "  ")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	fixtures.Compare(t, "app.json", actual)
+	assert.EqualFixture(t, "App()", "app.json", got)
 }
