@@ -1,6 +1,7 @@
 linters:
   disable-all: true
   enable:
+    - asciicheck
     - bodyclose
     - deadcode
     - depguard
@@ -12,8 +13,10 @@ linters:
     - goconst
     - gocritic
     - gocyclo
+    - godot
     - godox
     - gofmt
+    - gomodguard
     - goimports
     - golint
     - goprintffuncname
@@ -25,6 +28,8 @@ linters:
     - maligned
     - misspell
     - nakedret
+    - nestif
+    - nolintlint
     - prealloc
     - rowserrcheck
     - scopelint
@@ -45,8 +50,5 @@ linters:
 linters-settings:
   maligned:
     suggest-new: true
-  godox:
-    keywords:
-      - XXX
   funlen:
     lines: 100
