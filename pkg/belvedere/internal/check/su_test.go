@@ -89,8 +89,9 @@ func TestSUError(t *testing.T) {
 		t.Fatal("should have returned an error")
 	}
 
-	expected := "operation failed: {\"code\":500,\"message\":\"nope\"}"
-	if actual := err.Error(); expected != actual {
-		t.Error(cmp.Diff(expected, actual))
+	want := `operation failed: {"code":500,"message":"nope"}`
+	got := err.Error()
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("SU error mismatch (-want +got):\n%s", diff)
 	}
 }

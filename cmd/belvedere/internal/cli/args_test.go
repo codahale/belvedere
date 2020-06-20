@@ -10,18 +10,18 @@ import (
 func TestArgs_String(t *testing.T) {
 	args := &args{args: []string{"one", "two"}}
 
-	expected, actual := "two", args.String(1)
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	want, got := "two", args.String(1)
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("String() mismatch (-want +got):\n%s", diff)
 	}
 }
 
 func TestArgs_String_Default(t *testing.T) {
 	args := &args{args: []string{"one", "two"}}
 
-	expected, actual := "", args.String(20)
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	want, got := "", args.String(20)
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("String() mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -30,14 +30,14 @@ func TestArgs_File(t *testing.T) {
 		args: []string{"example.txt"},
 	}
 
-	expected := []byte("one\n")
-	actual, err := args.File(0)
+	want := []byte("one\n")
+	got, err := args.File(0)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("File() mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -50,13 +50,13 @@ func TestArgs_File_Default(t *testing.T) {
 		stdin: f,
 	}
 
-	expected := []byte("one\n")
-	actual, err := args.File(0)
+	want := []byte("one\n")
+	got, err := args.File(0)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("File() mismatch (-want +got):\n%s", diff)
 	}
 }

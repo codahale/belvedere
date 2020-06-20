@@ -94,8 +94,9 @@ func TestGCEError(t *testing.T) {
 		t.Fatal("should have returned an error")
 	}
 
-	expected := "operation failed: {\"errors\":[{\"code\":\"ERR_MAGIC_HAT\",\"location\":\"/great-hall\",\"message\":\"Bad personality test\"}]}"
-	if actual := err.Error(); expected != actual {
-		t.Error(cmp.Diff(expected, actual))
+	want := `operation failed: {"errors":[{"code":"ERR_MAGIC_HAT","location":"/great-hall","message":"Bad personality test"}]}`
+	got := err.Error()
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf(" GCE error mismatch (-want +got):\n%s", diff)
 	}
 }

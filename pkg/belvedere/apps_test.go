@@ -40,19 +40,19 @@ func TestAppService_Get(t *testing.T) {
 		dm:      dm,
 	}
 
-	actual, err := as.Get(context.Background(), "my-app")
+	got, err := as.Get(context.Background(), "my-app")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := &App{
+	want := &App{
 		Name:    "app1",
 		Project: "my-project",
 		Region:  "us-west1",
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("Get() mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -81,12 +81,12 @@ func TestAppService_List(t *testing.T) {
 		dm:      dm,
 	}
 
-	actual, err := as.List(context.Background())
+	got, err := as.List(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := []App{
+	want := []App{
 		{
 			Name:    "app1",
 			Project: "my-project",
@@ -94,8 +94,8 @@ func TestAppService_List(t *testing.T) {
 		},
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("List() mismatch (-want +got):\n%s", diff)
 	}
 }
 

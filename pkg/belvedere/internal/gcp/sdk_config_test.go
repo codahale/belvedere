@@ -14,18 +14,18 @@ func TestSDKConfig(t *testing.T) {
 	}
 	defer func() { sdkPath = oldSdkPath }()
 
-	actual, err := SDKConfig()
+	got, err := SDKConfig()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := map[string]map[string]string{
+	want := map[string]map[string]string{
 		"":      {"bare": "1"},
 		"core":  {"project": "boop"},
 		"other": {"yes": "no"},
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("SDKConfig() mismatch (-want +got):\n%s", diff)
 	}
 }

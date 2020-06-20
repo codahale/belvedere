@@ -28,7 +28,7 @@ func TestTableOutput_Print(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := `
+	want := `
 +-------+-----------+
 | Name  | Regular   |
 +-------+-----------+
@@ -36,10 +36,9 @@ func TestTableOutput_Print(t *testing.T) {
 | three | four five |
 +-------+-----------+
 `
-	actual := "\n" + buf.String()
-
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	got := "\n" + buf.String()
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("Table output mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -55,14 +54,14 @@ func TestCSVOutput_Print(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := `
+	want := `
 Name,Regular
 one,two
 `
-	actual := "\n" + buf.String()
+	got := "\n" + buf.String()
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("CSV output mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -78,13 +77,13 @@ func TestJSONOutput_Print(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := `
+	want := `
 {"Name":"one","Weird":"two"}
 `
-	actual := "\n" + buf.String()
+	got := "\n" + buf.String()
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("JSON output mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -100,16 +99,16 @@ func TestPrettyJSONOutput_Print(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := `
+	want := `
 {
   "Name": "one",
   "Weird": "two"
 }
 `
-	actual := "\n" + buf.String()
+	got := "\n" + buf.String()
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("Pretty JSON output mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -125,14 +124,14 @@ func TestYamlOutput_Print(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := `
+	want := `
 Name: one
 Weird: two
 
 `
-	actual := "\n" + buf.String()
+	got := "\n" + buf.String()
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("YAML output mismatch (-want +got):\n%s", diff)
 	}
 }

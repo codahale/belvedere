@@ -22,8 +22,9 @@ func TestModifyLoop_Success(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if expected, actual := 1, n; expected != actual {
-		t.Fatal(cmp.Diff(expected, actual))
+	want, got := 1, n
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("ModifyLoop count mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -41,8 +42,9 @@ func TestModifyLoop_PreconditionFailed(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if expected, actual := 3, n; expected != actual {
-		t.Fatal(cmp.Diff(expected, actual))
+	want, got := 3, n
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("ModifyLoop count mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -60,8 +62,9 @@ func TestModifyLoop_InitialFailure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if expected, actual := 3, n; expected != actual {
-		t.Fatal(cmp.Diff(expected, actual))
+	want, got := 3, n
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("ModifyLoop count mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -95,7 +98,8 @@ func TestModifyLoopFatalFailure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if expected, actual := 1, n; expected != actual {
-		t.Fatal(cmp.Diff(expected, actual))
+	want, got := 1, n
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("ModifyLoop count mismatch (-want +got):\n%s", diff)
 	}
 }

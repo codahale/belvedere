@@ -41,12 +41,12 @@ func TestReleaseService_List(t *testing.T) {
 		project: "my-project",
 		dm:      dm,
 	}
-	actual, err := service.List(context.Background(), "")
+	got, err := service.List(context.Background(), "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := []Release{
+	want := []Release{
 		{
 			Project: "my-project",
 			App:     "my-app",
@@ -56,8 +56,8 @@ func TestReleaseService_List(t *testing.T) {
 		},
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("List() mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -92,12 +92,12 @@ func TestReleaseService_List_withApp(t *testing.T) {
 		project: "my-project",
 		dm:      dm,
 	}
-	actual, err := service.List(context.Background(), "my-app")
+	got, err := service.List(context.Background(), "my-app")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := []Release{
+	want := []Release{
 		{
 			Project: "my-project",
 			App:     "my-app",
@@ -107,8 +107,8 @@ func TestReleaseService_List_withApp(t *testing.T) {
 		},
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("List() mismatch (-want +got):\n%s", diff)
 	}
 }
 

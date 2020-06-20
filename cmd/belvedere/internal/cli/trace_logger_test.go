@@ -97,10 +97,10 @@ func TestTraceLogger_ExportSpan(t *testing.T) {
 			out := bytes.NewBuffer(nil)
 			exporter := NewTraceLogger(out)
 			exporter.ExportSpan(test.span)
-			expected := test.output
-			actual := out.String()
-			if !cmp.Equal(expected, actual) {
-				t.Fatal(cmp.Diff(expected, actual))
+			want := test.output
+			got := out.String()
+			if diff := cmp.Diff(want, got); diff != "" {
+				t.Errorf("Output mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}

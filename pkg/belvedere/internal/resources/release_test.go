@@ -50,7 +50,7 @@ func TestDockerArgs(t *testing.T) {
 		DockerOptions: []string{"--privileged"},
 	}
 
-	expected := []string{
+	want := []string{
 		"--log-driver", "gcplogs",
 		"--log-opt", "labels=alphabet,env",
 		"--name", "my-example",
@@ -65,14 +65,14 @@ func TestDockerArgs(t *testing.T) {
 		"gcr.io/example/example@sha256:123456",
 		"/usr/bin/example", "-h", "-y",
 	}
-	actual := dockerArgs(container, "my-example", "v3", "123456",
+	got := dockerArgs(container, "my-example", "v3", "123456",
 		map[string]string{
 			"env":      "qa",
 			"alphabet": "latin",
 		})
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("dockerArgs() mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -87,7 +87,7 @@ func TestDockerArgsEmptyCommand(t *testing.T) {
 		DockerOptions: []string{"--privileged"},
 	}
 
-	expected := []string{
+	want := []string{
 		"--log-driver", "gcplogs",
 		"--log-opt", "labels=alphabet,env",
 		"--name", "my-example",
@@ -102,14 +102,14 @@ func TestDockerArgsEmptyCommand(t *testing.T) {
 		"gcr.io/example/example@sha256:123456",
 		"-h", "-y",
 	}
-	actual := dockerArgs(container, "my-example", "v3", "123456",
+	got := dockerArgs(container, "my-example", "v3", "123456",
 		map[string]string{
 			"env":      "qa",
 			"alphabet": "latin",
 		})
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("dockerArgs() mismatch (-want +got):\n%s", diff)
 	}
 }
 

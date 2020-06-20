@@ -29,18 +29,18 @@ func TestProject_DNSServers(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	actual, err := s.DNSServers(context.Background())
+	got, err := s.DNSServers(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := []DNSServer{
+	want := []DNSServer{
 		{Hostname: "ns1.example.com"},
 		{Hostname: "ns2.example.com"},
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("DNSServers() mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -99,12 +99,12 @@ func TestProject_Instances(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	actual, err := s.Instances(context.Background(), "", "")
+	got, err := s.Instances(context.Background(), "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := []Instance{
+	want := []Instance{
 		{
 			Name:        "another-app-1",
 			MachineType: "n1-standard-1",
@@ -125,8 +125,8 @@ func TestProject_Instances(t *testing.T) {
 		},
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("Instances() mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -175,12 +175,12 @@ func TestProject_InstancesApp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	actual, err := s.Instances(context.Background(), "my-app", "")
+	got, err := s.Instances(context.Background(), "my-app", "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := []Instance{
+	want := []Instance{
 		{
 			Name:        "my-app-1",
 			MachineType: "n1-standard-1",
@@ -195,8 +195,8 @@ func TestProject_InstancesApp(t *testing.T) {
 		},
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("Instances() mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -231,12 +231,12 @@ func TestProject_InstancesAppRelease(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	actual, err := s.Instances(context.Background(), "my-app", "v2")
+	got, err := s.Instances(context.Background(), "my-app", "v2")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := []Instance{
+	want := []Instance{
 		{
 			Name:        "my-app-2",
 			MachineType: "n1-standard-1",
@@ -245,8 +245,8 @@ func TestProject_InstancesAppRelease(t *testing.T) {
 		},
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("Instances() mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -300,12 +300,12 @@ func TestProject_MachineTypes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	actual, err := s.MachineTypes(context.Background(), "us-central1")
+	got, err := s.MachineTypes(context.Background(), "us-central1")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := []MachineType{
+	want := []MachineType{
 		{
 			Name:   "n1-standard-1",
 			CPU:    2,
@@ -318,7 +318,7 @@ func TestProject_MachineTypes(t *testing.T) {
 		},
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Error(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("MachineTypes() mismatch (-want +got):\n%s", diff)
 	}
 }

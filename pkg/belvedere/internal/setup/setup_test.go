@@ -28,12 +28,12 @@ func TestService_ManagedZone(t *testing.T) {
 			DnsName: "my-dns",
 		})
 
-	actual, err := s.ManagedZone(context.Background(), "my-project")
+	got, err := s.ManagedZone(context.Background(), "my-project")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := &dns.ManagedZone{
+	want := &dns.ManagedZone{
 		DnsName: "my-dns",
 		ServerResponse: googleapi.ServerResponse{
 			HTTPStatusCode: http.StatusOK,
@@ -41,7 +41,7 @@ func TestService_ManagedZone(t *testing.T) {
 		},
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("ManagedZone() mismatch (-want +got):\n%s", diff)
 	}
 }

@@ -15,7 +15,16 @@ import (
 )
 
 func TestLabelsToEntries(t *testing.T) {
-	expected := []*deploymentmanager.DeploymentLabelEntry{
+	labels := Labels{
+		Type:    "release",
+		Region:  "us-west1",
+		App:     "my-app",
+		Release: "v1",
+		Hash:    "12345",
+	}
+	got := labelsToEntries(&labels)
+
+	want := []*deploymentmanager.DeploymentLabelEntry{
 		{
 			Key:   "belvedere-app",
 			Value: "my-app",
@@ -38,22 +47,13 @@ func TestLabelsToEntries(t *testing.T) {
 		},
 	}
 
-	labels := Labels{
-		Type:    "release",
-		Region:  "us-west1",
-		App:     "my-app",
-		Release: "v1",
-		Hash:    "12345",
-	}
-	actual := labelsToEntries(&labels)
-
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("labelsToEntries() mismatch (-want +got):\n%s", diff)
 	}
 }
 
 func TestEntriesToLabels(t *testing.T) {
-	actual := entriesToLabels([]*deploymentmanager.DeploymentLabelEntry{
+	got := entriesToLabels([]*deploymentmanager.DeploymentLabelEntry{
 		{
 			Key:   "belvedere-type",
 			Value: "release",
@@ -76,7 +76,7 @@ func TestEntriesToLabels(t *testing.T) {
 		},
 	})
 
-	expected := Labels{
+	want := Labels{
 		Type:    "release",
 		Region:  "us-west1",
 		App:     "my-app",
@@ -84,8 +84,8 @@ func TestEntriesToLabels(t *testing.T) {
 		Hash:    "12345",
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Fatal(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("entriesToLabels() mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -253,12 +253,12 @@ func TestManager_List(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	actual, err := dm.List(context.Background(), "my-project", "bobs eq 1")
+	got, err := dm.List(context.Background(), "my-project", "bobs eq 1")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := []Deployment{
+	want := []Deployment{
 		{
 			Name: "belvedere-base",
 			Labels: Labels{
@@ -275,8 +275,8 @@ func TestManager_List(t *testing.T) {
 		},
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Error(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("List() mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -301,19 +301,19 @@ func TestManager_Get(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	actual, err := dm.Get(context.Background(), "my-project", "belvedere-base")
+	got, err := dm.Get(context.Background(), "my-project", "belvedere-base")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := &Deployment{
+	want := &Deployment{
 		Name: "belvedere-base",
 		Labels: Labels{
 			Type: "base",
 		},
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Error(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("Get() mismatch (-want +got):\n%s", diff)
 	}
 }

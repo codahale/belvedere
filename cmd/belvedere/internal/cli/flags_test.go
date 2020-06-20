@@ -41,8 +41,9 @@ func TestGlobalFlags_Quiet(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if !cmp.Equal(testCase.quiet, gf.Quiet) {
-				t.Fatal(cmp.Diff(testCase.quiet, gf.Quiet))
+			want, got := testCase.quiet, gf.Quiet
+			if diff := cmp.Diff(want, got); diff != "" {
+				t.Errorf("Quiet mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -76,8 +77,9 @@ func TestGlobalFlags_Debug(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if !cmp.Equal(testCase.debug, gf.Debug) {
-				t.Fatal(cmp.Diff(testCase.debug, gf.Debug))
+			want, got := testCase.debug, gf.Debug
+			if diff := cmp.Diff(want, got); diff != "" {
+				t.Errorf("Debug mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -111,8 +113,9 @@ func TestGlobalFlags_Timeout(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if !cmp.Equal(testCase.timeout, gf.Timeout) {
-				t.Fatal(cmp.Diff(testCase.timeout, gf.Timeout))
+			want, got := testCase.timeout, gf.Timeout
+			if diff := cmp.Diff(want, got); diff != "" {
+				t.Errorf("Timeout mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -146,8 +149,9 @@ func TestGlobalFlags_Project(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if !cmp.Equal(testCase.project, gf.Project) {
-				t.Fatal(cmp.Diff(testCase.project, gf.Project))
+			want, got := testCase.project, gf.Project
+			if diff := cmp.Diff(want, got); diff != "" {
+				t.Errorf("Project mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -181,8 +185,9 @@ func TestGlobalFlags_Format(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if !cmp.Equal(testCase.format, gf.Format) {
-				t.Fatal(cmp.Diff(testCase.format, gf.Format))
+			want, got := testCase.format, gf.Format
+			if diff := cmp.Diff(want, got); diff != "" {
+				t.Errorf("Format mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -216,8 +221,9 @@ func TestModifyFlags_DryRun(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if !cmp.Equal(testCase.dryRun, mf.DryRun) {
-				t.Fatal(cmp.Diff(testCase.dryRun, mf.DryRun))
+			want, got := testCase.dryRun, mf.DryRun
+			if diff := cmp.Diff(want, got); diff != "" {
+				t.Errorf("DryRun mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -251,8 +257,9 @@ func TestLongRunningFlags_Interval(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if !cmp.Equal(testCase.interval, lrf.Interval) {
-				t.Fatal(cmp.Diff(testCase.interval, lrf.Interval))
+			want, got := testCase.interval, lrf.Interval
+			if diff := cmp.Diff(want, got); diff != "" {
+				t.Errorf("Interval mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -286,8 +293,9 @@ func TestAsyncFlags_Async(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if !cmp.Equal(testCase.async, af.Async) {
-				t.Fatal(cmp.Diff(testCase.async, af.Async))
+			want, got := testCase.async, af.Async
+			if diff := cmp.Diff(want, got); diff != "" {
+				t.Errorf("Async mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}

@@ -14,12 +14,12 @@ func TestParse(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	actual, err := Parse(b)
+	got, err := Parse(b)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := &Config{
+	want := &Config{
 		MachineType: "n1-standard-1",
 		NumReplicas: 2,
 		Container: Container{
@@ -73,7 +73,7 @@ func TestParse(t *testing.T) {
 		Subnetwork: "regions/region/subnetworks/subnetwork",
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Error(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("Parse() mismatch (-want +got):\n%s", diff)
 	}
 }

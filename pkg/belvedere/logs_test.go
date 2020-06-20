@@ -51,12 +51,12 @@ func TestLogService_List(t *testing.T) {
 		},
 	}
 
-	actual, err := s.List(context.Background(), "my-app", "", "", 15*time.Minute, []string{"health"})
+	got, err := s.List(context.Background(), "my-app", "", "", 15*time.Minute, []string{"health"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := []LogEntry{
+	want := []LogEntry{
 		{
 			Timestamp: time.Date(2019, 6, 25, 14, 55, 1, 0, time.UTC),
 			Release:   "v2",
@@ -66,7 +66,7 @@ func TestLogService_List(t *testing.T) {
 		},
 	}
 
-	if !cmp.Equal(expected, actual) {
-		t.Error(cmp.Diff(expected, actual))
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("Logs() mismatch (-want +got):\n%s", diff)
 	}
 }
