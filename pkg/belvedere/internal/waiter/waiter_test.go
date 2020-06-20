@@ -6,6 +6,9 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"github.com/codahale/belvedere/internal/assert"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func TestPoll(t *testing.T) {
@@ -20,17 +23,16 @@ func TestPoll(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if n != 10 {
-		t.Errorf("Expected 10 but was %v", n)
-	}
+	assert.Equal(t, "Poll count", uint64(10), n)
 }
 
 func TestPollError(t *testing.T) {
+	want := fmt.Errorf("error")
 	var n uint64
 	op := func() (bool, error) {
 		i := atomic.AddUint64(&n, 1)
 		if i == 5 {
-			return false, fmt.Errorf("weird number: %d", i)
+			return false, want
 		}
 		return i == 10, nil
 	}
@@ -40,17 +42,8 @@ func TestPollError(t *testing.T) {
 
 	err := Poll(ctx, 200*time.Millisecond, op)
 
-	if err == nil {
-		t.Fatal("Expected an error but none returned")
-	}
-
-	if err.Error() != "weird number: 5" {
-		t.Errorf("Unexpected error: %s", err)
-	}
-
-	if n != 5 {
-		t.Errorf("Expected 10 but was %v", n)
-	}
+	assert.Equal(t, "Poll error", want, err, cmpopts.EquateErrors())
+	assert.Equal(t, "Poll count", uint64(5), n)
 }
 
 func TestPollTimeout(t *testing.T) {
@@ -63,13 +56,7 @@ func TestPollTimeout(t *testing.T) {
 	defer cancel()
 	err := Poll(ctx, 200*time.Millisecond, op)
 
-	if err == nil {
-		t.Fatal("Expected an error but none returned")
-	}
-
-	if err != context.DeadlineExceeded {
-		t.Errorf("Unexpected error: %s", err)
-	}
+	assert.Equal(t, "Poll timeout error", context.DeadlineExceeded, err, cmpopts.EquateErrors())
 }
 
 func TestPollCancelled(t *testing.T) {
@@ -87,11 +74,5 @@ func TestPollCancelled(t *testing.T) {
 	}()
 	err := Poll(ctx, 1*time.Second, op)
 
-	if err == nil {
-		t.Fatal("Expected an error but none returned")
-	}
-
-	if err != context.Canceled {
-		t.Errorf("Unexpected error: %s", err)
-	}
+	assert.Equal(t, "Poll timeout error", context.Canceled, err, cmpopts.EquateErrors())
 }

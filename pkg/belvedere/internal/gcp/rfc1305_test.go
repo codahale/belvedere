@@ -3,6 +3,9 @@ package gcp
 import (
 	"strings"
 	"testing"
+
+	"github.com/codahale/belvedere/internal/assert"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func TestValidateRFC1035(t *testing.T) {
@@ -11,9 +14,8 @@ func TestValidateRFC1035(t *testing.T) {
 		strings.Repeat("a", 63),
 	}
 	for _, val := range goodValues {
-		if err := ValidateRFC1035(val); err != nil {
-			t.Errorf("expected valid for '%s': %v", val, err)
-		}
+		err := ValidateRFC1035(val)
+		assert.Equal(t, "ValidateRFC1305() error", nil, err, cmpopts.EquateErrors())
 	}
 
 	badValues := []string{
