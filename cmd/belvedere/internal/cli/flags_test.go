@@ -30,17 +30,19 @@ func TestGlobalFlags_Quiet(t *testing.T) {
 			quiet: true,
 		},
 	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
+
+	for _, v := range tests {
+		testCase := v
+		t.Run(testCase.name, func(t *testing.T) {
 			fs := pflag.NewFlagSet("test", pflag.PanicOnError)
 			gf := GlobalFlags{}
 			gf.Register(fs)
-			if err := fs.Parse(test.args); err != nil {
+			if err := fs.Parse(testCase.args); err != nil {
 				t.Fatal(err)
 			}
 
-			if !cmp.Equal(test.quiet, gf.Quiet) {
-				t.Fatal(cmp.Diff(test.quiet, gf.Quiet))
+			if !cmp.Equal(testCase.quiet, gf.Quiet) {
+				t.Fatal(cmp.Diff(testCase.quiet, gf.Quiet))
 			}
 		})
 	}
@@ -63,17 +65,19 @@ func TestGlobalFlags_Debug(t *testing.T) {
 			debug: true,
 		},
 	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
+
+	for _, v := range tests {
+		testCase := v
+		t.Run(testCase.name, func(t *testing.T) {
 			fs := pflag.NewFlagSet("test", pflag.PanicOnError)
 			gf := GlobalFlags{}
 			gf.Register(fs)
-			if err := fs.Parse(test.args); err != nil {
+			if err := fs.Parse(testCase.args); err != nil {
 				t.Fatal(err)
 			}
 
-			if !cmp.Equal(test.debug, gf.Debug) {
-				t.Fatal(cmp.Diff(test.debug, gf.Debug))
+			if !cmp.Equal(testCase.debug, gf.Debug) {
+				t.Fatal(cmp.Diff(testCase.debug, gf.Debug))
 			}
 		})
 	}
@@ -96,17 +100,19 @@ func TestGlobalFlags_Timeout(t *testing.T) {
 			timeout: 5 * time.Minute,
 		},
 	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
+
+	for _, v := range tests {
+		testCase := v
+		t.Run(testCase.name, func(t *testing.T) {
 			fs := pflag.NewFlagSet("test", pflag.PanicOnError)
 			gf := GlobalFlags{}
 			gf.Register(fs)
-			if err := fs.Parse(test.args); err != nil {
+			if err := fs.Parse(testCase.args); err != nil {
 				t.Fatal(err)
 			}
 
-			if !cmp.Equal(test.timeout, gf.Timeout) {
-				t.Fatal(cmp.Diff(test.timeout, gf.Timeout))
+			if !cmp.Equal(testCase.timeout, gf.Timeout) {
+				t.Fatal(cmp.Diff(testCase.timeout, gf.Timeout))
 			}
 		})
 	}
@@ -129,17 +135,19 @@ func TestGlobalFlags_Project(t *testing.T) {
 			project: "example",
 		},
 	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
+
+	for _, v := range tests {
+		testCase := v
+		t.Run(testCase.name, func(t *testing.T) {
 			fs := pflag.NewFlagSet("test", pflag.PanicOnError)
 			gf := GlobalFlags{}
 			gf.Register(fs)
-			if err := fs.Parse(test.args); err != nil {
+			if err := fs.Parse(testCase.args); err != nil {
 				t.Fatal(err)
 			}
 
-			if !cmp.Equal(test.project, gf.Project) {
-				t.Fatal(cmp.Diff(test.project, gf.Project))
+			if !cmp.Equal(testCase.project, gf.Project) {
+				t.Fatal(cmp.Diff(testCase.project, gf.Project))
 			}
 		})
 	}
@@ -162,17 +170,19 @@ func TestGlobalFlags_Format(t *testing.T) {
 			format: "json",
 		},
 	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
+
+	for _, v := range tests {
+		testCase := v
+		t.Run(testCase.name, func(t *testing.T) {
 			fs := pflag.NewFlagSet("test", pflag.PanicOnError)
 			gf := GlobalFlags{}
 			gf.Register(fs)
-			if err := fs.Parse(test.args); err != nil {
+			if err := fs.Parse(testCase.args); err != nil {
 				t.Fatal(err)
 			}
 
-			if !cmp.Equal(test.format, gf.Format) {
-				t.Fatal(cmp.Diff(test.format, gf.Format))
+			if !cmp.Equal(testCase.format, gf.Format) {
+				t.Fatal(cmp.Diff(testCase.format, gf.Format))
 			}
 		})
 	}
@@ -195,17 +205,19 @@ func TestModifyFlags_DryRun(t *testing.T) {
 			dryRun: true,
 		},
 	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
+
+	for _, v := range tests {
+		testCase := v
+		t.Run(testCase.name, func(t *testing.T) {
 			fs := pflag.NewFlagSet("test", pflag.PanicOnError)
 			mf := ModifyFlags{}
 			mf.Register(fs)
-			if err := fs.Parse(test.args); err != nil {
+			if err := fs.Parse(testCase.args); err != nil {
 				t.Fatal(err)
 			}
 
-			if !cmp.Equal(test.dryRun, mf.DryRun) {
-				t.Fatal(cmp.Diff(test.dryRun, mf.DryRun))
+			if !cmp.Equal(testCase.dryRun, mf.DryRun) {
+				t.Fatal(cmp.Diff(testCase.dryRun, mf.DryRun))
 			}
 		})
 	}
@@ -228,17 +240,19 @@ func TestLongRunningFlags_Interval(t *testing.T) {
 			interval: 5 * time.Minute,
 		},
 	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
+
+	for _, v := range tests {
+		testCase := v
+		t.Run(testCase.name, func(t *testing.T) {
 			fs := pflag.NewFlagSet("test", pflag.PanicOnError)
 			lrf := LongRunningFlags{}
 			lrf.Register(fs)
-			if err := fs.Parse(test.args); err != nil {
+			if err := fs.Parse(testCase.args); err != nil {
 				t.Fatal(err)
 			}
 
-			if !cmp.Equal(test.interval, lrf.Interval) {
-				t.Fatal(cmp.Diff(test.interval, lrf.Interval))
+			if !cmp.Equal(testCase.interval, lrf.Interval) {
+				t.Fatal(cmp.Diff(testCase.interval, lrf.Interval))
 			}
 		})
 	}
@@ -261,17 +275,19 @@ func TestAsyncFlags_Async(t *testing.T) {
 			async: true,
 		},
 	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
+
+	for _, v := range tests {
+		testCase := v
+		t.Run(testCase.name, func(t *testing.T) {
 			fs := pflag.NewFlagSet("test", pflag.PanicOnError)
 			af := AsyncFlags{}
 			af.Register(fs)
-			if err := fs.Parse(test.args); err != nil {
+			if err := fs.Parse(testCase.args); err != nil {
 				t.Fatal(err)
 			}
 
-			if !cmp.Equal(test.async, af.Async) {
-				t.Fatal(cmp.Diff(test.async, af.Async))
+			if !cmp.Equal(testCase.async, af.Async) {
+				t.Fatal(cmp.Diff(testCase.async, af.Async))
 			}
 		})
 	}
