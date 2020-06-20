@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/codahale/belvedere/internal/assert"
 	compute "google.golang.org/api/compute/v1"
 )
 
@@ -73,7 +73,5 @@ func TestParse(t *testing.T) {
 		Subnetwork: "regions/region/subnetworks/subnetwork",
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("Parse() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "Parse()", want, got)
 }

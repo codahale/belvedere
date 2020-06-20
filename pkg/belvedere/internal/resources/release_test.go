@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/codahale/belvedere/internal/assert"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/fixtures"
-	"github.com/google/go-cmp/cmp"
 	compute "google.golang.org/api/compute/v1"
 )
 
@@ -71,9 +71,7 @@ func TestDockerArgs(t *testing.T) {
 			"alphabet": "latin",
 		})
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("dockerArgs() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "dockerArgs()", want, got)
 }
 
 func TestDockerArgsEmptyCommand(t *testing.T) {
@@ -108,9 +106,7 @@ func TestDockerArgsEmptyCommand(t *testing.T) {
 			"alphabet": "latin",
 		})
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("dockerArgs() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "dockerArgs()", want, got)
 }
 
 func TestCloudConfig(t *testing.T) {

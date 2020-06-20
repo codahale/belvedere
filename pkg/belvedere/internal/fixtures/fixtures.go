@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/codahale/belvedere/internal/assert"
 )
 
 // Compare validates that the contents of the given file are the same as the given bytes. If the
@@ -25,7 +25,5 @@ func Compare(t *testing.T, filename string, got []byte) {
 		t.Fatal(err)
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("%s mismatch (-want +got):\n%s", filename, diff)
-	}
+	assert.Equal(t, filename, want, got)
 }

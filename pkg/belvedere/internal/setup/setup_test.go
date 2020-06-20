@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/codahale/belvedere/internal/assert"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
-	"github.com/google/go-cmp/cmp"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/option"
@@ -41,7 +41,5 @@ func TestService_ManagedZone(t *testing.T) {
 		},
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("ManagedZone() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "ManagedZone()", want, got)
 }

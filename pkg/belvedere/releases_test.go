@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/codahale/belvedere/internal/assert"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	"github.com/golang/mock/gomock"
-	"github.com/google/go-cmp/cmp"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -56,9 +56,7 @@ func TestReleaseService_List(t *testing.T) {
 		},
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("List() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "List()", want, got)
 }
 
 func TestReleaseService_List_withApp(t *testing.T) {
@@ -107,9 +105,7 @@ func TestReleaseService_List_withApp(t *testing.T) {
 		},
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("List() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "List()", want, got)
 }
 
 func TestReleaseService_Create(t *testing.T) {

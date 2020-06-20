@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/codahale/belvedere/internal/assert"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
-	"github.com/google/go-cmp/cmp"
 	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
@@ -95,8 +95,5 @@ func TestGCEError(t *testing.T) {
 	}
 
 	want := `operation failed: {"errors":[{"code":"ERR_MAGIC_HAT","location":"/great-hall","message":"Bad personality test"}]}`
-	got := err.Error()
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf(" GCE error mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "GCE() error", want, err.Error())
 }

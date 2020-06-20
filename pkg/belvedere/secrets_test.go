@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/codahale/belvedere/internal/assert"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
-	"github.com/google/go-cmp/cmp"
 	"google.golang.org/api/option"
 	"google.golang.org/api/secretmanager/v1"
 	"gopkg.in/h2non/gock.v1"
@@ -53,9 +53,7 @@ func TestSecretsService_List(t *testing.T) {
 		},
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("List() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "List()", want, got)
 }
 
 func TestSecretsService_Create(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/codahale/belvedere/internal/assert"
 	"go.opencensus.io/trace"
 )
 
@@ -97,11 +97,8 @@ func TestTraceLogger_ExportSpan(t *testing.T) {
 			out := bytes.NewBuffer(nil)
 			exporter := NewTraceLogger(out)
 			exporter.ExportSpan(test.span)
-			want := test.output
-			got := out.String()
-			if diff := cmp.Diff(want, got); diff != "" {
-				t.Errorf("Output mismatch (-want +got):\n%s", diff)
-			}
+
+			assert.Equal(t, "Output", test.output, out.String())
 		})
 	}
 }

@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/codahale/belvedere/internal/assert"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
-	"github.com/google/go-cmp/cmp"
 	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/option"
@@ -39,9 +39,7 @@ func TestProject_DNSServers(t *testing.T) {
 		{Hostname: "ns2.example.com"},
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("DNSServers() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "DNSServers()", want, got)
 }
 
 func TestProject_Instances(t *testing.T) {
@@ -125,9 +123,7 @@ func TestProject_Instances(t *testing.T) {
 		},
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("Instances() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "Instances()", want, got)
 }
 
 func TestProject_InstancesApp(t *testing.T) {
@@ -195,9 +191,7 @@ func TestProject_InstancesApp(t *testing.T) {
 		},
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("Instances() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "Instances()", want, got)
 }
 
 func TestProject_InstancesAppRelease(t *testing.T) {
@@ -245,9 +239,7 @@ func TestProject_InstancesAppRelease(t *testing.T) {
 		},
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("Instances() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "Instances()", want, got)
 }
 
 func TestProject_MachineTypes(t *testing.T) {
@@ -318,7 +310,5 @@ func TestProject_MachineTypes(t *testing.T) {
 		},
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("MachineTypes() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "MachineTypes()", want, got)
 }

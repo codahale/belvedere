@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/codahale/belvedere/internal/assert"
 	"github.com/spf13/pflag"
 )
 
@@ -41,10 +41,7 @@ func TestGlobalFlags_Quiet(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			want, got := testCase.quiet, gf.Quiet
-			if diff := cmp.Diff(want, got); diff != "" {
-				t.Errorf("Quiet mismatch (-want +got):\n%s", diff)
-			}
+			assert.Equal(t, "Quiet", testCase.quiet, gf.Quiet)
 		})
 	}
 }
@@ -77,10 +74,7 @@ func TestGlobalFlags_Debug(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			want, got := testCase.debug, gf.Debug
-			if diff := cmp.Diff(want, got); diff != "" {
-				t.Errorf("Debug mismatch (-want +got):\n%s", diff)
-			}
+			assert.Equal(t, "Debug", testCase.debug, gf.Debug)
 		})
 	}
 }
@@ -113,10 +107,7 @@ func TestGlobalFlags_Timeout(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			want, got := testCase.timeout, gf.Timeout
-			if diff := cmp.Diff(want, got); diff != "" {
-				t.Errorf("Timeout mismatch (-want +got):\n%s", diff)
-			}
+			assert.Equal(t, "Timeout", testCase.timeout, gf.Timeout)
 		})
 	}
 }
@@ -149,10 +140,7 @@ func TestGlobalFlags_Project(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			want, got := testCase.project, gf.Project
-			if diff := cmp.Diff(want, got); diff != "" {
-				t.Errorf("Project mismatch (-want +got):\n%s", diff)
-			}
+			assert.Equal(t, "Project", testCase.project, gf.Project)
 		})
 	}
 }
@@ -185,10 +173,7 @@ func TestGlobalFlags_Format(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			want, got := testCase.format, gf.Format
-			if diff := cmp.Diff(want, got); diff != "" {
-				t.Errorf("Format mismatch (-want +got):\n%s", diff)
-			}
+			assert.Equal(t, "Format", testCase.format, gf.Format)
 		})
 	}
 }
@@ -221,10 +206,7 @@ func TestModifyFlags_DryRun(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			want, got := testCase.dryRun, mf.DryRun
-			if diff := cmp.Diff(want, got); diff != "" {
-				t.Errorf("DryRun mismatch (-want +got):\n%s", diff)
-			}
+			assert.Equal(t, "DryRun", testCase.dryRun, mf.DryRun)
 		})
 	}
 }
@@ -257,10 +239,7 @@ func TestLongRunningFlags_Interval(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			want, got := testCase.interval, lrf.Interval
-			if diff := cmp.Diff(want, got); diff != "" {
-				t.Errorf("Interval mismatch (-want +got):\n%s", diff)
-			}
+			assert.Equal(t, "Interval", testCase.interval, lrf.Interval)
 		})
 	}
 }
@@ -293,10 +272,7 @@ func TestAsyncFlags_Async(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			want, got := testCase.async, af.Async
-			if diff := cmp.Diff(want, got); diff != "" {
-				t.Errorf("Async mismatch (-want +got):\n%s", diff)
-			}
+			assert.Equal(t, "Async", testCase.async, af.Async)
 		})
 	}
 }

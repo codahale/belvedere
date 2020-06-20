@@ -4,25 +4,19 @@ import (
 	"os"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/codahale/belvedere/internal/assert"
 )
 
 func TestArgs_String(t *testing.T) {
 	args := &args{args: []string{"one", "two"}}
 
-	want, got := "two", args.String(1)
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("String() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "String()", "two", args.String(1))
 }
 
 func TestArgs_String_Default(t *testing.T) {
 	args := &args{args: []string{"one", "two"}}
 
-	want, got := "", args.String(20)
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("String() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "String()", "", args.String(20))
 }
 
 func TestArgs_File(t *testing.T) {
@@ -36,9 +30,7 @@ func TestArgs_File(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("File() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "File()", want, got)
 }
 
 func TestArgs_File_Default(t *testing.T) {
@@ -56,7 +48,5 @@ func TestArgs_File_Default(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("File() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "File()", want, got)
 }

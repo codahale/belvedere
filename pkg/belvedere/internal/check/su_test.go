@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/codahale/belvedere/internal/assert"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
-	"github.com/google/go-cmp/cmp"
 	"google.golang.org/api/option"
 	"google.golang.org/api/serviceusage/v1"
 	"gopkg.in/h2non/gock.v1"
@@ -90,8 +90,5 @@ func TestSUError(t *testing.T) {
 	}
 
 	want := `operation failed: {"code":500,"message":"nope"}`
-	got := err.Error()
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("SU error mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "SU() error", want, err.Error())
 }

@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/codahale/belvedere/internal/assert"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	"github.com/golang/mock/gomock"
-	"github.com/google/go-cmp/cmp"
 	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/option"
@@ -51,9 +51,7 @@ func TestAppService_Get(t *testing.T) {
 		Region:  "us-west1",
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("Get() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "Get()", want, got)
 }
 
 func TestAppService_List(t *testing.T) {
@@ -94,9 +92,7 @@ func TestAppService_List(t *testing.T) {
 		},
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("List() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "List()", want, got)
 }
 
 func TestAppService_Create(t *testing.T) {

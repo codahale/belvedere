@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/codahale/belvedere/internal/assert"
 	"google.golang.org/api/googleapi"
 )
 
@@ -22,10 +22,7 @@ func TestModifyLoop_Success(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	want, got := 1, n
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("ModifyLoop count mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "ModifyLoop count", 1, n)
 }
 
 func TestModifyLoop_PreconditionFailed(t *testing.T) {
@@ -42,10 +39,7 @@ func TestModifyLoop_PreconditionFailed(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	want, got := 3, n
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("ModifyLoop count mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "ModifyLoop count", 3, n)
 }
 
 func TestModifyLoop_InitialFailure(t *testing.T) {
@@ -62,10 +56,7 @@ func TestModifyLoop_InitialFailure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	want, got := 3, n
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("ModifyLoop count mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "ModifyLoop count", 3, n)
 }
 
 func TestModifyLoop_FinalFailure(t *testing.T) {
@@ -98,8 +89,5 @@ func TestModifyLoopFatalFailure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	want, got := 1, n
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("ModifyLoop count mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "ModifyLoop count", 1, n)
 }

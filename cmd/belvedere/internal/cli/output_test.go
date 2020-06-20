@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/codahale/belvedere/internal/assert"
 )
 
 type example struct {
@@ -37,9 +37,7 @@ func TestTableOutput_Print(t *testing.T) {
 +-------+-----------+
 `
 	got := "\n" + buf.String()
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("Table output mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "Table", want, got)
 }
 
 func TestCSVOutput_Print(t *testing.T) {
@@ -60,9 +58,7 @@ one,two
 `
 	got := "\n" + buf.String()
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("CSV output mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "CSV", want, got)
 }
 
 func TestJSONOutput_Print(t *testing.T) {
@@ -82,9 +78,7 @@ func TestJSONOutput_Print(t *testing.T) {
 `
 	got := "\n" + buf.String()
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("JSON output mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "JSON", want, got)
 }
 
 func TestPrettyJSONOutput_Print(t *testing.T) {
@@ -107,9 +101,7 @@ func TestPrettyJSONOutput_Print(t *testing.T) {
 `
 	got := "\n" + buf.String()
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("Pretty JSON output mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "Pretty JSON", want, got)
 }
 
 func TestYamlOutput_Print(t *testing.T) {
@@ -131,7 +123,5 @@ Weird: two
 `
 	got := "\n" + buf.String()
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("YAML output mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "YAML", want, got)
 }

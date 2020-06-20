@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/codahale/belvedere/internal/assert"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
-	"github.com/google/go-cmp/cmp"
 	"google.golang.org/api/deploymentmanager/v2"
 	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
@@ -95,9 +95,5 @@ func TestDMError(t *testing.T) {
 	}
 
 	want := `operation failed: {"errors":[{"code":"ERR_BAD_NEWS","location":"/downtown","message":"here comes Mongo"}]}`
-	got := err.Error()
-
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("DM error mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "DM() error", want, err.Error())
 }

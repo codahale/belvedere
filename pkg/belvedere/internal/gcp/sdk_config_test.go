@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/codahale/belvedere/internal/assert"
 )
 
 func TestSDKConfig(t *testing.T) {
@@ -25,7 +25,5 @@ func TestSDKConfig(t *testing.T) {
 		"other": {"yes": "no"},
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("SDKConfig() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "SDKConfig()", want, got)
 }

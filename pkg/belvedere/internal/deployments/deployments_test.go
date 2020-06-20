@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/codahale/belvedere/internal/assert"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
-	"github.com/google/go-cmp/cmp"
 	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/deploymentmanager/v2"
 	"google.golang.org/api/option"
@@ -47,9 +47,7 @@ func TestLabelsToEntries(t *testing.T) {
 		},
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("labelsToEntries() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "labelsToEntries()", want, got)
 }
 
 func TestEntriesToLabels(t *testing.T) {
@@ -84,9 +82,7 @@ func TestEntriesToLabels(t *testing.T) {
 		Hash:    "12345",
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("entriesToLabels() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "entriesToLabels()", want, got)
 }
 
 func TestManager_Insert(t *testing.T) {
@@ -275,9 +271,7 @@ func TestManager_List(t *testing.T) {
 		},
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("List() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "List()", want, got)
 }
 
 func TestManager_Get(t *testing.T) {
@@ -313,7 +307,5 @@ func TestManager_Get(t *testing.T) {
 		},
 	}
 
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("Get() mismatch (-want +got):\n%s", diff)
-	}
+	assert.Equal(t, "Get()", want, got)
 }
