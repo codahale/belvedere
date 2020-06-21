@@ -62,7 +62,7 @@
         "description": "Common WAF rules for Belvedere apps.",
         "rules": [
           {
-            "action": "deny-404",
+            "action": "deny(404)",
             "description": "Deny external access to healthchecks.",
             "match": {
               "expr": {

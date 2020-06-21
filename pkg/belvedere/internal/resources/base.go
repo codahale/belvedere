@@ -66,7 +66,7 @@ func (*builder) Base(dnsZone string) []deployments.Resource {
 				Description: "Common WAF rules for Belvedere apps.",
 				Rules: []*compute.SecurityPolicyRule{
 					{
-						Action:      "deny-404",
+						Action:      "deny(404)",
 						Description: "Deny external access to healthchecks.",
 						Match: &compute.SecurityPolicyRuleMatcher{
 							Expr: &compute.Expr{
