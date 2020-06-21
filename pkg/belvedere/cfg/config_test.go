@@ -68,7 +68,19 @@ func TestParse(t *testing.T) {
 			SignedUrlKeyNames:       []string{"one"},
 			SignedUrlCacheMaxAgeSec: 200,
 		},
-		IAMRoles:   []string{"roles/cloudkms.cryptoKeyDecrypter"},
+		IAMRoles: []string{"roles/cloudkms.cryptoKeyDecrypter"},
+		WAFRules: []*compute.SecurityPolicyRule{
+			{
+				Action:      "deny(403)",
+				Description: "Prevent XSS attacks.",
+				Match: &compute.SecurityPolicyRuleMatcher{
+					Expr: &compute.Expr{
+						Expression: "evaluatePreconfiguredExpr('xss-stable')",
+					},
+				},
+				Priority: 1,
+			},
+		},
 		Network:    "projects/project/global/networks/network",
 		Subnetwork: "regions/region/subnetworks/subnetwork",
 	}

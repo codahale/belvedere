@@ -2,7 +2,6 @@ package resources
 
 import (
 	"fmt"
-	"math"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	compute "google.golang.org/api/compute/v1"
@@ -56,38 +55,6 @@ func (*builder) Base(dnsZone string) []deployments.Resource {
 				// per https://cloud.google.com/iap/docs/using-tcp-forwarding#starting_ssh
 				SourceRanges: []string{"35.235.240.0/20"},
 				TargetTags:   []string{"belvedere"},
-			},
-		},
-		// The Cloud WAF security policy.
-		{
-			Name: "belvedere-waf",
-			Type: "compute.v1.securityPolicy",
-			Properties: &compute.SecurityPolicy{
-				Description: "Common WAF rules for Belvedere apps.",
-				Rules: []*compute.SecurityPolicyRule{
-					{
-						Action:      "deny(404)",
-						Description: "Deny external access to healthchecks.",
-						Match: &compute.SecurityPolicyRuleMatcher{
-							Expr: &compute.Expr{
-								Expression: "request.path.matches('^/healthz')",
-							},
-						},
-						Priority: 100,
-					},
-					{
-						Action:      "allow",
-						Description: "Allow all access by default.",
-						Match: &compute.SecurityPolicyRuleMatcher{
-							Config: &compute.SecurityPolicyRuleMatcherConfig{
-								SrcIpRanges: []string{"*"},
-							},
-							VersionedExpr: "SRC_IPS_V1",
-						},
-
-						Priority: math.MaxInt32,
-					},
-				},
 			},
 		},
 	}

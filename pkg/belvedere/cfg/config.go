@@ -20,6 +20,7 @@ type Config struct {
 	CDNPolicy         *compute.BackendServiceCdnPolicy `json:"cdnPolicy"`
 	Network           string                           `json:"network"`
 	Subnetwork        string                           `json:"subnetwork"`
+	WAFRules          []*compute.SecurityPolicyRule    `json:"wafRules"`
 }
 
 // Parse loads the given bytes as a YAML configuration.

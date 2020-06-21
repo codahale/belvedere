@@ -54,38 +54,6 @@
           "belvedere"
         ]
       }
-    },
-    {
-      "name": "belvedere-waf",
-      "type": "compute.v1.securityPolicy",
-      "properties": {
-        "description": "Common WAF rules for Belvedere apps.",
-        "rules": [
-          {
-            "action": "deny(404)",
-            "description": "Deny external access to healthchecks.",
-            "match": {
-              "expr": {
-                "expression": "request.path.matches('^/healthz')"
-              }
-            },
-            "priority": 100
-          },
-          {
-            "action": "allow",
-            "description": "Allow all access by default.",
-            "match": {
-              "config": {
-                "srcIpRanges": [
-                  "*"
-                ]
-              },
-              "versionedExpr": "SRC_IPS_V1"
-            },
-            "priority": 2147483647
-          }
-        ]
-      }
     }
   ]
 }

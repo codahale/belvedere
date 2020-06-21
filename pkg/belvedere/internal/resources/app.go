@@ -2,6 +2,7 @@ package resources
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
@@ -20,6 +21,7 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 	serviceAccount := fmt.Sprintf("%s-sa", app)
 	dnsRecord := fmt.Sprintf("%s-rrs", app)
 	dnsName := fmt.Sprintf("%s.%s", app, managedZone.DnsName)
+	securityPolicy := fmt.Sprintf("%s-waf", app)
 	resources := []deployments.Resource{
 		// A firewall rule allowing access from the load balancer to application instances on port
 		// 8443.
@@ -74,7 +76,7 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 				},
 				PortName:       "svc-https",
 				Protocol:       "HTTP2",
-				SecurityPolicy: fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/securityPolicies/belvedere-waf", project),
+				SecurityPolicy: deployments.SelfLink(securityPolicy),
 			},
 		},
 		// A URL map directing requests to the backend service while blocking access to the
@@ -143,6 +145,37 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 						Ttl:     50,
 					},
 				},
+			},
+		},
+		// The Cloud WAF security policy.
+		{
+			Name: securityPolicy,
+			Type: "compute.v1.securityPolicy",
+			Properties: &compute.SecurityPolicy{
+				Description: fmt.Sprintf("WAF rules for Belvedere app %s.", app),
+				Rules: append(config.WAFRules,
+					&compute.SecurityPolicyRule{
+						Action:      "deny(404)",
+						Description: "Deny external access to healthchecks.",
+						Match: &compute.SecurityPolicyRuleMatcher{
+							Expr: &compute.Expr{
+								Expression: "request.path.matches('^/healthz')",
+							},
+						},
+						Priority: 1,
+					},
+					&compute.SecurityPolicyRule{
+						Action:      "allow",
+						Description: "Allow all access by default.",
+						Match: &compute.SecurityPolicyRuleMatcher{
+							Config: &compute.SecurityPolicyRuleMatcherConfig{
+								SrcIpRanges: []string{"*"},
+							},
+							VersionedExpr: "SRC_IPS_V1",
+						},
+						Priority: math.MaxInt32,
+					},
+				),
 			},
 		},
 	}

@@ -56,7 +56,7 @@
         },
         "portName": "svc-https",
         "protocol": "HTTP2",
-        "securityPolicy": "https://www.googleapis.com/compute/v1/projects/my-project/global/securityPolicies/belvedere-waf"
+        "securityPolicy": "$(ref.my-app-waf.selfLink)"
       }
     },
     {
@@ -119,6 +119,48 @@
             ],
             "ttl": 50,
             "type": "A"
+          }
+        ]
+      }
+    },
+    {
+      "name": "my-app-waf",
+      "type": "compute.v1.securityPolicy",
+      "properties": {
+        "description": "WAF rules for Belvedere app my-app.",
+        "rules": [
+          {
+            "action": "deny(403)",
+            "description": "Prevent XSS attacks.",
+            "match": {
+              "expr": {
+                "expression": "evaluatePreconfiguredExpr('xss-stable')"
+              }
+            },
+            "priority": 1
+          },
+          {
+            "action": "deny(404)",
+            "description": "Deny external access to healthchecks.",
+            "match": {
+              "expr": {
+                "expression": "request.path.matches('^/healthz')"
+              }
+            },
+            "priority": 1
+          },
+          {
+            "action": "allow",
+            "description": "Allow all access by default.",
+            "match": {
+              "config": {
+                "srcIpRanges": [
+                  "*"
+                ]
+              },
+              "versionedExpr": "SRC_IPS_V1"
+            },
+            "priority": 2147483647
           }
         ]
       }

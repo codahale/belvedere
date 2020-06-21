@@ -40,5 +40,12 @@ cdnPolicy:
   signedUrlCacheMaxAgeSec: "200"
 iamRoles:
   - roles/cloudkms.cryptoKeyDecrypter
+wafRules:
+  - action: deny(403)
+    description: Prevent XSS attacks.
+    match:
+      expr:
+        expression: "evaluatePreconfiguredExpr('xss-stable')"
+    priority: 1
 network: projects/project/global/networks/network
 subnetwork: regions/region/subnetworks/subnetwork
