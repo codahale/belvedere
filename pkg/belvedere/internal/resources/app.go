@@ -2,7 +2,6 @@ package resources
 
 import (
 	"fmt"
-	"math"
 
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
@@ -20,7 +19,6 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 	forwardingRule := fmt.Sprintf("%s-fr", app)
 	serviceAccount := fmt.Sprintf("%s-sa", app)
 	dnsRecord := fmt.Sprintf("%s-rrs", app)
-	securityPolicy := fmt.Sprintf("%s-secpol", app)
 	dnsName := fmt.Sprintf("%s.%s", app, managedZone.DnsName)
 	resources := []deployments.Resource{
 		// A firewall rule allowing access from the load balancer to application instances on port
@@ -76,7 +74,7 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 				},
 				PortName:       "svc-https",
 				Protocol:       "HTTP2",
-				SecurityPolicy: deployments.SelfLink(securityPolicy),
+				SecurityPolicy: fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/securityPolicies/belvedere-waf", project),
 			},
 		},
 		// A URL map directing requests to the backend service while blocking access to the
@@ -143,38 +141,6 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 						Type:    "A",
 						Rrdatas: []string{deployments.Ref(forwardingRule, "IPAddress")},
 						Ttl:     50,
-					},
-				},
-			},
-		},
-		// The Cloud WAF security policy.
-		{
-			Name: securityPolicy,
-			Type: "compute.v1.securityPolicy",
-			Properties: &compute.SecurityPolicy{
-				Description: fmt.Sprintf("WAF rules for Belvedere app %s", app),
-				Rules: []*compute.SecurityPolicyRule{
-					{
-						Action:      "deny-404",
-						Description: "Deny external access to healthchecks.",
-						Match: &compute.SecurityPolicyRuleMatcher{
-							Expr: &compute.Expr{
-								Expression: "request.path.matches('^/healthz/')",
-							},
-						},
-						Priority: 100,
-					},
-					{
-						Action:      "allow",
-						Description: "Allow all access by default.",
-						Match: &compute.SecurityPolicyRuleMatcher{
-							Config: &compute.SecurityPolicyRuleMatcherConfig{
-								SrcIpRanges: []string{"*"},
-							},
-							VersionedExpr: "SRC_IPS_V1",
-						},
-
-						Priority: math.MaxInt32,
 					},
 				},
 			},
