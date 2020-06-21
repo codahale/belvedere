@@ -70,7 +70,7 @@ func (*builder) Base(dnsZone string) []deployments.Resource {
 						Description: "Deny external access to healthchecks.",
 						Match: &compute.SecurityPolicyRuleMatcher{
 							Expr: &compute.Expr{
-								Expression: "request.path.matches('^/healthz/')",
+								Expression: "request.path.matches('^/healthz')",
 							},
 						},
 						Priority: 100,
