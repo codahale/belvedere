@@ -3,7 +3,7 @@
 _A small lookout tower (usually square) on the roof of a house._
 
 Belvedere is a small, opinionated tool for deploying HTTP2-based apps on GCP in an operationally friendly manner.
-It handles load balancing, DNS, TLS certificates, autoscaling, deploys, logging, metrics, tracing, permissions, IAP access control, CDN setup, and more.
+It handles load balancing, DNS, TLS certificates, autoscaling, deploys, logging, metrics, tracing, permissions, IAP access control, CDN setup, WAF rules, and more.
 
 ## Setup
 
