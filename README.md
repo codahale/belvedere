@@ -84,6 +84,7 @@ This will create a Deployment Manager deployment with a bunch of goodies:
 * a global, HTTP2 load balancing stack, with support for QUIC
 * a DNS A record for `my-app.cornbread.club` pointing to the load balancer
 * a Let's Encrypt-provided, Google-managed TLS certificate for `my-app.cornbread.club`
+* a Cloud Armor WAF with configurable rules for protecting your app
 * a service account with the specified IAM roles, plus baked in access to key services:
   - Stackdriver Metrics
   - Stackdriver Logging

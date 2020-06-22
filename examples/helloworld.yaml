@@ -64,6 +64,17 @@ sidecars:
 iamRoles:
   - roles/cloudkms.cryptoKeyDecrypter
 
+# Optionally, a list of Cloud Armor rules. This example matches requests against a Google-managed
+# set of filters which detect potential XSS attacks and intercepts them, returning a 403 error
+# instead.
+wafRules:
+  - action: deny(403)
+    description: Prevent XSS attacks.
+    match:
+      expr:
+        expression: "evaluatePreconfiguredExpr('xss-stable')"
+    priority: 1
+
 # Optionally, the URL of a specific VPC network and subnetwork. If not specified, the application
 # instances will be automatically placed in the default network.
 #network: projects/project/global/networks/network
