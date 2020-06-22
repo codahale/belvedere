@@ -63,10 +63,12 @@ func parseINI(ini io.Reader) (map[string]map[string]string, error) {
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("error scanning ini: %v", err)
+		return nil, fmt.Errorf("error scanning ini: %w", err)
 	}
 	return result, nil
 }
+
+var errNoHomeDir = errors.New("unable to get current user home directory: os/user lookup failed; $HOME is empty")
 
 // nolint:gochecknoglobals
 var sdkPath = func() (string, error) {
@@ -75,7 +77,7 @@ var sdkPath = func() (string, error) {
 	}
 	homeDir := guessUnixHomeDir()
 	if homeDir == "" {
-		return "", errors.New("unable to get current user home directory: os/user lookup failed; $HOME is empty")
+		return "", errNoHomeDir
 	}
 	return filepath.Join(homeDir, ".config", "gcloud"), nil
 }

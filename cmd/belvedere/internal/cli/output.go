@@ -17,6 +17,8 @@ type Output interface {
 	Print(v interface{}) error
 }
 
+var errBadFormat = fmt.Errorf("format must be one of: table, csv, json, prettyjson, yaml")
+
 func NewOutput(w io.Writer, format string) (Output, error) {
 	switch strings.ToLower(format) {
 	case "table":
@@ -30,7 +32,7 @@ func NewOutput(w io.Writer, format string) (Output, error) {
 	case "yaml":
 		return &yamlOutput{w: w}, nil
 	default:
-		return nil, fmt.Errorf("%q is not a valid format (must be one of: table, csv, json, prettyjson, yaml)", format)
+		return nil, errBadFormat
 	}
 }
 
@@ -82,7 +84,7 @@ type jsonOutput struct {
 func (o *jsonOutput) Print(v interface{}) error {
 	t := reflect.TypeOf(v)
 	if t.Kind() != reflect.Slice {
-		return fmt.Errorf("not a slice of structs")
+		return errBadInput
 	}
 
 	iv := reflect.ValueOf(v)
@@ -106,7 +108,7 @@ type prettyJSONOutput struct {
 func (o *prettyJSONOutput) Print(v interface{}) error {
 	t := reflect.TypeOf(v)
 	if t.Kind() != reflect.Slice {
-		return fmt.Errorf("not a slice of structs")
+		return errBadInput
 	}
 
 	iv := reflect.ValueOf(v)
@@ -130,7 +132,7 @@ type yamlOutput struct {
 func (o *yamlOutput) Print(v interface{}) error {
 	t := reflect.TypeOf(v)
 	if t.Kind() != reflect.Slice {
-		return fmt.Errorf("not a slice of structs")
+		return errBadInput
 	}
 
 	iv := reflect.ValueOf(v)
@@ -147,15 +149,17 @@ func (o *yamlOutput) Print(v interface{}) error {
 	return nil
 }
 
+var errBadInput = fmt.Errorf("not a slice of structs")
+
 func toRows(v interface{}) (table.Row, []table.ColumnConfig, []table.Row, error) {
 	t := reflect.TypeOf(v)
 	if t.Kind() != reflect.Slice {
-		return nil, nil, nil, fmt.Errorf("not a slice of structs")
+		return nil, nil, nil, errBadInput
 	}
 
 	t = t.Elem()
 	if t.Kind() != reflect.Struct {
-		return nil, nil, nil, fmt.Errorf("not a slice of structs")
+		return nil, nil, nil, errBadInput
 	}
 
 	var headers table.Row

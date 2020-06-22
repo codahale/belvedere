@@ -33,8 +33,7 @@ func SU(ctx context.Context, su *serviceusage.Service, operation string) waiter.
 			}, "Error")
 
 			// Exit with a maximally descriptive error.
-			j, _ := op.Error.MarshalJSON()
-			return false, fmt.Errorf("operation failed: %s", j)
+			return false, &FailedOperationError{Message: op.Error}
 		}
 
 		// Keep waiting unless the operation is done.

@@ -2,7 +2,7 @@ package waiter
 
 import (
 	"context"
-	"errors"
+	"io"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -27,7 +27,7 @@ func TestPoll(t *testing.T) {
 }
 
 func TestPollError(t *testing.T) {
-	want := errors.New("error")
+	want := io.EOF
 	var n uint64
 	op := func() (bool, error) {
 		i := atomic.AddUint64(&n, 1)

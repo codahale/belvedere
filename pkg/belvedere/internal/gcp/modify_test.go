@@ -1,9 +1,10 @@
 package gcp
 
 import (
+	"context"
+	"errors"
 	"net/http"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
@@ -69,8 +70,8 @@ func TestModifyLoop_FinalFailure(t *testing.T) {
 		return nil
 	})
 
-	if err == nil || !strings.HasPrefix(err.Error(), "timeout after") {
-		t.Fatal("bad error")
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("bad error: %v", err)
 	}
 
 	if n < 1 {
@@ -85,8 +86,8 @@ func TestModifyLoopFatalFailure(t *testing.T) {
 		return os.ErrClosed
 	})
 
-	if err != os.ErrClosed {
-		t.Fatal(err)
+	if !errors.Is(err, os.ErrClosed) {
+		t.Fatalf("bad error: %v", err)
 	}
 
 	assert.Equal(t, "ModifyLoop count", 1, n)

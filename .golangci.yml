@@ -16,6 +16,7 @@ linters:
     - gocyclo
     - godot
     - godox
+    - goerr113
     - gofmt
     - goimports
     - golint
@@ -43,9 +44,11 @@ linters:
     - unused
     - varcheck
     - whitespace
+#    - dupl
 #    - gomnd
-#    - wsl
 #    - lll
+#    - testpackage
+#    - wsl
 
 linters-settings:
   maligned:

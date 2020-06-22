@@ -37,9 +37,9 @@ func DM(ctx context.Context, dm *deploymentmanager.Service, project string, oper
 					trace.StringAttribute("location", e.Location),
 				}, "Error")
 			}
+
 			// Exit with a maximally descriptive error.
-			j, _ := op.Error.MarshalJSON()
-			return false, fmt.Errorf("operation failed: %s", j)
+			return false, &FailedOperationError{Message: op.Error}
 		}
 
 		// Keep waiting unless the operation is done.

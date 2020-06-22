@@ -26,13 +26,15 @@ func (i *args) String(idx int) string {
 	return ""
 }
 
+var errStdinUnreadable = fmt.Errorf("can't read from stdin")
+
 func (i *args) File(idx int) ([]byte, error) {
 	if len(i.args) > idx {
 		return ioutil.ReadFile(i.args[idx])
 	}
 
 	if isTerminal(i.stdin) {
-		return nil, fmt.Errorf("can't read from stdin")
+		return nil, errStdinUnreadable
 	}
 
 	if rc, ok := i.stdin.(io.ReadCloser); ok {

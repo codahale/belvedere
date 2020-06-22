@@ -1,7 +1,7 @@
 package gcp
 
 import (
-	"fmt"
+	"context"
 	"net/http"
 	"time"
 
@@ -26,7 +26,7 @@ func ModifyLoop(interval, timeout time.Duration, f func() error) error {
 				d := bo.NextBackOff()
 				if d == backoff.Stop {
 					// If the total time has elapsed, return an error.
-					return fmt.Errorf("timeout after %s", bo.GetElapsedTime())
+					return context.DeadlineExceeded
 				}
 				time.Sleep(d)
 				continue

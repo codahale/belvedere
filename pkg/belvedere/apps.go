@@ -83,6 +83,15 @@ func (s *appService) List(ctx context.Context) ([]App, error) {
 	return apps, nil
 }
 
+type DownRegionError struct {
+	Region string
+	Status string
+}
+
+func (e *DownRegionError) Error() string {
+	return fmt.Sprintf("region %s is %q", e.Region, e.Status)
+}
+
 func (s *appService) Create(ctx context.Context, region, name string, config *cfg.Config, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.apps.Create")
 	span.AddAttributes(
@@ -103,7 +112,7 @@ func (s *appService) Create(ctx context.Context, region, name string, config *cf
 		return fmt.Errorf("invalid region %q: %w", region, err)
 	}
 	if r.Status != "UP" {
-		return fmt.Errorf("region %q is down", region)
+		return &DownRegionError{Region: region, Status: r.Status}
 	}
 
 	// Find the project's managed zone.

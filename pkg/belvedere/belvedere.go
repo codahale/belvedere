@@ -234,6 +234,8 @@ func (p *project) DNSServers(ctx context.Context) ([]DNSServer, error) {
 	return servers, nil
 }
 
+var ErrNoSDKConfiguration = fmt.Errorf("core.project not found")
+
 func activeProject() (string, error) {
 	// Load SDK config.
 	config, err := gcp.SDKConfig()
@@ -249,7 +251,7 @@ func activeProject() (string, error) {
 	}
 
 	// Complain if core.project doesn't exist.
-	return "", fmt.Errorf("core.project not found")
+	return "", ErrNoSDKConfiguration
 }
 
 // Instance is a Google Compute Engine VM instance.
