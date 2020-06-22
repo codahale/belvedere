@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
+	"github.com/codahale/belvedere/internal/it"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"

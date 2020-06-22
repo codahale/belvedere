@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/codahale/belvedere/internal/assert"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
+	"github.com/codahale/belvedere/internal/it"
 	"google.golang.org/api/deploymentmanager/v2"
 	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"

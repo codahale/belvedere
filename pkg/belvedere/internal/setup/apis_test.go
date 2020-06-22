@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
+	"github.com/codahale/belvedere/internal/it"
 	"google.golang.org/api/option"
 	"google.golang.org/api/serviceusage/v1"
 	"gopkg.in/h2non/gock.v1"

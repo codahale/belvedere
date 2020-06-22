@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/internal/assert"
+	"github.com/codahale/belvedere/internal/it"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
 	"github.com/golang/mock/gomock"
 	"gopkg.in/h2non/gock.v1"
 )

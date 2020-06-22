@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codahale/belvedere/pkg/belvedere/internal/it"
+	"github.com/codahale/belvedere/internal/it"
 	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
