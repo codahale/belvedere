@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codahale/belvedere/cmd/belvedere/internal/mocks"
 	"github.com/codahale/belvedere/pkg/belvedere"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/golang/mock/gomock"
@@ -23,7 +22,7 @@ func TestReleasesList(t *testing.T) {
 		},
 	}
 
-	releases := mocks.NewMockReleaseService(ctrl)
+	releases := NewMockReleaseService(ctrl)
 	releases.EXPECT().
 		List(gomock.Any(), "my-app").
 		Return(list, nil)
@@ -56,7 +55,7 @@ func TestReleasesCreate(t *testing.T) {
 		NumReplicas: 10,
 	}
 
-	releases := mocks.NewMockReleaseService(ctrl)
+	releases := NewMockReleaseService(ctrl)
 	releases.EXPECT().
 		Create(gomock.Any(), "my-app", "my-release", &config, "12345", true, 5*time.Minute)
 
@@ -90,7 +89,7 @@ func TestReleasesCreate_AndEnable(t *testing.T) {
 		NumReplicas: 10,
 	}
 
-	releases := mocks.NewMockReleaseService(ctrl)
+	releases := NewMockReleaseService(ctrl)
 	releases.EXPECT().
 		Enable(gomock.Any(), "my-app", "my-release", true, 5*time.Minute).
 		After(
@@ -129,7 +128,7 @@ func TestReleasesCreate_WithFilename(t *testing.T) {
 		NumReplicas: 10,
 	}
 
-	releases := mocks.NewMockReleaseService(ctrl)
+	releases := NewMockReleaseService(ctrl)
 	releases.EXPECT().
 		Create(gomock.Any(), "my-app", "my-release", &config, "12345", true, 5*time.Minute)
 
@@ -159,7 +158,7 @@ func TestReleasesEnable(t *testing.T) {
 
 	project, _, pf, of := mockFactories(ctrl)
 
-	releases := mocks.NewMockReleaseService(ctrl)
+	releases := NewMockReleaseService(ctrl)
 	releases.EXPECT().
 		Enable(gomock.Any(), "my-app", "my-release", true, 10*time.Minute)
 
@@ -187,7 +186,7 @@ func TestReleasesDisable(t *testing.T) {
 
 	project, _, pf, of := mockFactories(ctrl)
 
-	releases := mocks.NewMockReleaseService(ctrl)
+	releases := NewMockReleaseService(ctrl)
 	releases.EXPECT().
 		Disable(gomock.Any(), "my-app", "my-release", true, 10*time.Minute)
 
@@ -215,7 +214,7 @@ func TestReleasesDelete(t *testing.T) {
 
 	project, _, pf, of := mockFactories(ctrl)
 
-	releases := mocks.NewMockReleaseService(ctrl)
+	releases := NewMockReleaseService(ctrl)
 	releases.EXPECT().
 		Delete(gomock.Any(), "my-app", "my-release", true, true, 10*time.Minute)
 

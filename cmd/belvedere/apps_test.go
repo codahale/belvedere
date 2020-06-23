@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codahale/belvedere/cmd/belvedere/internal/mocks"
 	"github.com/codahale/belvedere/pkg/belvedere"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/golang/mock/gomock"
@@ -23,7 +22,7 @@ func TestAppsList(t *testing.T) {
 		},
 	}
 
-	apps := mocks.NewMockAppService(ctrl)
+	apps := NewMockAppService(ctrl)
 	apps.EXPECT().
 		List(gomock.Any()).
 		Return(list, nil)
@@ -55,7 +54,7 @@ func TestAppsCreate(t *testing.T) {
 		NumReplicas: 10,
 	}
 
-	apps := mocks.NewMockAppService(ctrl)
+	apps := NewMockAppService(ctrl)
 	apps.EXPECT().
 		Create(gomock.Any(), "us-west1", "my-app", &config, true, 10*time.Minute).
 		Return(nil)
@@ -89,7 +88,7 @@ func TestAppsCreate_WithFilename(t *testing.T) {
 		NumReplicas: 10,
 	}
 
-	apps := mocks.NewMockAppService(ctrl)
+	apps := NewMockAppService(ctrl)
 	apps.EXPECT().
 		Create(gomock.Any(), "us-west1", "my-app", &config, true, 10*time.Minute).
 		Return(nil)
@@ -123,7 +122,7 @@ func TestAppsUpdate(t *testing.T) {
 		NumReplicas: 10,
 	}
 
-	apps := mocks.NewMockAppService(ctrl)
+	apps := NewMockAppService(ctrl)
 	apps.EXPECT().
 		Update(gomock.Any(), "my-app", &config, true, 10*time.Minute).
 		Return(nil)
@@ -156,7 +155,7 @@ func TestAppsUpdate_WithFilename(t *testing.T) {
 		NumReplicas: 10,
 	}
 
-	apps := mocks.NewMockAppService(ctrl)
+	apps := NewMockAppService(ctrl)
 	apps.EXPECT().
 		Update(gomock.Any(), "my-app", &config, true, 10*time.Minute).
 		Return(nil)
@@ -185,7 +184,7 @@ func TestAppsDelete(t *testing.T) {
 
 	project, _, pf, of := mockFactories(ctrl)
 
-	apps := mocks.NewMockAppService(ctrl)
+	apps := NewMockAppService(ctrl)
 	apps.EXPECT().
 		Delete(gomock.Any(), "my-app", true, true, 10*time.Minute).
 		Return(nil)

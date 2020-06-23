@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/codahale/belvedere/cmd/belvedere/internal/mocks"
 	"github.com/codahale/belvedere/pkg/belvedere"
 	"github.com/golang/mock/gomock"
 )
@@ -21,7 +20,7 @@ func TestSecretsList(t *testing.T) {
 		},
 	}
 
-	secrets := mocks.NewMockSecretsService(ctrl)
+	secrets := NewMockSecretsService(ctrl)
 	secrets.EXPECT().
 		List(gomock.Any()).
 		Return(list, nil)
@@ -51,7 +50,7 @@ func TestSecretsCreate(t *testing.T) {
 
 	value := []byte(`secret`)
 
-	secrets := mocks.NewMockSecretsService(ctrl)
+	secrets := NewMockSecretsService(ctrl)
 	secrets.EXPECT().
 		Create(gomock.Any(), "my-secret", value, true)
 
@@ -80,7 +79,7 @@ func TestSecretsCreate_WithFilename(t *testing.T) {
 
 	value := []byte("secret\n")
 
-	secrets := mocks.NewMockSecretsService(ctrl)
+	secrets := NewMockSecretsService(ctrl)
 	secrets.EXPECT().
 		Create(gomock.Any(), "my-secret", value, true)
 
@@ -109,7 +108,7 @@ func TestSecretsUpdate(t *testing.T) {
 
 	value := []byte(`secret`)
 
-	secrets := mocks.NewMockSecretsService(ctrl)
+	secrets := NewMockSecretsService(ctrl)
 	secrets.EXPECT().
 		Update(gomock.Any(), "my-secret", value, true)
 
@@ -138,7 +137,7 @@ func TestSecretsUpdate_WithFilename(t *testing.T) {
 
 	value := []byte("secret\n")
 
-	secrets := mocks.NewMockSecretsService(ctrl)
+	secrets := NewMockSecretsService(ctrl)
 	secrets.EXPECT().
 		Update(gomock.Any(), "my-secret", value, true)
 
@@ -165,7 +164,7 @@ func TestSecretsGrant(t *testing.T) {
 
 	project, _, pf, of := mockFactories(ctrl)
 
-	secrets := mocks.NewMockSecretsService(ctrl)
+	secrets := NewMockSecretsService(ctrl)
 	secrets.EXPECT().
 		Grant(gomock.Any(), "my-secret", "my-app", true)
 
@@ -192,7 +191,7 @@ func TestSecretsRevoke(t *testing.T) {
 
 	project, _, pf, of := mockFactories(ctrl)
 
-	secrets := mocks.NewMockSecretsService(ctrl)
+	secrets := NewMockSecretsService(ctrl)
 	secrets.EXPECT().
 		Revoke(gomock.Any(), "my-secret", "my-app", true)
 
@@ -219,7 +218,7 @@ func TestSecretsDelete(t *testing.T) {
 
 	project, _, pf, of := mockFactories(ctrl)
 
-	secrets := mocks.NewMockSecretsService(ctrl)
+	secrets := NewMockSecretsService(ctrl)
 	secrets.EXPECT().
 		Delete(gomock.Any(), "my-secret", true)
 

@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codahale/belvedere/cmd/belvedere/internal/mocks"
 	"github.com/codahale/belvedere/pkg/belvedere"
 	"github.com/golang/mock/gomock"
 )
@@ -22,7 +21,7 @@ func TestLogs(t *testing.T) {
 		},
 	}
 
-	logs := mocks.NewMockLogService(ctrl)
+	logs := NewMockLogService(ctrl)
 	logs.EXPECT().
 		List(gomock.Any(), "my-app", "", "", 15*time.Minute, []string{"woo"}).
 		Return(entries, nil)
@@ -58,7 +57,7 @@ func TestLogs_WithRelease(t *testing.T) {
 		},
 	}
 
-	logs := mocks.NewMockLogService(ctrl)
+	logs := NewMockLogService(ctrl)
 	logs.EXPECT().
 		List(gomock.Any(), "my-app", "my-release", "", 15*time.Minute, []string{"woo"}).
 		Return(entries, nil)
@@ -95,7 +94,7 @@ func TestLogs_WithReleaseAndInstance(t *testing.T) {
 		},
 	}
 
-	logs := mocks.NewMockLogService(ctrl)
+	logs := NewMockLogService(ctrl)
 	logs.EXPECT().
 		List(gomock.Any(), "my-app", "my-release", "my-instance", 15*time.Minute, []string{"woo"}).
 		Return(entries, nil)
