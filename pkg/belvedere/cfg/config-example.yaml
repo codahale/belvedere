@@ -49,3 +49,4 @@ wafRules:
     priority: 1
 network: projects/project/global/networks/network
 subnetwork: regions/region/subnetworks/subnetwork
+sessionAffinity: none

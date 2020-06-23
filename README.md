@@ -260,6 +260,5 @@ The resulting plaintext secrets will only ever be stored in memory.
 
 - [ ] Canary deploys
 - [ ] Run containers as a non-root user
-- [ ] Session affinity
 - [ ] GPU accelerator support
 - [ ] Redirect HTTP to HTTPS on LB

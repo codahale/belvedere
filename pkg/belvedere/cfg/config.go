@@ -21,7 +21,22 @@ type Config struct {
 	Network           string                           `json:"network"`
 	Subnetwork        string                           `json:"subnetwork"`
 	WAFRules          []*compute.SecurityPolicyRule    `json:"wafRules"`
+	SessionAffinity   string                           `json:"sessionAffinity"`
 }
+
+type InvalidSessionAffinityError struct {
+	Value string
+}
+
+func (e *InvalidSessionAffinityError) Error() string {
+	return fmt.Sprintf("invalid session affinity: %s", e.Value)
+}
+
+const (
+	SessionAffinityNone   = "none"
+	SessionAffinityIP     = "ip"
+	SessionAffinityCookie = "cookie"
+)
 
 // Parse loads the given bytes as a YAML configuration.
 func Parse(b []byte) (*Config, error) {
@@ -31,6 +46,14 @@ func Parse(b []byte) (*Config, error) {
 	if err := yaml.Unmarshal(b, &config); err != nil {
 		return nil, fmt.Errorf("error parsing config: %w", err)
 	}
+
+	// Validate properties.
+	switch config.SessionAffinity {
+	case "", SessionAffinityCookie, SessionAffinityIP, SessionAffinityNone:
+	default:
+		return nil, &InvalidSessionAffinityError{Value: config.SessionAffinity}
+	}
+
 	return &config, nil
 }
 

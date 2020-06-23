@@ -56,7 +56,8 @@
         },
         "portName": "svc-https",
         "protocol": "HTTP2",
-        "securityPolicy": "$(ref.my-app-waf.selfLink)"
+        "securityPolicy": "$(ref.my-app-waf.selfLink)",
+        "sessionAffinity": "NONE"
       }
     },
     {

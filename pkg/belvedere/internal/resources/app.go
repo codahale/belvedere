@@ -22,6 +22,17 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 	dnsRecord := fmt.Sprintf("%s-rrs", app)
 	dnsName := fmt.Sprintf("%s.%s", app, managedZone.DnsName)
 	securityPolicy := fmt.Sprintf("%s-waf", app)
+
+	var sessionAffinity string
+	switch config.SessionAffinity {
+	case cfg.SessionAffinityCookie:
+		sessionAffinity = "GENERATED_COOKIE"
+	case cfg.SessionAffinityIP:
+		sessionAffinity = "CLIENT_IP"
+	default:
+		sessionAffinity = "NONE"
+	}
+
 	resources := []deployments.Resource{
 		// A firewall rule allowing access from the load balancer to application instances on port
 		// 8443.
@@ -74,9 +85,10 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 				LogConfig: &compute.BackendServiceLogConfig{
 					Enable: true,
 				},
-				PortName:       "svc-https",
-				Protocol:       "HTTP2",
-				SecurityPolicy: deployments.SelfLink(securityPolicy),
+				PortName:        "svc-https",
+				Protocol:        "HTTP2",
+				SecurityPolicy:  deployments.SelfLink(securityPolicy),
+				SessionAffinity: sessionAffinity,
 			},
 		},
 		// A URL map directing requests to the backend service while blocking access to the

@@ -81,8 +81,9 @@ func TestParse(t *testing.T) {
 				Priority: 1,
 			},
 		},
-		Network:    "projects/project/global/networks/network",
-		Subnetwork: "regions/region/subnetworks/subnetwork",
+		SessionAffinity: "none",
+		Network:         "projects/project/global/networks/network",
+		Subnetwork:      "regions/region/subnetworks/subnetwork",
 	}
 
 	assert.Equal(t, "Parse()", want, got)
