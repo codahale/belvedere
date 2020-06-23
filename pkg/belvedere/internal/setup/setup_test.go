@@ -15,6 +15,12 @@ import (
 func TestService_ManagedZone(t *testing.T) {
 	defer gock.Off()
 
+	gock.New("https://dns.googleapis.com/dns/v1/projects/my-project/managedZones/belvedere?alt=json&prettyPrint=false").
+		Reply(http.StatusOK).
+		JSON(&dns.ManagedZone{
+			DnsName: "my-dns",
+		})
+
 	s, err := NewService(
 		context.Background(),
 		option.WithHTTPClient(http.DefaultClient),
@@ -23,12 +29,6 @@ func TestService_ManagedZone(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	gock.New("https://dns.googleapis.com/dns/v1/projects/my-project/managedZones/belvedere?alt=json&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(&dns.ManagedZone{
-			DnsName: "my-dns",
-		})
 
 	got, err := s.ManagedZone(context.Background(), "my-project")
 	if err != nil {
