@@ -258,7 +258,6 @@ The resulting plaintext secrets will only ever be stored in memory.
 
 ## TODO
 
-- [ ] Block external access to `/healthz`
 - [ ] Canary deploys
 - [ ] Run containers as a non-root user
 - [ ] Session affinity
