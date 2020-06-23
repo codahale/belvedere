@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/codahale/belvedere/internal/assert"
-	"github.com/codahale/belvedere/internal/it"
 	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
@@ -14,7 +13,6 @@ import (
 
 func TestHealthNotStable(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-central1/instanceGroupManagers/ig-1?alt=json&fields=status&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -24,7 +22,11 @@ func TestHealthNotStable(t *testing.T) {
 			},
 		})
 
-	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	gce, err := compute.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,7 +42,6 @@ func TestHealthNotStable(t *testing.T) {
 
 func TestHealthNotRegistered(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-central1/instanceGroupManagers/ig-1?alt=json&fields=status&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -63,7 +64,11 @@ func TestHealthNotRegistered(t *testing.T) {
 			HealthStatus: []*compute.HealthStatus{},
 		})
 
-	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	gce, err := compute.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +84,6 @@ func TestHealthNotRegistered(t *testing.T) {
 
 func TestHealthNotHealthy(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-central1/instanceGroupManagers/ig-1?alt=json&fields=status&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -111,7 +115,11 @@ func TestHealthNotHealthy(t *testing.T) {
 			},
 		})
 
-	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	gce, err := compute.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +135,6 @@ func TestHealthNotHealthy(t *testing.T) {
 
 func TestHealthDone(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-central1/instanceGroupManagers/ig-1?alt=json&fields=status&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -159,7 +166,11 @@ func TestHealthDone(t *testing.T) {
 			},
 		})
 
-	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	gce, err := compute.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}

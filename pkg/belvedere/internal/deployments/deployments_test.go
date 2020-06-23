@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/internal/assert"
-	"github.com/codahale/belvedere/internal/it"
 	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/deploymentmanager/v2"
 	"google.golang.org/api/option"
@@ -87,7 +86,6 @@ func TestEntriesToLabels(t *testing.T) {
 
 func TestManager_Insert(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/deployments?alt=json&prettyPrint=false").
 		JSON(deploymentmanager.Deployment{
@@ -115,7 +113,11 @@ func TestManager_Insert(t *testing.T) {
 			Status: "DONE",
 		})
 
-	dm, err := NewManager(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	dm, err := NewManager(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -140,7 +142,6 @@ func TestManager_Insert(t *testing.T) {
 
 func TestManager_Update(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/deployments/my-deployment?alt=json&prettyPrint=false").
 		JSON(deploymentmanager.Deployment{
@@ -161,7 +162,11 @@ func TestManager_Update(t *testing.T) {
 			Status: "DONE",
 		})
 
-	dm, err := NewManager(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	dm, err := NewManager(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -183,7 +188,6 @@ func TestManager_Update(t *testing.T) {
 
 func TestManager_Delete(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/deployments/my-deployment?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -197,7 +201,11 @@ func TestManager_Delete(t *testing.T) {
 			Status: "DONE",
 		})
 
-	dm, err := NewManager(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	dm, err := NewManager(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -209,7 +217,6 @@ func TestManager_Delete(t *testing.T) {
 
 func TestManager_List(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/deployments?alt=json&filter=bobs+eq+1&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -244,7 +251,11 @@ func TestManager_List(t *testing.T) {
 			},
 		})
 
-	dm, err := NewManager(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	dm, err := NewManager(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -276,7 +287,6 @@ func TestManager_List(t *testing.T) {
 
 func TestManager_Get(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/deployments/belvedere-base?alt=json&fields=&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -290,7 +300,11 @@ func TestManager_Get(t *testing.T) {
 			},
 		})
 
-	dm, err := NewManager(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	dm, err := NewManager(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/codahale/belvedere/internal/it"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
@@ -13,7 +12,6 @@ import (
 
 func TestManager_SetDMPerms(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/my-project?alt=json&fields=projectNumber&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -82,7 +80,11 @@ func TestManager_SetDMPerms(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(cloudresourcemanager.Policy{})
 
-	crm, err := cloudresourcemanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	crm, err := cloudresourcemanager.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +98,6 @@ func TestManager_SetDMPerms(t *testing.T) {
 
 func TestManager_SetDMPermsExisting(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/my-project?alt=json&fields=projectNumber&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -120,7 +121,11 @@ func TestManager_SetDMPermsExisting(t *testing.T) {
 			Etag: "300",
 		})
 
-	crm, err := cloudresourcemanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	crm, err := cloudresourcemanager.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}

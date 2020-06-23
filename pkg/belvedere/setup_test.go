@@ -5,16 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codahale/belvedere/internal/it"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/golang/mock/gomock"
-	"gopkg.in/h2non/gock.v1"
 )
 
 func TestProject_Setup(t *testing.T) {
-	defer gock.Off()
-	it.MockTokenSource()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -50,9 +45,6 @@ func TestProject_Setup(t *testing.T) {
 }
 
 func TestProject_Teardown(t *testing.T) {
-	defer gock.Off()
-	it.MockTokenSource()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

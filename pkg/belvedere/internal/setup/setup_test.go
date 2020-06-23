@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/codahale/belvedere/internal/assert"
-	"github.com/codahale/belvedere/internal/it"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/option"
@@ -15,9 +14,12 @@ import (
 
 func TestService_ManagedZone(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
-	s, err := NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	s, err := NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/codahale/belvedere/internal/assert"
-	"github.com/codahale/belvedere/internal/it"
 	"google.golang.org/api/deploymentmanager/v2"
 	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
@@ -14,7 +13,6 @@ import (
 
 func TestDMRunning(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -22,7 +20,11 @@ func TestDMRunning(t *testing.T) {
 			Status: "RUNNING",
 		})
 
-	dm, err := deploymentmanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	dm, err := deploymentmanager.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +40,6 @@ func TestDMRunning(t *testing.T) {
 
 func TestDMDone(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -46,7 +47,11 @@ func TestDMDone(t *testing.T) {
 			Status: "DONE",
 		})
 
-	dm, err := deploymentmanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	dm, err := deploymentmanager.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +67,6 @@ func TestDMDone(t *testing.T) {
 
 func TestDMError(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -79,7 +83,11 @@ func TestDMError(t *testing.T) {
 			},
 		})
 
-	dm, err := deploymentmanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	dm, err := deploymentmanager.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}

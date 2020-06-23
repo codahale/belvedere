@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/internal/assert"
-	"github.com/codahale/belvedere/internal/it"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/golang/mock/gomock"
@@ -18,9 +17,6 @@ import (
 )
 
 func TestAppService_Get(t *testing.T) {
-	defer gock.Off()
-	it.MockTokenSource()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -55,9 +51,6 @@ func TestAppService_Get(t *testing.T) {
 }
 
 func TestAppService_List(t *testing.T) {
-	defer gock.Off()
-	it.MockTokenSource()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -97,7 +90,6 @@ func TestAppService_List(t *testing.T) {
 
 func TestAppService_Create(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-west1?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -137,7 +129,11 @@ func TestAppService_Create(t *testing.T) {
 			},
 			false, 10*time.Millisecond)
 
-	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	gce, err := compute.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -156,7 +152,6 @@ func TestAppService_Create(t *testing.T) {
 
 func TestAppService_Create_DownRegion(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-west1?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -172,7 +167,11 @@ func TestAppService_Create_DownRegion(t *testing.T) {
 	setupService := NewSetupService(ctrl)
 
 	config := &cfg.Config{}
-	gce, err := compute.NewService(context.Background())
+	gce, err := compute.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -192,7 +191,6 @@ func TestAppService_Create_DownRegion(t *testing.T) {
 
 func TestAppService_Create_BadRegion(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-west1?alt=json&prettyPrint=false").
 		Reply(http.StatusNotFound)
@@ -206,7 +204,11 @@ func TestAppService_Create_BadRegion(t *testing.T) {
 
 	config := &cfg.Config{}
 
-	gce, err := compute.NewService(context.Background())
+	gce, err := compute.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -225,9 +227,6 @@ func TestAppService_Create_BadRegion(t *testing.T) {
 }
 
 func TestAppService_Update(t *testing.T) {
-	defer gock.Off()
-	it.MockTokenSource()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -266,9 +265,6 @@ func TestAppService_Update(t *testing.T) {
 }
 
 func TestAppService_Delete(t *testing.T) {
-	defer gock.Off()
-	it.MockTokenSource()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

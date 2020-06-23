@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/codahale/belvedere/internal/assert"
-	"github.com/codahale/belvedere/internal/it"
 	"google.golang.org/api/option"
 	"google.golang.org/api/serviceusage/v1"
 	"gopkg.in/h2non/gock.v1"
@@ -14,7 +13,6 @@ import (
 
 func TestSURunning(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -22,7 +20,11 @@ func TestSURunning(t *testing.T) {
 			Done: false,
 		})
 
-	su, err := serviceusage.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	su, err := serviceusage.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +40,6 @@ func TestSURunning(t *testing.T) {
 
 func TestSUDone(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -46,7 +47,11 @@ func TestSUDone(t *testing.T) {
 			Done: true,
 		})
 
-	su, err := serviceusage.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	su, err := serviceusage.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +67,6 @@ func TestSUDone(t *testing.T) {
 
 func TestSUError(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -74,7 +78,11 @@ func TestSUError(t *testing.T) {
 			},
 		})
 
-	su, err := serviceusage.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	su, err := serviceusage.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}

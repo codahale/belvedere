@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/codahale/belvedere/internal/assert"
-	"github.com/codahale/belvedere/internal/it"
 	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/option"
@@ -15,7 +14,6 @@ import (
 
 func TestProject_DNSServers(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://dns.googleapis.com/dns/v1/projects/my-project/managedZones/belvedere?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -23,8 +21,12 @@ func TestProject_DNSServers(t *testing.T) {
 			NameServers: []string{"ns1.example.com", "ns2.example.com"},
 		})
 
-	s, err := NewProject(context.Background(), "my-project",
-		option.WithHTTPClient(http.DefaultClient))
+	s, err := NewProject(
+		context.Background(),
+		"my-project",
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,7 +46,6 @@ func TestProject_DNSServers(t *testing.T) {
 
 func TestProject_Instances(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/aggregated/instances?alt=json&filter=labels.belvedere-app%21%3D%22%22&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -91,8 +92,12 @@ func TestProject_Instances(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject(context.Background(), "my-project",
-		option.WithHTTPClient(http.DefaultClient))
+	s, err := NewProject(
+		context.Background(),
+		"my-project",
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,7 +133,6 @@ func TestProject_Instances(t *testing.T) {
 
 func TestProject_InstancesApp(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/aggregated/instances?alt=json&filter=labels.belvedere-app%21%3D%22%22+AND+labels.belvedere-app%3D%22my-app%22&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -165,8 +169,12 @@ func TestProject_InstancesApp(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject(context.Background(), "my-project",
-		option.WithHTTPClient(http.DefaultClient))
+	s, err := NewProject(
+		context.Background(),
+		"my-project",
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -196,7 +204,6 @@ func TestProject_InstancesApp(t *testing.T) {
 
 func TestProject_InstancesAppRelease(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/aggregated/instances?alt=json&filter=labels.belvedere-app%21%3D%22%22+AND+labels.belvedere-app%3D%22my-app%22+AND+labels.belvedere-release%3D%22v2%22&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -219,8 +226,12 @@ func TestProject_InstancesAppRelease(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject(context.Background(), "my-project",
-		option.WithHTTPClient(http.DefaultClient))
+	s, err := NewProject(
+		context.Background(),
+		"my-project",
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -244,7 +255,6 @@ func TestProject_InstancesAppRelease(t *testing.T) {
 
 func TestProject_MachineTypes(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/aggregated/machineTypes?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -286,8 +296,12 @@ func TestProject_MachineTypes(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject(context.Background(), "my-project",
-		option.WithHTTPClient(http.DefaultClient))
+	s, err := NewProject(
+		context.Background(),
+		"my-project",
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}

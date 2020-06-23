@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/codahale/belvedere/internal/assert"
-	"github.com/codahale/belvedere/internal/it"
 	"google.golang.org/api/option"
 	"google.golang.org/api/secretmanager/v1"
 	"gopkg.in/h2non/gock.v1"
@@ -14,7 +13,6 @@ import (
 
 func TestSecretsService_List(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets?alt=json&fields=secrets.name&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -29,7 +27,11 @@ func TestSecretsService_List(t *testing.T) {
 			},
 		})
 
-	sm, err := secretmanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	sm, err := secretmanager.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +60,6 @@ func TestSecretsService_List(t *testing.T) {
 
 func TestSecretsService_Create(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets?alt=json&prettyPrint=false&secretId=my-secret").
 		JSON(secretmanager.Secret{
@@ -78,7 +79,11 @@ func TestSecretsService_Create(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.SecretVersion{})
 
-	sm, err := secretmanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	sm, err := secretmanager.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,7 +100,6 @@ func TestSecretsService_Create(t *testing.T) {
 
 func TestSecretsService_Update(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret:addVersion?alt=json&prettyPrint=false").
 		JSON(secretmanager.AddSecretVersionRequest{
@@ -106,7 +110,11 @@ func TestSecretsService_Update(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.SecretVersion{})
 
-	sm, err := secretmanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	sm, err := secretmanager.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,14 +131,17 @@ func TestSecretsService_Update(t *testing.T) {
 
 func TestSecretsService_Delete(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret?alt=json&prettyPrint=false").
 		Delete("").
 		Reply(http.StatusOK).
 		JSON(secretmanager.Empty{})
 
-	sm, err := secretmanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	sm, err := secretmanager.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -147,7 +158,6 @@ func TestSecretsService_Delete(t *testing.T) {
 
 func TestSecretsService_Grant(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret:getIamPolicy?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -173,7 +183,11 @@ func TestSecretsService_Grant(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{})
 
-	sm, err := secretmanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	sm, err := secretmanager.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -190,7 +204,6 @@ func TestSecretsService_Grant(t *testing.T) {
 
 func TestSecretsService_Revoke(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret:getIamPolicy?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -216,7 +229,11 @@ func TestSecretsService_Revoke(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{})
 
-	sm, err := secretmanager.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	sm, err := secretmanager.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/codahale/belvedere/internal/assert"
-	"github.com/codahale/belvedere/internal/it"
 	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
@@ -14,7 +13,6 @@ import (
 
 func TestGCERunning(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -22,7 +20,11 @@ func TestGCERunning(t *testing.T) {
 			Status: "RUNNING",
 		})
 
-	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	gce, err := compute.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +40,6 @@ func TestGCERunning(t *testing.T) {
 
 func TestGCEDone(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -46,7 +47,11 @@ func TestGCEDone(t *testing.T) {
 			Status: "DONE",
 		})
 
-	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	gce, err := compute.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +67,6 @@ func TestGCEDone(t *testing.T) {
 
 func TestGCEError(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -79,7 +83,11 @@ func TestGCEError(t *testing.T) {
 			},
 		})
 
-	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	gce, err := compute.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}

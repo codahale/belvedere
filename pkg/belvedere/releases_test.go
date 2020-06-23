@@ -7,17 +7,12 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/internal/assert"
-	"github.com/codahale/belvedere/internal/it"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/golang/mock/gomock"
-	"gopkg.in/h2non/gock.v1"
 )
 
 func TestReleaseService_List(t *testing.T) {
-	defer gock.Off()
-	it.MockTokenSource()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -60,9 +55,6 @@ func TestReleaseService_List(t *testing.T) {
 }
 
 func TestReleaseService_List_withApp(t *testing.T) {
-	defer gock.Off()
-	it.MockTokenSource()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -109,9 +101,6 @@ func TestReleaseService_List_withApp(t *testing.T) {
 }
 
 func TestReleaseService_Create(t *testing.T) {
-	defer gock.Off()
-	it.MockTokenSource()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -162,9 +151,6 @@ func TestReleaseService_Create(t *testing.T) {
 }
 
 func TestReleaseService_Enable(t *testing.T) {
-	defer gock.Off()
-	it.MockTokenSource()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -198,9 +184,6 @@ func TestReleaseService_Enable(t *testing.T) {
 }
 
 func TestReleaseService_Disable(t *testing.T) {
-	defer gock.Off()
-	it.MockTokenSource()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -229,9 +212,6 @@ func TestReleaseService_Disable(t *testing.T) {
 }
 
 func TestReleaseService_Delete(t *testing.T) {
-	defer gock.Off()
-	it.MockTokenSource()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

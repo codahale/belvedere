@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codahale/belvedere/internal/it"
 	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/option"
 	"gopkg.in/h2non/gock.v1"
@@ -15,7 +14,6 @@ import (
 
 func TestService_Add(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -57,7 +55,11 @@ func TestService_Add(t *testing.T) {
 			Status: "DONE",
 		})
 
-	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	gce, err := compute.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,7 +73,6 @@ func TestService_Add(t *testing.T) {
 
 func TestService_AddExisting(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -90,7 +91,11 @@ func TestService_AddExisting(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	gce, err := compute.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,7 +109,6 @@ func TestService_AddExisting(t *testing.T) {
 
 func TestService_AddDryRun(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -123,7 +127,11 @@ func TestService_AddDryRun(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	gce, err := compute.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -137,7 +145,6 @@ func TestService_AddDryRun(t *testing.T) {
 
 func TestService_Remove(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -179,7 +186,11 @@ func TestService_Remove(t *testing.T) {
 			Status: "DONE",
 		})
 
-	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	gce, err := compute.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -193,7 +204,6 @@ func TestService_Remove(t *testing.T) {
 
 func TestSetup_RemoveLast(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -225,7 +235,11 @@ func TestSetup_RemoveLast(t *testing.T) {
 			Status: "DONE",
 		})
 
-	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	gce, err := compute.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -239,7 +253,6 @@ func TestSetup_RemoveLast(t *testing.T) {
 
 func TestSetup_RemoveMissing(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -258,7 +271,11 @@ func TestSetup_RemoveMissing(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	gce, err := compute.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -272,7 +289,6 @@ func TestSetup_RemoveMissing(t *testing.T) {
 
 func TestSetup_RemoveDryRun(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
 		Reply(http.StatusOK).
@@ -294,7 +310,11 @@ func TestSetup_RemoveDryRun(t *testing.T) {
 			SelfLink: "http://ig-1",
 		})
 
-	gce, err := compute.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	gce, err := compute.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}

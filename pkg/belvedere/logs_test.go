@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/internal/assert"
-	"github.com/codahale/belvedere/internal/it"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/logging/v2"
 	"google.golang.org/api/option"
@@ -16,7 +15,6 @@ import (
 
 func TestLogService_List(t *testing.T) {
 	defer gock.Off()
-	it.MockTokenSource()
 
 	gock.New("https://logging.googleapis.com/v2/entries:list?alt=json&prettyPrint=false").
 		JSON(logging.ListLogEntriesRequest{
@@ -38,7 +36,11 @@ func TestLogService_List(t *testing.T) {
 			},
 		})
 
-	logs, err := logging.NewService(context.Background(), option.WithHTTPClient(http.DefaultClient))
+	logs, err := logging.NewService(
+		context.Background(),
+		option.WithHTTPClient(http.DefaultClient),
+		option.WithoutAuthentication(),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
