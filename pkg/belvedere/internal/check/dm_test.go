@@ -29,8 +29,7 @@ func TestDMRunning(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f := DM(context.Background(), dm, "example", "op1")
-	done, err := f()
+	done, err := DM(context.Background(), dm, "example", "op1")()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,8 +55,7 @@ func TestDMDone(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f := DM(context.Background(), dm, "example", "op1")
-	done, err := f()
+	done, err := DM(context.Background(), dm, "example", "op1")()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,8 +90,7 @@ func TestDMError(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f := DM(context.Background(), dm, "example", "op1")
-	_, err = f()
+	_, err = DM(context.Background(), dm, "example", "op1")()
 	if err == nil {
 		t.Fatal("no error, but should have returned one")
 	}

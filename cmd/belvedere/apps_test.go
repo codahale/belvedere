@@ -39,6 +39,7 @@ func TestAppsList(t *testing.T) {
 		"apps",
 		"list",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -73,6 +74,7 @@ func TestAppsCreate(t *testing.T) {
 		"--dry-run",
 		"--interval=10m",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -107,6 +109,7 @@ func TestAppsCreate_WithFilename(t *testing.T) {
 		"--dry-run",
 		"--interval=10m",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -140,6 +143,7 @@ func TestAppsUpdate(t *testing.T) {
 		"--dry-run",
 		"--interval=10m",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -173,6 +177,7 @@ func TestAppsUpdate_WithFilename(t *testing.T) {
 		"--dry-run",
 		"--interval=10m",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -202,6 +207,7 @@ func TestAppsDelete(t *testing.T) {
 		"--dry-run",
 		"--interval=10m",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}

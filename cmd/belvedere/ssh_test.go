@@ -21,6 +21,7 @@ func TestSSH(t *testing.T) {
 	cmd.SetArgs([]string{
 		"ssh",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}

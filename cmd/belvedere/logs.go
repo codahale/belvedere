@@ -11,8 +11,11 @@ import (
 )
 
 func newLogsCmd() *cli.Command {
-	var filters []string
-	var maxAge time.Duration
+	var (
+		filters []string
+		maxAge  time.Duration
+	)
+
 	return &cli.Command{
 		UI: cobra.Command{
 			Use:     `logs <app> [<release>] [<instance>] [--filter=<filter>...]`,
@@ -39,6 +42,7 @@ https://cloud.google.com/logging/docs/view/advanced-queries#advanced_logs_query_
 			if err != nil {
 				return err
 			}
+
 			return out.Print(entries)
 		},
 	}

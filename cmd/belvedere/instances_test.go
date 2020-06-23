@@ -33,6 +33,7 @@ func TestInstances(t *testing.T) {
 	cmd.SetArgs([]string{
 		"instances",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -64,6 +65,7 @@ func TestInstances_WithApp(t *testing.T) {
 		"instances",
 		"my-app",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -96,6 +98,7 @@ func TestInstances_WithAppAndRelease(t *testing.T) {
 		"my-app",
 		"my-release",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}

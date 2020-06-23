@@ -13,6 +13,7 @@ import (
 func EqualFixture(t *testing.T, name, filename string, got []byte) {
 	if ok, _ := strconv.ParseBool(os.Getenv("OVERWRITE")); ok {
 		t.Logf("overwriting %s", filename)
+
 		err := ioutil.WriteFile(filename, got, 0644) //nolint:gosec
 		if err != nil {
 			t.Fatal(err)

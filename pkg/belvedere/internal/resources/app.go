@@ -23,16 +23,6 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 	dnsName := fmt.Sprintf("%s.%s", app, managedZone.DnsName)
 	securityPolicy := fmt.Sprintf("%s-waf", app)
 
-	var sessionAffinity string
-	switch config.SessionAffinity {
-	case cfg.SessionAffinityCookie:
-		sessionAffinity = "GENERATED_COOKIE"
-	case cfg.SessionAffinityIP:
-		sessionAffinity = "CLIENT_IP"
-	default:
-		sessionAffinity = "NONE"
-	}
-
 	resources := []deployments.Resource{
 		// A firewall rule allowing access from the load balancer to application instances on port
 		// 8443.
@@ -88,7 +78,7 @@ func (*builder) App(project string, app string, managedZone *dns.ManagedZone, co
 				PortName:        "svc-https",
 				Protocol:        "HTTP2",
 				SecurityPolicy:  deployments.SelfLink(securityPolicy),
-				SessionAffinity: sessionAffinity,
+				SessionAffinity: sessionAffinityEnum(config.SessionAffinity),
 			},
 		},
 		// A URL map directing requests to the backend service while blocking access to the
@@ -227,5 +217,16 @@ func roleBinding(project, serviceAccount, role string) deployments.Resource {
 			Role:     role,
 			Member:   fmt.Sprintf("serviceAccount:%s", deployments.Ref(serviceAccount, "email")),
 		},
+	}
+}
+
+func sessionAffinityEnum(s string) string {
+	switch s {
+	case cfg.SessionAffinityCookie:
+		return "GENERATED_COOKIE"
+	case cfg.SessionAffinityIP:
+		return "CLIENT_IP"
+	default:
+		return "NONE"
 	}
 }

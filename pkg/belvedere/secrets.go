@@ -44,7 +44,9 @@ func (s *secretsService) List(ctx context.Context) ([]Secret, error) {
 	defer span.End()
 
 	name := fmt.Sprintf("projects/%s", s.project)
+
 	var secrets []Secret
+
 	if err := s.sm.Projects.Secrets.List(name).Fields("secrets.name").Pages(ctx,
 		func(list *secretmanager.ListSecretsResponse) error {
 			for _, s := range list.Secrets {
@@ -57,16 +59,18 @@ func (s *secretsService) List(ctx context.Context) ([]Secret, error) {
 	); err != nil {
 		return nil, fmt.Errorf("error listing secrets: %w", err)
 	}
+
 	return secrets, nil
 }
 
 func (s *secretsService) Create(ctx context.Context, name string, value []byte, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.Create")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("name", name),
 		trace.StringAttribute("value", obscure(value)),
 	)
-	defer span.End()
 
 	if dryRun {
 		return nil
@@ -88,11 +92,12 @@ func (s *secretsService) Create(ctx context.Context, name string, value []byte, 
 
 func (s *secretsService) Update(ctx context.Context, name string, value []byte, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.Update")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("name", name),
 		trace.StringAttribute("value", obscure(value)),
 	)
-	defer span.End()
 
 	if dryRun {
 		return nil
@@ -107,15 +112,17 @@ func (s *secretsService) Update(ctx context.Context, name string, value []byte, 
 	).Context(ctx).Do(); err != nil {
 		return fmt.Errorf("error adding secret version: %w", err)
 	}
+
 	return nil
 }
 
 func (s *secretsService) Delete(ctx context.Context, name string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.Delete")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("name", name),
 	)
-	defer span.End()
 
 	if dryRun {
 		return nil
@@ -124,18 +131,21 @@ func (s *secretsService) Delete(ctx context.Context, name string, dryRun bool) e
 	_, err := s.sm.Projects.Secrets.
 		Delete(fmt.Sprintf("projects/%s/secrets/%s", s.project, name)).
 		Context(ctx).Do()
+
 	return err
 }
 
 func (s *secretsService) Grant(ctx context.Context, name, app string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.Grant")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("name", name),
 		trace.StringAttribute("app", app),
 	)
-	defer span.End()
 
 	sa := fmt.Sprintf("serviceAccount:%s-sa@%s.iam.gserviceaccount.com", app, s.project)
+
 	return s.modifyIAMPolicy(ctx, fmt.Sprintf("projects/%s/secrets/%s", s.project, name),
 		func(policy *secretmanager.Policy) *secretmanager.Policy {
 			// Look for an existing IAM binding giving the application access to the secret.
@@ -175,13 +185,15 @@ func (s *secretsService) Grant(ctx context.Context, name, app string, dryRun boo
 
 func (s *secretsService) Revoke(ctx context.Context, name, app string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.Revoke")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("name", name),
 		trace.StringAttribute("app", app),
 	)
-	defer span.End()
 
 	sa := fmt.Sprintf("serviceAccount:%s-sa@%s.iam.gserviceaccount.com", app, s.project)
+
 	return s.modifyIAMPolicy(ctx, fmt.Sprintf("projects/%s/secrets/%s", s.project, name),
 		func(policy *secretmanager.Policy) *secretmanager.Policy {
 			var bindings []*secretmanager.Binding
@@ -258,10 +270,10 @@ func (s *secretsService) modifyIAMPolicy(
 
 		return err
 	})
-
 	if err != nil {
 		return fmt.Errorf("error setting IAM policy: %w", err)
 	}
+
 	return nil
 }
 

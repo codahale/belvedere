@@ -13,7 +13,9 @@ import (
 func mockFactories(ctrl *gomock.Controller) (*MockProject, *MockOutput, cli.ProjectFactory, cli.OutputFactory) {
 	project := NewMockProject(ctrl)
 	project.EXPECT().Name().Return("my-project").AnyTimes()
+
 	output := NewMockOutput(ctrl)
+
 	return project, output,
 		func(ctx context.Context, name string, opts ...option.ClientOption) (belvedere.Project, error) {
 			return project, nil

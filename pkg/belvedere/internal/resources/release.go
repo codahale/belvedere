@@ -16,9 +16,12 @@ func (*builder) Release(project, region, app, release, imageSHA256 string, confi
 	instanceTemplate := fmt.Sprintf("%s-%s-it", app, release)
 	instanceGroupManager := fmt.Sprintf("%s-%s-ig", app, release)
 	autoscaler := fmt.Sprintf("%s-%s-as", app, release)
-	if config.Network == "" {
-		config.Network = defaultNetwork
+
+	var network = defaultNetwork
+	if config.Network != "" {
+		network = config.Network
 	}
+
 	dep := []deployments.Resource{
 		// An instance template for creating release instances.
 		{
@@ -58,7 +61,7 @@ func (*builder) Release(project, region, app, release, imageSHA256 string, confi
 					// Enable outbound internet access for the instances.
 					NetworkInterfaces: []*compute.NetworkInterface{
 						{
-							Network:    config.Network,
+							Network:    network,
 							Subnetwork: config.Subnetwork,
 							AccessConfigs: []*compute.AccessConfig{
 								{
@@ -203,6 +206,7 @@ func cloudConfig(c *cfg.Config, app, release string, imageSHA256 string) string 
 	}
 
 	b, _ := json.Marshal(cc)
+
 	return fmt.Sprintf("#cloud-config\n\n%s", b)
 }
 
@@ -229,6 +233,7 @@ func systemdService(name string, dockerArgs []string) string {
 	for _, s := range dockerArgs {
 		args = append(args, shellescape.Quote(s))
 	}
+
 	return fmt.Sprintf(systemdTemplate, name, strings.Join(args, " "), name, name)
 }
 
@@ -238,6 +243,7 @@ func dockerArgs(c *cfg.Container, app, release, sha256 string, labels map[string
 	for k := range labels {
 		labelNames = append(labelNames, k)
 	}
+
 	sort.Stable(sort.StringSlice(labelNames))
 
 	args := []string{
@@ -264,6 +270,7 @@ func dockerArgs(c *cfg.Container, app, release, sha256 string, labels map[string
 	for k := range c.Env {
 		envNames = append(envNames, k)
 	}
+
 	sort.Stable(sort.StringSlice(envNames))
 
 	for _, k := range envNames {
@@ -274,13 +281,16 @@ func dockerArgs(c *cfg.Container, app, release, sha256 string, labels map[string
 
 	args = append(args, c.DockerOptions...)
 	url := c.Image
+
 	if sha256 != "" {
 		url = fmt.Sprintf("%s@sha256:%s", url, sha256)
 	}
+
 	args = append(args, url)
 	if c.Command != "" {
 		args = append(args, c.Command)
 	}
+
 	args = append(args, c.Args...)
 
 	return args

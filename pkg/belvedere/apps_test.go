@@ -167,6 +167,7 @@ func TestAppService_Create_DownRegion(t *testing.T) {
 	setupService := NewSetupService(ctrl)
 
 	config := &cfg.Config{}
+
 	gce, err := compute.NewService(
 		context.Background(),
 		option.WithHTTPClient(http.DefaultClient),
@@ -183,6 +184,7 @@ func TestAppService_Create_DownRegion(t *testing.T) {
 		setup:     setupService,
 		gce:       gce,
 	}
+
 	err = apps.Create(context.Background(), "us-west1", "my-app", config, false, 10*time.Millisecond)
 	if err == nil {
 		t.Fatal("no error")
@@ -220,6 +222,7 @@ func TestAppService_Create_BadRegion(t *testing.T) {
 		setup:     setupService,
 		gce:       gce,
 	}
+
 	err = apps.Create(context.Background(), "us-west1", "my-app", config, false, 10*time.Millisecond)
 	if err == nil {
 		t.Fatal("no error")
@@ -259,6 +262,7 @@ func TestAppService_Update(t *testing.T) {
 		resources: resourceBuilder,
 		setup:     setupService,
 	}
+
 	if err := apps.Update(context.Background(), "my-app", config, false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
@@ -277,6 +281,7 @@ func TestAppService_Delete(t *testing.T) {
 		project: "my-project",
 		dm:      dm,
 	}
+
 	if err := apps.Delete(context.Background(), "my-app", false, false, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}

@@ -10,8 +10,11 @@ import (
 )
 
 func newSetupCmd() *cli.Command {
-	var mf cli.ModifyFlags
-	var lrf cli.LongRunningFlags
+	var (
+		mf  cli.ModifyFlags
+		lrf cli.LongRunningFlags
+	)
+
 	return &cli.Command{
 		UI: cobra.Command{
 			Use:     `setup <dns-zone>`,

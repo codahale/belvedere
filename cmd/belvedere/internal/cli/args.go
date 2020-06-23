@@ -23,6 +23,7 @@ func (i *args) String(idx int) string {
 	if len(i.args) > idx {
 		return i.args[idx]
 	}
+
 	return ""
 }
 
@@ -40,6 +41,7 @@ func (i *args) File(idx int) ([]byte, error) {
 	if rc, ok := i.stdin.(io.ReadCloser); ok {
 		defer func() { _ = rc.Close() }()
 	}
+
 	return ioutil.ReadAll(i.stdin)
 }
 
@@ -48,5 +50,6 @@ func isTerminal(r io.Reader) bool {
 	if !ok {
 		return false
 	}
+
 	return isatty.IsTerminal(f.Fd()) || isatty.IsCygwinTerminal(f.Fd())
 }

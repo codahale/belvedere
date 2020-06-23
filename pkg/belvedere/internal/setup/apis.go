@@ -42,11 +42,12 @@ var (
 
 func (s *service) EnableAPIs(ctx context.Context, project string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.setup.EnableAPIs")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
-	defer span.End()
 
 	// Divide the required services up into batches of at most 20 services.
 	for _, serviceIDs := range batchStrings(requiredServices, 20) {
@@ -88,6 +89,8 @@ func batchStrings(s []string, n int) [][]string {
 	for n < len(s) {
 		s, b = s[n:], append(b, s[0:n:n])
 	}
+
 	b = append(b, s)
+
 	return b
 }

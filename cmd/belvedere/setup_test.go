@@ -26,6 +26,7 @@ func TestSetup(t *testing.T) {
 		"--interval=1m",
 		"cloudslap.club.",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}

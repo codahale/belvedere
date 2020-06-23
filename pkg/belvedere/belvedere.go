@@ -73,6 +73,7 @@ func NewProject(ctx context.Context, name string, opts ...option.ClientOption) (
 		if err != nil {
 			return nil, err
 		}
+
 		name = s
 	}
 
@@ -111,6 +112,7 @@ func NewProject(ctx context.Context, name string, opts ...option.ClientOption) (
 		gce:       gce,
 		resources: res,
 	}
+
 	return &project{
 		logs: &logService{
 			project: name,
@@ -168,23 +170,26 @@ func (p *project) Releases() ReleaseService {
 
 func (p *project) Instances(ctx context.Context, app, release string) ([]Instance, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.project.Instances")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("app", app),
 		trace.StringAttribute("release", release),
 	)
-	defer span.End()
 
 	// Construct filter set, always limiting results to Belvedere app instances.
 	filters := []string{`labels.belvedere-app!=""`}
 	if app != "" {
 		filters = append(filters, fmt.Sprintf("labels.belvedere-app=%q", app))
 	}
+
 	if release != "" {
 		filters = append(filters, fmt.Sprintf("labels.belvedere-release=%q", release))
 	}
 
-	// List all instances.
 	var instances []Instance
+
+	// List all instances.
 	if err := p.gce.Instances.AggregatedList(p.name).
 		Filter(strings.Join(filters, " AND ")).
 		Pages(ctx,
@@ -209,6 +214,7 @@ func (p *project) Instances(ctx context.Context, app, release string) ([]Instanc
 	sort.SliceStable(instances, func(i, j int) bool {
 		return instances[i].Name < instances[j].Name
 	})
+
 	return instances, nil
 }
 
@@ -231,6 +237,7 @@ func (p *project) DNSServers(ctx context.Context) ([]DNSServer, error) {
 	for _, s := range mz.NameServers {
 		servers = append(servers, DNSServer{Hostname: s})
 	}
+
 	return servers, nil
 }
 
@@ -279,20 +286,23 @@ type MachineType struct {
 }
 
 func (mt MachineType) lexical() string {
-	parts := strings.SplitN(mt.Name, "-", 3)
 	var n int
+
+	parts := strings.SplitN(mt.Name, "-", 3)
 	if len(parts) > 2 {
 		n, _ = strconv.Atoi(parts[2])
 	}
+
 	return fmt.Sprintf("%10s%10s%010d", parts[0], parts[1], n)
 }
 
 func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineType, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.project.MachineTypes")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("region", region),
 	)
-	defer span.End()
 
 	if region != "" {
 		span.AddAttributes(trace.StringAttribute("region", region))
@@ -333,6 +343,7 @@ func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineTyp
 	sort.SliceStable(machineTypes, func(i, j int) bool {
 		return machineTypes[i].lexical() < machineTypes[j].lexical()
 	})
+
 	return machineTypes, nil
 }
 
@@ -341,5 +352,6 @@ func lastPathComponent(s string) string {
 	if idx < 0 {
 		return s
 	}
+
 	return s[idx+1:]
 }

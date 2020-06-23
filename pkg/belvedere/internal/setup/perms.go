@@ -12,11 +12,12 @@ import (
 
 func (s *service) SetDMPerms(ctx context.Context, project string, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.setup.SetDMPerms")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
-	defer span.End()
 
 	// Resolve the project's numeric ID.
 	p, err := s.crm.Projects.Get(project).Fields("projectNumber").Context(ctx).Do()
@@ -25,9 +26,11 @@ func (s *service) SetDMPerms(ctx context.Context, project string, dryRun bool) e
 	}
 
 	member := fmt.Sprintf("serviceAccount:%d@cloudservices.gserviceaccount.com", p.ProjectNumber)
+
 	const owner = "roles/owner"
 
 	exists := false
+
 	err = modifyIAMPolicy(ctx, s.crm, project,
 		func(policy *cloudresourcemanager.Policy) *cloudresourcemanager.Policy {
 			// Look for an existing IAM binding giving Deployment Service ownership of the project.
@@ -58,6 +61,7 @@ func (s *service) SetDMPerms(ctx context.Context, project string, dryRun bool) e
 	if exists {
 		msg = "Binding verified"
 	}
+
 	span.Annotate(
 		[]trace.Attribute{
 			trace.Int64Attribute("project_number", p.ProjectNumber),
@@ -93,9 +97,9 @@ func modifyIAMPolicy(
 		}).Context(ctx).Do()
 		return err
 	})
-
 	if err != nil {
 		return fmt.Errorf("error modifying IAM policy: %w", err)
 	}
+
 	return nil
 }

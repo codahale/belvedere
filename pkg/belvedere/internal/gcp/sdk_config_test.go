@@ -8,11 +8,11 @@ import (
 )
 
 func TestSDKConfig(t *testing.T) {
-	oldSdkPath := sdkPath
+	defer func(f func() (string, error)) { sdkPath = f }(sdkPath)
+
 	sdkPath = func() (string, error) {
 		return filepath.Abs("./fixtures")
 	}
-	defer func() { sdkPath = oldSdkPath }()
 
 	got, err := SDKConfig()
 	if err != nil {

@@ -36,6 +36,7 @@ func TestReleaseService_List(t *testing.T) {
 		project: "my-project",
 		dm:      dm,
 	}
+
 	got, err := service.List(context.Background(), "")
 	if err != nil {
 		t.Fatal(err)
@@ -82,6 +83,7 @@ func TestReleaseService_List_withApp(t *testing.T) {
 		project: "my-project",
 		dm:      dm,
 	}
+
 	got, err := service.List(context.Background(), "my-app")
 	if err != nil {
 		t.Fatal(err)

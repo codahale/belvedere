@@ -40,6 +40,7 @@ func TestLogs(t *testing.T) {
 		"--max-age=15m",
 		"--filter=woo",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -77,6 +78,7 @@ func TestLogs_WithRelease(t *testing.T) {
 		"--max-age=15m",
 		"--filter=woo",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -115,6 +117,7 @@ func TestLogs_WithReleaseAndInstance(t *testing.T) {
 		"--max-age=15m",
 		"--filter=woo",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}

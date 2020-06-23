@@ -36,13 +36,14 @@ func (h *healthChecker) Poll(ctx context.Context, project, region, backendServic
 func Health(ctx context.Context, gce *compute.Service, project, region, backendService, instanceGroup string) waiter.Condition {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.Health")
+		defer span.End()
+
 		span.AddAttributes(
 			trace.StringAttribute("project", project),
 			trace.StringAttribute("region", region),
 			trace.StringAttribute("backend_service", backendService),
 			trace.StringAttribute("instance_group", instanceGroup),
 		)
-		defer span.End()
 
 		// Verify that the instance group manager exists and is stable.
 		igm, err := gce.RegionInstanceGroupManagers.Get(project, region, instanceGroup).
@@ -50,6 +51,7 @@ func Health(ctx context.Context, gce *compute.Service, project, region, backendS
 		if err != nil {
 			return false, fmt.Errorf("getting getting instance group manager: %w", err)
 		}
+
 		span.AddAttributes(trace.BoolAttribute("stable", igm.Status.IsStable))
 
 		// If the instance group manager is not stable, continue waiting.
@@ -63,6 +65,7 @@ func Health(ctx context.Context, gce *compute.Service, project, region, backendS
 		if err != nil {
 			return false, fmt.Errorf("getting getting instance group: %w", err)
 		}
+
 		span.AddAttributes(trace.Int64Attribute("instances", ig.Size))
 
 		// Find the health of the running instances.
@@ -72,6 +75,7 @@ func Health(ctx context.Context, gce *compute.Service, project, region, backendS
 		if err != nil {
 			return false, fmt.Errorf("getting getting backend service health: %w", err)
 		}
+
 		span.AddAttributes(trace.Int64Attribute("registered", int64(len(health.HealthStatus))))
 
 		// If not all instances are registered, continue waiting.
@@ -81,12 +85,15 @@ func Health(ctx context.Context, gce *compute.Service, project, region, backendS
 
 		// Count the number of healthy instances.
 		var healthy int64
+
 		for _, h := range health.HealthStatus {
 			span.AddAttributes(trace.StringAttribute("health."+h.Instance, h.HealthState))
+
 			if h.HealthState == "HEALTHY" {
 				healthy++
 			}
 		}
+
 		span.AddAttributes(trace.Int64Attribute("healthy", healthy))
 
 		// If some instances are not healthy, continue waiting.

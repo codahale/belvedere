@@ -13,9 +13,12 @@ import (
 func GCE(ctx context.Context, gce *compute.Service, project, operation string) waiter.Condition {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.GCE")
-		span.AddAttributes(trace.StringAttribute("project", project))
-		span.AddAttributes(trace.StringAttribute("operation", operation))
 		defer span.End()
+
+		span.AddAttributes(
+			trace.StringAttribute("project", project),
+			trace.StringAttribute("operation", operation),
+		)
 
 		// Fetch the operation's status and any errors.
 		op, err := gce.GlobalOperations.Get(project, operation).Context(ctx).
@@ -23,6 +26,7 @@ func GCE(ctx context.Context, gce *compute.Service, project, operation string) w
 		if err != nil {
 			return false, fmt.Errorf("error getting operation: %w", err)
 		}
+
 		span.AddAttributes(trace.StringAttribute("status", op.Status))
 
 		// Check for errors in the operation.

@@ -10,9 +10,12 @@ import (
 )
 
 func newTeardownCmd() *cli.Command {
-	var mf cli.ModifyFlags
-	var lrf cli.LongRunningFlags
-	var af cli.AsyncFlags
+	var (
+		mf  cli.ModifyFlags
+		lrf cli.LongRunningFlags
+		af  cli.AsyncFlags
+	)
+
 	return &cli.Command{
 		UI: cobra.Command{
 			Use:     `teardown`,

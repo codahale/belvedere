@@ -26,6 +26,7 @@ func TestArgs_File(t *testing.T) {
 
 	want := []byte("one\n")
 	got, err := args.File(0)
+
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,12 +39,14 @@ func TestArgs_File_Default(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	args := &args{
 		stdin: f,
 	}
 
 	want := []byte("one\n")
 	got, err := args.File(0)
+
 	if err != nil {
 		t.Fatal(err)
 	}

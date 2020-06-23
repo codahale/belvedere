@@ -33,6 +33,7 @@ func TestMachineTypes(t *testing.T) {
 	cmd.SetArgs([]string{
 		"machine-types",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -64,6 +65,7 @@ func TestMachineTypes_WithRegion(t *testing.T) {
 		"machine-types",
 		"us-west1",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}

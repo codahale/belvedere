@@ -48,15 +48,19 @@ The list of releases can by filtered by application.`,
 			if err != nil {
 				return err
 			}
+
 			return out.Print(releases)
 		},
 	}
 }
 
 func newReleasesCreateCmd() *cli.Command {
-	var mf cli.ModifyFlags
-	var lrf cli.LongRunningFlags
-	var enable bool
+	var (
+		mf     cli.ModifyFlags
+		lrf    cli.LongRunningFlags
+		enable bool
+	)
+
 	return &cli.Command{
 		UI: cobra.Command{
 			Use:     `create <app> <name> <sha-256> [<config-file>]`,
@@ -103,8 +107,11 @@ instead.`,
 }
 
 func newReleasesEnableCmd() *cli.Command {
-	var mf cli.ModifyFlags
-	var lrf cli.LongRunningFlags
+	var (
+		mf  cli.ModifyFlags
+		lrf cli.LongRunningFlags
+	)
+
 	return &cli.Command{
 		UI: cobra.Command{
 			Use:     `enable <app> <name>`,
@@ -130,8 +137,11 @@ flag to bound the amount of time allowed for health checks to pass.`,
 }
 
 func newReleasesDisableCmd() *cli.Command {
-	var mf cli.ModifyFlags
-	var lrf cli.LongRunningFlags
+	var (
+		mf  cli.ModifyFlags
+		lrf cli.LongRunningFlags
+	)
+
 	return &cli.Command{
 		UI: cobra.Command{
 			Use:     `disable <app> <name>`,
@@ -157,9 +167,12 @@ releases which did not pass health checks in order to roll a deploy back.`,
 }
 
 func newReleasesDeleteCmd() *cli.Command {
-	var mf cli.ModifyFlags
-	var lrf cli.LongRunningFlags
-	var af cli.AsyncFlags
+	var (
+		mf  cli.ModifyFlags
+		lrf cli.LongRunningFlags
+		af  cli.AsyncFlags
+	)
+
 	return &cli.Command{
 		UI: cobra.Command{
 			Use:     "delete <app> <name>",

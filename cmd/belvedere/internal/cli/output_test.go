@@ -15,6 +15,7 @@ type example struct {
 func TestTableOutput_Print(t *testing.T) {
 	buf := bytes.NewBuffer(nil)
 	output := &tableOutput{w: buf}
+
 	if err := output.Print([]example{
 		{
 			Name:  "one",
@@ -43,6 +44,7 @@ func TestTableOutput_Print(t *testing.T) {
 func TestCSVOutput_Print(t *testing.T) {
 	buf := bytes.NewBuffer(nil)
 	output := &csvOutput{tableOutput: tableOutput{w: buf}}
+
 	if err := output.Print([]example{
 		{
 			Name:  "one",
@@ -64,6 +66,7 @@ one,two
 func TestJSONOutput_Print(t *testing.T) {
 	buf := bytes.NewBuffer(nil)
 	output := &jsonOutput{w: buf}
+
 	if err := output.Print([]example{
 		{
 			Name:  "one",
@@ -84,6 +87,7 @@ func TestJSONOutput_Print(t *testing.T) {
 func TestPrettyJSONOutput_Print(t *testing.T) {
 	buf := bytes.NewBuffer(nil)
 	output := &prettyJSONOutput{w: buf}
+
 	if err := output.Print([]example{
 		{
 			Name:  "one",
@@ -107,6 +111,7 @@ func TestPrettyJSONOutput_Print(t *testing.T) {
 func TestYamlOutput_Print(t *testing.T) {
 	buf := bytes.NewBuffer(nil)
 	output := &yamlOutput{w: buf}
+
 	if err := output.Print([]example{
 		{
 			Name:  "one",

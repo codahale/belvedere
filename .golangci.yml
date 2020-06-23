@@ -44,11 +44,11 @@ linters:
     - unused
     - varcheck
     - whitespace
+    - wsl
 #    - dupl
 #    - gomnd
 #    - lll
 #    - testpackage
-#    - wsl
 
 linters-settings:
   maligned:

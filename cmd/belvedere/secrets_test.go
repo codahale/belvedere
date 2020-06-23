@@ -37,6 +37,7 @@ func TestSecretsList(t *testing.T) {
 		"secrets",
 		"list",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -66,6 +67,7 @@ func TestSecretsCreate(t *testing.T) {
 		"my-secret",
 		"--dry-run",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -95,6 +97,7 @@ func TestSecretsCreate_WithFilename(t *testing.T) {
 		"secret.txt",
 		"--dry-run",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -124,6 +127,7 @@ func TestSecretsUpdate(t *testing.T) {
 		"my-secret",
 		"--dry-run",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -153,6 +157,7 @@ func TestSecretsUpdate_WithFilename(t *testing.T) {
 		"secret.txt",
 		"--dry-run",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -180,6 +185,7 @@ func TestSecretsGrant(t *testing.T) {
 		"my-app",
 		"--dry-run",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -207,6 +213,7 @@ func TestSecretsRevoke(t *testing.T) {
 		"my-app",
 		"--dry-run",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -233,6 +240,7 @@ func TestSecretsDelete(t *testing.T) {
 		"my-secret",
 		"--dry-run",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}

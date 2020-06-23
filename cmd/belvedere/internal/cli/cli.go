@@ -48,11 +48,13 @@ func (c *Command) ToCobra(pf ProjectFactory, of OutputFactory) *cobra.Command {
 		for _, sc := range c.Subcommands {
 			cmd.AddCommand(sc.ToCobra(pf, of))
 		}
+
 		return &cmd
 	}
 
 	// Register the global flags for each command.
 	var gf GlobalFlags
+
 	gf.Register(cmd.Flags())
 
 	// Wrap the func, if one is provided.
@@ -82,6 +84,7 @@ func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, f CommandFunc) f
 		if err != nil {
 			return err
 		}
+
 		span.AddAttributes(
 			trace.StringAttribute("project", project.Name()),
 			trace.StringAttribute("args", escapeArgs(cmdArgs)),
@@ -106,15 +109,18 @@ func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, f CommandFunc) f
 
 func rootSpan(ctx context.Context) (context.Context, *trace.Span) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.main")
+
 	if hostname, err := os.Hostname(); err == nil {
 		span.AddAttributes(trace.StringAttribute("hostname", hostname))
 	}
+
 	if u, err := user.Current(); err == nil {
 		span.AddAttributes(
 			trace.StringAttribute("username", u.Username),
 			trace.StringAttribute("uid", u.Uid),
 		)
 	}
+
 	return ctx, span
 }
 
@@ -139,10 +145,12 @@ func enableLogging(stderr io.Writer, debug, quiet bool) {
 func fmtText(doc string) string {
 	parts := strings.Split(doc, "\n\n")
 	wrapped := make([]string, len(parts))
+
 	for i, part := range parts {
 		lines, _ := tablewriter.WrapString(part, 80)
 		wrapped[i] = strings.TrimSpace(strings.Join(lines, "\n"))
 	}
+
 	return strings.Join(wrapped, "\n\n")
 }
 
@@ -151,5 +159,6 @@ func escapeArgs(args []string) string {
 	for i, s := range args {
 		escaped[i] = shellescape.Quote(s)
 	}
+
 	return strings.Join(escaped, " ")
 }

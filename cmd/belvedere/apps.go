@@ -44,6 +44,7 @@ Prints a table of provisioned applications in the current project.`,
 			if err != nil {
 				return err
 			}
+
 			return out.Print(apps)
 		},
 	}
@@ -51,6 +52,7 @@ Prints a table of provisioned applications in the current project.`,
 
 func newAppsCreateCmd() *cli.Command {
 	var mf cli.ModifyFlags
+
 	var lrf cli.LongRunningFlags
 
 	return &cli.Command{
@@ -90,8 +92,10 @@ instead.`,
 }
 
 func newAppsUpdateCmd() *cli.Command {
-	var mf cli.ModifyFlags
-	var lrf cli.LongRunningFlags
+	var (
+		mf  cli.ModifyFlags
+		lrf cli.LongRunningFlags
+	)
 
 	return &cli.Command{
 		UI: cobra.Command{
@@ -126,9 +130,12 @@ instead.`,
 }
 
 func newAppsDeleteCmd() *cli.Command {
-	var mf cli.ModifyFlags
-	var lrf cli.LongRunningFlags
-	var af cli.AsyncFlags
+	var (
+		mf  cli.ModifyFlags
+		lrf cli.LongRunningFlags
+		af  cli.AsyncFlags
+	)
+
 	return &cli.Command{
 		UI: cobra.Command{
 			Use:     `delete <name>`,

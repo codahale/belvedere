@@ -61,5 +61,6 @@ func (s *service) ManagedZone(ctx context.Context, project string) (*dns.Managed
 	if err != nil {
 		return nil, fmt.Errorf("error getting managed zone: %w", err)
 	}
+
 	return mz, nil
 }

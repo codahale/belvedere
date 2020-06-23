@@ -26,6 +26,7 @@ func TestTeardown(t *testing.T) {
 		"--async",
 		"--interval=1m",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}

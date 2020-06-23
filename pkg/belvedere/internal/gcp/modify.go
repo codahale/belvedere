@@ -16,6 +16,7 @@ func ModifyLoop(interval, timeout time.Duration, f func() error) error {
 	bo := backoff.NewExponentialBackOff()
 	bo.MaxInterval = interval
 	bo.MaxElapsedTime = timeout
+
 	for {
 		// Perform operation.
 		err := f()
@@ -28,7 +29,9 @@ func ModifyLoop(interval, timeout time.Duration, f func() error) error {
 					// If the total time has elapsed, return an error.
 					return context.DeadlineExceeded
 				}
+
 				time.Sleep(d)
+
 				continue
 			}
 		} else if err != nil {

@@ -34,6 +34,7 @@ func newCompletionBashCmd() *cli.Command {
 
 func newCompletionFishCmd() *cli.Command {
 	var includeDesc bool
+
 	return &cli.Command{
 		UI: cobra.Command{
 			Use: "fish",

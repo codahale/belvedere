@@ -11,11 +11,12 @@ import (
 
 func (p *project) Setup(ctx context.Context, dnsZone string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.project.Setup")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("dns_zone", dnsZone),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
-	defer span.End()
 
 	// Enable all required services.
 	if err := p.setup.EnableAPIs(ctx, p.name, dryRun, interval); err != nil {
@@ -44,11 +45,12 @@ func (p *project) Setup(ctx context.Context, dnsZone string, dryRun bool, interv
 
 func (p *project) Teardown(ctx context.Context, dryRun, async bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.project.Teardown")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.BoolAttribute("dry_run", dryRun),
 		trace.BoolAttribute("async", async),
 	)
-	defer span.End()
 
 	// Delete the shared deployment.
 	return p.dm.Delete(ctx, p.name, "belvedere", dryRun, async, interval)

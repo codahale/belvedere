@@ -9,7 +9,7 @@ import (
 )
 
 func (*builder) Base(dnsZone string) []deployments.Resource {
-	resources := []deployments.Resource{
+	return []deployments.Resource{
 		// A managed DNS zone for all the app A records.
 		{
 			Name: "belvedere-managed-zone",
@@ -58,5 +58,4 @@ func (*builder) Base(dnsZone string) []deployments.Resource {
 			},
 		},
 	}
-	return resources
 }

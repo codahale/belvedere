@@ -82,6 +82,7 @@ func (r *releaseService) List(ctx context.Context, app string) ([]Release, error
 			Hash:    dep.Hash,
 		}
 	}
+
 	return releases, nil
 }
 
@@ -98,13 +99,14 @@ func (e *InvalidSHA256DigestError) Error() string {
 
 func (r *releaseService) Create(ctx context.Context, app, name string, config *cfg.Config, imageSHA256 string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.releases.Create")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("app", app),
 		trace.StringAttribute("name", name),
 		trace.StringAttribute("image_sha256", imageSHA256),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
-	defer span.End()
 
 	if err := gcp.ValidateRFC1035(name); err != nil {
 		return err
@@ -134,12 +136,13 @@ func (r *releaseService) Create(ctx context.Context, app, name string, config *c
 
 func (r *releaseService) Enable(ctx context.Context, app, name string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.releases.Enable")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("app", app),
 		trace.StringAttribute("name", name),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
-	defer span.End()
 
 	a, err := r.apps.Get(ctx, app)
 	if err != nil {
@@ -148,6 +151,7 @@ func (r *releaseService) Enable(ctx context.Context, app, name string, dryRun bo
 
 	backendService := fmt.Sprintf("%s-bes", app)
 	instanceGroup := fmt.Sprintf("%s-%s-ig", app, name)
+
 	if err := r.backends.Add(ctx, r.project, a.Region, backendService, instanceGroup, dryRun, interval); err != nil {
 		return err
 	}
@@ -157,12 +161,13 @@ func (r *releaseService) Enable(ctx context.Context, app, name string, dryRun bo
 
 func (r *releaseService) Disable(ctx context.Context, app, name string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.releases.Disable")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("app", app),
 		trace.StringAttribute("name", name),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
-	defer span.End()
 
 	a, err := r.apps.Get(ctx, app)
 	if err != nil {
@@ -171,18 +176,20 @@ func (r *releaseService) Disable(ctx context.Context, app, name string, dryRun b
 
 	backendService := fmt.Sprintf("%s-bes", app)
 	instanceGroup := fmt.Sprintf("%s-%s-ig", app, name)
+
 	return r.backends.Remove(ctx, r.project, a.Region, backendService, instanceGroup, dryRun, interval)
 }
 
 func (r *releaseService) Delete(ctx context.Context, app, name string, dryRun, async bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.releases.Delete")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("app", app),
 		trace.StringAttribute("name", name),
 		trace.BoolAttribute("dry_run", dryRun),
 		trace.BoolAttribute("async", async),
 	)
-	defer span.End()
 
 	return r.dm.Delete(ctx, r.project, resources.Name(app, name), dryRun, async, interval)
 }

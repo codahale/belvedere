@@ -14,6 +14,7 @@ func main() {
 	cobra.EnableCommandSorting = false
 	version := buildVersion(version, commit, date, builtBy)
 	root := newRootCmd(version).ToCobra(belvedere.NewProject, cli.NewOutput)
+
 	if err := root.Execute(); err != nil {
 		_, _ = fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
@@ -54,6 +55,7 @@ func buildVersion(version, commit, date, builtBy string) string {
 	if version == "dev" {
 		return fmt.Sprintf("%s (%s)", version, runtime.Version())
 	}
+
 	return fmt.Sprintf("%s (commit %.8s, %s, %s, %s)", version, commit, date, builtBy, runtime.Version())
 }
 

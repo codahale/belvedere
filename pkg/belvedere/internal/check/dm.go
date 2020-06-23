@@ -13,11 +13,12 @@ import (
 func DM(ctx context.Context, dm *deploymentmanager.Service, project string, operation string) waiter.Condition {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.DM")
+		defer span.End()
+
 		span.AddAttributes(
 			trace.StringAttribute("project", project),
 			trace.StringAttribute("operation", operation),
 		)
-		defer span.End()
 
 		// Fetch the operation's status and any errors.
 		op, err := dm.Operations.Get(project, operation).Context(ctx).
@@ -25,6 +26,7 @@ func DM(ctx context.Context, dm *deploymentmanager.Service, project string, oper
 		if err != nil {
 			return false, fmt.Errorf("error getting operation: %w", err)
 		}
+
 		span.AddAttributes(trace.StringAttribute("status", op.Status))
 
 		// Check for errors in the operation.

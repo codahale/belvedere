@@ -29,8 +29,7 @@ func TestSURunning(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f := SU(context.Background(), su, "op1")
-	done, err := f()
+	done, err := SU(context.Background(), su, "op1")()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,8 +55,7 @@ func TestSUDone(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f := SU(context.Background(), su, "op1")
-	done, err := f()
+	done, err := SU(context.Background(), su, "op1")()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -87,8 +85,7 @@ func TestSUError(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f := SU(context.Background(), su, "op1")
-	_, err = f()
+	_, err = SU(context.Background(), su, "op1")()
 	if err == nil {
 		t.Fatal("should have returned an error")
 	}

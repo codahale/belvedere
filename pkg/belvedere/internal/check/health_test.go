@@ -31,8 +31,7 @@ func TestHealthNotStable(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f := Health(context.Background(), gce, "my-project", "us-central1", "bes-1", "ig-1")
-	done, err := f()
+	done, err := Health(context.Background(), gce, "my-project", "us-central1", "bes-1", "ig-1")()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,8 +72,7 @@ func TestHealthNotRegistered(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f := Health(context.Background(), gce, "my-project", "us-central1", "bes-1", "ig-1")
-	done, err := f()
+	done, err := Health(context.Background(), gce, "my-project", "us-central1", "bes-1", "ig-1")()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,8 +122,7 @@ func TestHealthNotHealthy(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f := Health(context.Background(), gce, "my-project", "us-central1", "bes-1", "ig-1")
-	done, err := f()
+	done, err := Health(context.Background(), gce, "my-project", "us-central1", "bes-1", "ig-1")()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -175,8 +172,7 @@ func TestHealthDone(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f := Health(context.Background(), gce, "my-project", "us-central1", "bes-1", "ig-1")
-	done, err := f()
+	done, err := Health(context.Background(), gce, "my-project", "us-central1", "bes-1", "ig-1")()
 	if err != nil {
 		t.Fatal(err)
 	}

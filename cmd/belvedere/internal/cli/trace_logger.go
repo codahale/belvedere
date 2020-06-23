@@ -28,9 +28,11 @@ func (l *traceLogger) ExportSpan(s *trace.SpanData) {
 	if s.Code != 0 {
 		_, _ = fmt.Fprintf(l.w, " code=%d", s.Code)
 	}
+
 	if s.Message != "" {
 		_, _ = fmt.Fprintf(l.w, " message=%s", shellescape.Quote(s.Message))
 	}
+
 	l.printAttributes(s.Attributes)
 	_, _ = fmt.Fprintln(l.w)
 
@@ -46,12 +48,15 @@ func (l *traceLogger) printAttributes(attributes map[string]interface{}) {
 	for k := range attributes {
 		keys = append(keys, k)
 	}
+
 	sort.Stable(sort.StringSlice(keys))
+
 	for _, k := range keys {
 		v := attributes[k]
 		if s, ok := v.(string); ok {
 			v = shellescape.Quote(s)
 		}
+
 		_, _ = fmt.Fprintf(l.w, " %v=%v", k, v)
 	}
 }

@@ -34,6 +34,8 @@ type logService struct {
 
 func (l *logService) List(ctx context.Context, app, release, instance string, maxAge time.Duration, filters []string) ([]LogEntry, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.logs.List")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("app", app),
 		trace.Int64Attribute("max_age_ms", maxAge.Milliseconds()),
@@ -41,10 +43,10 @@ func (l *logService) List(ctx context.Context, app, release, instance string, ma
 		trace.StringAttribute("release", release),
 		trace.StringAttribute("instance", instance),
 	)
+
 	for i, f := range filters {
 		span.AddAttributes(trace.StringAttribute(fmt.Sprintf("filter.%d", i), f))
 	}
-	defer span.End()
 
 	filter := l.makeFilter(app, release, instance, maxAge, filters)
 
@@ -88,11 +90,11 @@ func (l *logService) makeFilter(app string, release string, instance string, max
 
 	// Include any other given filters.
 	filter = append(filter, filters...)
+
 	return filter
 }
 
 func (l *logService) parse(entries *logging.ListLogEntriesResponse) ([]LogEntry, error) {
-	results := make([]LogEntry, len(entries.Entries))
 	var payload struct {
 		Container struct {
 			Name     string `json:"name"`
@@ -105,14 +107,19 @@ func (l *logService) parse(entries *logging.ListLogEntriesResponse) ([]LogEntry,
 		} `json:"instance"`
 		Message string `json:"message"`
 	}
+
+	results := make([]LogEntry, len(entries.Entries))
+
 	for i, e := range entries.Entries {
 		if err := json.Unmarshal(e.JsonPayload, &payload); err != nil {
 			return nil, fmt.Errorf("error parsing log entry %s: %w", e.InsertId, err)
 		}
+
 		ts, err := time.Parse(time.RFC3339Nano, e.Timestamp)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing timestamp in %s: %w", e.InsertId, err)
 		}
+
 		results[i] = LogEntry{
 			Timestamp: ts,
 			Release:   payload.Container.Metadata.Release,
@@ -121,5 +128,6 @@ func (l *logService) parse(entries *logging.ListLogEntriesResponse) ([]LogEntry,
 			Message:   payload.Message,
 		}
 	}
+
 	return results, nil
 }

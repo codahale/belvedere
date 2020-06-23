@@ -33,6 +33,7 @@ func TestDNSServers(t *testing.T) {
 	cmd.SetArgs([]string{
 		"dns-servers",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}

@@ -54,6 +54,7 @@ func (s *appService) Get(ctx context.Context, name string) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &App{
 		Project: s.project,
 		Name:    dep.App,
@@ -80,6 +81,7 @@ func (s *appService) List(ctx context.Context) ([]App, error) {
 			Region:  dep.Region,
 		}
 	}
+
 	return apps, nil
 }
 
@@ -94,23 +96,26 @@ func (e *DownRegionError) Error() string {
 
 func (s *appService) Create(ctx context.Context, region, name string, config *cfg.Config, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.apps.Create")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("region", region),
 		trace.StringAttribute("name", name),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
-	defer span.End()
 
 	// Validate the application name.
 	if err := gcp.ValidateRFC1035(name); err != nil {
 		return err
 	}
 
-	// Validate the region name and status.
+	// Validate the region name.
 	r, err := s.gce.Regions.Get(s.project, region).Context(ctx).Fields("status").Do()
 	if err != nil {
 		return fmt.Errorf("invalid region %q: %w", region, err)
 	}
+
+	// Validate the region status.
 	if r.Status != "UP" {
 		return &DownRegionError{Region: region, Status: r.Status}
 	}
@@ -135,11 +140,12 @@ func (s *appService) Create(ctx context.Context, region, name string, config *cf
 
 func (s *appService) Update(ctx context.Context, name string, config *cfg.Config, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.apps.Update")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("name", name),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
-	defer span.End()
 
 	// Find the project's managed zone.
 	managedZone, err := s.setup.ManagedZone(ctx, s.project)
@@ -156,12 +162,13 @@ func (s *appService) Update(ctx context.Context, name string, config *cfg.Config
 
 func (s *appService) Delete(ctx context.Context, name string, dryRun, async bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.apps.Delete")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("name", name),
 		trace.BoolAttribute("dry_run", dryRun),
 		trace.BoolAttribute("async", async),
 	)
-	defer span.End()
 
 	// Delete the application deployment.
 	return s.dm.Delete(ctx, s.project, resources.Name(name), dryRun, async, interval)

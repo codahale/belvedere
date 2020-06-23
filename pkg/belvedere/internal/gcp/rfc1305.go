@@ -22,5 +22,6 @@ func ValidateRFC1035(name string) error {
 	if len(name) < 1 || len(name) > 63 || !rfc1035.MatchString(name) {
 		return &InvalidNameError{Name: name}
 	}
+
 	return nil
 }

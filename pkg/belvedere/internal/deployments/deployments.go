@@ -45,7 +45,9 @@ func (s *ServiceAccount) MarshalJSON() ([]byte, error) {
 	// Cast from a pointer to a raw type to avoid infinite recursion while reusing the standard JSON
 	// marshalling code.
 	type NoMethod ServiceAccount
+
 	raw := NoMethod(*s)
+
 	return json.Marshal(raw)
 }
 
@@ -64,7 +66,9 @@ func (rrs *ResourceRecordSets) MarshalJSON() ([]byte, error) {
 	// Cast from a pointer to a raw type to avoid infinite recursion while reusing the standard JSON
 	// marshalling code.
 	type NoMethod ResourceRecordSets
+
 	raw := NoMethod(*rrs)
+
 	return json.Marshal(raw)
 }
 
@@ -83,7 +87,9 @@ func (b *IAMMemberBinding) MarshalJSON() ([]byte, error) {
 	// Cast from a pointer to a raw type to avoid infinite recursion while reusing the standard JSON
 	// marshalling code.
 	type NoMethod IAMMemberBinding
+
 	raw := NoMethod(*b)
+
 	return json.Marshal(raw)
 }
 
@@ -132,6 +138,7 @@ func NewManager(ctx context.Context, opts ...option.ClientOption) (Manager, erro
 	if err != nil {
 		return nil, err
 	}
+
 	return &manager{dm: dm}, nil
 }
 
@@ -141,11 +148,12 @@ type manager struct {
 
 func (m *manager) Get(ctx context.Context, project, name string) (*Deployment, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Get")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("name", name),
 	)
-	defer span.End()
 
 	d, err := m.dm.Deployments.Get(project, name).Fields("").Context(ctx).Do()
 	if err != nil {
@@ -160,12 +168,13 @@ func (m *manager) Get(ctx context.Context, project, name string) (*Deployment, e
 
 func (m *manager) Insert(ctx context.Context, project, name string, resources []Resource, labels Labels, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Insert")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("name", name),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
-	defer span.End()
 
 	// Create our config target.
 	d := deploymentConfig{Resources: resources}
@@ -176,7 +185,9 @@ func (m *manager) Insert(ctx context.Context, project, name string, resources []
 		if err != nil {
 			return fmt.Errorf("error generating JSON: %w", err)
 		}
+
 		fmt.Println(string(b))
+
 		return nil
 	}
 
@@ -206,12 +217,13 @@ func (m *manager) Insert(ctx context.Context, project, name string, resources []
 
 func (m *manager) Update(ctx context.Context, project, name string, resources []Resource, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Update")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("name", name),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
-	defer span.End()
 
 	// Create our config target.
 	d := deploymentConfig{Resources: resources}
@@ -222,7 +234,9 @@ func (m *manager) Update(ctx context.Context, project, name string, resources []
 		if err != nil {
 			return fmt.Errorf("error generating JSON: %w", err)
 		}
+
 		fmt.Println(string(b))
+
 		return nil
 	}
 
@@ -250,13 +264,14 @@ func (m *manager) Update(ctx context.Context, project, name string, resources []
 
 func (m *manager) Delete(ctx context.Context, project, name string, dryRun, async bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Delete")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("name", name),
 		trace.BoolAttribute("dry_run", dryRun),
 		trace.BoolAttribute("async", async),
 	)
-	defer span.End()
 
 	// Early exit if we don't want side effects.
 	if dryRun {
@@ -280,13 +295,15 @@ func (m *manager) Delete(ctx context.Context, project, name string, dryRun, asyn
 
 func (m *manager) List(ctx context.Context, project, filter string) ([]Deployment, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.List")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 	)
-	defer span.End()
+
+	var deployments []Deployment
 
 	// List all of the deployments.
-	var deployments []Deployment
 	if err := m.dm.Deployments.List(project).Filter(filter).Pages(ctx,
 		func(list *deploymentmanager.DeploymentsListResponse) error {
 			// Convert labels to maps.
@@ -301,9 +318,11 @@ func (m *manager) List(ctx context.Context, project, filter string) ([]Deploymen
 	); err != nil {
 		return nil, fmt.Errorf("error listing deployments: %w", err)
 	}
+
 	sort.SliceStable(deployments, func(i, j int) bool {
 		return deployments[i].Name < deployments[j].Name
 	})
+
 	return deployments, nil
 }
 
@@ -316,21 +335,27 @@ func labelsToEntries(l *Labels) []*deploymentmanager.DeploymentLabelEntry {
 	if l.App != "" {
 		entries = append(entries, entry("belvedere-app", l.App))
 	}
+
 	if l.Hash != "" {
 		entries = append(entries, entry("belvedere-hash", l.Hash))
 	}
+
 	if l.Region != "" {
 		entries = append(entries, entry("belvedere-region", l.Region))
 	}
+
 	if l.Release != "" {
 		entries = append(entries, entry("belvedere-release", l.Release))
 	}
+
 	entries = append(entries, entry("belvedere-type", l.Type))
+
 	return entries
 }
 
 func entriesToLabels(entries []*deploymentmanager.DeploymentLabelEntry) Labels {
 	var l Labels
+
 	for _, e := range entries {
 		switch e.Key {
 		case "belvedere-app":
@@ -345,5 +370,6 @@ func entriesToLabels(entries []*deploymentmanager.DeploymentLabelEntry) Labels {
 			l.Type = e.Value
 		}
 	}
+
 	return l
 }

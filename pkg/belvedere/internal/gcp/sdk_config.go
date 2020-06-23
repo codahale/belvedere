@@ -30,10 +30,12 @@ func SDKConfig() (map[string]map[string]string, error) {
 	// Open the default config file.
 	configPath := filepath.Join(sdkPath, "configurations",
 		fmt.Sprintf("config_%s", strings.TrimSpace(string(configName))))
+
 	f, err := os.Open(configPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load active config: %w", err)
 	}
+
 	defer func() { _ = f.Close() }()
 
 	// Parse as an INI file.
@@ -46,25 +48,31 @@ func parseINI(ini io.Reader) (map[string]map[string]string, error) {
 	}
 	scanner := bufio.NewScanner(ini)
 	currentSection := ""
+
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		if strings.HasPrefix(line, ";") {
 			// comment.
 			continue
 		}
+
 		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
 			currentSection = strings.TrimSpace(line[1 : len(line)-1])
 			result[currentSection] = map[string]string{}
+
 			continue
 		}
+
 		parts := strings.SplitN(line, "=", 2)
 		if len(parts) == 2 && parts[0] != "" {
 			result[currentSection][strings.TrimSpace(parts[0])] = strings.TrimSpace(parts[1])
 		}
 	}
+
 	if err := scanner.Err(); err != nil {
 		return nil, fmt.Errorf("error scanning ini: %w", err)
 	}
+
 	return result, nil
 }
 
@@ -87,9 +95,11 @@ func guessUnixHomeDir() string {
 	if v := os.Getenv("HOME"); v != "" {
 		return v
 	}
+
 	// Else, fall back to user.Current:
 	if u, err := user.Current(); err == nil {
 		return u.HomeDir
 	}
+
 	return ""
 }

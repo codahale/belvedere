@@ -54,7 +54,10 @@ secrets exist in their own namespace.`,
 }
 
 func newSecretsCreateCmd() *cli.Command {
-	var mf cli.ModifyFlags
+	var (
+		mf cli.ModifyFlags
+	)
+
 	return &cli.Command{
 		UI: cobra.Command{
 			Use:     `create <name> [<data-file>]`,
@@ -85,6 +88,7 @@ instead.`,
 
 func newSecretsUpdateCmd() *cli.Command {
 	var mf cli.ModifyFlags
+
 	return &cli.Command{
 		UI: cobra.Command{
 			Use:     `update <name> [<data-file>]`,
@@ -115,6 +119,7 @@ instead.`,
 
 func newSecretsDeleteCmd() *cli.Command {
 	var mf cli.ModifyFlags
+
 	return &cli.Command{
 		UI: cobra.Command{
 			Use:     `delete <name>`,
@@ -137,6 +142,7 @@ This deletes all versions of the secret as well, and cannot be undone.`,
 
 func newSecretsGrantCmd() *cli.Command {
 	var mf cli.ModifyFlags
+
 	return &cli.Command{
 		UI: cobra.Command{
 			Use:     `grant <name> <app>`,
@@ -161,6 +167,7 @@ secrets' value.`,
 
 func newSecretsRevokeCmd() *cli.Command {
 	var mf cli.ModifyFlags
+
 	return &cli.Command{
 		UI: cobra.Command{
 			Use:     `revoke <name> <app>`,

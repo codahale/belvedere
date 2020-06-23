@@ -45,7 +45,9 @@ func (o *tableOutput) Print(v interface{}) error {
 	if err != nil {
 		return err
 	}
+
 	_, err = fmt.Fprintln(o.w, tw.Render())
+
 	return err
 }
 
@@ -61,6 +63,7 @@ func (o *tableOutput) buildWriter(v interface{}) (table.Writer, error) {
 	tw.SetColumnConfigs(cols)
 	tw.AppendSeparator()
 	tw.AppendRows(rows)
+
 	return tw, err
 }
 
@@ -73,7 +76,9 @@ func (o *csvOutput) Print(v interface{}) error {
 	if err != nil {
 		return err
 	}
+
 	_, err = fmt.Fprintln(o.w, tw.RenderCSV())
+
 	return err
 }
 
@@ -98,6 +103,7 @@ func (o *jsonOutput) Print(v interface{}) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -122,6 +128,7 @@ func (o *prettyJSONOutput) Print(v interface{}) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -146,6 +153,7 @@ func (o *yamlOutput) Print(v interface{}) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -163,7 +171,9 @@ func toRows(v interface{}) (table.Row, []table.ColumnConfig, []table.Row, error)
 	}
 
 	var headers table.Row
+
 	var cols []table.ColumnConfig
+
 	for i := 0; i < t.NumField(); i++ {
 		s := t.Field(i).Tag.Get("table")
 		if s == "" {
@@ -173,6 +183,7 @@ func toRows(v interface{}) (table.Row, []table.ColumnConfig, []table.Row, error)
 		parts := strings.Split(s, ",")
 
 		headers = append(headers, parts[0])
+
 		if strings.Contains(s, ",ralign") {
 			cols = append(cols, table.ColumnConfig{
 				Name:  parts[0],
@@ -182,10 +193,14 @@ func toRows(v interface{}) (table.Row, []table.ColumnConfig, []table.Row, error)
 	}
 
 	var rows []table.Row
+
 	iv := reflect.ValueOf(v)
+
 	for i := 0; i < iv.Len(); i++ {
 		var row table.Row
+
 		ev := iv.Index(i)
+
 		for j := range headers {
 			f := ev.Field(j)
 
@@ -195,6 +210,7 @@ func toRows(v interface{}) (table.Row, []table.ColumnConfig, []table.Row, error)
 				row = append(row, fmt.Sprint(f.Interface()))
 			}
 		}
+
 		rows = append(rows, row)
 	}
 

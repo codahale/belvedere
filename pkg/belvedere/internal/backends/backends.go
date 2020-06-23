@@ -38,6 +38,8 @@ type service struct {
 func (s *service) Add(ctx context.Context, project, region, backendService, instanceGroup string,
 	dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Add")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("region", region),
@@ -45,9 +47,9 @@ func (s *service) Add(ctx context.Context, project, region, backendService, inst
 		trace.StringAttribute("instance_group", instanceGroup),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
-	defer span.End()
 
 	var op *compute.Operation
+
 	err := gcp.ModifyLoop(5*time.Second, 2*time.Minute, func() error {
 		// Get the current backends.
 		bes, err := s.gce.BackendServices.Get(project, backendService).
@@ -110,6 +112,8 @@ func (s *service) Add(ctx context.Context, project, region, backendService, inst
 func (s *service) Remove(ctx context.Context, project, region, backendService, instanceGroup string,
 	dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Remove")
+	defer span.End()
+
 	span.AddAttributes(
 		trace.StringAttribute("project", project),
 		trace.StringAttribute("region", region),
@@ -117,9 +121,9 @@ func (s *service) Remove(ctx context.Context, project, region, backendService, i
 		trace.StringAttribute("instance_group", instanceGroup),
 		trace.BoolAttribute("dry_run", dryRun),
 	)
-	defer span.End()
 
 	var op *compute.Operation
+
 	err := gcp.ModifyLoop(5*time.Second, 2*time.Minute, func() error {
 		// Get the current backends.
 		bes, err := s.gce.BackendServices.Get(project, backendService).

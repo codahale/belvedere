@@ -29,8 +29,7 @@ func TestGCERunning(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f := GCE(context.Background(), gce, "example", "op1")
-	done, err := f()
+	done, err := GCE(context.Background(), gce, "example", "op1")()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,8 +55,7 @@ func TestGCEDone(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f := GCE(context.Background(), gce, "example", "op1")
-	done, err := f()
+	done, err := GCE(context.Background(), gce, "example", "op1")()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,8 +90,7 @@ func TestGCEError(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f := GCE(context.Background(), gce, "example", "op1")
-	_, err = f()
+	_, err = GCE(context.Background(), gce, "example", "op1")()
 	if err == nil {
 		t.Fatal("should have returned an error")
 	}

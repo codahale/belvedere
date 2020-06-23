@@ -40,6 +40,7 @@ func TestReleasesList(t *testing.T) {
 		"list",
 		"my-app",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -74,6 +75,7 @@ func TestReleasesCreate(t *testing.T) {
 		"--dry-run",
 		"--interval=5m",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -113,6 +115,7 @@ func TestReleasesCreate_AndEnable(t *testing.T) {
 		"--dry-run",
 		"--interval=5m",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -147,6 +150,7 @@ func TestReleasesCreate_WithFilename(t *testing.T) {
 		"--dry-run",
 		"--interval=5m",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -175,6 +179,7 @@ func TestReleasesEnable(t *testing.T) {
 		"--dry-run",
 		"--interval=10m",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -203,6 +208,7 @@ func TestReleasesDisable(t *testing.T) {
 		"--dry-run",
 		"--interval=10m",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
@@ -232,6 +238,7 @@ func TestReleasesDelete(t *testing.T) {
 		"--async",
 		"--interval=10m",
 	})
+
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}

@@ -13,14 +13,16 @@ import (
 func SU(ctx context.Context, su *serviceusage.Service, operation string) waiter.Condition {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.SU")
-		span.AddAttributes(trace.StringAttribute("operation", operation))
 		defer span.End()
+
+		span.AddAttributes(trace.StringAttribute("operation", operation))
 
 		// Fetch the operation's status and any errors.
 		op, err := su.Operations.Get(operation).Context(ctx).Do()
 		if err != nil {
 			return false, fmt.Errorf("error getting operation: %w", err)
 		}
+
 		span.AddAttributes(trace.BoolAttribute("done", op.Done))
 
 		// Check for errors in the operation.
