@@ -21,19 +21,18 @@ func ModifyLoop(interval, timeout time.Duration, f func() error) error {
 		// Perform operation.
 		err := f()
 
-		if e, ok := err.(*googleapi.Error); ok {
-			// If the operation resulted in a conflict, back off and retry.
-			if e.Code == http.StatusConflict || e.Code == http.StatusPreconditionFailed {
-				d := bo.NextBackOff()
-				if d == backoff.Stop {
-					// If the total time has elapsed, return an error.
-					return context.DeadlineExceeded
-				}
-
-				time.Sleep(d)
-
-				continue
+		// Check to see if the error is retryable.
+		if isRetryable(err) {
+			d := bo.NextBackOff()
+			if d == backoff.Stop {
+				// If the total time has elapsed, return an error.
+				return context.DeadlineExceeded
 			}
+
+			// Otherwise, wait for the backoff period and retry later.
+			time.Sleep(d)
+
+			continue
 		} else if err != nil {
 			// If the operation resulted in an error, exit.
 			return err
@@ -42,4 +41,15 @@ func ModifyLoop(interval, timeout time.Duration, f func() error) error {
 		// If the operation was successful, exit.
 		return nil
 	}
+}
+
+func isRetryable(err error) bool {
+	// If the operation resulted in a conflict, back off and retry.
+	if e, ok := err.(*googleapi.Error); ok {
+		if e.Code == http.StatusConflict || e.Code == http.StatusPreconditionFailed {
+			return true
+		}
+	}
+
+	return false
 }
