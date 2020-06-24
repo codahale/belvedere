@@ -1,3 +1,4 @@
+// nolint: dupl
 package check
 
 import (
@@ -11,90 +12,73 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestGCERunning(t *testing.T) {
-	defer gock.Off()
-
-	gock.New("https://compute.googleapis.com/compute/v1/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.Operation{
-			Status: "RUNNING",
-		})
-
-	gce, err := compute.NewService(
-		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
-		option.WithoutAuthentication(),
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	done, err := GCE(context.Background(), gce, "example", "op1")()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assert.Equal(t, "GCE()", false, done)
-}
-
-func TestGCEDone(t *testing.T) {
-	defer gock.Off()
-
-	gock.New("https://compute.googleapis.com/compute/v1/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.Operation{
-			Status: "DONE",
-		})
-
-	gce, err := compute.NewService(
-		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
-		option.WithoutAuthentication(),
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	done, err := GCE(context.Background(), gce, "example", "op1")()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assert.Equal(t, "GCE()", true, done)
-}
-
-func TestGCEError(t *testing.T) {
-	defer gock.Off()
-
-	gock.New("https://compute.googleapis.com/compute/v1/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.Operation{
-			Status: "DONE",
-			Error: &compute.OperationError{
-				Errors: []*compute.OperationErrorErrors{
-					{
-						Code:     "ERR_MAGIC_HAT",
-						Location: "/great-hall",
-						Message:  "Bad personality test",
+func TestGCE(t *testing.T) {
+	tests := []struct {
+		name   string
+		op     compute.Operation
+		done   bool
+		errMsg string
+	}{
+		{
+			name: "running",
+			op: compute.Operation{
+				Status: "RUNNING",
+			},
+			done: false,
+		},
+		{
+			name: "done",
+			op: compute.Operation{
+				Status: "DONE",
+			},
+			done: true,
+		},
+		{
+			name: "error",
+			op: compute.Operation{
+				Status: "DONE",
+				Error: &compute.OperationError{
+					Errors: []*compute.OperationErrorErrors{
+						{
+							Code:     "ERR_BAD_NEWS",
+							Location: "/downtown",
+							Message:  "here comes Mongo",
+						},
 					},
 				},
 			},
+			done:   false,
+			errMsg: `operation failed: {"errors":[{"code":"ERR_BAD_NEWS","location":"/downtown","message":"here comes Mongo"}]}`,
+		},
+	}
+	for _, testCase := range tests {
+		testCase := testCase
+		t.Run(testCase.name, func(t *testing.T) {
+			defer gock.Off()
+
+			gock.New("https://compute.googleapis.com/compute/v1/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
+				Reply(http.StatusOK).
+				JSON(testCase.op)
+
+			gce, err := compute.NewService(
+				context.Background(),
+				option.WithHTTPClient(http.DefaultClient),
+				option.WithoutAuthentication(),
+			)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			done, err := GCE(context.Background(), gce, "example", "op1")()
+
+			assert.Equal(t, "done", testCase.done, done)
+
+			errMsg := ""
+			if err != nil {
+				errMsg = err.Error()
+			}
+
+			assert.Equal(t, "errMsg", testCase.errMsg, errMsg)
 		})
-
-	gce, err := compute.NewService(
-		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
-		option.WithoutAuthentication(),
-	)
-	if err != nil {
-		t.Fatal(err)
 	}
-
-	_, err = GCE(context.Background(), gce, "example", "op1")()
-	if err == nil {
-		t.Fatal("should have returned an error")
-	}
-
-	want := `operation failed: {"errors":[{"code":"ERR_MAGIC_HAT","location":"/great-hall","message":"Bad personality test"}]}`
-	assert.Equal(t, "GCE() error", want, err.Error())
 }

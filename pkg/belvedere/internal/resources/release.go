@@ -12,7 +12,7 @@ import (
 	compute "google.golang.org/api/compute/v1"
 )
 
-func (*builder) Release(project, region, app, release, imageSHA256 string, config *cfg.Config) []deployments.Resource { // nolint:funlen
+func (*builder) Release(project, region, app, release, imageSHA256 string, config *cfg.Config) []deployments.Resource {
 	instanceTemplate := fmt.Sprintf("%s-%s-it", app, release)
 	instanceGroupManager := fmt.Sprintf("%s-%s-ig", app, release)
 	autoscaler := fmt.Sprintf("%s-%s-as", app, release)

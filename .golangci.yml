@@ -6,6 +6,7 @@ linters:
     - deadcode
     - depguard
     - dogsled
+    - dupl
     - errcheck
     - funlen
     - gochecknoglobals
@@ -44,7 +45,6 @@ linters:
     - varcheck
     - whitespace
     - wsl
-#    - dupl
 #    - gomnd
 #    - lll
 #    - testpackage
@@ -54,4 +54,4 @@ linters-settings:
   maligned:
     suggest-new: true
   funlen:
-    lines: 100
+    lines: 150

@@ -1,3 +1,4 @@
+// nolint:dupl // duplicated code b/c no type parameters
 package check
 
 import (

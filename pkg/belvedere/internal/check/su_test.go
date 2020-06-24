@@ -11,85 +11,67 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestSURunning(t *testing.T) {
-	defer gock.Off()
-
-	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(serviceusage.Operation{
-			Done: false,
-		})
-
-	su, err := serviceusage.NewService(
-		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
-		option.WithoutAuthentication(),
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	done, err := SU(context.Background(), su, "op1")()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assert.Equal(t, "SU()", false, done)
-}
-
-func TestSUDone(t *testing.T) {
-	defer gock.Off()
-
-	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(serviceusage.Operation{
-			Done: true,
-		})
-
-	su, err := serviceusage.NewService(
-		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
-		option.WithoutAuthentication(),
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	done, err := SU(context.Background(), su, "op1")()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assert.Equal(t, "SU()", true, done)
-}
-
-func TestSUError(t *testing.T) {
-	defer gock.Off()
-
-	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(serviceusage.Operation{
-			Done: true,
-			Error: &serviceusage.Status{
-				Code:    500,
-				Message: "nope",
+func TestSU(t *testing.T) {
+	tests := []struct {
+		name   string
+		op     serviceusage.Operation
+		done   bool
+		errMsg string
+	}{
+		{
+			name: "running",
+			op: serviceusage.Operation{
+				Done: false,
 			},
+			done: false,
+		},
+		{
+			name: "done",
+			op: serviceusage.Operation{
+				Done: true,
+			},
+			done: true,
+		},
+		{
+			name: "error",
+			op: serviceusage.Operation{
+				Done: true,
+				Error: &serviceusage.Status{
+					Code:    500,
+					Message: "nope",
+				},
+			},
+			errMsg: `operation failed: {"code":500,"message":"nope"}`,
+		},
+	}
+	for _, testCase := range tests {
+		testCase := testCase
+		t.Run(testCase.name, func(t *testing.T) {
+			defer gock.Off()
+
+			gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&prettyPrint=false").
+				Reply(http.StatusOK).
+				JSON(testCase.op)
+
+			su, err := serviceusage.NewService(
+				context.Background(),
+				option.WithHTTPClient(http.DefaultClient),
+				option.WithoutAuthentication(),
+			)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			done, err := SU(context.Background(), su, "op1")()
+
+			assert.Equal(t, "done", testCase.done, done)
+
+			errMsg := ""
+			if err != nil {
+				errMsg = err.Error()
+			}
+
+			assert.Equal(t, "errMsg", testCase.errMsg, errMsg)
 		})
-
-	su, err := serviceusage.NewService(
-		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
-		option.WithoutAuthentication(),
-	)
-	if err != nil {
-		t.Fatal(err)
 	}
-
-	_, err = SU(context.Background(), su, "op1")()
-	if err == nil {
-		t.Fatal("should have returned an error")
-	}
-
-	want := `operation failed: {"code":500,"message":"nope"}`
-	assert.Equal(t, "SU() error", want, err.Error())
 }

@@ -1,3 +1,4 @@
+// nolint: dupl
 package check
 
 import (
@@ -11,90 +12,73 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestDMRunning(t *testing.T) {
-	defer gock.Off()
-
-	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(deploymentmanager.Operation{
-			Status: "RUNNING",
-		})
-
-	dm, err := deploymentmanager.NewService(
-		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
-		option.WithoutAuthentication(),
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	done, err := DM(context.Background(), dm, "example", "op1")()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assert.Equal(t, "DM()", false, done)
-}
-
-func TestDMDone(t *testing.T) {
-	defer gock.Off()
-
-	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(deploymentmanager.Operation{
-			Status: "DONE",
-		})
-
-	dm, err := deploymentmanager.NewService(
-		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
-		option.WithoutAuthentication(),
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	done, err := DM(context.Background(), dm, "example", "op1")()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assert.Equal(t, "DM()", true, done)
-}
-
-func TestDMError(t *testing.T) {
-	defer gock.Off()
-
-	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(deploymentmanager.Operation{
-			Status: "DONE",
-			Error: &deploymentmanager.OperationError{
-				Errors: []*deploymentmanager.OperationErrorErrors{
-					{
-						Code:     "ERR_BAD_NEWS",
-						Location: "/downtown",
-						Message:  "here comes Mongo",
+func TestDM(t *testing.T) {
+	tests := []struct {
+		name   string
+		op     deploymentmanager.Operation
+		done   bool
+		errMsg string
+	}{
+		{
+			name: "running",
+			op: deploymentmanager.Operation{
+				Status: "RUNNING",
+			},
+			done: false,
+		},
+		{
+			name: "done",
+			op: deploymentmanager.Operation{
+				Status: "DONE",
+			},
+			done: true,
+		},
+		{
+			name: "error",
+			op: deploymentmanager.Operation{
+				Status: "DONE",
+				Error: &deploymentmanager.OperationError{
+					Errors: []*deploymentmanager.OperationErrorErrors{
+						{
+							Code:     "ERR_BAD_NEWS",
+							Location: "/downtown",
+							Message:  "here comes Mongo",
+						},
 					},
 				},
 			},
+			done:   false,
+			errMsg: `operation failed: {"errors":[{"code":"ERR_BAD_NEWS","location":"/downtown","message":"here comes Mongo"}]}`,
+		},
+	}
+	for _, testCase := range tests {
+		testCase := testCase
+		t.Run(testCase.name, func(t *testing.T) {
+			defer gock.Off()
+
+			gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
+				Reply(http.StatusOK).
+				JSON(testCase.op)
+
+			dm, err := deploymentmanager.NewService(
+				context.Background(),
+				option.WithHTTPClient(http.DefaultClient),
+				option.WithoutAuthentication(),
+			)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			done, err := DM(context.Background(), dm, "example", "op1")()
+
+			assert.Equal(t, "done", testCase.done, done)
+
+			errMsg := ""
+			if err != nil {
+				errMsg = err.Error()
+			}
+
+			assert.Equal(t, "errMsg", testCase.errMsg, errMsg)
 		})
-
-	dm, err := deploymentmanager.NewService(
-		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
-		option.WithoutAuthentication(),
-	)
-	if err != nil {
-		t.Fatal(err)
 	}
-
-	_, err = DM(context.Background(), dm, "example", "op1")()
-	if err == nil {
-		t.Fatal("no error, but should have returned one")
-	}
-
-	want := `operation failed: {"errors":[{"code":"ERR_BAD_NEWS","location":"/downtown","message":"here comes Mongo"}]}`
-	assert.Equal(t, "DM() error", want, err.Error())
 }
