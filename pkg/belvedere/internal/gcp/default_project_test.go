@@ -7,23 +7,19 @@ import (
 	"github.com/codahale/belvedere/internal/assert"
 )
 
-func TestSDKConfig(t *testing.T) {
+func TestDefaultProject(t *testing.T) {
 	defer func(f func() (string, error)) { sdkPath = f }(sdkPath)
 
 	sdkPath = func() (string, error) {
 		return filepath.Abs("./fixtures")
 	}
 
-	got, err := SDKConfig()
+	got, err := DefaultProject()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	want := map[string]map[string]string{
-		"":      {"bare": "1"},
-		"core":  {"project": "boop"},
-		"other": {"yes": "no"},
-	}
+	want := "boop"
 
-	assert.Equal(t, "SDKConfig()", want, got)
+	assert.Equal(t, "DefaultProject()", want, got)
 }

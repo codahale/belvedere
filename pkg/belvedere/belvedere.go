@@ -69,7 +69,7 @@ type DNSServer struct {
 // the active project configured for the Google Cloud SDK is used.
 func NewProject(ctx context.Context, name string, opts ...option.ClientOption) (Project, error) {
 	if name == "" {
-		s, err := activeProject()
+		s, err := gcp.DefaultProject()
 		if err != nil {
 			return nil, err
 		}
@@ -239,26 +239,6 @@ func (p *project) DNSServers(ctx context.Context) ([]DNSServer, error) {
 	}
 
 	return servers, nil
-}
-
-var ErrNoSDKConfiguration = fmt.Errorf("core.project not found")
-
-func activeProject() (string, error) {
-	// Load SDK config.
-	config, err := gcp.SDKConfig()
-	if err != nil {
-		return "", err
-	}
-
-	// Return core.project, if it exists.
-	if core, ok := config["core"]; ok {
-		if project, ok := core["project"]; ok {
-			return project, nil
-		}
-	}
-
-	// Complain if core.project doesn't exist.
-	return "", ErrNoSDKConfiguration
 }
 
 // Instance is a Google Compute Engine VM instance.
