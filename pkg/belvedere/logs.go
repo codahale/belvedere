@@ -32,7 +32,9 @@ type logService struct {
 	clock   func() time.Time
 }
 
-func (l *logService) List(ctx context.Context, app, release, instance string, maxAge time.Duration, filters []string) ([]LogEntry, error) {
+func (l *logService) List(
+	ctx context.Context, app, release, instance string, maxAge time.Duration, filters []string,
+) ([]LogEntry, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.logs.List")
 	defer span.End()
 
@@ -65,7 +67,9 @@ func (l *logService) List(ctx context.Context, app, release, instance string, ma
 	return l.parse(entries)
 }
 
-func (l *logService) makeFilter(app string, release string, instance string, maxAge time.Duration, filters []string) []string {
+func (l *logService) makeFilter(
+	app string, release string, instance string, maxAge time.Duration, filters []string,
+) []string {
 	// Always filter by resource type, time, and app.
 	ts := l.clock().Add(-maxAge)
 	filter := []string{

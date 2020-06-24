@@ -13,13 +13,15 @@ import (
 func TestManager_SetDMPerms(t *testing.T) {
 	defer gock.Off()
 
-	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/my-project?alt=json&fields=projectNumber&prettyPrint=false").
+	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/" +
+		"my-project?alt=json&fields=projectNumber&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(cloudresourcemanager.Project{
 			ProjectNumber: 123456,
 		})
 
-	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/my-project:getIamPolicy?alt=json&prettyPrint=false").
+	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/" +
+		"my-project:getIamPolicy?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(cloudresourcemanager.Policy{
 			Bindings: []*cloudresourcemanager.Binding{
@@ -31,7 +33,8 @@ func TestManager_SetDMPerms(t *testing.T) {
 			Etag: "300",
 		})
 
-	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/my-project:getIamPolicy?alt=json&prettyPrint=false").
+	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/" +
+		"my-project:getIamPolicy?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(cloudresourcemanager.Policy{
 			Bindings: []*cloudresourcemanager.Binding{
@@ -43,7 +46,8 @@ func TestManager_SetDMPerms(t *testing.T) {
 			Etag: "301",
 		})
 
-	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/my-project:setIamPolicy?alt=json&prettyPrint=false").
+	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/" +
+		"my-project:setIamPolicy?alt=json&prettyPrint=false").
 		JSON(cloudresourcemanager.SetIamPolicyRequest{
 			Policy: &cloudresourcemanager.Policy{
 				Bindings: []*cloudresourcemanager.Binding{
@@ -61,7 +65,8 @@ func TestManager_SetDMPerms(t *testing.T) {
 		}).
 		Reply(http.StatusConflict)
 
-	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/my-project:setIamPolicy?alt=json&prettyPrint=false").
+	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/" +
+		"my-project:setIamPolicy?alt=json&prettyPrint=false").
 		JSON(cloudresourcemanager.SetIamPolicyRequest{
 			Policy: &cloudresourcemanager.Policy{
 				Bindings: []*cloudresourcemanager.Binding{
@@ -99,13 +104,15 @@ func TestManager_SetDMPerms(t *testing.T) {
 func TestManager_SetDMPermsExisting(t *testing.T) {
 	defer gock.Off()
 
-	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/my-project?alt=json&fields=projectNumber&prettyPrint=false").
+	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/" +
+		"my-project?alt=json&fields=projectNumber&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(cloudresourcemanager.Project{
 			ProjectNumber: 123456,
 		})
 
-	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/my-project:getIamPolicy?alt=json&prettyPrint=false").
+	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/" +
+		"my-project:getIamPolicy?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(cloudresourcemanager.Policy{
 			Bindings: []*cloudresourcemanager.Binding{

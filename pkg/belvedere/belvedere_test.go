@@ -15,7 +15,8 @@ import (
 func TestProject_DNSServers(t *testing.T) {
 	defer gock.Off()
 
-	gock.New("https://dns.googleapis.com/dns/v1/projects/my-project/managedZones/belvedere?alt=json&prettyPrint=false").
+	gock.New("https://dns.googleapis.com/dns/v1/projects/my-project/managedZones/" +
+		"belvedere?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(&dns.ManagedZone{
 			NameServers: []string{"ns1.example.com", "ns2.example.com"},
@@ -47,7 +48,8 @@ func TestProject_DNSServers(t *testing.T) {
 func TestProject_Instances(t *testing.T) {
 	defer gock.Off()
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/aggregated/instances?alt=json&filter=labels.belvedere-app%21%3D%22%22&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/" +
+		"aggregated/instances?alt=json&filter=labels.belvedere-app%21%3D%22%22&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(&compute.InstanceAggregatedList{
 			Items: map[string]compute.InstancesScopedList{
@@ -134,7 +136,9 @@ func TestProject_Instances(t *testing.T) {
 func TestProject_InstancesApp(t *testing.T) {
 	defer gock.Off()
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/aggregated/instances?alt=json&filter=labels.belvedere-app%21%3D%22%22+AND+labels.belvedere-app%3D%22my-app%22&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/" +
+		"aggregated/instances?alt=json&" +
+		"filter=labels.belvedere-app%21%3D%22%22+AND+labels.belvedere-app%3D%22my-app%22&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(&compute.InstanceAggregatedList{
 			Items: map[string]compute.InstancesScopedList{
@@ -205,7 +209,10 @@ func TestProject_InstancesApp(t *testing.T) {
 func TestProject_InstancesAppRelease(t *testing.T) {
 	defer gock.Off()
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/aggregated/instances?alt=json&filter=labels.belvedere-app%21%3D%22%22+AND+labels.belvedere-app%3D%22my-app%22+AND+labels.belvedere-release%3D%22v2%22&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/" +
+		"aggregated/instances?alt=json&" +
+		"filter=labels.belvedere-app%21%3D%22%22+AND+labels.belvedere-app%3D%22my-app%22+AND+" +
+		"labels.belvedere-release%3D%22v2%22&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(&compute.InstanceAggregatedList{
 			Items: map[string]compute.InstancesScopedList{
@@ -256,7 +263,8 @@ func TestProject_InstancesAppRelease(t *testing.T) {
 func TestProject_MachineTypes(t *testing.T) {
 	defer gock.Off()
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/aggregated/machineTypes?alt=json&prettyPrint=false").
+	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/" +
+		"aggregated/machineTypes?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(compute.MachineTypeAggregatedList{
 			NextPageToken: "",

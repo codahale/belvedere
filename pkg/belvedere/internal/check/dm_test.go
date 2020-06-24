@@ -56,7 +56,8 @@ func TestDM(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			defer gock.Off()
 
-			gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
+			gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/example/global/" +
+				"operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 				Reply(http.StatusOK).
 				JSON(testCase.op)
 

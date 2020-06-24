@@ -63,9 +63,10 @@ func newReleasesCreateCmd() *cli.Command {
 
 	return &cli.Command{
 		UI: cobra.Command{
-			Use:     `create <app> <name> <sha-256> [<config-file>]`,
-			Example: `belvedere releases create my-app v1 5fb4ba1a651bae8057ec6b5cdafc93fa7e0b7d944d6f02a4b751de4e15464def my-app.yaml`,
-			Short:   `Create a release`,
+			Use: `create <app> <name> <sha-256> [<config-file>]`,
+			Example: `belvedere releases create my-app v1 ` +
+				`5fb4ba1a651bae8057ec6b5cdafc93fa7e0b7d944d6f02a4b751de4e15464def my-app.yaml`,
+			Short: `Create a release`,
 			Long: `Create a release.
 
 This requires the application name, a release name, the SHA-256 digest of the Docker image to

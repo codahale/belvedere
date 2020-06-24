@@ -121,10 +121,16 @@ type Manager interface {
 	Get(ctx context.Context, project, name string) (*Deployment, error)
 
 	// Insert inserts a new deployment with the given name, resources, and labels.
-	Insert(ctx context.Context, project, name string, resources []Resource, labels Labels, dryRun bool, interval time.Duration) error
+	Insert(
+		ctx context.Context, project, name string, resources []Resource, labels Labels, dryRun bool,
+		interval time.Duration,
+	) error
 
 	// Update patches the given deployment to add, remove, or modify resources.
-	Update(ctx context.Context, project, name string, resources []Resource, dryRun bool, interval time.Duration) error
+	Update(
+		ctx context.Context, project, name string, resources []Resource, dryRun bool,
+		interval time.Duration,
+	) error
 
 	// Delete deletes the given deployment.
 	Delete(ctx context.Context, project, name string, dryRun, async bool, interval time.Duration) error
@@ -166,7 +172,10 @@ func (m *manager) Get(ctx context.Context, project, name string) (*Deployment, e
 	}, nil
 }
 
-func (m *manager) Insert(ctx context.Context, project, name string, resources []Resource, labels Labels, dryRun bool, interval time.Duration) error {
+func (m *manager) Insert(
+	ctx context.Context, project, name string, resources []Resource, labels Labels, dryRun bool,
+	interval time.Duration,
+) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Insert")
 	defer span.End()
 
@@ -215,7 +224,10 @@ func (m *manager) Insert(ctx context.Context, project, name string, resources []
 	return waiter.Poll(ctx, interval, check.DM(ctx, m.dm, project, op.Name))
 }
 
-func (m *manager) Update(ctx context.Context, project, name string, resources []Resource, dryRun bool, interval time.Duration) error {
+func (m *manager) Update(
+	ctx context.Context, project, name string, resources []Resource, dryRun bool,
+	interval time.Duration,
+) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Update")
 	defer span.End()
 

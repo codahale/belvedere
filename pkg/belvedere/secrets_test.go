@@ -14,7 +14,8 @@ import (
 func TestSecretsService_List(t *testing.T) {
 	defer gock.Off()
 
-	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets?alt=json&fields=secrets.name&prettyPrint=false").
+	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/" +
+		"secrets?alt=json&fields=secrets.name&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(secretmanager.ListSecretsResponse{
 			Secrets: []*secretmanager.Secret{
@@ -61,7 +62,8 @@ func TestSecretsService_List(t *testing.T) {
 func TestSecretsService_Create(t *testing.T) {
 	defer gock.Off()
 
-	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets?alt=json&prettyPrint=false&secretId=my-secret").
+	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/" +
+		"secrets?alt=json&prettyPrint=false&secretId=my-secret").
 		JSON(secretmanager.Secret{
 			Replication: &secretmanager.Replication{
 				Automatic: &secretmanager.Automatic{},
@@ -70,7 +72,8 @@ func TestSecretsService_Create(t *testing.T) {
 		Reply(http.StatusOK).
 		JSON(secretmanager.Secret{})
 
-	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret:addVersion?alt=json&prettyPrint=false").
+	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/" +
+		"secrets/my-secret:addVersion?alt=json&prettyPrint=false").
 		JSON(secretmanager.AddSecretVersionRequest{
 			Payload: &secretmanager.SecretPayload{
 				Data: "c2VjcmV0",
@@ -101,7 +104,8 @@ func TestSecretsService_Create(t *testing.T) {
 func TestSecretsService_Update(t *testing.T) {
 	defer gock.Off()
 
-	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret:addVersion?alt=json&prettyPrint=false").
+	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/" +
+		"my-secret:addVersion?alt=json&prettyPrint=false").
 		JSON(secretmanager.AddSecretVersionRequest{
 			Payload: &secretmanager.SecretPayload{
 				Data: "c2VjcmV0",
@@ -132,7 +136,8 @@ func TestSecretsService_Update(t *testing.T) {
 func TestSecretsService_Delete(t *testing.T) {
 	defer gock.Off()
 
-	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret?alt=json&prettyPrint=false").
+	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/" +
+		"my-secret?alt=json&prettyPrint=false").
 		Delete("").
 		Reply(http.StatusOK).
 		JSON(secretmanager.Empty{})
@@ -159,13 +164,15 @@ func TestSecretsService_Delete(t *testing.T) {
 func TestSecretsService_Grant(t *testing.T) {
 	defer gock.Off()
 
-	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret:getIamPolicy?alt=json&prettyPrint=false").
+	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/" +
+		"my-secret:getIamPolicy?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{
 			Etag: "300",
 		})
 
-	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret:setIamPolicy?alt=json&prettyPrint=false").
+	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/" +
+		"my-secret:setIamPolicy?alt=json&prettyPrint=false").
 		JSON(
 			secretmanager.SetIamPolicyRequest{
 				Policy: &secretmanager.Policy{
@@ -205,7 +212,8 @@ func TestSecretsService_Grant(t *testing.T) {
 func TestSecretsService_Revoke(t *testing.T) {
 	defer gock.Off()
 
-	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret:getIamPolicy?alt=json&prettyPrint=false").
+	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/" +
+		"my-secret:getIamPolicy?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(secretmanager.Policy{
 			Bindings: []*secretmanager.Binding{
@@ -219,7 +227,8 @@ func TestSecretsService_Revoke(t *testing.T) {
 			Etag: "300",
 		})
 
-	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret:setIamPolicy?alt=json&prettyPrint=false").
+	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/" +
+		"my-secret:setIamPolicy?alt=json&prettyPrint=false").
 		JSON(
 			secretmanager.SetIamPolicyRequest{
 				Policy: &secretmanager.Policy{

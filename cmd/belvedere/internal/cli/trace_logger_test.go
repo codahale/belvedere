@@ -55,8 +55,9 @@ func TestTraceLogger_ExportSpan(t *testing.T) {
 			},
 		},
 		{
-			name:   "annotations",
-			output: "Mar  8 17:26:00: example.thing.Func (0102030405060708)\n  Mar  7 17:26:00: 'it went ok' one='well yes ok'\n",
+			name: "annotations",
+			output: "Mar  8 17:26:00: example.thing.Func (0102030405060708)\n  Mar  7 17:26:00: " +
+				"'it went ok' one='well yes ok'\n",
 			span: &trace.SpanData{
 				Name:    "example.thing.Func",
 				EndTime: time.Date(2020, 3, 8, 17, 26, 0, 0, time.UTC),

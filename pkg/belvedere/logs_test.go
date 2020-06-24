@@ -30,8 +30,9 @@ func TestLogService_List(t *testing.T) {
 		JSON(logging.ListLogEntriesResponse{
 			Entries: []*logging.LogEntry{
 				{
-					Timestamp:   "2019-06-25T14:55:01.000000000Z",
-					JsonPayload: googleapi.RawMessage(`{"message": "woo","instance":{"name":"example-v2-abcd"},"container":{"name":"/nginx","metadata":{"release":"v2"}}}`),
+					Timestamp: "2019-06-25T14:55:01.000000000Z",
+					JsonPayload: googleapi.RawMessage(`{"message": "woo","instance":` +
+						`{"name":"example-v2-abcd"},"container":{"name":"/nginx","metadata":{"release":"v2"}}}`),
 				},
 			},
 		})

@@ -31,7 +31,10 @@ type ReleaseService interface {
 	List(ctx context.Context, app string) ([]Release, error)
 
 	// Create creates a deployment containing release resources for the given app.
-	Create(ctx context.Context, app, name string, config *cfg.Config, imageSHA256 string, dryRun bool, interval time.Duration) error
+	Create(
+		ctx context.Context, app, name string, config *cfg.Config, imageSHA256 string, dryRun bool,
+		interval time.Duration,
+	) error
 
 	// Enable adds the release's instance group to the app's backend project and waits for the
 	// instances to go fully into project.
@@ -97,7 +100,10 @@ func (e *InvalidSHA256DigestError) Error() string {
 	return fmt.Sprintf("invalid SHA-256 digest: %q", e.Digest)
 }
 
-func (r *releaseService) Create(ctx context.Context, app, name string, config *cfg.Config, imageSHA256 string, dryRun bool, interval time.Duration) error {
+func (r *releaseService) Create(
+	ctx context.Context, app, name string, config *cfg.Config, imageSHA256 string, dryRun bool,
+	interval time.Duration,
+) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.releases.Create")
 	defer span.End()
 
@@ -180,7 +186,9 @@ func (r *releaseService) Disable(ctx context.Context, app, name string, dryRun b
 	return r.backends.Remove(ctx, r.project, a.Region, backendService, instanceGroup, dryRun, interval)
 }
 
-func (r *releaseService) Delete(ctx context.Context, app, name string, dryRun, async bool, interval time.Duration) error {
+func (r *releaseService) Delete(
+	ctx context.Context, app, name string, dryRun, async bool, interval time.Duration,
+) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.releases.Delete")
 	defer span.End()
 

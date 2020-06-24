@@ -101,15 +101,18 @@ func TestHealth(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			defer gock.Off()
 
-			gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-central1/instanceGroupManagers/ig-1?alt=json&fields=status&prettyPrint=false").
+			gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/" +
+				"us-central1/instanceGroupManagers/ig-1?alt=json&fields=status&prettyPrint=false").
 				Reply(http.StatusOK).
 				JSON(testCase.igm)
 
-			gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-central1/instanceGroups/ig-1?alt=json&fields=selfLink%2Csize&prettyPrint=false").
+			gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/" +
+				"us-central1/instanceGroups/ig-1?alt=json&fields=selfLink%2Csize&prettyPrint=false").
 				Reply(http.StatusOK).
 				JSON(testCase.ig)
 
-			gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/backendServices/bes-1/getHealth?alt=json&prettyPrint=false").
+			gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/" +
+				"backendServices/bes-1/getHealth?alt=json&prettyPrint=false").
 				Reply(http.StatusOK).
 				JSON(testCase.health)
 

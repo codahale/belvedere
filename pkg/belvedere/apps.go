@@ -94,7 +94,9 @@ func (e *DownRegionError) Error() string {
 	return fmt.Sprintf("region %s is %q", e.Region, e.Status)
 }
 
-func (s *appService) Create(ctx context.Context, region, name string, config *cfg.Config, dryRun bool, interval time.Duration) error {
+func (s *appService) Create(
+	ctx context.Context, region, name string, config *cfg.Config, dryRun bool, interval time.Duration,
+) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.apps.Create")
 	defer span.End()
 
@@ -138,7 +140,9 @@ func (s *appService) Create(ctx context.Context, region, name string, config *cf
 	)
 }
 
-func (s *appService) Update(ctx context.Context, name string, config *cfg.Config, dryRun bool, interval time.Duration) error {
+func (s *appService) Update(
+	ctx context.Context, name string, config *cfg.Config, dryRun bool, interval time.Duration,
+) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.apps.Update")
 	defer span.End()
 

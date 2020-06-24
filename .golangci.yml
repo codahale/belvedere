@@ -28,6 +28,7 @@ linters:
     - govet
     - ineffassign
     - interfacer
+    - lll
     - maligned
     - misspell
     - nakedret
@@ -46,7 +47,6 @@ linters:
     - whitespace
     - wsl
 #    - gomnd
-#    - lll
 #    - testpackage
 #    - typecheck
 

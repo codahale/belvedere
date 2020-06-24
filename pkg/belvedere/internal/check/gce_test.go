@@ -56,7 +56,8 @@ func TestGCE(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			defer gock.Off()
 
-			gock.New("https://compute.googleapis.com/compute/v1/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
+			gock.New("https://compute.googleapis.com/compute/v1/projects/example/global/" +
+				"operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 				Reply(http.StatusOK).
 				JSON(testCase.op)
 

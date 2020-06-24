@@ -10,7 +10,10 @@ import (
 	"google.golang.org/api/dns/v1"
 )
 
-func (*builder) App(project string, app string, managedZone *dns.ManagedZone, config *cfg.Config) []deployments.Resource { // nolint:funlen
+// nolint:funlen
+func (*builder) App(
+	project string, app string, managedZone *dns.ManagedZone, config *cfg.Config,
+) []deployments.Resource {
 	firewall := fmt.Sprintf("belvedere-allow-%s-lb", app)
 	healthcheck := fmt.Sprintf("%s-hc", app)
 	backendService := fmt.Sprintf("%s-bes", app)
