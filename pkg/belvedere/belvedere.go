@@ -276,6 +276,7 @@ func (mt MachineType) lexical() string {
 	return fmt.Sprintf("%10s%10s%010d", parts[0], parts[1], n)
 }
 
+// nolint: gocognit // this is just complicated
 func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineType, error) {
 	ctx, span := trace.StartSpan(ctx, "belvedere.project.MachineTypes")
 	defer span.End()

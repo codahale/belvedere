@@ -149,20 +149,15 @@ func (s *secretsService) Grant(ctx context.Context, name, app string, dryRun boo
 	return s.modifyIAMPolicy(ctx, fmt.Sprintf("projects/%s/secrets/%s", s.project, name),
 		func(policy *secretmanager.Policy) *secretmanager.Policy {
 			// Look for an existing IAM binding giving the application access to the secret.
-			for _, binding := range policy.Bindings {
-				if binding.Role == accessor {
-					for _, member := range binding.Members {
-						if member == sa {
-							span.Annotate(
-								[]trace.Attribute{
-									trace.StringAttribute("service_account", sa),
-								},
-								"Binding verified",
-							)
-							return nil
-						}
-					}
-				}
+			idx := findBinding(policy.Bindings, sa)
+			if idx >= 0 {
+				span.Annotate(
+					[]trace.Attribute{
+						trace.StringAttribute("service_account", sa),
+					},
+					"Binding verified",
+				)
+				return nil
 			}
 
 			// If none exists, add a binding and update the policy.
@@ -196,33 +191,9 @@ func (s *secretsService) Revoke(ctx context.Context, name, app string, dryRun bo
 
 	return s.modifyIAMPolicy(ctx, fmt.Sprintf("projects/%s/secrets/%s", s.project, name),
 		func(policy *secretmanager.Policy) *secretmanager.Policy {
-			var bindings []*secretmanager.Binding
-
-			// Copy everything that's not an IAM binding giving the application access to the secret.
-			for _, binding := range policy.Bindings {
-				if binding.Role == accessor {
-					remove := false
-					for _, member := range binding.Members {
-						if member == sa {
-							span.Annotate(
-								[]trace.Attribute{
-									trace.StringAttribute("service_account", sa),
-								},
-								"Binding removed",
-							)
-							remove = true
-							break
-						}
-					}
-
-					if !remove {
-						bindings = append(bindings, binding)
-					}
-				}
-			}
-
-			// If no such policy exists, nevermind.
-			if len(bindings) == len(policy.Bindings) {
+			idx := findBinding(policy.Bindings, sa)
+			if idx < 0 {
+				// If no such policy exists, nevermind.
 				span.Annotate(
 					[]trace.Attribute{
 						trace.StringAttribute("service_account", sa),
@@ -232,12 +203,33 @@ func (s *secretsService) Revoke(ctx context.Context, name, app string, dryRun bo
 				return nil
 			}
 
+			span.Annotate(
+				[]trace.Attribute{
+					trace.StringAttribute("service_account", sa),
+				},
+				"Binding removed",
+			)
+
 			// Otherwise, update the policy.
-			policy.Bindings = bindings
+			policy.Bindings = append(policy.Bindings[:idx], policy.Bindings[idx+1:]...)
 			return policy
 		},
 		dryRun,
 	)
+}
+
+func findBinding(bindings []*secretmanager.Binding, sa string) int {
+	for i, binding := range bindings {
+		if binding.Role == accessor {
+			for _, member := range binding.Members {
+				if member == sa {
+					return i
+				}
+			}
+		}
+	}
+
+	return -1
 }
 
 func (s *secretsService) modifyIAMPolicy(

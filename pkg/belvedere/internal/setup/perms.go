@@ -25,27 +25,20 @@ func (s *service) SetDMPerms(ctx context.Context, project string, dryRun bool) e
 		return fmt.Errorf("error getting project: %w", err)
 	}
 
+	span.AddAttributes(trace.Int64Attribute("project_number", p.ProjectNumber))
+
 	member := fmt.Sprintf("serviceAccount:%d@cloudservices.gserviceaccount.com", p.ProjectNumber)
 
-	const owner = "roles/owner"
-
-	exists := false
-
-	err = modifyIAMPolicy(ctx, s.crm, project,
+	return modifyIAMPolicy(ctx, s.crm, project,
 		func(policy *cloudresourcemanager.Policy) *cloudresourcemanager.Policy {
 			// Look for an existing IAM binding giving Deployment Service ownership of the project.
-			for _, binding := range policy.Bindings {
-				if binding.Role == owner {
-					for _, m := range binding.Members {
-						if m == member {
-							exists = true
-							return nil
-						}
-					}
-				}
+			if bindingExists(policy.Bindings, member) {
+				span.Annotate(nil, "Binding verified")
+				return nil
 			}
 
 			// If none exists, add a binding and update the policy.
+			span.Annotate(nil, "Binding created")
 			policy.Bindings = append(policy.Bindings, &cloudresourcemanager.Binding{
 				Members: []string{member},
 				Role:    owner,
@@ -53,24 +46,23 @@ func (s *service) SetDMPerms(ctx context.Context, project string, dryRun bool) e
 			return policy
 		},
 	)
-	if err != nil {
-		return err
-	}
-
-	msg := "Binding created"
-	if exists {
-		msg = "Binding verified"
-	}
-
-	span.Annotate(
-		[]trace.Attribute{
-			trace.Int64Attribute("project_number", p.ProjectNumber),
-		},
-		msg,
-	)
-
-	return nil
 }
+
+func bindingExists(bindings []*cloudresourcemanager.Binding, member string) bool {
+	for _, binding := range bindings {
+		if binding.Role == owner {
+			for _, m := range binding.Members {
+				if m == member {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
+}
+
+const owner = "roles/owner"
 
 func modifyIAMPolicy(
 	ctx context.Context,

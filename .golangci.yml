@@ -51,7 +51,11 @@ linters:
 #    - typecheck
 
 linters-settings:
-  maligned:
-    suggest-new: true
   funlen:
     lines: 150
+  gocognit:
+    min-complexity: 10
+  gocyclo:
+    min-complexity: 10
+  maligned:
+    suggest-new: true

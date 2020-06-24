@@ -170,6 +170,37 @@ func toRows(v interface{}) (table.Row, []table.ColumnConfig, []table.Row, error)
 		return nil, nil, nil, errBadInput
 	}
 
+	headers, cols := collectHeaders(t)
+	rows := collectRows(v, headers)
+
+	return headers, cols, rows, nil
+}
+
+func collectRows(v interface{}, headers table.Row) []table.Row {
+	iv := reflect.ValueOf(v)
+	rows := make([]table.Row, iv.Len())
+
+	for i := 0; i < iv.Len(); i++ {
+		row := make(table.Row, len(headers))
+		ev := iv.Index(i)
+
+		for j := range headers {
+			f := ev.Field(j)
+
+			if t, ok := f.Interface().(time.Time); ok {
+				row[j] = t.Format(time.Stamp)
+			} else {
+				row[j] = fmt.Sprint(f.Interface())
+			}
+		}
+
+		rows[i] = row
+	}
+
+	return rows
+}
+
+func collectHeaders(t reflect.Type) (table.Row, []table.ColumnConfig) {
 	var headers table.Row
 
 	var cols []table.ColumnConfig
@@ -192,27 +223,5 @@ func toRows(v interface{}) (table.Row, []table.ColumnConfig, []table.Row, error)
 		}
 	}
 
-	var rows []table.Row
-
-	iv := reflect.ValueOf(v)
-
-	for i := 0; i < iv.Len(); i++ {
-		var row table.Row
-
-		ev := iv.Index(i)
-
-		for j := range headers {
-			f := ev.Field(j)
-
-			if t, ok := f.Interface().(time.Time); ok {
-				row = append(row, t.Format(time.Stamp))
-			} else {
-				row = append(row, fmt.Sprint(f.Interface()))
-			}
-		}
-
-		rows = append(rows, row)
-	}
-
-	return headers, cols, rows, nil
+	return headers, cols
 }

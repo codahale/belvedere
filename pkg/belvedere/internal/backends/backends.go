@@ -35,6 +35,7 @@ type service struct {
 	gce *compute.Service
 }
 
+// nolint: gocognit
 func (s *service) Add(ctx context.Context, project, region, backendService, instanceGroup string,
 	dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Add")
@@ -66,11 +67,10 @@ func (s *service) Add(ctx context.Context, project, region, backendService, inst
 		}
 
 		// Check to see if the instance group is already in service.
-		for _, be := range bes.Backends {
-			if be.Group == ig.SelfLink {
-				span.AddAttributes(trace.BoolAttribute("modified", false))
-				return nil
-			}
+		idx := findBackend(bes.Backends, ig.SelfLink)
+		if idx >= 0 {
+			span.AddAttributes(trace.BoolAttribute("modified", false))
+			return nil
 		}
 		span.AddAttributes(trace.BoolAttribute("modified", true))
 
@@ -109,8 +109,11 @@ func (s *service) Add(ctx context.Context, project, region, backendService, inst
 	return waiter.Poll(ctx, interval, check.GCE(ctx, s.gce, project, op.Name))
 }
 
-func (s *service) Remove(ctx context.Context, project, region, backendService, instanceGroup string,
-	dryRun bool, interval time.Duration) error {
+// nolint: gocognit
+func (s *service) Remove(
+	ctx context.Context, project, region, backendService, instanceGroup string, dryRun bool,
+	interval time.Duration,
+) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Remove")
 	defer span.End()
 
@@ -139,19 +142,16 @@ func (s *service) Remove(ctx context.Context, project, region, backendService, i
 			return fmt.Errorf("error getting instance group: %w", err)
 		}
 
-		// Copy all backends except for the instance group in question.
-		var backends []*compute.Backend
-		for _, be := range bes.Backends {
-			if be.Group != ig.SelfLink {
-				backends = append(backends, be)
-			}
-		}
-
-		// Early exit if the instance group isn't in service and doesn't need to be removed.
-		if len(bes.Backends) == len(backends) {
+		// Find the index of the instance group.
+		idx := findBackend(bes.Backends, ig.SelfLink)
+		if idx < 0 {
+			// Early exit if the instance group isn't in service and doesn't need to be removed.
 			span.AddAttributes(trace.BoolAttribute("modified", false))
 			return nil
 		}
+
+		// Remove the instance group in question from the backends.
+		bes.Backends = append(bes.Backends[:idx], bes.Backends[idx+1:]...)
 		span.AddAttributes(trace.BoolAttribute("modified", true))
 
 		// Early exit if we don't want side effects.
@@ -162,7 +162,7 @@ func (s *service) Remove(ctx context.Context, project, region, backendService, i
 		// Patch the backend service to remove the instance group as a backend.
 		op, err = s.gce.BackendServices.Patch(project, backendService,
 			&compute.BackendService{
-				Backends: backends,
+				Backends: bes.Backends,
 				// Include the fingerprint to avoid overwriting concurrent writes.
 				Fingerprint: bes.Fingerprint,
 				// Force sending both fields in case the backends list is empty.
@@ -185,4 +185,14 @@ func (s *service) Remove(ctx context.Context, project, region, backendService, i
 
 	// Return the patch operation.
 	return waiter.Poll(ctx, interval, check.GCE(ctx, s.gce, project, op.Name))
+}
+
+func findBackend(backends []*compute.Backend, ig string) int {
+	for i, be := range backends {
+		if be.Group == ig {
+			return i
+		}
+	}
+
+	return -1
 }
