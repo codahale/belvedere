@@ -51,9 +51,10 @@ Prints a table of provisioned applications in the current project.`,
 }
 
 func newAppsCreateCmd() *cli.Command {
-	var mf cli.ModifyFlags
-
-	var lrf cli.LongRunningFlags
+	var (
+		mf  cli.ModifyFlags
+		lrf cli.LongRunningFlags
+	)
 
 	return &cli.Command{
 		UI: cobra.Command{

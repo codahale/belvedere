@@ -54,9 +54,7 @@ secrets exist in their own namespace.`,
 }
 
 func newSecretsCreateCmd() *cli.Command {
-	var (
-		mf cli.ModifyFlags
-	)
+	var mf cli.ModifyFlags
 
 	return &cli.Command{
 		UI: cobra.Command{
