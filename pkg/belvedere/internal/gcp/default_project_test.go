@@ -8,13 +8,9 @@ import (
 )
 
 func TestDefaultProject(t *testing.T) {
-	defer func(f func() (string, error)) { sdkPath = f }(sdkPath)
-
-	sdkPath = func() (string, error) {
+	got, err := DefaultProject(func() (string, error) {
 		return filepath.Abs("./fixtures")
-	}
-
-	got, err := DefaultProject()
+	})
 	if err != nil {
 		t.Fatal(err)
 	}

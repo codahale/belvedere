@@ -69,7 +69,7 @@ type DNSServer struct {
 // the active project configured for the Google Cloud SDK is used.
 func NewProject(ctx context.Context, name string, opts ...option.ClientOption) (Project, error) {
 	if name == "" {
-		s, err := gcp.DefaultProject()
+		s, err := gcp.DefaultProject(gcp.SDKPath)
 		if err != nil {
 			return nil, err
 		}
