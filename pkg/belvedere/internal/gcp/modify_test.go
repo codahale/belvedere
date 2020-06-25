@@ -14,12 +14,11 @@ import (
 
 func TestModifyLoop_Success(t *testing.T) {
 	n := 0
-	err := ModifyLoop(10*time.Millisecond, 1*time.Second, func() error {
+
+	if err := ModifyLoop(10*time.Millisecond, 1*time.Second, func() error {
 		n++
 		return nil
-	})
-
-	if err != nil {
+	}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -28,15 +27,14 @@ func TestModifyLoop_Success(t *testing.T) {
 
 func TestModifyLoop_PreconditionFailed(t *testing.T) {
 	n := 0
-	err := ModifyLoop(10*time.Millisecond, 1*time.Second, func() error {
+
+	if err := ModifyLoop(10*time.Millisecond, 1*time.Second, func() error {
 		n++
 		if n < 3 {
 			return &googleapi.Error{Code: http.StatusPreconditionFailed}
 		}
 		return nil
-	})
-
-	if err != nil {
+	}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -45,15 +43,14 @@ func TestModifyLoop_PreconditionFailed(t *testing.T) {
 
 func TestModifyLoop_InitialFailure(t *testing.T) {
 	n := 0
-	err := ModifyLoop(10*time.Millisecond, 1*time.Second, func() error {
+
+	if err := ModifyLoop(10*time.Millisecond, 1*time.Second, func() error {
 		n++
 		if n < 3 {
 			return &googleapi.Error{Code: http.StatusConflict}
 		}
 		return nil
-	})
-
-	if err != nil {
+	}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -62,6 +59,7 @@ func TestModifyLoop_InitialFailure(t *testing.T) {
 
 func TestModifyLoop_FinalFailure(t *testing.T) {
 	n := 0
+
 	err := ModifyLoop(10*time.Millisecond, 100*time.Millisecond, func() error {
 		n++
 		if n < 3 {
@@ -69,7 +67,6 @@ func TestModifyLoop_FinalFailure(t *testing.T) {
 		}
 		return nil
 	})
-
 	if !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatalf("bad error: %v", err)
 	}
@@ -81,11 +78,11 @@ func TestModifyLoop_FinalFailure(t *testing.T) {
 
 func TestModifyLoopFatalFailure(t *testing.T) {
 	n := 0
+
 	err := ModifyLoop(10*time.Millisecond, 100*time.Millisecond, func() error {
 		n++
 		return os.ErrClosed
 	})
-
 	if !errors.Is(err, os.ErrClosed) {
 		t.Fatalf("bad error: %v", err)
 	}

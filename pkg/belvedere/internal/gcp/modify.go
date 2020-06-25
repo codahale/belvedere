@@ -18,11 +18,8 @@ func ModifyLoop(interval, timeout time.Duration, f func() error) error {
 	bo.MaxElapsedTime = timeout
 
 	for {
-		// Perform operation.
-		err := f()
-
-		// Check to see if the error is retryable.
-		if isRetryable(err) {
+		// Perform operation and check to see if the error is retryable.
+		if err := f(); isRetryable(err) {
 			d := bo.NextBackOff()
 			if d == backoff.Stop {
 				// If the total time has elapsed, return an error.
