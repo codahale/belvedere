@@ -11,6 +11,8 @@ import (
 // EqualFixture validates that the contents of the given file are the same as the given bytes. If the
 // OVERWRITE environment variable is set to TRUE, the given bytes are written to the file first.
 func EqualFixture(t *testing.T, name, filename string, got []byte) {
+	t.Helper()
+
 	if ok, _ := strconv.ParseBool(os.Getenv("OVERWRITE")); ok {
 		t.Logf("overwriting %s", filename)
 
