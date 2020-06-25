@@ -59,7 +59,7 @@ func buildVersion(version, commit, date, builtBy string) string {
 	return fmt.Sprintf("%s (commit %.8s, %s, %s, %s)", version, commit, date, builtBy, runtime.Version())
 }
 
-// nolint: gochecknoglobals
+//nolint:gochecknoglobals // values injected at build time by goreleaser
 var (
 	version = "dev"
 	commit  = ""

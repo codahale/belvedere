@@ -35,7 +35,7 @@ type service struct {
 	gce *compute.Service
 }
 
-// nolint: gocognit
+//nolint:gocognit // this is complex logic
 func (s *service) Add(ctx context.Context, project, region, backendService, instanceGroup string,
 	dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Add")
@@ -109,7 +109,7 @@ func (s *service) Add(ctx context.Context, project, region, backendService, inst
 	return waiter.Poll(ctx, interval, check.GCE(ctx, s.gce, project, op.Name))
 }
 
-// nolint: gocognit
+//nolint: gocognit // this is complex logic
 func (s *service) Remove(
 	ctx context.Context, project, region, backendService, instanceGroup string, dryRun bool,
 	interval time.Duration,

@@ -13,7 +13,7 @@ import (
 
 var (
 	// The full set of GCP services required for Belvedere to be a happy home.
-	// nolint:gochecknoglobals
+	//nolint:gochecknoglobals // can't have non-scalar consts
 	requiredServices = []string{
 		"cloudasset.googleapis.com",
 		"cloudbuild.googleapis.com",

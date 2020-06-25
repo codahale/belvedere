@@ -49,7 +49,7 @@ func DefaultProject() (string, error) {
 
 var errNoHomeDir = errors.New("unable to get current user home directory: os/user lookup failed; $HOME is empty")
 
-// nolint:gochecknoglobals
+//nolint:gochecknoglobals // keep this mutable for testing
 var sdkPath = func() (string, error) {
 	if runtime.GOOS == "windows" {
 		return filepath.Join(os.Getenv("APPDATA"), "gcloud"), nil

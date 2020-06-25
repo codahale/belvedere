@@ -35,7 +35,7 @@ func (h *healthChecker) Poll(
 
 // Health returns a waiter.Condition for the given instance group being stable and for all its
 // instances registering as healthy with the given backend service.
-// nolint: gocognit // this is just complicated
+//nolint:gocognit // this is just complicated
 func Health(
 	ctx context.Context, gce *compute.Service, project, region, backendService, instanceGroup string,
 ) waiter.Condition {

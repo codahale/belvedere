@@ -10,7 +10,7 @@ import (
 	"google.golang.org/api/dns/v1"
 )
 
-// nolint:funlen
+//nolint:funlen // not worth splitting this up
 func (*builder) App(
 	project string, app string, managedZone *dns.ManagedZone, config *cfg.Config,
 ) []deployments.Resource {
@@ -197,7 +197,7 @@ func (*builder) App(
 }
 
 // requiresRoles is a list of IAM role which are added to application service accounts by default.
-// nolint:gochecknoglobals
+//nolint:gochecknoglobals // can't have non-scalar consts
 var requiredRoles = []string{
 	"roles/clouddebugger.agent",
 	"roles/cloudprofiler.agent",

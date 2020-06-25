@@ -13,7 +13,7 @@ import (
 )
 
 type Service interface {
-	// nolint: lll
+	//nolint:lll // no way to shorten this URL
 	// SetDMPerms binds the Deployment Service service account to the `owner` role if it has not already
 	// been so bound. This allows Deployment Service to add IAM roles to service accounts per
 	// https://cloud.google.com/deployment-manager/docs/configuration/set-access-control-resources#granting_deployment_manager_permission_to_set_iam_policies

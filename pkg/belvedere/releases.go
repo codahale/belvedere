@@ -89,7 +89,7 @@ func (r *releaseService) List(ctx context.Context, app string) ([]Release, error
 	return releases, nil
 }
 
-// nolint:gochecknoglobals
+//nolint:gochecknoglobals // only compile once
 var imageHashFormat = regexp.MustCompile(`^[a-f0-9]{64}$`)
 
 type InvalidSHA256DigestError struct {
