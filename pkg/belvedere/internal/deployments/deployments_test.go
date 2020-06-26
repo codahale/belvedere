@@ -301,7 +301,7 @@ func TestManager_Get(t *testing.T) {
 	defer gock.Off()
 
 	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/" +
-		"deployments/belvedere-base?alt=json&fields=&prettyPrint=false").
+		"deployments/belvedere-base?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(&deploymentmanager.Deployment{
 			Name: "belvedere-base",

@@ -152,7 +152,7 @@ func (m *manager) Get(ctx context.Context, project, name string) (*Deployment, e
 		trace.StringAttribute("name", name),
 	)
 
-	d, err := m.dm.Deployments.Get(project, name).Fields("").Context(ctx).Do()
+	d, err := m.dm.Deployments.Get(project, name).Context(ctx).Do()
 	if err != nil {
 		return nil, err
 	}
