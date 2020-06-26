@@ -45,10 +45,7 @@ func (s *ServiceAccount) MarshalJSON() ([]byte, error) {
 	// Cast from a pointer to a raw type to avoid infinite recursion while reusing the standard JSON
 	// marshalling code.
 	type NoMethod ServiceAccount
-
-	raw := NoMethod(*s)
-
-	return json.Marshal(raw)
+	return json.Marshal(NoMethod(*s))
 }
 
 var _ json.Marshaler = &ServiceAccount{}
@@ -66,10 +63,7 @@ func (rrs *ResourceRecordSets) MarshalJSON() ([]byte, error) {
 	// Cast from a pointer to a raw type to avoid infinite recursion while reusing the standard JSON
 	// marshalling code.
 	type NoMethod ResourceRecordSets
-
-	raw := NoMethod(*rrs)
-
-	return json.Marshal(raw)
+	return json.Marshal(NoMethod(*rrs))
 }
 
 var _ json.Marshaler = &ResourceRecordSets{}
@@ -87,10 +81,7 @@ func (b *IAMMemberBinding) MarshalJSON() ([]byte, error) {
 	// Cast from a pointer to a raw type to avoid infinite recursion while reusing the standard JSON
 	// marshalling code.
 	type NoMethod IAMMemberBinding
-
-	raw := NoMethod(*b)
-
-	return json.Marshal(raw)
+	return json.Marshal(NoMethod(*b))
 }
 
 var _ json.Marshaler = &IAMMemberBinding{}
