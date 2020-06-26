@@ -119,11 +119,6 @@ func TestGlobalFlags_Project(t *testing.T) {
 		project string
 	}{
 		{
-			name:    "default",
-			args:    nil,
-			project: "",
-		},
-		{
 			name:    "long",
 			args:    []string{"--project=example"},
 			project: "example",

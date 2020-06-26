@@ -4,9 +4,7 @@ package belvedere
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"os/exec"
 	"sort"
 	"strconv"
 	"strings"
@@ -66,27 +64,8 @@ type DNSServer struct {
 	Hostname string
 }
 
-// NewProject returns a new Project instance for the given GCP project. If no project is provided,
-// the active project configured for the Google Cloud SDK is used.
+// NewProject returns a new Project instance for the given GCP project.
 func NewProject(ctx context.Context, name string, opts ...option.ClientOption) (Project, error) {
-	if name == "" {
-		path, err := exec.LookPath("gcloud")
-		if err != nil {
-			return nil, fmt.Errorf("gcloud not installed: %w", err)
-		}
-
-		out, err := exec.CommandContext(ctx, path,
-			"config", "get-value", "project", "-q", "--format=json",
-		).CombinedOutput()
-		if err != nil {
-			return nil, fmt.Errorf("error executing gcloud: %w", err)
-		}
-
-		if err := json.Unmarshal(out, &name); err != nil {
-			return nil, fmt.Errorf("unable to parse gcloud output: %w", err)
-		}
-	}
-
 	ls, err := logging.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
