@@ -12,6 +12,7 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/setup"
 	"go.opencensus.io/trace"
@@ -66,6 +67,10 @@ type DNSServer struct {
 
 // NewProject returns a new Project instance for the given GCP project.
 func NewProject(ctx context.Context, name string, opts ...option.ClientOption) (Project, error) {
+	if err := gcp.ValidateRFC1035(name); err != nil {
+		return nil, err
+	}
+
 	ls, err := logging.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
