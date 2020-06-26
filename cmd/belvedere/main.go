@@ -16,7 +16,6 @@ func main() {
 	root := newRootCmd(version).ToCobra(belvedere.NewProject, cli.NewOutput)
 
 	if err := root.Execute(); err != nil {
-		_, _ = fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
 	}
 }
