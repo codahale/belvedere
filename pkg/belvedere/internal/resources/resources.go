@@ -10,6 +10,10 @@ import (
 )
 
 func Name(s ...string) string {
+	if len(s) == 0 {
+		return "belvedere"
+	}
+
 	return fmt.Sprintf("belvedere-%s", strings.Join(s, "-"))
 }
 

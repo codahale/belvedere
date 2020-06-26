@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
+	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
 	"go.opencensus.io/trace"
 )
 
@@ -35,7 +36,7 @@ func (p *project) Setup(ctx context.Context, dnsZone string, dryRun bool, interv
 
 	// Create a deployment with a managed DNS zone and firewall rules which limit SSH to GCE
 	// instances to those tunneled over IAP.
-	return p.dm.Insert(ctx, p.name, "belvedere", p.resources.Base(dnsZone),
+	return p.dm.Insert(ctx, p.name, resources.Name(), p.resources.Base(dnsZone),
 		deployments.Labels{
 			Type: "base",
 		},
@@ -53,5 +54,5 @@ func (p *project) Teardown(ctx context.Context, dryRun, async bool, interval tim
 	)
 
 	// Delete the shared deployment.
-	return p.dm.Delete(ctx, p.name, "belvedere", dryRun, async, interval)
+	return p.dm.Delete(ctx, p.name, resources.Name(), dryRun, async, interval)
 }
