@@ -4,7 +4,9 @@ package belvedere
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"os/exec"
 	"sort"
 	"strconv"
 	"strings"
@@ -12,7 +14,6 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
-	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/setup"
 	"go.opencensus.io/trace"
@@ -69,12 +70,21 @@ type DNSServer struct {
 // the active project configured for the Google Cloud SDK is used.
 func NewProject(ctx context.Context, name string, opts ...option.ClientOption) (Project, error) {
 	if name == "" {
-		s, err := gcp.DefaultProject(gcp.SDKPath)
+		path, err := exec.LookPath("gcloud")
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("gcloud not installed: %w", err)
 		}
 
-		name = s
+		out, err := exec.CommandContext(ctx, path,
+			"config", "get-value", "project", "-q", "--format=json",
+		).CombinedOutput()
+		if err != nil {
+			return nil, fmt.Errorf("error executing gcloud: %w", err)
+		}
+
+		if err := json.Unmarshal(out, &name); err != nil {
+			return nil, fmt.Errorf("unable to parse gcloud output: %w", err)
+		}
 	}
 
 	ls, err := logging.NewService(ctx, opts...)
