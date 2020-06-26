@@ -15,7 +15,7 @@ type InvalidNameError struct {
 }
 
 func (e *InvalidNameError) Error() string {
-	return fmt.Sprintf("invalid name: %s", e.Name)
+	return fmt.Sprintf("invalid name: %q", e.Name)
 }
 
 // ValidateRFC1035 returns an error if the given name is not a valid RFC1035 DNS name.
