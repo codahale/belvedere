@@ -1,12 +1,18 @@
 package cli
 
 import (
-	"encoding/json"
-	"os/exec"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"runtime"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/pflag"
+	"gopkg.in/ini.v1"
 )
 
 type GlobalFlags struct {
@@ -57,17 +63,41 @@ var (
 )
 
 func setDefaultProject() {
-	path, err := exec.LookPath("gcloud")
+	var sdkPath string
+
+	// Find the SDK config path.
+	if runtime.GOOS == "windows" {
+		sdkPath = filepath.Join(os.Getenv("APPDATA"), "gcloud")
+	} else {
+		home, err := homedir.Dir()
+		if err != nil {
+			return
+		}
+
+		sdkPath = filepath.Join(home, ".config", "gcloud")
+	}
+
+	// Read the active config.
+	configName, err := ioutil.ReadFile(filepath.Join(sdkPath, "active_config"))
 	if err != nil {
 		return
 	}
 
-	out, err := exec.Command(path,
-		"config", "get-value", "project", "-q", "--format=json",
-	).CombinedOutput()
+	// Find the default config file.
+	configPath := filepath.Join(sdkPath, "configurations",
+		fmt.Sprintf("config_%s", strings.TrimSpace(string(configName))))
+
+	// Read and parse it.
+	cfg, err := ini.Load(configPath)
 	if err != nil {
 		return
 	}
 
-	_ = json.Unmarshal(out, &defaultProject)
+	// Find core.project, if any.
+	key, err := cfg.Section("core").GetKey("project")
+	if err != nil {
+		return
+	}
+
+	defaultProject = key.String()
 }
