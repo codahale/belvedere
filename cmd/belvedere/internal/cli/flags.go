@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/mitchellh/go-homedir"
@@ -24,7 +23,6 @@ type GlobalFlags struct {
 }
 
 func (gf *GlobalFlags) Register(fs *pflag.FlagSet) {
-	defaultProjectOnce.Do(setDefaultProject)
 	fs.BoolVarP(&gf.Quiet, "quiet", "q", false, "disable logging entirely")
 	fs.BoolVar(&gf.Debug, "debug", false, "log verbose output")
 	fs.DurationVar(&gf.Timeout, "timeout", 10*time.Minute, "maximum time allowed for total execution")
@@ -58,11 +56,11 @@ func (a *AsyncFlags) Register(fs *pflag.FlagSet) {
 
 //nolint:gochecknoglobals // project name has to be a singleton value
 var (
-	defaultProjectOnce sync.Once
-	defaultProject     string
+	defaultProject string
 )
 
-func setDefaultProject() {
+//nolint:gochecknoinits // gotta find the default project
+func init() {
 	var sdkPath string
 
 	// Find the SDK config path.
