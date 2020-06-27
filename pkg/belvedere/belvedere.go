@@ -279,10 +279,6 @@ func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineTyp
 		trace.StringAttribute("region", region),
 	)
 
-	if region != "" {
-		span.AddAttributes(trace.StringAttribute("region", region))
-	}
-
 	// Aggregate across pages of results.
 	mtMap := map[string]*compute.MachineType{}
 	region = "zones/" + region

@@ -1,4 +1,3 @@
-//nolint:dupl // duplicated code b/c no type parameters
 package check
 
 import (
@@ -32,17 +31,14 @@ func GCE(ctx context.Context, gce *compute.Service, project, operation string) w
 
 		// Check for errors in the operation.
 		if op.Error != nil {
-			// Record all errors as annotations.
-			for _, e := range op.Error.Errors {
-				span.Annotate([]trace.Attribute{
-					trace.StringAttribute("code", e.Code),
-					trace.StringAttribute("message", e.Message),
-					trace.StringAttribute("location", e.Location),
-				}, "Error")
-			}
+			err := &FailedOperationError{Message: op.Error}
 
-			// Exit with a maximally descriptive error.
-			return false, &FailedOperationError{Message: op.Error}
+			span.SetStatus(trace.Status{
+				Code:    trace.StatusCodeInternal,
+				Message: err.Error(),
+			})
+
+			return false, err
 		}
 
 		// Keep waiting unless the operation is done.

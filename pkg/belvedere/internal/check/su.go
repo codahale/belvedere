@@ -27,15 +27,14 @@ func SU(ctx context.Context, su *serviceusage.Service, operation string) waiter.
 
 		// Check for errors in the operation.
 		if op.Error != nil {
-			// Record the error as an annotation.
-			span.Annotate([]trace.Attribute{
-				trace.Int64Attribute("error.code", op.Error.Code),
-				trace.StringAttribute("error.message", op.Error.Message),
-				trace.StringAttribute("error.details", fmt.Sprint(op.Error.Details)),
-			}, "Error")
+			err := &FailedOperationError{Message: op.Error}
 
-			// Exit with a maximally descriptive error.
-			return false, &FailedOperationError{Message: op.Error}
+			span.SetStatus(trace.Status{
+				Code:    trace.StatusCodeInternal,
+				Message: err.Error(),
+			})
+
+			return false, err
 		}
 
 		// Keep waiting unless the operation is done.

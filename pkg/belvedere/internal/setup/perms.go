@@ -32,13 +32,15 @@ func (s *service) SetDMPerms(ctx context.Context, project string, dryRun bool) e
 	return modifyIAMPolicy(ctx, s.crm, project,
 		func(policy *cloudresourcemanager.Policy) *cloudresourcemanager.Policy {
 			// Look for an existing IAM binding giving Deployment Service ownership of the project.
-			if bindingExists(policy.Bindings, member) {
-				span.Annotate(nil, "Binding verified")
+			exists := bindingExists(policy.Bindings, member)
+			span.AddAttributes(trace.BoolAttribute("binding_exists", exists))
+
+			// If it exists, early exit.
+			if exists {
 				return nil
 			}
 
 			// If none exists, add a binding and update the policy.
-			span.Annotate(nil, "Binding created")
 			policy.Bindings = append(policy.Bindings, &cloudresourcemanager.Binding{
 				Members: []string{member},
 				Role:    owner,

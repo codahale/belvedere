@@ -139,24 +139,22 @@ func (s *secretsService) Grant(ctx context.Context, name, app string, dryRun boo
 	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.Grant")
 	defer span.End()
 
+	sa := fmt.Sprintf("serviceAccount:%s-sa@%s.iam.gserviceaccount.com", app, s.project)
+
 	span.AddAttributes(
 		trace.StringAttribute("name", name),
 		trace.StringAttribute("app", app),
+		trace.StringAttribute("service_account", sa),
 	)
-
-	sa := fmt.Sprintf("serviceAccount:%s-sa@%s.iam.gserviceaccount.com", app, s.project)
 
 	return s.modifyIAMPolicy(ctx, fmt.Sprintf("projects/%s/secrets/%s", s.project, name),
 		func(policy *secretmanager.Policy) *secretmanager.Policy {
 			// Look for an existing IAM binding giving the application access to the secret.
-			idx := findBinding(policy.Bindings, sa)
-			if idx >= 0 {
-				span.Annotate(
-					[]trace.Attribute{
-						trace.StringAttribute("service_account", sa),
-					},
-					"Binding verified",
-				)
+			exists := findBinding(policy.Bindings, sa) >= 0
+			span.AddAttributes(trace.BoolAttribute("binding_exists", exists))
+
+			// If it exists, early exit.
+			if exists {
 				return nil
 			}
 
@@ -165,13 +163,6 @@ func (s *secretsService) Grant(ctx context.Context, name, app string, dryRun boo
 				Members: []string{sa},
 				Role:    accessor,
 			})
-
-			span.Annotate(
-				[]trace.Attribute{
-					trace.StringAttribute("service_account", sa),
-				},
-				"Binding created",
-			)
 			return policy
 		},
 		dryRun,
@@ -182,33 +173,25 @@ func (s *secretsService) Revoke(ctx context.Context, name, app string, dryRun bo
 	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.Revoke")
 	defer span.End()
 
+	sa := fmt.Sprintf("serviceAccount:%s-sa@%s.iam.gserviceaccount.com", app, s.project)
+
 	span.AddAttributes(
 		trace.StringAttribute("name", name),
 		trace.StringAttribute("app", app),
+		trace.StringAttribute("service_account", sa),
 	)
-
-	sa := fmt.Sprintf("serviceAccount:%s-sa@%s.iam.gserviceaccount.com", app, s.project)
 
 	return s.modifyIAMPolicy(ctx, fmt.Sprintf("projects/%s/secrets/%s", s.project, name),
 		func(policy *secretmanager.Policy) *secretmanager.Policy {
+			// Look for an existing IAM binding giving the application access to the secret.
 			idx := findBinding(policy.Bindings, sa)
-			if idx < 0 {
-				// If no such policy exists, nevermind.
-				span.Annotate(
-					[]trace.Attribute{
-						trace.StringAttribute("service_account", sa),
-					},
-					"Binding not found",
-				)
+			exists := idx >= 0
+			span.AddAttributes(trace.BoolAttribute("binding_exists", exists))
+
+			// If it doesn't exist, early exit.
+			if !exists {
 				return nil
 			}
-
-			span.Annotate(
-				[]trace.Attribute{
-					trace.StringAttribute("service_account", sa),
-				},
-				"Binding removed",
-			)
 
 			// Otherwise, update the policy.
 			policy.Bindings = append(policy.Bindings[:idx], policy.Bindings[idx+1:]...)
