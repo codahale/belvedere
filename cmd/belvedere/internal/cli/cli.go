@@ -110,6 +110,7 @@ func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, f CommandFunc) f
 				Message: err.Error(),
 			})
 		}
+
 		return err
 	}
 }
