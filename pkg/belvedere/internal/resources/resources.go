@@ -1,7 +1,6 @@
 package resources
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
@@ -10,11 +9,7 @@ import (
 )
 
 func Name(s ...string) string {
-	if len(s) == 0 {
-		return "belvedere"
-	}
-
-	return fmt.Sprintf("belvedere-%s", strings.Join(s, "-"))
+	return strings.Join(append([]string{"belvedere"}, s...), "-")
 }
 
 type Builder interface {
