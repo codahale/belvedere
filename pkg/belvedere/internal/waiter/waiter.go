@@ -22,12 +22,8 @@ func Poll(ctx context.Context, interval time.Duration, c Condition) error {
 			return ctx.Err()
 		case <-ticker.C:
 			done, err := c()
-			if err != nil {
+			if done || err != nil {
 				return err
-			}
-
-			if done {
-				return nil
 			}
 		}
 	}
