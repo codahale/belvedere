@@ -72,6 +72,11 @@ func (s *service) Add(ctx context.Context, project, region, backendService, inst
 			span.AddAttributes(trace.BoolAttribute("modified", false))
 			return nil
 		}
+
+		// If it's not in service, add it as a backend.
+		backends := append(bes.Backends, &compute.Backend{
+			Group: ig.SelfLink,
+		})
 		span.AddAttributes(trace.BoolAttribute("modified", true))
 
 		// Early exit if we don't want side effects.
@@ -82,12 +87,9 @@ func (s *service) Add(ctx context.Context, project, region, backendService, inst
 		// Patch the backend service to include the instance group as a backend.
 		op, err = s.gce.BackendServices.Patch(project, backendService,
 			&compute.BackendService{
-				Backends: append(bes.Backends, &compute.Backend{
-					Group: ig.SelfLink,
-				}),
+				Backends: backends,
 				// Include the fingerprint to avoid overwriting concurrent writes.
-				Fingerprint:     bes.Fingerprint,
-				ForceSendFields: []string{"Backends", "Fingerprint"},
+				Fingerprint: bes.Fingerprint,
 			},
 		).Context(ctx).Do()
 		if err != nil {
@@ -151,7 +153,7 @@ func (s *service) Remove(
 		}
 
 		// Remove the instance group in question from the backends.
-		bes.Backends = append(bes.Backends[:idx], bes.Backends[idx+1:]...)
+		backends := append(bes.Backends[:idx], bes.Backends[idx+1:]...)
 		span.AddAttributes(trace.BoolAttribute("modified", true))
 
 		// Early exit if we don't want side effects.
@@ -162,7 +164,7 @@ func (s *service) Remove(
 		// Patch the backend service to remove the instance group as a backend.
 		op, err = s.gce.BackendServices.Patch(project, backendService,
 			&compute.BackendService{
-				Backends: bes.Backends,
+				Backends: backends,
 				// Include the fingerprint to avoid overwriting concurrent writes.
 				Fingerprint: bes.Fingerprint,
 				// Force sending both fields in case the backends list is empty.
