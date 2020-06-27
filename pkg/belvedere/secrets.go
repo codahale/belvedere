@@ -216,10 +216,9 @@ func findBinding(bindings []*secretmanager.Binding, sa string) int {
 }
 
 func (s *secretsService) modifyIAMPolicy(
-	ctx context.Context,
-	secret string,
-	f func(policy *secretmanager.Policy) *secretmanager.Policy,
-	dryRun bool) error {
+	ctx context.Context, secret string, f func(policy *secretmanager.Policy) *secretmanager.Policy,
+	dryRun bool,
+) error {
 	err := gcp.ModifyLoop(5*time.Second, 1*time.Minute, func() error {
 		// Get the secret's IAM policy.
 		policy, err := s.sm.Projects.Secrets.GetIamPolicy(secret).Context(ctx).Do()

@@ -36,8 +36,10 @@ type service struct {
 }
 
 //nolint:gocognit // this is complex logic
-func (s *service) Add(ctx context.Context, project, region, backendService, instanceGroup string,
-	dryRun bool, interval time.Duration) error {
+func (s *service) Add(
+	ctx context.Context, project, region, backendService, instanceGroup string, dryRun bool,
+	interval time.Duration,
+) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.backends.Add")
 	defer span.End()
 
