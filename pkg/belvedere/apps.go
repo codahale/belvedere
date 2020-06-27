@@ -85,12 +85,12 @@ func (s *appService) List(ctx context.Context) ([]App, error) {
 	return apps, nil
 }
 
-type DownRegionError struct {
+type RegionDownError struct {
 	Region string
 	Status string
 }
 
-func (e *DownRegionError) Error() string {
+func (e *RegionDownError) Error() string {
 	return fmt.Sprintf("region %s is %q", e.Region, e.Status)
 }
 
@@ -119,7 +119,7 @@ func (s *appService) Create(
 
 	// Validate the region status.
 	if r.Status != "UP" {
-		return &DownRegionError{Region: region, Status: r.Status}
+		return &RegionDownError{Region: region, Status: r.Status}
 	}
 
 	// Find the project's managed zone.
