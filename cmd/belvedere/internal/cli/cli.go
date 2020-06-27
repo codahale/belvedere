@@ -103,7 +103,14 @@ func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, f CommandFunc) f
 		}
 
 		// Execute command.
-		return f(ctx, project, input, output)
+		err = f(ctx, project, input, output)
+		if err != nil {
+			span.SetStatus(trace.Status{
+				Code:    trace.StatusCodeInternal,
+				Message: err.Error(),
+			})
+		}
+		return err
 	}
 }
 
