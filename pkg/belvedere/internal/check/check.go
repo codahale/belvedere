@@ -5,11 +5,11 @@ import (
 	"fmt"
 )
 
-type FailedOperationError struct {
+type failedOperationError struct {
 	Message json.Marshaler
 }
 
-func (e *FailedOperationError) Error() string {
+func (e *failedOperationError) Error() string {
 	j, _ := e.Message.MarshalJSON()
 	return fmt.Sprintf("operation failed: %s", string(j))
 }

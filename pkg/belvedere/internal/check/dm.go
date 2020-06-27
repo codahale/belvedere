@@ -31,7 +31,7 @@ func DM(ctx context.Context, dm *deploymentmanager.Service, project string, oper
 
 		// Check for errors in the operation.
 		if op.Error != nil {
-			err := &FailedOperationError{Message: op.Error}
+			err := &failedOperationError{Message: op.Error}
 
 			span.SetStatus(trace.Status{
 				Code:    trace.StatusCodeInternal,
