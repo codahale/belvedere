@@ -74,9 +74,11 @@ func Health(
 		span.AddAttributes(trace.Int64Attribute("instances", ig.Size))
 
 		// Find the health of the running instances.
-		health, err := gce.BackendServices.GetHealth(project, backendService, &compute.ResourceGroupReference{
-			Group: ig.SelfLink,
-		}).Context(ctx).Do()
+		health, err := gce.BackendServices.GetHealth(project, backendService,
+			&compute.ResourceGroupReference{
+				Group: ig.SelfLink,
+			},
+		).Context(ctx).Do()
 		if err != nil {
 			return false, fmt.Errorf("getting getting backend service health: %w", err)
 		}
