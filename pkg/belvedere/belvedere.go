@@ -281,14 +281,14 @@ func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineTyp
 
 	// Aggregate across pages of results.
 	mtMap := map[string]*compute.MachineType{}
-	region = "zones/" + region
+	zonePrefix := fmt.Sprintf("zones/%s-", region)
 
 	// Iterate through all pages of the results.
 	if err := p.gce.MachineTypes.AggregatedList(p.name).Pages(ctx,
 		func(list *compute.MachineTypeAggregatedList) error {
 			// Aggregate across zones.
 			for zone, items := range list.Items {
-				if strings.HasPrefix(zone, region) {
+				if region == "" || strings.HasPrefix(zone, zonePrefix) {
 					for _, mt := range items.MachineTypes {
 						mtMap[mt.Name] = mt
 					}
