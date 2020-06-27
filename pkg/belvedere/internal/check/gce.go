@@ -31,14 +31,7 @@ func GCE(ctx context.Context, gce *compute.Service, project, operation string) w
 
 		// Check for errors in the operation.
 		if op.Error != nil {
-			err := &failedOperationError{Message: op.Error}
-
-			span.SetStatus(trace.Status{
-				Code:    trace.StatusCodeInternal,
-				Message: err.Error(),
-			})
-
-			return false, err
+			return false, &failedOperationError{Message: op.Error}
 		}
 
 		// Keep waiting unless the operation is done.
