@@ -265,7 +265,9 @@ func (m *manager) Update(
 	return waiter.Poll(ctx, interval, check.DM(ctx, m.dm, project, op.Name))
 }
 
-func (m *manager) Delete(ctx context.Context, project, name string, dryRun, async bool, interval time.Duration) error {
+func (m *manager) Delete(
+	ctx context.Context, project, name string, dryRun, async bool, interval time.Duration,
+) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.deployments.Delete")
 	defer span.End()
 
