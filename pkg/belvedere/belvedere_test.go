@@ -286,9 +286,10 @@ func TestProject_MachineTypes(t *testing.T) {
 							MemoryMb:  1024,
 						},
 						{
-							Name:      "n1-standard-4",
-							GuestCpus: 4,
-							MemoryMb:  4096,
+							Name:        "n1-standard-4",
+							GuestCpus:   4,
+							MemoryMb:    4096,
+							IsSharedCpu: true,
 						},
 					},
 				},
@@ -326,9 +327,10 @@ func TestProject_MachineTypes(t *testing.T) {
 			Memory: 1024,
 		},
 		{
-			Name:   "n1-standard-4",
-			CPU:    4,
-			Memory: 4096,
+			Name:      "n1-standard-4",
+			CPU:       4,
+			Memory:    4096,
+			SharedCPU: true,
 		},
 		{
 			Name:   "n1-standard-8",

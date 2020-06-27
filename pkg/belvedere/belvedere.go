@@ -254,9 +254,10 @@ var _ fmt.Stringer = Memory(0)
 
 // MachineType is a GCE machine type which can run VMs.
 type MachineType struct {
-	Name   string
-	CPU    int    `table:"CPU,ralign"`
-	Memory Memory `table:"Memory (GiB),ralign"`
+	Name      string
+	CPU       int    `table:"CPU,ralign"`
+	Memory    Memory `table:"Memory (GiB),ralign"`
+	SharedCPU bool   `table:"Shared CPU"`
 }
 
 func (mt MachineType) lexical() string {
@@ -304,9 +305,10 @@ func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineTyp
 	machineTypes := make([]MachineType, 0, len(mtMap))
 	for _, v := range mtMap {
 		machineTypes = append(machineTypes, MachineType{
-			Name:   v.Name,
-			CPU:    int(v.GuestCpus),
-			Memory: Memory(v.MemoryMb),
+			Name:      v.Name,
+			CPU:       int(v.GuestCpus),
+			Memory:    Memory(v.MemoryMb),
+			SharedCPU: v.IsSharedCpu,
 		})
 	}
 
