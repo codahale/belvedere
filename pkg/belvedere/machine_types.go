@@ -60,21 +60,24 @@ func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineTyp
 	if err := p.gce.MachineTypes.AggregatedList(p.name).Pages(ctx,
 		func(list *compute.MachineTypeAggregatedList) error {
 			for zone, items := range list.Items {
+				// Skip zones outside the given region.
 				if !strings.HasPrefix(zone, zonePrefix) {
 					continue
 				}
 
+				// Aggregate machine types by name.
 				for _, mt := range items.MachineTypes {
 					machineTypesByName[mt.Name] = mt
 				}
 			}
+
 			return nil
 		},
 	); err != nil {
 		return nil, fmt.Errorf("error listing machine types: %w", err)
 	}
 
-	// Convert to our type.
+	// Convert to our type, sort, and return.
 	return machineTypesToSlice(machineTypesByName), nil
 }
 
@@ -89,7 +92,6 @@ func machineTypesToSlice(machineTypesByName map[string]*compute.MachineType) []M
 		})
 	}
 
-	// Sort the machine types and return.
 	sort.SliceStable(machineTypes, func(i, j int) bool {
 		return machineTypes[i].lexical() < machineTypes[j].lexical()
 	})
