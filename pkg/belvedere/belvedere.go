@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
@@ -58,11 +57,6 @@ type Project interface {
 
 	// Releases provides methods for managing releases.
 	Releases() ReleaseService
-}
-
-// DNSServer is a DNS server run by Google.
-type DNSServer struct {
-	Hostname string
 }
 
 // NewProject returns a new Project instance for the given GCP project.
@@ -146,6 +140,10 @@ type project struct {
 	resources resources.Builder
 }
 
+func (p *project) Name() string {
+	return p.name
+}
+
 func (p *project) Apps() AppService {
 	return p.apps
 }
@@ -160,6 +158,38 @@ func (p *project) Logs() LogService {
 
 func (p *project) Releases() ReleaseService {
 	return p.releases
+}
+
+// DNSServer is a DNS server run by Google.
+type DNSServer struct {
+	Hostname string
+}
+
+func (p *project) DNSServers(ctx context.Context) ([]DNSServer, error) {
+	ctx, span := trace.StartSpan(ctx, "belvedere.project.DNSServers")
+	defer span.End()
+
+	// Find the project'p managed zone.
+	mz, err := p.setup.ManagedZone(ctx, p.name)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return the DNS servers.
+	servers := make([]DNSServer, 0, len(mz.NameServers))
+	for _, s := range mz.NameServers {
+		servers = append(servers, DNSServer{Hostname: s})
+	}
+
+	return servers, nil
+}
+
+// Instance is a Google Compute Engine VM instance.
+type Instance struct {
+	Name        string
+	MachineType string `table:"Machine Type"`
+	Zone        string
+	Status      string
 }
 
 func (p *project) Instances(ctx context.Context, app, release string) ([]Instance, error) {
@@ -210,120 +240,6 @@ func (p *project) Instances(ctx context.Context, app, release string) ([]Instanc
 	})
 
 	return instances, nil
-}
-
-func (p *project) Name() string {
-	return p.name
-}
-
-func (p *project) DNSServers(ctx context.Context) ([]DNSServer, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.project.DNSServers")
-	defer span.End()
-
-	// Find the project'p managed zone.
-	mz, err := p.setup.ManagedZone(ctx, p.name)
-	if err != nil {
-		return nil, err
-	}
-
-	// Return the DNS servers.
-	servers := make([]DNSServer, 0, len(mz.NameServers))
-	for _, s := range mz.NameServers {
-		servers = append(servers, DNSServer{Hostname: s})
-	}
-
-	return servers, nil
-}
-
-// Instance is a Google Compute Engine VM instance.
-type Instance struct {
-	Name        string
-	MachineType string `table:"Machine Type"`
-	Zone        string
-	Status      string
-}
-
-// Memory represents a specific amount of RAM provided to a virtual machine.
-type Memory int64
-
-func (m Memory) String() string {
-	return fmt.Sprintf("%.2f", float64(m)/1024)
-}
-
-var _ fmt.Stringer = Memory(0)
-
-// MachineType is a GCE machine type which can run VMs.
-type MachineType struct {
-	Name      string
-	CPU       int    `table:"CPU,ralign"`
-	Memory    Memory `table:"Memory (GiB),ralign"`
-	SharedCPU bool   `table:"Shared CPU"`
-}
-
-func (mt MachineType) lexical() string {
-	var n int
-
-	parts := strings.SplitN(mt.Name, "-", 3)
-	if len(parts) > 2 {
-		n, _ = strconv.Atoi(parts[2])
-	}
-
-	return fmt.Sprintf("%10s%10s%010d", parts[0], parts[1], n)
-}
-
-//nolint:gocognit // this is just complicated
-func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineType, error) {
-	ctx, span := trace.StartSpan(ctx, "belvedere.project.MachineTypes")
-	defer span.End()
-
-	span.AddAttributes(
-		trace.StringAttribute("region", region),
-	)
-
-	// Limit by zone prefix.
-	zonePrefix := "zones/"
-	if region != "" {
-		zonePrefix = zonePrefix + region + "-"
-	}
-
-	// Aggregate across pages of results.
-	machineTypesByName := map[string]*compute.MachineType{}
-
-	// Iterate through all pages of the results.
-	if err := p.gce.MachineTypes.AggregatedList(p.name).Pages(ctx,
-		func(list *compute.MachineTypeAggregatedList) error {
-			for zone, items := range list.Items {
-				if !strings.HasPrefix(zone, zonePrefix) {
-					continue
-				}
-
-				for _, mt := range items.MachineTypes {
-					machineTypesByName[mt.Name] = mt
-				}
-			}
-			return nil
-		},
-	); err != nil {
-		return nil, fmt.Errorf("error listing machine types: %w", err)
-	}
-
-	// Convert to our type.
-	machineTypes := make([]MachineType, 0, len(machineTypesByName))
-	for _, v := range machineTypesByName {
-		machineTypes = append(machineTypes, MachineType{
-			Name:      v.Name,
-			CPU:       int(v.GuestCpus),
-			Memory:    Memory(v.MemoryMb),
-			SharedCPU: v.IsSharedCpu,
-		})
-	}
-
-	// Sort the machine types and return.
-	sort.SliceStable(machineTypes, func(i, j int) bool {
-		return machineTypes[i].lexical() < machineTypes[j].lexical()
-	})
-
-	return machineTypes, nil
 }
 
 func lastPathComponent(s string) string {
