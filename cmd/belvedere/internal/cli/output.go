@@ -149,7 +149,7 @@ func (o *yamlOutput) Print(v interface{}) error {
 			return err
 		}
 
-		if _, err := fmt.Fprintf(o.w, "%s\n", string(b)); err != nil {
+		if _, err := fmt.Fprintf(o.w, "---\n%s", string(b)); err != nil {
 			return err
 		}
 	}
@@ -189,6 +189,8 @@ func collectRows(v interface{}, headers table.Row) []table.Row {
 
 			if t, ok := f.Interface().(time.Time); ok {
 				row[j] = t.Format(time.Stamp)
+			} else if s, ok := f.Interface().([]string); ok {
+				row[j] = strings.Join(s, ",")
 			} else {
 				row[j] = fmt.Sprint(f.Interface())
 			}
