@@ -272,18 +272,20 @@ func TestProject_MachineTypes(t *testing.T) {
 				"zones/us-central1-a": {
 					MachineTypes: []*compute.MachineType{
 						{
-							Name:      "n1-standard-1",
-							GuestCpus: 2,
-							MemoryMb:  1024,
+							Name:        "n1-standard-1",
+							GuestCpus:   2,
+							MemoryMb:    1024,
+							IsSharedCpu: false,
 						},
 					},
 				},
 				"zones/us-central1-b": {
 					MachineTypes: []*compute.MachineType{
 						{
-							Name:      "n1-standard-1",
-							GuestCpus: 2,
-							MemoryMb:  1024,
+							Name:        "n1-standard-1",
+							GuestCpus:   2,
+							MemoryMb:    1024,
+							IsSharedCpu: false,
 						},
 						{
 							Name:        "n1-standard-4",
@@ -296,9 +298,10 @@ func TestProject_MachineTypes(t *testing.T) {
 				"zones/us-west2-a": {
 					MachineTypes: []*compute.MachineType{
 						{
-							Name:      "n1-standard-8",
-							GuestCpus: 8,
-							MemoryMb:  500,
+							Name:        "n1-standard-8",
+							GuestCpus:   8,
+							MemoryMb:    500,
+							IsSharedCpu: false,
 						},
 					},
 				},
@@ -322,9 +325,10 @@ func TestProject_MachineTypes(t *testing.T) {
 
 	want := []MachineType{
 		{
-			Name:   "n1-standard-1",
-			CPU:    2,
-			Memory: 1024,
+			Name:      "n1-standard-1",
+			CPU:       2,
+			Memory:    1024,
+			SharedCPU: false,
 		},
 		{
 			Name:      "n1-standard-4",
@@ -333,9 +337,10 @@ func TestProject_MachineTypes(t *testing.T) {
 			SharedCPU: true,
 		},
 		{
-			Name:   "n1-standard-8",
-			CPU:    8,
-			Memory: 500,
+			Name:      "n1-standard-8",
+			CPU:       8,
+			Memory:    500,
+			SharedCPU: false,
 		},
 	}
 
@@ -354,32 +359,36 @@ func TestProject_MachineTypes_Region(t *testing.T) {
 				"zones/us-central1-a": {
 					MachineTypes: []*compute.MachineType{
 						{
-							Name:      "n1-standard-1",
-							GuestCpus: 2,
-							MemoryMb:  1024,
+							Name:        "n1-standard-1",
+							GuestCpus:   2,
+							MemoryMb:    1024,
+							IsSharedCpu: false,
 						},
 					},
 				},
 				"zones/us-central12-b": {
 					MachineTypes: []*compute.MachineType{
 						{
-							Name:      "n1-standard-1",
-							GuestCpus: 2,
-							MemoryMb:  1024,
+							Name:        "n1-standard-1",
+							GuestCpus:   2,
+							MemoryMb:    1024,
+							IsSharedCpu: false,
 						},
 						{
-							Name:      "n1-standard-4",
-							GuestCpus: 4,
-							MemoryMb:  4096,
+							Name:        "n1-standard-4",
+							GuestCpus:   4,
+							MemoryMb:    4096,
+							IsSharedCpu: false,
 						},
 					},
 				},
 				"zones/us-west2-a": {
 					MachineTypes: []*compute.MachineType{
 						{
-							Name:      "n1-standard-8",
-							GuestCpus: 8,
-							MemoryMb:  500,
+							Name:        "n1-standard-8",
+							GuestCpus:   8,
+							MemoryMb:    500,
+							IsSharedCpu: false,
 						},
 					},
 				},
@@ -403,9 +412,10 @@ func TestProject_MachineTypes_Region(t *testing.T) {
 
 	want := []MachineType{
 		{
-			Name:   "n1-standard-1",
-			CPU:    2,
-			Memory: 1024,
+			Name:      "n1-standard-1",
+			CPU:       2,
+			Memory:    1024,
+			SharedCPU: false,
 		},
 	}
 
