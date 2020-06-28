@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"sort"
-	"strconv"
 	"strings"
 
 	"go.opencensus.io/trace"
@@ -28,15 +27,23 @@ type MachineType struct {
 	SharedCPU bool   `table:"Shared CPU"`
 }
 
-func (mt MachineType) lexical() string {
-	var n int
+func (mt MachineType) lt(v MachineType) bool {
+	a := strings.Split(mt.Name, "-")
+	b := strings.Split(v.Name, "-")
 
-	parts := strings.SplitN(mt.Name, "-", 3)
-	if len(parts) > 2 {
-		n, _ = strconv.Atoi(parts[2])
+	// Compare n1 vs e2, then standard vs highmem, then vCPU count.
+	switch {
+	case a[0] < b[0]:
+		return true
+	case a[0] > b[0]:
+		return false
+	case a[1] < b[1]:
+		return true
+	case a[1] > b[1]:
+		return false
+	default:
+		return mt.CPU < v.CPU
 	}
-
-	return fmt.Sprintf("%10s%10s%010d", parts[0], parts[1], n)
 }
 
 func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineType, error) {
@@ -93,7 +100,7 @@ func machineTypesToSlice(machineTypesByName map[string]*compute.MachineType) []M
 	}
 
 	sort.SliceStable(machineTypes, func(i, j int) bool {
-		return machineTypes[i].lexical() < machineTypes[j].lexical()
+		return machineTypes[i].lt(machineTypes[j])
 	})
 
 	return machineTypes
