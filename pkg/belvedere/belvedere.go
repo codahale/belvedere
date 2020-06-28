@@ -280,19 +280,25 @@ func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineTyp
 		trace.StringAttribute("region", region),
 	)
 
+	// Limit by zone prefix.
+	zonePrefix := "zones/"
+	if region != "" {
+		zonePrefix = zonePrefix + region + "-"
+	}
+
 	// Aggregate across pages of results.
-	mtMap := map[string]*compute.MachineType{}
-	zonePrefix := fmt.Sprintf("zones/%s-", region)
+	machineTypesByName := map[string]*compute.MachineType{}
 
 	// Iterate through all pages of the results.
 	if err := p.gce.MachineTypes.AggregatedList(p.name).Pages(ctx,
 		func(list *compute.MachineTypeAggregatedList) error {
-			// Aggregate across zones.
 			for zone, items := range list.Items {
-				if region == "" || strings.HasPrefix(zone, zonePrefix) {
-					for _, mt := range items.MachineTypes {
-						mtMap[mt.Name] = mt
-					}
+				if !strings.HasPrefix(zone, zonePrefix) {
+					continue
+				}
+
+				for _, mt := range items.MachineTypes {
+					machineTypesByName[mt.Name] = mt
 				}
 			}
 			return nil
@@ -302,8 +308,8 @@ func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineTyp
 	}
 
 	// Convert to our type.
-	machineTypes := make([]MachineType, 0, len(mtMap))
-	for _, v := range mtMap {
+	machineTypes := make([]MachineType, 0, len(machineTypesByName))
+	for _, v := range machineTypesByName {
 		machineTypes = append(machineTypes, MachineType{
 			Name:      v.Name,
 			CPU:       int(v.GuestCpus),
