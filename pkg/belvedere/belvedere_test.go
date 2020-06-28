@@ -329,21 +329,18 @@ func TestProject_MachineTypes(t *testing.T) {
 			CPU:       2,
 			Memory:    1024,
 			SharedCPU: false,
-			Zones:     []string{"us-central1-a", "us-central1-b"},
 		},
 		{
 			Name:      "n1-standard-4",
 			CPU:       4,
 			Memory:    4096,
 			SharedCPU: true,
-			Zones:     []string{"us-central1-b"},
 		},
 		{
 			Name:      "n1-standard-8",
 			CPU:       8,
 			Memory:    500,
 			SharedCPU: false,
-			Zones:     []string{"us-west2-a"},
 		},
 	}
 
@@ -419,7 +416,6 @@ func TestProject_MachineTypes_Region(t *testing.T) {
 			CPU:       2,
 			Memory:    1024,
 			SharedCPU: false,
-			Zones:     []string{"us-central1-a"},
 		},
 	}
 

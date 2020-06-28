@@ -258,7 +258,6 @@ type MachineType struct {
 	CPU       int    `table:"CPU,ralign"`
 	Memory    Memory `table:"Memory (GiB),ralign"`
 	SharedCPU bool   `table:"Shared CPU"`
-	Zones     []string
 }
 
 func (mt MachineType) lexical() string {
@@ -282,8 +281,7 @@ func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineTyp
 	)
 
 	// Aggregate across pages of results.
-	machineTypesByName := map[string]*compute.MachineType{}
-	zonesByName := map[string]map[string]struct{}{}
+	mtMap := map[string]*compute.MachineType{}
 	zonePrefix := fmt.Sprintf("zones/%s-", region)
 
 	// Iterate through all pages of the results.
@@ -293,11 +291,7 @@ func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineTyp
 			for zone, items := range list.Items {
 				if region == "" || strings.HasPrefix(zone, zonePrefix) {
 					for _, mt := range items.MachineTypes {
-						if _, ok := zonesByName[mt.Name]; !ok {
-							zonesByName[mt.Name] = map[string]struct{}{}
-						}
-						zonesByName[mt.Name][zone] = struct{}{}
-						machineTypesByName[mt.Name] = mt
+						mtMap[mt.Name] = mt
 					}
 				}
 			}
@@ -308,25 +302,13 @@ func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineTyp
 	}
 
 	// Convert to our type.
-	machineTypes := make([]MachineType, 0, len(machineTypesByName))
-
-	for _, v := range machineTypesByName {
-		// Aggregate zones.
-		zoneMap := zonesByName[v.Name]
-
-		zones := make([]string, 0, len(zoneMap))
-		for zone := range zoneMap {
-			zones = append(zones, lastPathComponent(zone))
-		}
-
-		sort.Stable(sort.StringSlice(zones))
-
+	machineTypes := make([]MachineType, 0, len(mtMap))
+	for _, v := range mtMap {
 		machineTypes = append(machineTypes, MachineType{
 			Name:      v.Name,
 			CPU:       int(v.GuestCpus),
 			Memory:    Memory(v.MemoryMb),
 			SharedCPU: v.IsSharedCpu,
-			Zones:     zones,
 		})
 	}
 
