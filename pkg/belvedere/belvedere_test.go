@@ -22,7 +22,7 @@ func TestProject_DNSServers(t *testing.T) {
 			NameServers: []string{"ns1.example.com", "ns2.example.com"},
 		})
 
-	s, err := NewProject(
+	project, err := NewProject(
 		context.Background(),
 		"my-project",
 		option.WithHTTPClient(http.DefaultClient),
@@ -32,7 +32,7 @@ func TestProject_DNSServers(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := s.DNSServers(context.Background())
+	got, err := project.DNSServers(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +94,7 @@ func TestProject_Instances(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject(
+	project, err := NewProject(
 		context.Background(),
 		"my-project",
 		option.WithHTTPClient(http.DefaultClient),
@@ -104,7 +104,7 @@ func TestProject_Instances(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := s.Instances(context.Background(), "", "")
+	got, err := project.Instances(context.Background(), "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,7 +173,7 @@ func TestProject_InstancesApp(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject(
+	project, err := NewProject(
 		context.Background(),
 		"my-project",
 		option.WithHTTPClient(http.DefaultClient),
@@ -183,7 +183,7 @@ func TestProject_InstancesApp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := s.Instances(context.Background(), "my-app", "")
+	got, err := project.Instances(context.Background(), "my-app", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -233,7 +233,7 @@ func TestProject_InstancesAppRelease(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject(
+	project, err := NewProject(
 		context.Background(),
 		"my-project",
 		option.WithHTTPClient(http.DefaultClient),
@@ -243,7 +243,7 @@ func TestProject_InstancesAppRelease(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := s.Instances(context.Background(), "my-app", "v2")
+	got, err := project.Instances(context.Background(), "my-app", "v2")
 	if err != nil {
 		t.Fatal(err)
 	}

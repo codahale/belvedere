@@ -59,7 +59,7 @@ func TestProject_MachineTypes(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject(
+	project, err := NewProject(
 		context.Background(),
 		"my-project",
 		option.WithHTTPClient(http.DefaultClient),
@@ -69,7 +69,7 @@ func TestProject_MachineTypes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := s.MachineTypes(context.Background(), "")
+	got, err := project.MachineTypes(context.Background(), "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,7 +146,7 @@ func TestProject_MachineTypes_Region(t *testing.T) {
 			},
 		})
 
-	s, err := NewProject(
+	project, err := NewProject(
 		context.Background(),
 		"my-project",
 		option.WithHTTPClient(http.DefaultClient),
@@ -156,7 +156,7 @@ func TestProject_MachineTypes_Region(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := s.MachineTypes(context.Background(), "us-central1")
+	got, err := project.MachineTypes(context.Background(), "us-central1")
 	if err != nil {
 		t.Fatal(err)
 	}
