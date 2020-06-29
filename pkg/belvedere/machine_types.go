@@ -3,6 +3,7 @@ package belvedere
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -55,10 +56,7 @@ func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineTyp
 	)
 
 	// Limit by zone prefix.
-	zonePrefix := "zones/"
-	if region != "" {
-		zonePrefix = zonePrefix + region + "-"
-	}
+	zoneMatcher := zoneMatcher(region)
 
 	// Aggregate across pages of results.
 	machineTypesByName := map[string]*compute.MachineType{}
@@ -68,7 +66,7 @@ func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineTyp
 		func(list *compute.MachineTypeAggregatedList) error {
 			for zone, items := range list.Items {
 				// Skip zones outside the given region.
-				if !strings.HasPrefix(zone, zonePrefix) {
+				if !zoneMatcher.MatchString(zone) {
 					continue
 				}
 
@@ -86,6 +84,14 @@ func (p *project) MachineTypes(ctx context.Context, region string) ([]MachineTyp
 
 	// Convert to our type, sort, and return.
 	return machineTypesToSlice(machineTypesByName), nil
+}
+
+func zoneMatcher(region string) *regexp.Regexp {
+	if region == "" {
+		return regexp.MustCompile(`.*`)
+	}
+
+	return regexp.MustCompile(fmt.Sprintf(`^zones/%s-.*$`, region))
 }
 
 func machineTypesToSlice(machineTypesByName map[string]*compute.MachineType) []MachineType {
