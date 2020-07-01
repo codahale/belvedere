@@ -138,14 +138,13 @@ func enableLogging(stderr io.Writer, debug, quiet bool) {
 		DefaultSampler: trace.AlwaysSample(),
 	})
 
-	// Enable trace logging.
-	if debug {
-		// Use the print exporter for debugging, as it prints everything.
+	switch {
+	case debug: // Use the print exporter for debugging, as it prints everything.
 		pe := &exporter.PrintExporter{}
 		trace.RegisterExporter(pe)
 		view.RegisterExporter(pe)
-	} else if !quiet {
-		// Unless we're quiet, use the trace logger for more practical logging.
+	case quiet: // Don't register an exporter.
+	default: // Use the trace logger for more practical logging.
 		trace.RegisterExporter(NewTraceLogger(stderr))
 	}
 }
