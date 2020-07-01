@@ -91,7 +91,7 @@ func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, f CommandFunc) f
 		)
 
 		// Construct args instance.
-		input := &args{
+		args := &args{
 			stdin: cmd.InOrStdin(),
 			args:  cmdArgs,
 		}
@@ -103,7 +103,7 @@ func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, f CommandFunc) f
 		}
 
 		// Execute command.
-		err = f(ctx, project, input, output)
+		err = f(ctx, project, args, output)
 		if err != nil {
 			span.SetStatus(trace.Status{
 				Code:    trace.StatusCodeInternal,
