@@ -19,9 +19,9 @@ type args struct {
 	stdin io.Reader
 }
 
-func (i *args) String(idx int) string {
-	if len(i.args) > idx {
-		return i.args[idx]
+func (a *args) String(idx int) string {
+	if len(a.args) > idx {
+		return a.args[idx]
 	}
 
 	return ""
@@ -29,20 +29,20 @@ func (i *args) String(idx int) string {
 
 var errStdinUnreadable = fmt.Errorf("can't read from stdin")
 
-func (i *args) File(idx int) ([]byte, error) {
-	if len(i.args) > idx {
-		return ioutil.ReadFile(i.args[idx])
+func (a *args) File(idx int) ([]byte, error) {
+	if len(a.args) > idx {
+		return ioutil.ReadFile(a.args[idx])
 	}
 
-	if isTerminal(i.stdin) {
+	if isTerminal(a.stdin) {
 		return nil, errStdinUnreadable
 	}
 
-	if rc, ok := i.stdin.(io.ReadCloser); ok {
+	if rc, ok := a.stdin.(io.ReadCloser); ok {
 		defer func() { _ = rc.Close() }()
 	}
 
-	return ioutil.ReadAll(i.stdin)
+	return ioutil.ReadAll(a.stdin)
 }
 
 func isTerminal(r io.Reader) bool {
