@@ -17,7 +17,7 @@ func (*builder) Release(project, region, app, release, imageSHA256 string, confi
 	instanceGroupManager := fmt.Sprintf("%s-%s-ig", app, release)
 	autoscaler := fmt.Sprintf("%s-%s-as", app, release)
 
-	var network = defaultNetwork
+	network := defaultNetwork
 	if config.Network != "" {
 		network = config.Network
 	}
@@ -147,7 +147,7 @@ func metaData(key, value string) *compute.MetadataItems {
 }
 
 // cloudConfig returns a cloud-config manifest for the given release.
-func cloudConfig(c *cfg.Config, app, release string, imageSHA256 string) string {
+func cloudConfig(c *cfg.Config, app, release, imageSHA256 string) string {
 	type file struct {
 		Path        string `json:"path,omitempty"`
 		Permissions string `json:"permissions,omitempty"`

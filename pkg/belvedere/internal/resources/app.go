@@ -12,7 +12,7 @@ import (
 
 //nolint:funlen // not worth splitting this up
 func (*builder) App(
-	project string, app string, managedZone *dns.ManagedZone, config *cfg.Config,
+	project, app string, managedZone *dns.ManagedZone, config *cfg.Config,
 ) []deployments.Resource {
 	firewall := fmt.Sprintf("belvedere-allow-%s-lb", app)
 	healthcheck := fmt.Sprintf("%s-hc", app)

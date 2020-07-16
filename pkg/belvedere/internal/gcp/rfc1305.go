@@ -5,10 +5,8 @@ import (
 	"regexp"
 )
 
-var (
-	//nolint:gochecknoglobals // only compile once
-	rfc1035 = regexp.MustCompile(`^[a-z]([-a-z0-9]*[a-z0-9])?$`)
-)
+//nolint:gochecknoglobals // only compile once
+var rfc1035 = regexp.MustCompile(`^[a-z]([-a-z0-9]*[a-z0-9])?$`)
 
 type invalidNameError struct {
 	Name string

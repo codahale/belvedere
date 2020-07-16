@@ -17,7 +17,7 @@ type Builder interface {
 	Base(dnsZone string) []deployments.Resource
 
 	// App returns a list of resources for an app deployment.
-	App(project string, app string, managedZone *dns.ManagedZone, config *cfg.Config) []deployments.Resource
+	App(project, app string, managedZone *dns.ManagedZone, config *cfg.Config) []deployments.Resource
 
 	// Release returns a list of resources for a release deployment.
 	Release(project, region, app, release, imageSHA256 string, config *cfg.Config) []deployments.Resource

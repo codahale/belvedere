@@ -11,34 +11,32 @@ import (
 	"google.golang.org/api/serviceusage/v1"
 )
 
-var (
-	// The full set of GCP services required for Belvedere to be a happy home.
-	//nolint:gochecknoglobals // can't have non-scalar consts
-	requiredServices = []string{
-		"cloudasset.googleapis.com",
-		"cloudbuild.googleapis.com",
-		"clouddebugger.googleapis.com",
-		"clouderrorreporting.googleapis.com",
-		"cloudkms.googleapis.com",
-		"cloudprofiler.googleapis.com",
-		"cloudresourcemanager.googleapis.com",
-		"cloudtrace.googleapis.com",
-		"compute.googleapis.com",
-		"containeranalysis.googleapis.com",
-		"containerregistry.googleapis.com",
-		"containerscanning.googleapis.com",
-		"deploymentmanager.googleapis.com",
-		"dns.googleapis.com",
-		"iam.googleapis.com",
-		"iap.googleapis.com",
-		"logging.googleapis.com",
-		"monitoring.googleapis.com",
-		"oslogin.googleapis.com",
-		"secretmanager.googleapis.com",
-		"stackdriver.googleapis.com",
-		"storage-api.googleapis.com",
-	}
-)
+// The full set of GCP services required for Belvedere to be a happy home.
+//nolint:gochecknoglobals // can't have non-scalar consts
+var requiredServices = []string{
+	"cloudasset.googleapis.com",
+	"cloudbuild.googleapis.com",
+	"clouddebugger.googleapis.com",
+	"clouderrorreporting.googleapis.com",
+	"cloudkms.googleapis.com",
+	"cloudprofiler.googleapis.com",
+	"cloudresourcemanager.googleapis.com",
+	"cloudtrace.googleapis.com",
+	"compute.googleapis.com",
+	"containeranalysis.googleapis.com",
+	"containerregistry.googleapis.com",
+	"containerscanning.googleapis.com",
+	"deploymentmanager.googleapis.com",
+	"dns.googleapis.com",
+	"iam.googleapis.com",
+	"iap.googleapis.com",
+	"logging.googleapis.com",
+	"monitoring.googleapis.com",
+	"oslogin.googleapis.com",
+	"secretmanager.googleapis.com",
+	"stackdriver.googleapis.com",
+	"storage-api.googleapis.com",
+}
 
 func (s *service) EnableAPIs(ctx context.Context, project string, dryRun bool, interval time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.internal.setup.EnableAPIs")

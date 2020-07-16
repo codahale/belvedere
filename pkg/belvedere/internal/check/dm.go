@@ -10,7 +10,7 @@ import (
 )
 
 // DM returns a waiter.Condition for the given Deployment Manager operation completing.
-func DM(ctx context.Context, dm *deploymentmanager.Service, project string, operation string) waiter.Condition {
+func DM(ctx context.Context, dm *deploymentmanager.Service, project, operation string) waiter.Condition {
 	return func() (bool, error) {
 		ctx, span := trace.StartSpan(ctx, "belvedere.internal.check.DM")
 		defer span.End()

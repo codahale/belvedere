@@ -68,7 +68,7 @@ func (l *logService) List(
 }
 
 func (l *logService) makeFilter(
-	app string, release string, instance string, maxAge time.Duration, filters []string,
+	app, release, instance string, maxAge time.Duration, filters []string,
 ) []string {
 	// Always filter by resource type, time, and app.
 	ts := l.clock().Add(-maxAge)
