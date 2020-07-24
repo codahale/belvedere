@@ -261,5 +261,4 @@ The resulting plaintext secrets will only ever be stored in memory.
 - [ ] Canary deploys
 - [ ] Run containers as a non-root user
 - [ ] GPU accelerator support
-- [ ] Redirect HTTP to HTTPS on LB
 - [ ] Traffic Director integration (https://github.com/google-cloud-sdk-unofficial/google-cloud-sdk/blob/e3c7770d324cedd5aeb4df6741de9a2c26235597/lib/surface/compute/instance_templates/create.py#L328)

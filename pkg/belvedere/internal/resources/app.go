@@ -18,15 +18,27 @@ func (*builder) App(
 	healthcheck := fmt.Sprintf("%s-hc", app)
 	backendService := fmt.Sprintf("%s-bes", app)
 	urlMap := fmt.Sprintf("%s-urlmap", app)
+	httpURLMap := fmt.Sprintf("%s-urlmap-http", app)
 	sslCertificate := fmt.Sprintf("%s-cert", app)
 	targetProxy := fmt.Sprintf("%s-tp", app)
+	ipAddress := fmt.Sprintf("%s-ip", app)
+	httpTargetProxy := fmt.Sprintf("%s-tp-http", app)
 	forwardingRule := fmt.Sprintf("%s-fr", app)
+	httpForwardingRule := fmt.Sprintf("%s-fr-http", app)
 	serviceAccount := fmt.Sprintf("%s-sa", app)
 	dnsRecord := fmt.Sprintf("%s-rrs", app)
 	dnsName := fmt.Sprintf("%s.%s", app, managedZone.DnsName)
 	securityPolicy := fmt.Sprintf("%s-waf", app)
 
 	resources := []deployments.Resource{
+		// A global, static IP address for the app.
+		{
+			Name: ipAddress,
+			Type: "compute.v1.globalAddress",
+			Properties: &compute.Address{
+				IpVersion: "IPV4",
+			},
+		},
 		// A firewall rule allowing access from the load balancer to application instances on port
 		// 8443.
 		{
@@ -122,6 +134,7 @@ func (*builder) App(
 			Name: forwardingRule,
 			Type: "compute.v1.globalForwardingRule",
 			Properties: &compute.ForwardingRule{
+				IPAddress:  deployments.Ref(ipAddress, "address"),
 				IPProtocol: "TCP",
 				PortRange:  "443",
 				Target:     deployments.SelfLink(targetProxy),
@@ -146,7 +159,7 @@ func (*builder) App(
 				Records: []*dns.ResourceRecordSet{
 					{
 						Type:    "A",
-						Rrdatas: []string{deployments.Ref(forwardingRule, "IPAddress")},
+						Rrdatas: []string{deployments.Ref(ipAddress, "Address")},
 						Ttl:     50,
 					},
 				},
@@ -181,6 +194,36 @@ func (*builder) App(
 						Priority: math.MaxInt32,
 					},
 				),
+			},
+		},
+		// A URL map which redirects HTTP requests to their HTTPS eqiuvalents.
+		{
+			Name: httpURLMap,
+			Type: "compute.v1.urlMap",
+			Properties: &compute.UrlMap{
+				DefaultUrlRedirect: &compute.HttpRedirectAction{
+					RedirectResponseCode: "MOVED_PERMANENTLY_DEFAULT",
+					HttpsRedirect:        true,
+				},
+			},
+		},
+		// A HTTP target proxy which redirects HTTP requests to HTTP.
+		{
+			Name: httpTargetProxy,
+			Type: "compute.v1.targetHttpProxy",
+			Properties: &compute.TargetHttpProxy{
+				UrlMap: deployments.SelfLink(httpURLMap),
+			},
+		},
+		// A global forwarding rule directing TCP:80 to the target proxy.
+		{
+			Name: httpForwardingRule,
+			Type: "compute.v1.globalForwardingRule",
+			Properties: &compute.ForwardingRule{
+				IPAddress:  deployments.Ref(ipAddress, "address"),
+				IPProtocol: "TCP",
+				PortRange:  "80",
+				Target:     deployments.SelfLink(httpTargetProxy),
 			},
 		},
 	}

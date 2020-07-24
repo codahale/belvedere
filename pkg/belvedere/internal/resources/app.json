@@ -1,6 +1,13 @@
 {
   "resources": [
     {
+      "name": "my-app-ip",
+      "type": "compute.v1.globalAddress",
+      "properties": {
+        "ipVersion": "IPV4"
+      }
+    },
+    {
       "name": "belvedere-allow-my-app-lb",
       "type": "compute.v1.firewall",
       "properties": {
@@ -94,6 +101,7 @@
       "name": "my-app-fr",
       "type": "compute.v1.globalForwardingRule",
       "properties": {
+        "IPAddress": "$(ref.my-app-ip.address)",
         "IPProtocol": "TCP",
         "portRange": "443",
         "target": "$(ref.my-app-tp.selfLink)"
@@ -116,7 +124,7 @@
         "records": [
           {
             "rrdatas": [
-              "$(ref.my-app-fr.IPAddress)"
+              "$(ref.my-app-ip.Address)"
             ],
             "ttl": 50,
             "type": "A"
@@ -164,6 +172,33 @@
             "priority": 2147483647
           }
         ]
+      }
+    },
+    {
+      "name": "my-app-urlmap-http",
+      "type": "compute.v1.urlMap",
+      "properties": {
+        "defaultUrlRedirect": {
+          "httpsRedirect": true,
+          "redirectResponseCode": "MOVED_PERMANENTLY_DEFAULT"
+        }
+      }
+    },
+    {
+      "name": "my-app-tp-http",
+      "type": "compute.v1.targetHttpProxy",
+      "properties": {
+        "urlMap": "$(ref.my-app-urlmap-http.selfLink)"
+      }
+    },
+    {
+      "name": "my-app-fr-http",
+      "type": "compute.v1.globalForwardingRule",
+      "properties": {
+        "IPAddress": "$(ref.my-app-ip.address)",
+        "IPProtocol": "TCP",
+        "portRange": "80",
+        "target": "$(ref.my-app-tp-http.selfLink)"
       }
     },
     {
