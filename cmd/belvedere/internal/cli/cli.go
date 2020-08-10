@@ -52,13 +52,13 @@ func (c *Command) ToCobra(pf ProjectFactory, of OutputFactory) *cobra.Command {
 		return &cmd
 	}
 
-	// Register the global flags for each command.
-	var gf GlobalFlags
-
-	gf.Register(cmd.Flags())
-
 	// Wrap the func, if one is provided.
 	if c.Run != nil {
+		// Register the global flags for each command.
+		var gf GlobalFlags
+
+		gf.Register(cmd.Flags())
+
 		cmd.RunE = runE(&gf, pf, of, c.Run)
 	}
 
