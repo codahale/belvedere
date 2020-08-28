@@ -18,6 +18,6 @@ require (
 	go.opencensus.io v0.22.4
 	google.golang.org/api v0.30.0
 	gopkg.in/h2non/gock.v1 v1.0.15
-	gopkg.in/ini.v1 v1.60.1
+	gopkg.in/ini.v1 v1.60.2
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
