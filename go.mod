@@ -3,7 +3,7 @@ module github.com/codahale/belvedere
 go 1.14
 
 require (
-	github.com/alessio/shellescape v1.2.2
+	github.com/alessio/shellescape v1.3.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/mock v1.4.4
