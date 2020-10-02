@@ -87,7 +87,7 @@ func runE(gf *GlobalFlags, pf ProjectFactory, of OutputFactory, f CommandFunc) f
 
 		span.AddAttributes(
 			trace.StringAttribute("project", project.Name()),
-			trace.StringAttribute("args", escapeArgs(cmdArgs)),
+			trace.StringAttribute("args", shellescape.QuoteCommand(cmdArgs)),
 		)
 
 		// Construct args instance.
@@ -159,13 +159,4 @@ func fmtText(doc string) string {
 	}
 
 	return strings.Join(wrapped, "\n\n")
-}
-
-func escapeArgs(args []string) string {
-	escaped := make([]string, len(args))
-	for i, s := range args {
-		escaped[i] = shellescape.Quote(s)
-	}
-
-	return strings.Join(escaped, " ")
 }

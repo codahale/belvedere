@@ -228,13 +228,8 @@ ExecStopPost=/usr/bin/docker rm %s
 
 // systemdService returns a systemd service file with the given Docker arguments. All Docker
 // arguments are escaped, if necessary.
-func systemdService(name string, dockerArgs []string) string {
-	args := make([]string, 0, len(dockerArgs))
-	for _, s := range dockerArgs {
-		args = append(args, shellescape.Quote(s))
-	}
-
-	return fmt.Sprintf(systemdTemplate, name, strings.Join(args, " "), name, name)
+func systemdService(name string, srgs []string) string {
+	return fmt.Sprintf(systemdTemplate, name, shellescape.QuoteCommand(srgs), name, name)
 }
 
 // dockerArgs returns a list of arguments to `docker run` for running the given container.
