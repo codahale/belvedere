@@ -87,8 +87,8 @@ func TestEntriesToLabels(t *testing.T) {
 func TestManager_Insert(t *testing.T) {
 	defer gock.Off()
 
-	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/" +
-		"deployments?alt=json&prettyPrint=false").
+	gock.New("https://deploymentmanager.googleapis.com/deploymentmanager/v2/projects/" +
+		"my-project/global/deployments?alt=json&prettyPrint=false").
 		JSON(deploymentmanager.Deployment{
 			Name: "my-deployment",
 			Labels: []*deploymentmanager.DeploymentLabelEntry{
@@ -109,8 +109,8 @@ func TestManager_Insert(t *testing.T) {
 			Name: "op1",
 		})
 
-	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/" +
-		"operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
+	gock.New("https://deploymentmanager.googleapis.com/deploymentmanager/v2/projects/" +
+		"my-project/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(deploymentmanager.Operation{
 			Status: "DONE",
@@ -146,8 +146,8 @@ func TestManager_Insert(t *testing.T) {
 func TestManager_Update(t *testing.T) {
 	defer gock.Off()
 
-	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/" +
-		"global/deployments/my-deployment?alt=json&prettyPrint=false").
+	gock.New("https://deploymentmanager.googleapis.com/deploymentmanager/v2/projects/" +
+		"my-project/global/deployments/my-deployment?alt=json&prettyPrint=false").
 		JSON(deploymentmanager.Deployment{
 			Target: &deploymentmanager.TargetConfiguration{
 				Config: &deploymentmanager.ConfigFile{
@@ -161,8 +161,8 @@ func TestManager_Update(t *testing.T) {
 			Name: "op1",
 		})
 
-	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/" +
-		"global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
+	gock.New("https://deploymentmanager.googleapis.com/deploymentmanager/v2/projects/" +
+		"my-project/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(deploymentmanager.Operation{
 			Status: "DONE",
@@ -195,15 +195,15 @@ func TestManager_Update(t *testing.T) {
 func TestManager_Delete(t *testing.T) {
 	defer gock.Off()
 
-	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/" +
-		"deployments/my-deployment?alt=json&prettyPrint=false").
+	gock.New("https://deploymentmanager.googleapis.com/deploymentmanager/v2/projects/" +
+		"my-project/global/deployments/my-deployment?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(deploymentmanager.Operation{
 			Name: "op1",
 		})
 
-	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/" +
-		"operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
+	gock.New("https://deploymentmanager.googleapis.com/deploymentmanager/v2/projects/" +
+		"my-project/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(deploymentmanager.Operation{
 			Status: "DONE",
@@ -229,8 +229,8 @@ func TestManager_Delete(t *testing.T) {
 func TestManager_List(t *testing.T) {
 	defer gock.Off()
 
-	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/" +
-		"deployments?alt=json&filter=bobs+eq+1&prettyPrint=false").
+	gock.New("https://deploymentmanager.googleapis.com/deploymentmanager/v2/projects/" +
+		"my-project/global/deployments?alt=json&filter=bobs+eq+1&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(deploymentmanager.DeploymentsListResponse{
 			Deployments: []*deploymentmanager.Deployment{
@@ -300,8 +300,8 @@ func TestManager_List(t *testing.T) {
 func TestManager_Get(t *testing.T) {
 	defer gock.Off()
 
-	gock.New("https://www.googleapis.com/deploymentmanager/v2/projects/my-project/global/" +
-		"deployments/belvedere-base?alt=json&prettyPrint=false").
+	gock.New("https://deploymentmanager.googleapis.com/deploymentmanager/v2/projects/" +
+		"my-project/global/deployments/belvedere-base?alt=json&prettyPrint=false").
 		Reply(http.StatusOK).
 		JSON(&deploymentmanager.Deployment{
 			Name: "belvedere-base",
