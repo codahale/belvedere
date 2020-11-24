@@ -16,6 +16,6 @@ require (
 	github.com/spf13/pflag v1.0.5
 	go.opencensus.io v0.22.5
 	google.golang.org/api v0.35.0
-	gopkg.in/h2non/gock.v1 v1.0.15
+	gopkg.in/h2non/gock.v1 v1.0.16
 	gopkg.in/ini.v1 v1.62.0
 )
