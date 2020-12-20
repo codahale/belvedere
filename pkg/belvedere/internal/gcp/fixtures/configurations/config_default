@@ -1,9 +1,0 @@
-bare = 1
-
-; comment
-
-[core]
-project = boop
-
-[other]
-yes = no
