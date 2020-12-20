@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -42,8 +43,9 @@ func ModifyLoop(interval, timeout time.Duration, f func() error) error {
 
 func isRetryable(err error) bool {
 	// If the operation resulted in a conflict, back off and retry.
-	if e, ok := err.(*googleapi.Error); ok {
-		if e.Code == http.StatusConflict || e.Code == http.StatusPreconditionFailed {
+	var googleErr *googleapi.Error
+	if errors.As(err, &googleErr) {
+		if googleErr.Code == http.StatusConflict || googleErr.Code == http.StatusPreconditionFailed {
 			return true
 		}
 	}

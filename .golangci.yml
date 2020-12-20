@@ -11,6 +11,7 @@ linters:
     - exhaustive
     - exportloopref
     - funlen
+    - errorlint
     - gci
     - gochecknoglobals
     - gochecknoinits
