@@ -11,6 +11,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
+//nolint:paralleltest // uses Gock
 func TestManager_EnableAPIs(t *testing.T) {
 	defer gock.Off()
 

@@ -9,6 +9,8 @@ import (
 )
 
 func TestInstances(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -40,6 +42,8 @@ func TestInstances(t *testing.T) {
 }
 
 func TestInstances_WithApp(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -72,6 +76,8 @@ func TestInstances_WithApp(t *testing.T) {
 }
 
 func TestInstances_WithAppAndRelease(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

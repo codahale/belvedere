@@ -7,6 +7,8 @@ import (
 )
 
 func TestName(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		in   []string
@@ -31,6 +33,7 @@ func TestName(t *testing.T) {
 	for _, testCase := range tests {
 		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
 			assert.Equal(t, "Name()", testCase.out, Name(testCase.in...))
 		})
 	}

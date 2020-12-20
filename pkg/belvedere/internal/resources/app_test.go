@@ -11,6 +11,8 @@ import (
 )
 
 func TestAppResources(t *testing.T) {
+	t.Parallel()
+
 	zone := &dns.ManagedZone{
 		Name:    "belvedere",
 		DnsName: "horse.club",

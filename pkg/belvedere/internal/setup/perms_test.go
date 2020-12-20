@@ -10,6 +10,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
+//nolint:paralleltest // uses Gock
 func TestManager_SetDMPerms(t *testing.T) {
 	defer gock.Off()
 
@@ -101,6 +102,7 @@ func TestManager_SetDMPerms(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // uses Gock
 func TestManager_SetDMPermsExisting(t *testing.T) {
 	defer gock.Off()
 

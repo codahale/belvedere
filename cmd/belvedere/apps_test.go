@@ -11,6 +11,8 @@ import (
 )
 
 func TestAppsList(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -46,6 +48,8 @@ func TestAppsList(t *testing.T) {
 }
 
 func TestAppsCreate(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -81,6 +85,8 @@ func TestAppsCreate(t *testing.T) {
 }
 
 func TestAppsCreate_WithFilename(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -116,6 +122,8 @@ func TestAppsCreate_WithFilename(t *testing.T) {
 }
 
 func TestAppsUpdate(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -150,6 +158,8 @@ func TestAppsUpdate(t *testing.T) {
 }
 
 func TestAppsUpdate_WithFilename(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -184,6 +194,8 @@ func TestAppsUpdate_WithFilename(t *testing.T) {
 }
 
 func TestAppsDelete(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

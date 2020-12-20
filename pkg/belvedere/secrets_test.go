@@ -11,6 +11,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
+//nolint:paralleltest // uses Gock
 func TestSecretsService_List(t *testing.T) {
 	defer gock.Off()
 
@@ -59,6 +60,7 @@ func TestSecretsService_List(t *testing.T) {
 	assert.Equal(t, "List()", want, got)
 }
 
+//nolint:paralleltest // uses Gock
 func TestSecretsService_Create(t *testing.T) {
 	defer gock.Off()
 
@@ -101,6 +103,7 @@ func TestSecretsService_Create(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // uses Gock
 func TestSecretsService_Update(t *testing.T) {
 	defer gock.Off()
 
@@ -133,6 +136,7 @@ func TestSecretsService_Update(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // uses Gock
 func TestSecretsService_Delete(t *testing.T) {
 	defer gock.Off()
 
@@ -161,6 +165,7 @@ func TestSecretsService_Delete(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // uses Gock
 func TestSecretsService_Grant(t *testing.T) {
 	defer gock.Off()
 
@@ -209,6 +214,7 @@ func TestSecretsService_Grant(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // uses Gock
 func TestSecretsService_Revoke(t *testing.T) {
 	defer gock.Off()
 

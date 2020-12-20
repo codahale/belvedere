@@ -10,6 +10,8 @@ import (
 )
 
 func TestProject_Setup(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -45,6 +47,8 @@ func TestProject_Setup(t *testing.T) {
 }
 
 func TestProject_Teardown(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

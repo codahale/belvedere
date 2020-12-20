@@ -8,18 +8,24 @@ import (
 )
 
 func TestArgs_String(t *testing.T) {
+	t.Parallel()
+
 	args := &args{args: []string{"one", "two"}}
 
 	assert.Equal(t, "String()", "two", args.String(1))
 }
 
 func TestArgs_String_Default(t *testing.T) {
+	t.Parallel()
+
 	args := &args{args: []string{"one", "two"}}
 
 	assert.Equal(t, "String()", "", args.String(20))
 }
 
 func TestArgs_File(t *testing.T) {
+	t.Parallel()
+
 	args := &args{
 		args: []string{"example.txt"},
 	}
@@ -35,6 +41,8 @@ func TestArgs_File(t *testing.T) {
 }
 
 func TestArgs_File_Default(t *testing.T) {
+	t.Parallel()
+
 	f, err := os.Open("example.txt")
 	if err != nil {
 		t.Fatal(err)

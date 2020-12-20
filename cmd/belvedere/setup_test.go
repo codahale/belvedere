@@ -9,6 +9,8 @@ import (
 )
 
 func TestSetup(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -33,6 +35,8 @@ func TestSetup(t *testing.T) {
 }
 
 func TestSetup_Missing_DNS_Name(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

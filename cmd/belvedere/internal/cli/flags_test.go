@@ -9,6 +9,8 @@ import (
 )
 
 func TestGlobalFlags_Quiet(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name  string
 		args  []string
@@ -34,6 +36,8 @@ func TestGlobalFlags_Quiet(t *testing.T) {
 	for _, v := range tests {
 		testCase := v
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			fs := pflag.NewFlagSet("test", pflag.PanicOnError)
 			gf := GlobalFlags{}
 			gf.Register(fs)
@@ -47,6 +51,8 @@ func TestGlobalFlags_Quiet(t *testing.T) {
 }
 
 func TestGlobalFlags_Debug(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name  string
 		args  []string
@@ -67,6 +73,8 @@ func TestGlobalFlags_Debug(t *testing.T) {
 	for _, v := range tests {
 		testCase := v
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			fs := pflag.NewFlagSet("test", pflag.PanicOnError)
 			gf := GlobalFlags{}
 			gf.Register(fs)
@@ -80,6 +88,8 @@ func TestGlobalFlags_Debug(t *testing.T) {
 }
 
 func TestGlobalFlags_Timeout(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		args    []string
@@ -100,6 +110,8 @@ func TestGlobalFlags_Timeout(t *testing.T) {
 	for _, v := range tests {
 		testCase := v
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			fs := pflag.NewFlagSet("test", pflag.PanicOnError)
 			gf := GlobalFlags{}
 			gf.Register(fs)
@@ -113,6 +125,8 @@ func TestGlobalFlags_Timeout(t *testing.T) {
 }
 
 func TestGlobalFlags_Project(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		args    []string
@@ -128,6 +142,8 @@ func TestGlobalFlags_Project(t *testing.T) {
 	for _, v := range tests {
 		testCase := v
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			fs := pflag.NewFlagSet("test", pflag.PanicOnError)
 			gf := GlobalFlags{}
 			gf.Register(fs)
@@ -141,6 +157,8 @@ func TestGlobalFlags_Project(t *testing.T) {
 }
 
 func TestGlobalFlags_Format(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name   string
 		args   []string
@@ -161,6 +179,8 @@ func TestGlobalFlags_Format(t *testing.T) {
 	for _, v := range tests {
 		testCase := v
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			fs := pflag.NewFlagSet("test", pflag.PanicOnError)
 			gf := GlobalFlags{}
 			gf.Register(fs)
@@ -174,6 +194,8 @@ func TestGlobalFlags_Format(t *testing.T) {
 }
 
 func TestModifyFlags_DryRun(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name   string
 		args   []string
@@ -194,6 +216,8 @@ func TestModifyFlags_DryRun(t *testing.T) {
 	for _, v := range tests {
 		testCase := v
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			fs := pflag.NewFlagSet("test", pflag.PanicOnError)
 			mf := ModifyFlags{}
 			mf.Register(fs)
@@ -207,6 +231,8 @@ func TestModifyFlags_DryRun(t *testing.T) {
 }
 
 func TestLongRunningFlags_Interval(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		args     []string
@@ -227,6 +253,8 @@ func TestLongRunningFlags_Interval(t *testing.T) {
 	for _, v := range tests {
 		testCase := v
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			fs := pflag.NewFlagSet("test", pflag.PanicOnError)
 			lrf := LongRunningFlags{}
 			lrf.Register(fs)
@@ -240,6 +268,8 @@ func TestLongRunningFlags_Interval(t *testing.T) {
 }
 
 func TestAsyncFlags_Async(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name  string
 		args  []string
@@ -260,6 +290,8 @@ func TestAsyncFlags_Async(t *testing.T) {
 	for _, v := range tests {
 		testCase := v
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
 			fs := pflag.NewFlagSet("test", pflag.PanicOnError)
 			af := AsyncFlags{}
 			af.Register(fs)

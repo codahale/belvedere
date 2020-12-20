@@ -13,6 +13,8 @@ import (
 )
 
 func TestReleaseService_List(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -56,6 +58,8 @@ func TestReleaseService_List(t *testing.T) {
 }
 
 func TestReleaseService_List_withApp(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -103,6 +107,8 @@ func TestReleaseService_List_withApp(t *testing.T) {
 }
 
 func TestReleaseService_Create(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -153,6 +159,8 @@ func TestReleaseService_Create(t *testing.T) {
 }
 
 func TestReleaseService_Enable(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -186,6 +194,8 @@ func TestReleaseService_Enable(t *testing.T) {
 }
 
 func TestReleaseService_Disable(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -214,6 +224,8 @@ func TestReleaseService_Disable(t *testing.T) {
 }
 
 func TestReleaseService_Delete(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

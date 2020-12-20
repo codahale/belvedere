@@ -17,6 +17,8 @@ import (
 )
 
 func TestAppService_Get(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -51,6 +53,8 @@ func TestAppService_Get(t *testing.T) {
 }
 
 func TestAppService_List(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -88,6 +92,7 @@ func TestAppService_List(t *testing.T) {
 	assert.Equal(t, "List()", want, got)
 }
 
+//nolint:paralleltest // uses Gock
 func TestAppService_Create(t *testing.T) {
 	defer gock.Off()
 
@@ -150,6 +155,7 @@ func TestAppService_Create(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // uses Gock
 func TestAppService_Create_DownRegion(t *testing.T) {
 	defer gock.Off()
 
@@ -191,6 +197,7 @@ func TestAppService_Create_DownRegion(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // uses Gock
 func TestAppService_Create_BadRegion(t *testing.T) {
 	defer gock.Off()
 
@@ -230,6 +237,8 @@ func TestAppService_Create_BadRegion(t *testing.T) {
 }
 
 func TestAppService_Update(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -269,6 +278,8 @@ func TestAppService_Update(t *testing.T) {
 }
 
 func TestAppService_Delete(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

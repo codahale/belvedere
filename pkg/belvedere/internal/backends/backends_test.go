@@ -12,6 +12,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
+//nolint:paralleltest // uses Gock
 func TestService_Add(t *testing.T) {
 	defer gock.Off()
 
@@ -78,6 +79,7 @@ func TestService_Add(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // uses Gock
 func TestService_AddExisting(t *testing.T) {
 	defer gock.Off()
 
@@ -119,6 +121,7 @@ func TestService_AddExisting(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // uses Gock
 func TestService_AddDryRun(t *testing.T) {
 	defer gock.Off()
 
@@ -160,6 +163,7 @@ func TestService_AddDryRun(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // uses Gock
 func TestService_Remove(t *testing.T) {
 	defer gock.Off()
 
@@ -226,6 +230,7 @@ func TestService_Remove(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // uses Gock
 func TestSetup_RemoveLast(t *testing.T) {
 	defer gock.Off()
 
@@ -282,6 +287,7 @@ func TestSetup_RemoveLast(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // uses Gock
 func TestSetup_RemoveMissing(t *testing.T) {
 	defer gock.Off()
 
@@ -323,6 +329,7 @@ func TestSetup_RemoveMissing(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // uses Gock
 func TestSetup_RemoveDryRun(t *testing.T) {
 	defer gock.Off()
 

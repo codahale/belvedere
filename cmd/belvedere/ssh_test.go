@@ -8,6 +8,8 @@ import (
 )
 
 func TestSSH(t *testing.T) {
+	t.Parallel()
+
 	t.Skip("no real way to test SSH command")
 
 	ctrl := gomock.NewController(t)

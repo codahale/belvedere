@@ -12,6 +12,8 @@ import (
 )
 
 func TestPoll(t *testing.T) {
+	t.Parallel()
+
 	n := uint64(0)
 	op := func() (bool, error) {
 		return atomic.AddUint64(&n, 1) == 10, nil
@@ -28,6 +30,8 @@ func TestPoll(t *testing.T) {
 }
 
 func TestPollError(t *testing.T) {
+	t.Parallel()
+
 	want := io.EOF
 	n := uint64(0)
 	op := func() (bool, error) {
@@ -49,6 +53,8 @@ func TestPollError(t *testing.T) {
 }
 
 func TestPollTimeout(t *testing.T) {
+	t.Parallel()
+
 	n := uint64(0)
 	op := func() (bool, error) {
 		return atomic.AddUint64(&n, 1) == 100, nil
@@ -63,6 +69,8 @@ func TestPollTimeout(t *testing.T) {
 }
 
 func TestPollCancelled(t *testing.T) {
+	t.Parallel()
+
 	n := uint64(0)
 	op := func() (bool, error) {
 		return atomic.AddUint64(&n, 1) == 100, nil

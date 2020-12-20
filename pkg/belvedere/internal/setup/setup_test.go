@@ -12,6 +12,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
+//nolint:paralleltest // uses Gock
 func TestService_ManagedZone(t *testing.T) {
 	defer gock.Off()
 

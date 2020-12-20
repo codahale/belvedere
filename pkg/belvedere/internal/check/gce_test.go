@@ -12,6 +12,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
+//nolint:paralleltest // uses Gock
 func TestGCE(t *testing.T) {
 	tests := []struct {
 		name   string

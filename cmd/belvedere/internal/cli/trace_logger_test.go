@@ -10,6 +10,8 @@ import (
 )
 
 func TestTraceLogger_ExportSpan(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name   string
 		output string
@@ -95,6 +97,8 @@ func TestTraceLogger_ExportSpan(t *testing.T) {
 	for _, test := range tests {
 		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			out := bytes.NewBuffer(nil)
 			exporter := NewTraceLogger(out)
 			exporter.ExportSpan(test.span)

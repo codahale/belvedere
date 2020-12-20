@@ -9,6 +9,8 @@ import (
 )
 
 func TestSecretsList(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -44,6 +46,8 @@ func TestSecretsList(t *testing.T) {
 }
 
 func TestSecretsCreate(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -74,6 +78,8 @@ func TestSecretsCreate(t *testing.T) {
 }
 
 func TestSecretsCreate_WithFilename(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -104,6 +110,8 @@ func TestSecretsCreate_WithFilename(t *testing.T) {
 }
 
 func TestSecretsUpdate(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -134,6 +142,8 @@ func TestSecretsUpdate(t *testing.T) {
 }
 
 func TestSecretsUpdate_WithFilename(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -164,6 +174,8 @@ func TestSecretsUpdate_WithFilename(t *testing.T) {
 }
 
 func TestSecretsGrant(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -192,6 +204,8 @@ func TestSecretsGrant(t *testing.T) {
 }
 
 func TestSecretsRevoke(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -220,6 +234,8 @@ func TestSecretsRevoke(t *testing.T) {
 }
 
 func TestSecretsDelete(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

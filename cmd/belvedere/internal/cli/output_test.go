@@ -27,6 +27,8 @@ var testData = []example{
 }
 
 func TestTableOutput_Print(t *testing.T) {
+	t.Parallel()
+
 	buf := bytes.NewBuffer(nil)
 	output := &tableOutput{w: buf}
 
@@ -47,6 +49,8 @@ func TestTableOutput_Print(t *testing.T) {
 }
 
 func TestCSVOutput_Print(t *testing.T) {
+	t.Parallel()
+
 	buf := bytes.NewBuffer(nil)
 	output := &csvOutput{tableOutput: tableOutput{w: buf}}
 
@@ -65,6 +69,8 @@ three,four five,"one\,two"
 }
 
 func TestJSONOutput_Print(t *testing.T) {
+	t.Parallel()
+
 	buf := bytes.NewBuffer(nil)
 	output := &jsonOutput{w: buf}
 
@@ -82,6 +88,8 @@ func TestJSONOutput_Print(t *testing.T) {
 }
 
 func TestPrettyJSONOutput_Print(t *testing.T) {
+	t.Parallel()
+
 	buf := bytes.NewBuffer(nil)
 	output := &prettyJSONOutput{w: buf}
 
@@ -110,6 +118,8 @@ func TestPrettyJSONOutput_Print(t *testing.T) {
 }
 
 func TestYamlOutput_Print(t *testing.T) {
+	t.Parallel()
+
 	buf := bytes.NewBuffer(nil)
 	output := &yamlOutput{w: buf}
 

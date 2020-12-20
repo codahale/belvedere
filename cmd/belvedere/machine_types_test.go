@@ -9,6 +9,8 @@ import (
 )
 
 func TestMachineTypes(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -40,6 +42,8 @@ func TestMachineTypes(t *testing.T) {
 }
 
 func TestMachineTypes_WithRegion(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

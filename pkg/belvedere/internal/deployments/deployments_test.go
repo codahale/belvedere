@@ -14,6 +14,8 @@ import (
 )
 
 func TestLabelsToEntries(t *testing.T) {
+	t.Parallel()
+
 	labels := Labels{
 		Type:    "release",
 		Region:  "us-west1",
@@ -50,6 +52,8 @@ func TestLabelsToEntries(t *testing.T) {
 }
 
 func TestEntriesToLabels(t *testing.T) {
+	t.Parallel()
+
 	got := entriesToLabels([]*deploymentmanager.DeploymentLabelEntry{
 		{
 			Key:   "belvedere-type",
@@ -84,6 +88,7 @@ func TestEntriesToLabels(t *testing.T) {
 	assert.Equal(t, "entriesToLabels()", want, got)
 }
 
+//nolint:paralleltest // uses Gock
 func TestManager_Insert(t *testing.T) {
 	defer gock.Off()
 
@@ -143,6 +148,7 @@ func TestManager_Insert(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // uses Gock
 func TestManager_Update(t *testing.T) {
 	defer gock.Off()
 
@@ -192,6 +198,7 @@ func TestManager_Update(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // uses Gock
 func TestManager_Delete(t *testing.T) {
 	defer gock.Off()
 
@@ -226,6 +233,7 @@ func TestManager_Delete(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // uses Gock
 func TestManager_List(t *testing.T) {
 	defer gock.Off()
 
@@ -297,6 +305,7 @@ func TestManager_List(t *testing.T) {
 	assert.Equal(t, "List()", want, got)
 }
 
+//nolint:paralleltest // uses Gock
 func TestManager_Get(t *testing.T) {
 	defer gock.Off()
 

@@ -11,6 +11,8 @@ import (
 )
 
 func TestReleasesList(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -47,6 +49,8 @@ func TestReleasesList(t *testing.T) {
 }
 
 func TestReleasesCreate(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -82,6 +86,8 @@ func TestReleasesCreate(t *testing.T) {
 }
 
 func TestReleasesCreate_AndEnable(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -122,6 +128,8 @@ func TestReleasesCreate_AndEnable(t *testing.T) {
 }
 
 func TestReleasesCreate_WithFilename(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -157,6 +165,8 @@ func TestReleasesCreate_WithFilename(t *testing.T) {
 }
 
 func TestReleasesEnable(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -186,6 +196,8 @@ func TestReleasesEnable(t *testing.T) {
 }
 
 func TestReleasesDisable(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -215,6 +227,8 @@ func TestReleasesDisable(t *testing.T) {
 }
 
 func TestReleasesDelete(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

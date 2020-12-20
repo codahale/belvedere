@@ -10,6 +10,8 @@ import (
 )
 
 func TestReleaseResources(t *testing.T) {
+	t.Parallel()
+
 	resources := NewBuilder().Release(
 		"my-project", "us-central1", "my-app", "v43", "echo woo",
 		&cfg.Config{
@@ -38,6 +40,8 @@ func TestReleaseResources(t *testing.T) {
 }
 
 func TestDockerArgs(t *testing.T) {
+	t.Parallel()
+
 	container := &cfg.Container{
 		Image:   "gcr.io/example/example",
 		Command: "/usr/bin/example",
@@ -74,6 +78,8 @@ func TestDockerArgs(t *testing.T) {
 }
 
 func TestDockerArgsEmptyCommand(t *testing.T) {
+	t.Parallel()
+
 	container := &cfg.Container{
 		Image: "gcr.io/example/example",
 		Args:  []string{"-h", "-y"},
@@ -109,6 +115,8 @@ func TestDockerArgsEmptyCommand(t *testing.T) {
 }
 
 func TestCloudConfig(t *testing.T) {
+	t.Parallel()
+
 	config := &cfg.Config{
 		Container: cfg.Container{
 			Image:   "gcr.io/example/helloworld",

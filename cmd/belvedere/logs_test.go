@@ -10,6 +10,8 @@ import (
 )
 
 func TestLogs(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -47,6 +49,8 @@ func TestLogs(t *testing.T) {
 }
 
 func TestLogs_WithRelease(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -85,6 +89,8 @@ func TestLogs_WithRelease(t *testing.T) {
 }
 
 func TestLogs_WithReleaseAndInstance(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

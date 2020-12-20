@@ -9,6 +9,8 @@ import (
 )
 
 func TestValidateRFC1035(t *testing.T) {
+	t.Parallel()
+
 	goodValues := []string{
 		"a", "ab", "abc", "a1", "a-1", "a--1--2--b",
 		strings.Repeat("a", 63),

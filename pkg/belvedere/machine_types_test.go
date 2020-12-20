@@ -11,6 +11,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
+//nolint:paralleltest // uses Gock
 func TestProject_MachineTypes(t *testing.T) {
 	defer gock.Off()
 
@@ -98,6 +99,7 @@ func TestProject_MachineTypes(t *testing.T) {
 	assert.Equal(t, "MachineTypes()", want, got)
 }
 
+//nolint:paralleltest // uses Gock
 func TestProject_MachineTypes_Region(t *testing.T) {
 	defer gock.Off()
 

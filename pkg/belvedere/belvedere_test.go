@@ -12,6 +12,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
+//nolint:paralleltest // uses Gock
 func TestProject_DNSServers(t *testing.T) {
 	defer gock.Off()
 
@@ -45,6 +46,7 @@ func TestProject_DNSServers(t *testing.T) {
 	assert.Equal(t, "DNSServers()", want, got)
 }
 
+//nolint:paralleltest // uses Gock
 func TestProject_Instances(t *testing.T) {
 	defer gock.Off()
 
@@ -133,6 +135,7 @@ func TestProject_Instances(t *testing.T) {
 	assert.Equal(t, "Instances()", want, got)
 }
 
+//nolint:paralleltest // uses Gock
 func TestProject_InstancesApp(t *testing.T) {
 	defer gock.Off()
 
@@ -206,6 +209,7 @@ func TestProject_InstancesApp(t *testing.T) {
 	assert.Equal(t, "Instances()", want, got)
 }
 
+//nolint:paralleltest // uses Gock
 func TestProject_InstancesAppRelease(t *testing.T) {
 	defer gock.Off()
 

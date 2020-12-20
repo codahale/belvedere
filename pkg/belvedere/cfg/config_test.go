@@ -9,6 +9,8 @@ import (
 )
 
 func TestParse(t *testing.T) {
+	t.Parallel()
+
 	b, err := ioutil.ReadFile("config-example.yaml")
 	if err != nil {
 		t.Fatal(err)

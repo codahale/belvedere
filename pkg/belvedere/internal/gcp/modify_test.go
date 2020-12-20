@@ -13,6 +13,8 @@ import (
 )
 
 func TestModifyLoop_Success(t *testing.T) {
+	t.Parallel()
+
 	n := 0
 
 	if err := ModifyLoop(10*time.Millisecond, 1*time.Second, func() error {
@@ -26,6 +28,8 @@ func TestModifyLoop_Success(t *testing.T) {
 }
 
 func TestModifyLoop_PreconditionFailed(t *testing.T) {
+	t.Parallel()
+
 	n := 0
 
 	if err := ModifyLoop(10*time.Millisecond, 1*time.Second, func() error {
@@ -42,6 +46,8 @@ func TestModifyLoop_PreconditionFailed(t *testing.T) {
 }
 
 func TestModifyLoop_InitialFailure(t *testing.T) {
+	t.Parallel()
+
 	n := 0
 
 	if err := ModifyLoop(10*time.Millisecond, 1*time.Second, func() error {
@@ -58,6 +64,8 @@ func TestModifyLoop_InitialFailure(t *testing.T) {
 }
 
 func TestModifyLoop_FinalFailure(t *testing.T) {
+	t.Parallel()
+
 	n := 0
 
 	err := ModifyLoop(10*time.Millisecond, 100*time.Millisecond, func() error {
@@ -77,6 +85,8 @@ func TestModifyLoop_FinalFailure(t *testing.T) {
 }
 
 func TestModifyLoopFatalFailure(t *testing.T) {
+	t.Parallel()
+
 	n := 0
 
 	err := ModifyLoop(10*time.Millisecond, 100*time.Millisecond, func() error {

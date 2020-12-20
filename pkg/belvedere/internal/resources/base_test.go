@@ -8,6 +8,8 @@ import (
 )
 
 func TestBaseResources(t *testing.T) {
+	t.Parallel()
+
 	resources := NewBuilder().Base("cornbread.club")
 
 	got, err := json.MarshalIndent(map[string]interface{}{
