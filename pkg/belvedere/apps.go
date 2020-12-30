@@ -11,7 +11,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/setup"
 	"go.opencensus.io/trace"
-	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/compute/v1"
 )
 
 // AppService provides methods for managing applications.

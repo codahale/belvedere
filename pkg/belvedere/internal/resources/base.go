@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
-	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/dns/v1"
 )
 

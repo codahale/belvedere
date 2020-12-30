@@ -6,7 +6,7 @@ import (
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/waiter"
 	"go.opencensus.io/trace"
-	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/compute/v1"
 )
 
 // GCE returns a waiter.Condition for the given Compute Engine operation completing.

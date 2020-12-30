@@ -15,7 +15,7 @@ import (
 	"github.com/codahale/belvedere/pkg/belvedere/internal/resources"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/setup"
 	"go.opencensus.io/trace"
-	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/logging/v2"
 	"google.golang.org/api/option"
 	"google.golang.org/api/secretmanager/v1"

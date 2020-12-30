@@ -6,7 +6,7 @@ import (
 
 	"github.com/codahale/belvedere/internal/assert"
 	"github.com/codahale/belvedere/internal/httpmock"
-	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/option"
 )

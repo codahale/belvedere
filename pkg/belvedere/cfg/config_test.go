@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/codahale/belvedere/internal/assert"
-	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/compute/v1"
 )
 
 func TestParse(t *testing.T) {

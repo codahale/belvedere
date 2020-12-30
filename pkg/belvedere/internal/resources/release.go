@@ -9,7 +9,7 @@ import (
 	"github.com/alessio/shellescape"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
-	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/compute/v1"
 )
 
 func (*builder) Release(project, region, app, release, imageSHA256 string, config *cfg.Config) []deployments.Resource {
