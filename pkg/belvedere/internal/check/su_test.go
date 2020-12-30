@@ -2,17 +2,17 @@ package check
 
 import (
 	"context"
-	"net/http"
 	"testing"
 
 	"github.com/codahale/belvedere/internal/assert"
+	"github.com/codahale/belvedere/internal/httpmock"
 	"google.golang.org/api/option"
 	"google.golang.org/api/serviceusage/v1"
-	"gopkg.in/h2non/gock.v1"
 )
 
-//nolint:paralleltest // uses Gock
 func TestSU(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name   string
 		op     serviceusage.Operation
@@ -48,15 +48,17 @@ func TestSU(t *testing.T) {
 	for _, testCase := range tests {
 		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
-			defer gock.Off()
+			t.Parallel()
 
-			gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&prettyPrint=false").
-				Reply(http.StatusOK).
-				JSON(testCase.op)
+			srv := httpmock.NewServer(t)
+			defer srv.Finish()
+
+			srv.Expect(`/v1/op1?alt=json&prettyPrint=false`,
+				httpmock.RespJSON(testCase.op))
 
 			su, err := serviceusage.NewService(
 				context.Background(),
-				option.WithHTTPClient(http.DefaultClient),
+				option.WithEndpoint(srv.URL()),
 				option.WithoutAuthentication(),
 			)
 			if err != nil {

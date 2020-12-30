@@ -5,26 +5,24 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/codahale/belvedere/internal/httpmock"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/option"
-	"gopkg.in/h2non/gock.v1"
 )
 
-//nolint:paralleltest // uses Gock
 func TestManager_SetDMPerms(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/" +
-		"my-project?alt=json&fields=projectNumber&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(cloudresourcemanager.Project{
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/v1/projects/my-project?alt=json&fields=projectNumber&prettyPrint=false`,
+		httpmock.RespJSON(cloudresourcemanager.Project{
 			ProjectNumber: 123456,
-		})
+		}))
 
-	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/" +
-		"my-project:getIamPolicy?alt=json&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(cloudresourcemanager.Policy{
+	srv.Expect(`/v1/projects/my-project:getIamPolicy?alt=json&prettyPrint=false`,
+		httpmock.RespJSON(cloudresourcemanager.Policy{
 			Bindings: []*cloudresourcemanager.Binding{
 				{
 					Members: []string{"email:existing@example.com"},
@@ -32,12 +30,10 @@ func TestManager_SetDMPerms(t *testing.T) {
 				},
 			},
 			Etag: "300",
-		})
+		}))
 
-	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/" +
-		"my-project:getIamPolicy?alt=json&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(cloudresourcemanager.Policy{
+	srv.Expect(`/v1/projects/my-project:getIamPolicy?alt=json&prettyPrint=false`,
+		httpmock.RespJSON(cloudresourcemanager.Policy{
 			Bindings: []*cloudresourcemanager.Binding{
 				{
 					Members: []string{"email:existing@example.com"},
@@ -45,11 +41,10 @@ func TestManager_SetDMPerms(t *testing.T) {
 				},
 			},
 			Etag: "301",
-		})
+		}))
 
-	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/" +
-		"my-project:setIamPolicy?alt=json&prettyPrint=false").
-		JSON(cloudresourcemanager.SetIamPolicyRequest{
+	srv.Expect(`/v1/projects/my-project:setIamPolicy?alt=json&prettyPrint=false`,
+		httpmock.ReqJSON(cloudresourcemanager.SetIamPolicyRequest{
 			Policy: &cloudresourcemanager.Policy{
 				Bindings: []*cloudresourcemanager.Binding{
 					{
@@ -63,12 +58,11 @@ func TestManager_SetDMPerms(t *testing.T) {
 				},
 				Etag: "300",
 			},
-		}).
-		Reply(http.StatusConflict)
+		}),
+		httpmock.Status(http.StatusConflict))
 
-	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/" +
-		"my-project:setIamPolicy?alt=json&prettyPrint=false").
-		JSON(cloudresourcemanager.SetIamPolicyRequest{
+	srv.Expect(`/v1/projects/my-project:setIamPolicy?alt=json&prettyPrint=false`,
+		httpmock.ReqJSON(cloudresourcemanager.SetIamPolicyRequest{
 			Policy: &cloudresourcemanager.Policy{
 				Bindings: []*cloudresourcemanager.Binding{
 					{
@@ -82,13 +76,12 @@ func TestManager_SetDMPerms(t *testing.T) {
 				},
 				Etag: "301",
 			},
-		}).
-		Reply(http.StatusOK).
-		JSON(cloudresourcemanager.Policy{})
+		}),
+		httpmock.RespJSON(cloudresourcemanager.Policy{}))
 
 	crm, err := cloudresourcemanager.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {
@@ -102,21 +95,19 @@ func TestManager_SetDMPerms(t *testing.T) {
 	}
 }
 
-//nolint:paralleltest // uses Gock
 func TestManager_SetDMPermsExisting(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/" +
-		"my-project?alt=json&fields=projectNumber&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(cloudresourcemanager.Project{
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/v1/projects/my-project?alt=json&fields=projectNumber&prettyPrint=false`,
+		httpmock.RespJSON(cloudresourcemanager.Project{
 			ProjectNumber: 123456,
-		})
+		}))
 
-	gock.New("https://cloudresourcemanager.googleapis.com/v1/projects/" +
-		"my-project:getIamPolicy?alt=json&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(cloudresourcemanager.Policy{
+	srv.Expect(`/v1/projects/my-project:getIamPolicy?alt=json&prettyPrint=false`,
+		httpmock.RespJSON(cloudresourcemanager.Policy{
 			Bindings: []*cloudresourcemanager.Binding{
 				{
 					Members: []string{"email:existing@example.com"},
@@ -128,11 +119,11 @@ func TestManager_SetDMPermsExisting(t *testing.T) {
 				},
 			},
 			Etag: "300",
-		})
+		}))
 
 	crm, err := cloudresourcemanager.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {

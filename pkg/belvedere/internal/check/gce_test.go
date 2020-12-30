@@ -1,19 +1,18 @@
-//nolint:dupl // duplicated code b/c no type parameters
 package check
 
 import (
 	"context"
-	"net/http"
 	"testing"
 
 	"github.com/codahale/belvedere/internal/assert"
+	"github.com/codahale/belvedere/internal/httpmock"
 	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/option"
-	"gopkg.in/h2non/gock.v1"
 )
 
-//nolint:paralleltest // uses Gock
 func TestGCE(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name   string
 		op     compute.Operation
@@ -55,16 +54,17 @@ func TestGCE(t *testing.T) {
 	for _, testCase := range tests {
 		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
-			defer gock.Off()
+			t.Parallel()
 
-			gock.New("https://compute.googleapis.com/compute/v1/projects/example/global/" +
-				"operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
-				Reply(http.StatusOK).
-				JSON(testCase.op)
+			srv := httpmock.NewServer(t)
+			defer srv.Finish()
+
+			srv.Expect(`/projects/example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false`,
+				httpmock.RespJSON(testCase.op))
 
 			gce, err := compute.NewService(
 				context.Background(),
-				option.WithHTTPClient(http.DefaultClient),
+				option.WithEndpoint(srv.URL()),
 				option.WithoutAuthentication(),
 			)
 			if err != nil {

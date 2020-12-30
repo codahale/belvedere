@@ -2,45 +2,47 @@ package belvedere
 
 import (
 	"context"
-	"net/http"
 	"testing"
 	"time"
 
 	"github.com/codahale/belvedere/internal/assert"
+	"github.com/codahale/belvedere/internal/httpmock"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/logging/v2"
 	"google.golang.org/api/option"
-	"gopkg.in/h2non/gock.v1"
 )
 
-//nolint:paralleltest // uses Gock
 func TestLogService_List(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://logging.googleapis.com/v2/entries:list?alt=json&prettyPrint=false").
-		JSON(logging.ListLogEntriesRequest{
-			Filter: `resource.type="gce_instance" ` +
-				`timestamp>="2019-06-25T13:18:33.000000043Z" ` +
-				`jsonPayload.container.metadata.app="my-app" ` +
-				`health`,
-			OrderBy:       "timestamp desc",
-			PageSize:      1000,
-			ResourceNames: []string{"projects/my-project"},
-		}).
-		Reply(http.StatusOK).
-		JSON(logging.ListLogEntriesResponse{
-			Entries: []*logging.LogEntry{
-				{
-					Timestamp: "2019-06-25T14:55:01.000000000Z",
-					JsonPayload: googleapi.RawMessage(`{"message": "woo","instance":` +
-						`{"name":"example-v2-abcd"},"container":{"name":"/nginx","metadata":{"release":"v2"}}}`),
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/v2/entries:list?alt=json&prettyPrint=false`,
+		httpmock.ReqJSON(
+			logging.ListLogEntriesRequest{
+				Filter: `resource.type="gce_instance" ` +
+					`timestamp>="2019-06-25T13:18:33.000000043Z" ` +
+					`jsonPayload.container.metadata.app="my-app" ` +
+					`health`,
+				OrderBy:       "timestamp desc",
+				PageSize:      1000,
+				ResourceNames: []string{"projects/my-project"},
+			}),
+		httpmock.RespJSON(
+			logging.ListLogEntriesResponse{
+				Entries: []*logging.LogEntry{
+					{
+						Timestamp: "2019-06-25T14:55:01.000000000Z",
+						JsonPayload: googleapi.RawMessage(`{"message": "woo","instance":` +
+							`{"name":"example-v2-abcd"},"container":{"name":"/nginx","metadata":{"release":"v2"}}}`),
+					},
 				},
-			},
-		})
+			}))
 
 	logs, err := logging.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {

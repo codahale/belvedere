@@ -1,19 +1,18 @@
-//nolint:dupl // duplicated code b/c no type parameters
 package check
 
 import (
 	"context"
-	"net/http"
 	"testing"
 
 	"github.com/codahale/belvedere/internal/assert"
+	"github.com/codahale/belvedere/internal/httpmock"
 	"google.golang.org/api/deploymentmanager/v2"
 	"google.golang.org/api/option"
-	"gopkg.in/h2non/gock.v1"
 )
 
-//nolint:paralleltest // uses Gock
 func TestDM(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name   string
 		op     deploymentmanager.Operation
@@ -55,16 +54,18 @@ func TestDM(t *testing.T) {
 	for _, testCase := range tests {
 		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
-			defer gock.Off()
+			t.Parallel()
 
-			gock.New("https://deploymentmanager.googleapis.com/deploymentmanager/v2/projects/" +
-				"example/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
-				Reply(http.StatusOK).
-				JSON(testCase.op)
+			srv := httpmock.NewServer(t)
+			defer srv.Finish()
+
+			srv.Expect(`/deploymentmanager/v2/projects/example/global/operations/op1?`+
+				`alt=json&fields=status%2Cerror&prettyPrint=false`,
+				httpmock.RespJSON(testCase.op))
 
 			dm, err := deploymentmanager.NewService(
 				context.Background(),
-				option.WithHTTPClient(http.DefaultClient),
+				option.WithEndpoint(srv.URL()),
 				option.WithoutAuthentication(),
 			)
 			if err != nil {

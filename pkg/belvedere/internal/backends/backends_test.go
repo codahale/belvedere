@@ -3,41 +3,39 @@ package backends
 import (
 	"context"
 	"encoding/json"
-	"net/http"
 	"testing"
 	"time"
 
+	"github.com/codahale/belvedere/internal/httpmock"
 	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/option"
-	"gopkg.in/h2non/gock.v1"
 )
 
-//nolint:paralleltest // uses Gock
 func TestService_Add(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/" +
-		"backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.BackendService{
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/projects/my-project/global/backendServices/bes-1?`+
+		`alt=json&fields=backends%2Cfingerprint&prettyPrint=false`,
+		httpmock.RespJSON(compute.BackendService{
 			Backends: []*compute.Backend{
 				{
 					Group: "http://ig-2",
 				},
 			},
 			Fingerprint: "fp",
-		})
+		}))
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/" +
-		"us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.InstanceGroup{
+	srv.Expect(`/projects/my-project/regions/us-central1/instanceGroups/ig-1?`+
+		`alt=json&fields=selfLink&prettyPrint=false`,
+		httpmock.RespJSON(compute.InstanceGroup{
 			SelfLink: "http://ig-1",
-		})
+		}))
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/" +
-		"backendServices/bes-1?alt=json&prettyPrint=false").
-		JSON(compute.BackendService{
+	srv.Expect(`/projects/my-project/global/backendServices/bes-1?alt=json&prettyPrint=false`,
+		httpmock.ReqJSON(compute.BackendService{
 			Backends: []*compute.Backend{
 				{
 					Group: "http://ig-2",
@@ -47,22 +45,19 @@ func TestService_Add(t *testing.T) {
 				},
 			},
 			Fingerprint: "fp",
-		}).
-		Reply(http.StatusOK).
-		JSON(compute.Operation{
+		}),
+		httpmock.RespJSON(compute.Operation{
 			Name: "op1",
-		})
+		}))
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/" +
-		"operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.Operation{
+	srv.Expect(`/projects/my-project/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false`,
+		httpmock.RespJSON(compute.Operation{
 			Status: "DONE",
-		})
+		}))
 
 	gce, err := compute.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {
@@ -79,32 +74,32 @@ func TestService_Add(t *testing.T) {
 	}
 }
 
-//nolint:paralleltest // uses Gock
 func TestService_AddExisting(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/" +
-		"backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.BackendService{
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/projects/my-project/global/backendServices/bes-1?`+
+		`alt=json&fields=backends%2Cfingerprint&prettyPrint=false`,
+		httpmock.RespJSON(compute.BackendService{
 			Backends: []*compute.Backend{
 				{
 					Group: "http://ig-1",
 				},
 			},
 			Fingerprint: "fp",
-		})
+		}))
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/" +
-		"us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.InstanceGroup{
+	srv.Expect(`/projects/my-project/regions/us-central1/instanceGroups/ig-1?`+
+		`alt=json&fields=selfLink&prettyPrint=false`,
+		httpmock.RespJSON(compute.InstanceGroup{
 			SelfLink: "http://ig-1",
-		})
+		}))
 
 	gce, err := compute.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {
@@ -121,32 +116,32 @@ func TestService_AddExisting(t *testing.T) {
 	}
 }
 
-//nolint:paralleltest // uses Gock
 func TestService_AddDryRun(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/" +
-		"backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.BackendService{
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/projects/my-project/global/backendServices/bes-1?`+
+		`alt=json&fields=backends%2Cfingerprint&prettyPrint=false`,
+		httpmock.RespJSON(compute.BackendService{
 			Backends: []*compute.Backend{
 				{
 					Group: "http://ig-2",
 				},
 			},
 			Fingerprint: "fp",
-		})
+		}))
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/" +
-		"us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.InstanceGroup{
+	srv.Expect(`/projects/my-project/regions/us-central1/instanceGroups/ig-1?`+
+		`alt=json&fields=selfLink&prettyPrint=false`,
+		httpmock.RespJSON(compute.InstanceGroup{
 			SelfLink: "http://ig-1",
-		})
+		}))
 
 	gce, err := compute.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {
@@ -163,14 +158,15 @@ func TestService_AddDryRun(t *testing.T) {
 	}
 }
 
-//nolint:paralleltest // uses Gock
 func TestService_Remove(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/" +
-		"backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.BackendService{
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/projects/my-project/global/backendServices/bes-1?`+
+		`alt=json&fields=backends%2Cfingerprint&prettyPrint=false`,
+		httpmock.RespJSON(compute.BackendService{
 			Backends: []*compute.Backend{
 				{
 					Group: "http://ig-1",
@@ -180,40 +176,35 @@ func TestService_Remove(t *testing.T) {
 				},
 			},
 			Fingerprint: "fp",
-		})
+		}))
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/" +
-		"us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.InstanceGroup{
+	srv.Expect(`/projects/my-project/regions/us-central1/instanceGroups/ig-1?`+
+		`alt=json&fields=selfLink&prettyPrint=false`,
+		httpmock.RespJSON(compute.InstanceGroup{
 			SelfLink: "http://ig-1",
-		})
+		}))
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/" +
-		"backendServices/bes-1?alt=json&prettyPrint=false").
-		JSON(compute.BackendService{
+	srv.Expect(`/projects/my-project/global/backendServices/bes-1?alt=json&prettyPrint=false`,
+		httpmock.ReqJSON(compute.BackendService{
 			Backends: []*compute.Backend{
 				{
 					Group: "http://ig-2",
 				},
 			},
 			Fingerprint: "fp",
-		}).
-		Reply(http.StatusOK).
-		JSON(compute.Operation{
+		}),
+		httpmock.RespJSON(compute.Operation{
 			Name: "op1",
-		})
+		}))
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/" +
-		"operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.Operation{
+	srv.Expect(`/projects/my-project/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false`,
+		httpmock.RespJSON(compute.Operation{
 			Status: "DONE",
-		})
+		}))
 
 	gce, err := compute.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {
@@ -230,47 +221,43 @@ func TestService_Remove(t *testing.T) {
 	}
 }
 
-//nolint:paralleltest // uses Gock
 func TestSetup_RemoveLast(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/" +
-		"backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.BackendService{
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/projects/my-project/global/backendServices/bes-1?`+
+		`alt=json&fields=backends%2Cfingerprint&prettyPrint=false`,
+		httpmock.RespJSON(compute.BackendService{
 			Backends: []*compute.Backend{
 				{
 					Group: "http://ig-1",
 				},
 			},
 			Fingerprint: "fp",
-		})
+		}))
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/" +
-		"us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.InstanceGroup{
+	srv.Expect(`/projects/my-project/regions/us-central1/instanceGroups/ig-1?`+
+		`alt=json&fields=selfLink&prettyPrint=false`,
+		httpmock.RespJSON(compute.InstanceGroup{
 			SelfLink: "http://ig-1",
-		})
+		}))
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/" +
-		"backendServices/bes-1?alt=json&prettyPrint=false").
-		JSON(json.RawMessage(`{"backends":[],"fingerprint":"fp"}`)).
-		Reply(http.StatusOK).
-		JSON(compute.Operation{
+	srv.Expect(`/projects/my-project/global/backendServices/bes-1?alt=json&prettyPrint=false`,
+		httpmock.ReqJSON(json.RawMessage(`{"backends":[],"fingerprint":"fp"}`)),
+		httpmock.RespJSON(compute.Operation{
 			Name: "op1",
-		})
+		}))
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/" +
-		"operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.Operation{
+	srv.Expect(`/projects/my-project/global/operations/op1?alt=json&fields=status%2Cerror&prettyPrint=false`,
+		httpmock.RespJSON(compute.Operation{
 			Status: "DONE",
-		})
+		}))
 
 	gce, err := compute.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {
@@ -287,32 +274,32 @@ func TestSetup_RemoveLast(t *testing.T) {
 	}
 }
 
-//nolint:paralleltest // uses Gock
 func TestSetup_RemoveMissing(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/" +
-		"backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.BackendService{
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/projects/my-project/global/backendServices/bes-1?`+
+		`alt=json&fields=backends%2Cfingerprint&prettyPrint=false`,
+		httpmock.RespJSON(compute.BackendService{
 			Backends: []*compute.Backend{
 				{
 					Group: "http://ig-2",
 				},
 			},
 			Fingerprint: "fp",
-		})
+		}))
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/" +
-		"us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.InstanceGroup{
+	srv.Expect(`/projects/my-project/regions/us-central1/instanceGroups/ig-1?`+
+		`alt=json&fields=selfLink&prettyPrint=false`,
+		httpmock.RespJSON(compute.InstanceGroup{
 			SelfLink: "http://ig-1",
-		})
+		}))
 
 	gce, err := compute.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {
@@ -329,14 +316,15 @@ func TestSetup_RemoveMissing(t *testing.T) {
 	}
 }
 
-//nolint:paralleltest // uses Gock
 func TestSetup_RemoveDryRun(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/" +
-		"backendServices/bes-1?alt=json&fields=backends%2Cfingerprint&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.BackendService{
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/projects/my-project/global/backendServices/bes-1?`+
+		`alt=json&fields=backends%2Cfingerprint&prettyPrint=false`,
+		httpmock.RespJSON(compute.BackendService{
 			Backends: []*compute.Backend{
 				{
 					Group: "http://ig-1",
@@ -346,18 +334,17 @@ func TestSetup_RemoveDryRun(t *testing.T) {
 				},
 			},
 			Fingerprint: "fp",
-		})
+		}))
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/" +
-		"us-central1/instanceGroups/ig-1?alt=json&fields=selfLink&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(compute.InstanceGroup{
+	srv.Expect(`/projects/my-project/regions/us-central1/instanceGroups/ig-1?`+
+		`alt=json&fields=selfLink&prettyPrint=false`,
+		httpmock.RespJSON(compute.InstanceGroup{
 			SelfLink: "http://ig-1",
-		})
+		}))
 
 	gce, err := compute.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {

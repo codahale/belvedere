@@ -2,23 +2,22 @@ package belvedere
 
 import (
 	"context"
-	"net/http"
 	"testing"
 
 	"github.com/codahale/belvedere/internal/assert"
+	"github.com/codahale/belvedere/internal/httpmock"
 	"google.golang.org/api/option"
 	"google.golang.org/api/secretmanager/v1"
-	"gopkg.in/h2non/gock.v1"
 )
 
-//nolint:paralleltest // uses Gock
 func TestSecretsService_List(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/" +
-		"secrets?alt=json&fields=secrets.name&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(secretmanager.ListSecretsResponse{
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/v1/projects/my-project/secrets?alt=json&fields=secrets.name&prettyPrint=false`,
+		httpmock.RespJSON(secretmanager.ListSecretsResponse{
 			Secrets: []*secretmanager.Secret{
 				{
 					Name: "one",
@@ -27,11 +26,11 @@ func TestSecretsService_List(t *testing.T) {
 					Name: "two",
 				},
 			},
-		})
+		}))
 
 	sm, err := secretmanager.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {
@@ -60,33 +59,32 @@ func TestSecretsService_List(t *testing.T) {
 	assert.Equal(t, "List()", want, got)
 }
 
-//nolint:paralleltest // uses Gock
 func TestSecretsService_Create(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/" +
-		"secrets?alt=json&prettyPrint=false&secretId=my-secret").
-		JSON(secretmanager.Secret{
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/v1/projects/my-project/secrets?alt=json&prettyPrint=false&secretId=my-secret`,
+		httpmock.ReqJSON(secretmanager.Secret{
 			Replication: &secretmanager.Replication{
 				Automatic: &secretmanager.Automatic{},
 			},
-		}).
-		Reply(http.StatusOK).
-		JSON(secretmanager.Secret{})
+		}),
+		httpmock.RespJSON(secretmanager.Secret{}))
 
-	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/" +
-		"secrets/my-secret:addVersion?alt=json&prettyPrint=false").
-		JSON(secretmanager.AddSecretVersionRequest{
-			Payload: &secretmanager.SecretPayload{
-				Data: "c2VjcmV0",
-			},
-		}).
-		Reply(http.StatusOK).
-		JSON(secretmanager.SecretVersion{})
+	srv.Expect(`/v1/projects/my-project/secrets/my-secret:addVersion?alt=json&prettyPrint=false`,
+		httpmock.ReqJSON(
+			secretmanager.AddSecretVersionRequest{
+				Payload: &secretmanager.SecretPayload{
+					Data: "c2VjcmV0",
+				},
+			}),
+		httpmock.RespJSON(secretmanager.SecretVersion{}))
 
 	sm, err := secretmanager.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {
@@ -103,23 +101,23 @@ func TestSecretsService_Create(t *testing.T) {
 	}
 }
 
-//nolint:paralleltest // uses Gock
 func TestSecretsService_Update(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/" +
-		"my-secret:addVersion?alt=json&prettyPrint=false").
-		JSON(secretmanager.AddSecretVersionRequest{
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/v1/projects/my-project/secrets/my-secret:addVersion?alt=json&prettyPrint=false`,
+		httpmock.ReqJSON(secretmanager.AddSecretVersionRequest{
 			Payload: &secretmanager.SecretPayload{
 				Data: "c2VjcmV0",
 			},
-		}).
-		Reply(http.StatusOK).
-		JSON(secretmanager.SecretVersion{})
+		}),
+		httpmock.RespJSON(secretmanager.SecretVersion{}))
 
 	sm, err := secretmanager.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {
@@ -136,19 +134,19 @@ func TestSecretsService_Update(t *testing.T) {
 	}
 }
 
-//nolint:paralleltest // uses Gock
 func TestSecretsService_Delete(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/" +
-		"my-secret?alt=json&prettyPrint=false").
-		Delete("").
-		Reply(http.StatusOK).
-		JSON(secretmanager.Empty{})
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/v1/projects/my-project/secrets/my-secret?alt=json&prettyPrint=false`,
+		httpmock.Method("delete"),
+		httpmock.RespJSON(secretmanager.Empty{}))
 
 	sm, err := secretmanager.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {
@@ -165,39 +163,36 @@ func TestSecretsService_Delete(t *testing.T) {
 	}
 }
 
-//nolint:paralleltest // uses Gock
 func TestSecretsService_Grant(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/" +
-		"my-secret:getIamPolicy?alt=json&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(secretmanager.Policy{
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/v1/projects/my-project/secrets/my-secret:getIamPolicy?alt=json&prettyPrint=false`,
+		httpmock.RespJSON(secretmanager.Policy{
 			Etag: "300",
-		})
+		}))
 
-	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/" +
-		"my-secret:setIamPolicy?alt=json&prettyPrint=false").
-		JSON(
-			secretmanager.SetIamPolicyRequest{
-				Policy: &secretmanager.Policy{
-					Bindings: []*secretmanager.Binding{
-						{
-							Role: "roles/secretmanager.secretAccessor",
-							Members: []string{
-								"serviceAccount:my-app-sa@my-project.iam.gserviceaccount.com",
-							},
+	srv.Expect(`/v1/projects/my-project/secrets/my-secret:setIamPolicy?alt=json&prettyPrint=false`,
+		httpmock.ReqJSON(secretmanager.SetIamPolicyRequest{
+			Policy: &secretmanager.Policy{
+				Bindings: []*secretmanager.Binding{
+					{
+						Role: "roles/secretmanager.secretAccessor",
+						Members: []string{
+							"serviceAccount:my-app-sa@my-project.iam.gserviceaccount.com",
 						},
 					},
-					Etag: "300",
 				},
-			}).
-		Reply(http.StatusOK).
-		JSON(secretmanager.Policy{})
+				Etag: "300",
+			},
+		}),
+		httpmock.RespJSON(secretmanager.Policy{}))
 
 	sm, err := secretmanager.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {
@@ -214,14 +209,14 @@ func TestSecretsService_Grant(t *testing.T) {
 	}
 }
 
-//nolint:paralleltest // uses Gock
 func TestSecretsService_Revoke(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/" +
-		"my-secret:getIamPolicy?alt=json&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(secretmanager.Policy{
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/v1/projects/my-project/secrets/my-secret:getIamPolicy?alt=json&prettyPrint=false`,
+		httpmock.RespJSON(secretmanager.Policy{
 			Bindings: []*secretmanager.Binding{
 				{
 					Role: "roles/secretmanager.secretAccessor",
@@ -231,22 +226,19 @@ func TestSecretsService_Revoke(t *testing.T) {
 				},
 			},
 			Etag: "300",
-		})
+		}))
 
-	gock.New("https://secretmanager.googleapis.com/v1/projects/my-project/secrets/" +
-		"my-secret:setIamPolicy?alt=json&prettyPrint=false").
-		JSON(
-			secretmanager.SetIamPolicyRequest{
-				Policy: &secretmanager.Policy{
-					Etag: "300",
-				},
-			}).
-		Reply(http.StatusOK).
-		JSON(secretmanager.Policy{})
+	srv.Expect(`/v1/projects/my-project/secrets/my-secret:setIamPolicy?alt=json&prettyPrint=false`,
+		httpmock.ReqJSON(secretmanager.SetIamPolicyRequest{
+			Policy: &secretmanager.Policy{
+				Etag: "300",
+			},
+		}),
+		httpmock.RespJSON(secretmanager.Policy{}))
 
 	sm, err := secretmanager.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {

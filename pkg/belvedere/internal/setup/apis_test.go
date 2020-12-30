@@ -2,52 +2,49 @@ package setup
 
 import (
 	"context"
-	"net/http"
 	"testing"
 	"time"
 
+	"github.com/codahale/belvedere/internal/httpmock"
 	"google.golang.org/api/option"
 	"google.golang.org/api/serviceusage/v1"
-	"gopkg.in/h2non/gock.v1"
 )
 
-//nolint:paralleltest // uses Gock
 func TestManager_EnableAPIs(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://serviceusage.googleapis.com/v1/projects/my-project/services:batchEnable?alt=json&prettyPrint=false").
-		JSON(serviceusage.BatchEnableServicesRequest{
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/v1/projects/my-project/services:batchEnable?alt=json&prettyPrint=false`,
+		httpmock.ReqJSON(serviceusage.BatchEnableServicesRequest{
 			ServiceIds: requiredServices[:20],
-		}).
-		Reply(http.StatusOK).
-		JSON(serviceusage.Operation{
+		}),
+		httpmock.RespJSON(serviceusage.Operation{
 			Name: "op1",
-		})
+		}))
 
-	gock.New("https://serviceusage.googleapis.com/v1/op1?alt=json&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(serviceusage.Operation{
+	srv.Expect(`/v1/op1?alt=json&prettyPrint=false`,
+		httpmock.RespJSON(serviceusage.Operation{
 			Done: true,
-		})
+		}))
 
-	gock.New("https://serviceusage.googleapis.com/v1/projects/my-project/services:batchEnable?alt=json&prettyPrint=false").
-		JSON(serviceusage.BatchEnableServicesRequest{
+	srv.Expect(`/v1/projects/my-project/services:batchEnable?alt=json&prettyPrint=false`,
+		httpmock.ReqJSON(serviceusage.BatchEnableServicesRequest{
 			ServiceIds: requiredServices[20:],
-		}).
-		Reply(http.StatusOK).
-		JSON(serviceusage.Operation{
+		}),
+		httpmock.RespJSON(serviceusage.Operation{
 			Name: "op2",
-		})
+		}))
 
-	gock.New("https://serviceusage.googleapis.com/v1/op2?alt=json&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(serviceusage.Operation{
+	srv.Expect(`/v1/op2?alt=json&prettyPrint=false`,
+		httpmock.RespJSON(serviceusage.Operation{
 			Done: true,
-		})
+		}))
 
 	su, err := serviceusage.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {

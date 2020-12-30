@@ -2,17 +2,17 @@ package check
 
 import (
 	"context"
-	"net/http"
 	"testing"
 
 	"github.com/codahale/belvedere/internal/assert"
-	compute "google.golang.org/api/compute/v1"
+	"github.com/codahale/belvedere/internal/httpmock"
+	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/option"
-	"gopkg.in/h2non/gock.v1"
 )
 
-//nolint:paralleltest // uses Gock
 func TestHealth(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name   string
 		igm    compute.InstanceGroupManager
@@ -100,26 +100,28 @@ func TestHealth(t *testing.T) {
 	for _, testCase := range tests {
 		testCase := testCase
 		t.Run(testCase.name, func(t *testing.T) {
-			defer gock.Off()
+			t.Parallel()
 
-			gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/" +
-				"us-central1/instanceGroupManagers/ig-1?alt=json&fields=status&prettyPrint=false").
-				Reply(http.StatusOK).
-				JSON(testCase.igm)
+			srv := httpmock.NewServer(t)
+			defer srv.Finish()
 
-			gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/" +
-				"us-central1/instanceGroups/ig-1?alt=json&fields=selfLink%2Csize&prettyPrint=false").
-				Reply(http.StatusOK).
-				JSON(testCase.ig)
+			srv.Expect(`/projects/my-project/regions/us-central1/instanceGroupManagers/ig-1?`+
+				`alt=json&fields=status&prettyPrint=false`,
+				httpmock.RespJSON(testCase.igm))
 
-			gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/global/" +
-				"backendServices/bes-1/getHealth?alt=json&prettyPrint=false").
-				Reply(http.StatusOK).
-				JSON(testCase.health)
+			srv.Expect(`/projects/my-project/regions/us-central1/instanceGroups/ig-1?`+
+				`alt=json&fields=selfLink%2Csize&prettyPrint=false`,
+				httpmock.RespJSON(testCase.ig),
+				httpmock.Optional())
+
+			srv.Expect(`/projects/my-project/global/backendServices/bes-1/getHealth?`+
+				`alt=json&prettyPrint=false`,
+				httpmock.RespJSON(testCase.health),
+				httpmock.Optional())
 
 			gce, err := compute.NewService(
 				context.Background(),
-				option.WithHTTPClient(http.DefaultClient),
+				option.WithEndpoint(srv.URL()),
 				option.WithoutAuthentication(),
 			)
 			if err != nil {

@@ -7,13 +7,13 @@ import (
 	"time"
 
 	"github.com/codahale/belvedere/internal/assert"
+	"github.com/codahale/belvedere/internal/httpmock"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/golang/mock/gomock"
-	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/option"
-	"gopkg.in/h2non/gock.v1"
 )
 
 func TestAppService_Get(t *testing.T) {
@@ -92,15 +92,16 @@ func TestAppService_List(t *testing.T) {
 	assert.Equal(t, "List()", want, got)
 }
 
-//nolint:paralleltest // uses Gock
 func TestAppService_Create(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-west1?alt=json&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(&compute.Region{
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/projects/my-project/regions/us-west1?alt=json&fields=status&prettyPrint=false`,
+		httpmock.RespJSON(compute.Region{
 			Status: "UP",
-		})
+		}))
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -136,7 +137,7 @@ func TestAppService_Create(t *testing.T) {
 
 	gce, err := compute.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {
@@ -155,15 +156,16 @@ func TestAppService_Create(t *testing.T) {
 	}
 }
 
-//nolint:paralleltest // uses Gock
 func TestAppService_Create_DownRegion(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-west1?alt=json&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(&compute.Region{
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/projects/my-project/regions/us-west1?alt=json&fields=status&prettyPrint=false`,
+		httpmock.RespJSON(compute.Region{
 			Status: "DOWN",
-		})
+		}))
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -176,7 +178,7 @@ func TestAppService_Create_DownRegion(t *testing.T) {
 
 	gce, err := compute.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {
@@ -197,12 +199,14 @@ func TestAppService_Create_DownRegion(t *testing.T) {
 	}
 }
 
-//nolint:paralleltest // uses Gock
 func TestAppService_Create_BadRegion(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://compute.googleapis.com/compute/v1/projects/my-project/regions/us-west1?alt=json&prettyPrint=false").
-		Reply(http.StatusNotFound)
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/projects/my-project/regions/us-west1?alt=json&fields=status&prettyPrint=false`,
+		httpmock.Status(http.StatusNotFound))
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -215,7 +219,7 @@ func TestAppService_Create_BadRegion(t *testing.T) {
 
 	gce, err := compute.NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {

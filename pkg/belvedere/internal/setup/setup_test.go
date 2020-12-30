@@ -2,29 +2,29 @@ package setup
 
 import (
 	"context"
-	"net/http"
 	"testing"
 
 	"github.com/codahale/belvedere/internal/assert"
+	"github.com/codahale/belvedere/internal/httpmock"
 	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/option"
-	"gopkg.in/h2non/gock.v1"
 )
 
-//nolint:paralleltest // uses Gock
 func TestService_ManagedZone(t *testing.T) {
-	defer gock.Off()
+	t.Parallel()
 
-	gock.New("https://dns.googleapis.com/dns/v1/projects/my-project/managedZones/belvedere?alt=json&prettyPrint=false").
-		Reply(http.StatusOK).
-		JSON(&dns.ManagedZone{
+	srv := httpmock.NewServer(t)
+	defer srv.Finish()
+
+	srv.Expect(`/dns/v1/projects/my-project/managedZones/belvedere?alt=json&prettyPrint=false`,
+		httpmock.RespJSON(&dns.ManagedZone{
 			DnsName: "my-dns",
-		})
+		}))
 
 	s, err := NewService(
 		context.Background(),
-		option.WithHTTPClient(http.DefaultClient),
+		option.WithEndpoint(srv.URL()),
 		option.WithoutAuthentication(),
 	)
 	if err != nil {
@@ -36,12 +36,11 @@ func TestService_ManagedZone(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Empty out server response since we don't care.
+	got.ServerResponse = googleapi.ServerResponse{}
+
 	want := &dns.ManagedZone{
 		DnsName: "my-dns",
-		ServerResponse: googleapi.ServerResponse{
-			HTTPStatusCode: http.StatusOK,
-			Header:         http.Header{"Content-Type": {"application/json"}},
-		},
 	}
 
 	assert.Equal(t, "ManagedZone()", want, got)
