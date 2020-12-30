@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	// Make the GCP libs a direct dependency so we can get dependabot updates for it.
 	_ "cloud.google.com/go"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"

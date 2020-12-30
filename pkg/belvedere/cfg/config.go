@@ -6,6 +6,8 @@ import (
 
 	"github.com/ghodss/yaml"
 	"google.golang.org/api/compute/v1"
+
+	// Make the YAML lib a direct dependency so we can get dependabot updates for it.
 	_ "gopkg.in/yaml.v2"
 )
 
