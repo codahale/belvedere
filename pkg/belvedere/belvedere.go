@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	_ "cloud.google.com/go"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/check"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"

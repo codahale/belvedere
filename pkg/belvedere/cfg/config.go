@@ -6,6 +6,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"google.golang.org/api/compute/v1"
+	_ "gopkg.in/yaml.v2"
 )
 
 // Config contains all the mutable parameters of an app's configuration.
