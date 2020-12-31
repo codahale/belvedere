@@ -15,6 +15,13 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
+type Server struct {
+	m            sync.Mutex
+	srv          *httptest.Server
+	t            testing.TB
+	expectations []expectation
+}
+
 type expectation struct {
 	url      url.URL
 	method   string
@@ -24,15 +31,6 @@ type expectation struct {
 	optional bool
 	called   bool
 }
-
-type Server struct {
-	m            sync.Mutex
-	srv          *httptest.Server
-	t            testing.TB
-	expectations []expectation
-}
-
-type Option func(e *expectation)
 
 func NewServer(t testing.TB) *Server {
 	t.Helper()
@@ -122,6 +120,20 @@ func (s *Server) Expect(reqURL string, opt ...Option) {
 	s.expectations = append(s.expectations, e)
 }
 
+func (s *Server) Finish() {
+	s.t.Helper()
+	s.m.Lock()
+	defer s.m.Unlock()
+
+	for _, exp := range s.expectations {
+		if !exp.optional && !exp.called {
+			s.t.Errorf("No request for %q", exp.url.String())
+		}
+	}
+}
+
+type Option func(e *expectation)
+
 func RespJSON(resp interface{}) Option {
 	j, err := json.Marshal(resp)
 	if err != nil {
@@ -159,17 +171,5 @@ func ReqJSON(req interface{}) Option {
 func Optional() Option {
 	return func(e *expectation) {
 		e.optional = true
-	}
-}
-
-func (s *Server) Finish() {
-	s.t.Helper()
-	s.m.Lock()
-	defer s.m.Unlock()
-
-	for _, exp := range s.expectations {
-		if !exp.optional && !exp.called {
-			s.t.Errorf("No request for %q", exp.url.String())
-		}
 	}
 }
