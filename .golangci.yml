@@ -43,6 +43,7 @@ linters:
     - nolintlint
     - paralleltest
     - prealloc
+    - predeclared
     - rowserrcheck
     - scopelint
     - sqlclosecheck

@@ -27,5 +27,4 @@ func NewBuilder() Builder {
 	return &builder{}
 }
 
-type builder struct {
-}
+type builder struct{}
