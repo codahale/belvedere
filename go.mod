@@ -17,8 +17,7 @@ require (
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/pflag v1.0.5
 	go.opencensus.io v0.22.5
-	golang.org/x/sys v0.0.0-20201223074533-0d417f636930 // indirect
-	google.golang.org/api v0.36.0
+	google.golang.org/api v0.37.0
 	gopkg.in/ini.v1 v1.62.0
 	gopkg.in/yaml.v2 v2.4.0
 )
