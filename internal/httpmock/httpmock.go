@@ -18,7 +18,7 @@ import (
 type Server struct {
 	m            sync.Mutex
 	srv          *httptest.Server
-	t            testing.TB
+	tb           testing.TB
 	expectations []expectation
 }
 
@@ -32,17 +32,17 @@ type expectation struct {
 	called   bool
 }
 
-func NewServer(t testing.TB) *Server {
-	t.Helper()
+func NewServer(tb testing.TB) *Server {
+	tb.Helper()
 
-	server := &Server{t: t}
+	server := &Server{tb: tb}
 	server.srv = httptest.NewServer(http.HandlerFunc(server.handle))
 
 	return server
 }
 
 func (s *Server) handle(w http.ResponseWriter, r *http.Request) {
-	s.t.Helper()
+	s.tb.Helper()
 	s.m.Lock()
 	defer s.m.Unlock()
 
@@ -56,24 +56,24 @@ func (s *Server) handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.NotFound(w, r)
-	s.t.Errorf("Unexpected request for %q", r.URL.String())
+	s.tb.Errorf("Unexpected request for %q", r.URL.String())
 }
 
 func (s *Server) checkExpectation(w http.ResponseWriter, r *http.Request, exp expectation) {
 	if exp.method != "" {
-		assert.Equal(s.t, "method", exp.method, r.Method,
+		assert.Equal(s.tb, "method", exp.method, r.Method,
 			cmpopts.AcyclicTransformer("ToUpper", strings.ToUpper))
 	}
 
 	if exp.req != "" {
 		req, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			s.t.Fatal(err)
+			s.tb.Fatal(err)
 		}
 
 		_ = r.Body.Close()
 
-		assert.Equal(s.t, "request", exp.req, string(req),
+		assert.Equal(s.tb, "request", exp.req, string(req),
 			cmpopts.AcyclicTransformer("TrimSpace", strings.TrimSpace))
 	}
 
@@ -84,29 +84,29 @@ func (s *Server) checkExpectation(w http.ResponseWriter, r *http.Request, exp ex
 	if exp.resp != "" {
 		_, err := io.WriteString(w, exp.resp)
 		if err != nil {
-			s.t.Fatal(err)
+			s.tb.Fatal(err)
 		}
 	}
 }
 
 func (s *Server) URL() string {
-	s.t.Helper()
+	s.tb.Helper()
 	return s.srv.URL
 }
 
 func (s *Server) Client() *http.Client {
-	s.t.Helper()
+	s.tb.Helper()
 	return s.srv.Client()
 }
 
 func (s *Server) Expect(reqURL string, opt ...Option) {
-	s.t.Helper()
+	s.tb.Helper()
 	s.m.Lock()
 	defer s.m.Unlock()
 
 	u, err := url.Parse(reqURL)
 	if err != nil {
-		s.t.Fatal(err)
+		s.tb.Fatal(err)
 	}
 
 	e := expectation{
@@ -121,13 +121,13 @@ func (s *Server) Expect(reqURL string, opt ...Option) {
 }
 
 func (s *Server) Finish() {
-	s.t.Helper()
+	s.tb.Helper()
 	s.m.Lock()
 	defer s.m.Unlock()
 
 	for _, exp := range s.expectations {
 		if !exp.optional && !exp.called {
-			s.t.Errorf("No request for %q", exp.url.String())
+			s.tb.Errorf("No request for %q", exp.url.String())
 		}
 	}
 }
