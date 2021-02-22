@@ -6,50 +6,37 @@ package belvedere
 
 import (
 	context "context"
-	gomock "github.com/golang/mock/gomock"
-	dns "google.golang.org/api/dns/v1"
 	reflect "reflect"
 	time "time"
+
+	gomock "github.com/golang/mock/gomock"
+	dns "google.golang.org/api/dns/v1"
 )
 
-// SetupService is a mock of Service interface
+// SetupService is a mock of Service interface.
 type SetupService struct {
 	ctrl     *gomock.Controller
 	recorder *SetupServiceMockRecorder
 }
 
-// SetupServiceMockRecorder is the mock recorder for SetupService
+// SetupServiceMockRecorder is the mock recorder for SetupService.
 type SetupServiceMockRecorder struct {
 	mock *SetupService
 }
 
-// NewSetupService creates a new mock instance
+// NewSetupService creates a new mock instance.
 func NewSetupService(ctrl *gomock.Controller) *SetupService {
 	mock := &SetupService{ctrl: ctrl}
 	mock.recorder = &SetupServiceMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *SetupService) EXPECT() *SetupServiceMockRecorder {
 	return m.recorder
 }
 
-// SetDMPerms mocks base method
-func (m *SetupService) SetDMPerms(ctx context.Context, project string, dryRun bool) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetDMPerms", ctx, project, dryRun)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SetDMPerms indicates an expected call of SetDMPerms
-func (mr *SetupServiceMockRecorder) SetDMPerms(ctx, project, dryRun interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDMPerms", reflect.TypeOf((*SetupService)(nil).SetDMPerms), ctx, project, dryRun)
-}
-
-// EnableAPIs mocks base method
+// EnableAPIs mocks base method.
 func (m *SetupService) EnableAPIs(ctx context.Context, project string, dryRun bool, interval time.Duration) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EnableAPIs", ctx, project, dryRun, interval)
@@ -57,13 +44,13 @@ func (m *SetupService) EnableAPIs(ctx context.Context, project string, dryRun bo
 	return ret0
 }
 
-// EnableAPIs indicates an expected call of EnableAPIs
+// EnableAPIs indicates an expected call of EnableAPIs.
 func (mr *SetupServiceMockRecorder) EnableAPIs(ctx, project, dryRun, interval interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnableAPIs", reflect.TypeOf((*SetupService)(nil).EnableAPIs), ctx, project, dryRun, interval)
 }
 
-// ManagedZone mocks base method
+// ManagedZone mocks base method.
 func (m *SetupService) ManagedZone(ctx context.Context, project string) (*dns.ManagedZone, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ManagedZone", ctx, project)
@@ -72,8 +59,22 @@ func (m *SetupService) ManagedZone(ctx context.Context, project string) (*dns.Ma
 	return ret0, ret1
 }
 
-// ManagedZone indicates an expected call of ManagedZone
+// ManagedZone indicates an expected call of ManagedZone.
 func (mr *SetupServiceMockRecorder) ManagedZone(ctx, project interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ManagedZone", reflect.TypeOf((*SetupService)(nil).ManagedZone), ctx, project)
+}
+
+// SetDMPerms mocks base method.
+func (m *SetupService) SetDMPerms(ctx context.Context, project string, dryRun bool) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetDMPerms", ctx, project, dryRun)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetDMPerms indicates an expected call of SetDMPerms.
+func (mr *SetupServiceMockRecorder) SetDMPerms(ctx, project, dryRun interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDMPerms", reflect.TypeOf((*SetupService)(nil).SetDMPerms), ctx, project, dryRun)
 }

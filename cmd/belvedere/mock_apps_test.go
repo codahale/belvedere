@@ -6,37 +6,66 @@ package main
 
 import (
 	context "context"
+	reflect "reflect"
+	time "time"
+
 	belvedere "github.com/codahale/belvedere/pkg/belvedere"
 	cfg "github.com/codahale/belvedere/pkg/belvedere/cfg"
 	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
-	time "time"
 )
 
-// MockAppService is a mock of AppService interface
+// MockAppService is a mock of AppService interface.
 type MockAppService struct {
 	ctrl     *gomock.Controller
 	recorder *MockAppServiceMockRecorder
 }
 
-// MockAppServiceMockRecorder is the mock recorder for MockAppService
+// MockAppServiceMockRecorder is the mock recorder for MockAppService.
 type MockAppServiceMockRecorder struct {
 	mock *MockAppService
 }
 
-// NewMockAppService creates a new mock instance
+// NewMockAppService creates a new mock instance.
 func NewMockAppService(ctrl *gomock.Controller) *MockAppService {
 	mock := &MockAppService{ctrl: ctrl}
 	mock.recorder = &MockAppServiceMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockAppService) EXPECT() *MockAppServiceMockRecorder {
 	return m.recorder
 }
 
-// Get mocks base method
+// Create mocks base method.
+func (m *MockAppService) Create(ctx context.Context, region, name string, config *cfg.Config, dryRun bool, interval time.Duration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, region, name, config, dryRun, interval)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockAppServiceMockRecorder) Create(ctx, region, name, config, dryRun, interval interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAppService)(nil).Create), ctx, region, name, config, dryRun, interval)
+}
+
+// Delete mocks base method.
+func (m *MockAppService) Delete(ctx context.Context, name string, dryRun, async bool, interval time.Duration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", ctx, name, dryRun, async, interval)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockAppServiceMockRecorder) Delete(ctx, name, dryRun, async, interval interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockAppService)(nil).Delete), ctx, name, dryRun, async, interval)
+}
+
+// Get mocks base method.
 func (m *MockAppService) Get(ctx context.Context, name string) (*belvedere.App, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", ctx, name)
@@ -45,13 +74,13 @@ func (m *MockAppService) Get(ctx context.Context, name string) (*belvedere.App, 
 	return ret0, ret1
 }
 
-// Get indicates an expected call of Get
+// Get indicates an expected call of Get.
 func (mr *MockAppServiceMockRecorder) Get(ctx, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockAppService)(nil).Get), ctx, name)
 }
 
-// List mocks base method
+// List mocks base method.
 func (m *MockAppService) List(ctx context.Context) ([]belvedere.App, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List", ctx)
@@ -60,27 +89,13 @@ func (m *MockAppService) List(ctx context.Context) ([]belvedere.App, error) {
 	return ret0, ret1
 }
 
-// List indicates an expected call of List
+// List indicates an expected call of List.
 func (mr *MockAppServiceMockRecorder) List(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockAppService)(nil).List), ctx)
 }
 
-// Create mocks base method
-func (m *MockAppService) Create(ctx context.Context, region, name string, config *cfg.Config, dryRun bool, interval time.Duration) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, region, name, config, dryRun, interval)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Create indicates an expected call of Create
-func (mr *MockAppServiceMockRecorder) Create(ctx, region, name, config, dryRun, interval interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAppService)(nil).Create), ctx, region, name, config, dryRun, interval)
-}
-
-// Update mocks base method
+// Update mocks base method.
 func (m *MockAppService) Update(ctx context.Context, name string, config *cfg.Config, dryRun bool, interval time.Duration) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", ctx, name, config, dryRun, interval)
@@ -88,22 +103,8 @@ func (m *MockAppService) Update(ctx context.Context, name string, config *cfg.Co
 	return ret0
 }
 
-// Update indicates an expected call of Update
+// Update indicates an expected call of Update.
 func (mr *MockAppServiceMockRecorder) Update(ctx, name, config, dryRun, interval interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockAppService)(nil).Update), ctx, name, config, dryRun, interval)
-}
-
-// Delete mocks base method
-func (m *MockAppService) Delete(ctx context.Context, name string, dryRun, async bool, interval time.Duration) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", ctx, name, dryRun, async, interval)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Delete indicates an expected call of Delete
-func (mr *MockAppServiceMockRecorder) Delete(ctx, name, dryRun, async, interval interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockAppService)(nil).Delete), ctx, name, dryRun, async, interval)
 }

@@ -6,37 +6,94 @@ package main
 
 import (
 	context "context"
+	reflect "reflect"
+	time "time"
+
 	belvedere "github.com/codahale/belvedere/pkg/belvedere"
 	cfg "github.com/codahale/belvedere/pkg/belvedere/cfg"
 	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
-	time "time"
 )
 
-// MockReleaseService is a mock of ReleaseService interface
+// MockReleaseService is a mock of ReleaseService interface.
 type MockReleaseService struct {
 	ctrl     *gomock.Controller
 	recorder *MockReleaseServiceMockRecorder
 }
 
-// MockReleaseServiceMockRecorder is the mock recorder for MockReleaseService
+// MockReleaseServiceMockRecorder is the mock recorder for MockReleaseService.
 type MockReleaseServiceMockRecorder struct {
 	mock *MockReleaseService
 }
 
-// NewMockReleaseService creates a new mock instance
+// NewMockReleaseService creates a new mock instance.
 func NewMockReleaseService(ctrl *gomock.Controller) *MockReleaseService {
 	mock := &MockReleaseService{ctrl: ctrl}
 	mock.recorder = &MockReleaseServiceMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockReleaseService) EXPECT() *MockReleaseServiceMockRecorder {
 	return m.recorder
 }
 
-// List mocks base method
+// Create mocks base method.
+func (m *MockReleaseService) Create(ctx context.Context, app, name string, config *cfg.Config, imageSHA256 string, dryRun bool, interval time.Duration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, app, name, config, imageSHA256, dryRun, interval)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockReleaseServiceMockRecorder) Create(ctx, app, name, config, imageSHA256, dryRun, interval interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockReleaseService)(nil).Create), ctx, app, name, config, imageSHA256, dryRun, interval)
+}
+
+// Delete mocks base method.
+func (m *MockReleaseService) Delete(ctx context.Context, app, name string, dryRun, async bool, interval time.Duration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", ctx, app, name, dryRun, async, interval)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockReleaseServiceMockRecorder) Delete(ctx, app, name, dryRun, async, interval interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockReleaseService)(nil).Delete), ctx, app, name, dryRun, async, interval)
+}
+
+// Disable mocks base method.
+func (m *MockReleaseService) Disable(ctx context.Context, app, name string, dryRun bool, interval time.Duration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Disable", ctx, app, name, dryRun, interval)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Disable indicates an expected call of Disable.
+func (mr *MockReleaseServiceMockRecorder) Disable(ctx, app, name, dryRun, interval interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Disable", reflect.TypeOf((*MockReleaseService)(nil).Disable), ctx, app, name, dryRun, interval)
+}
+
+// Enable mocks base method.
+func (m *MockReleaseService) Enable(ctx context.Context, app, name string, dryRun bool, interval time.Duration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Enable", ctx, app, name, dryRun, interval)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Enable indicates an expected call of Enable.
+func (mr *MockReleaseServiceMockRecorder) Enable(ctx, app, name, dryRun, interval interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Enable", reflect.TypeOf((*MockReleaseService)(nil).Enable), ctx, app, name, dryRun, interval)
+}
+
+// List mocks base method.
 func (m *MockReleaseService) List(ctx context.Context, app string) ([]belvedere.Release, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List", ctx, app)
@@ -45,64 +102,8 @@ func (m *MockReleaseService) List(ctx context.Context, app string) ([]belvedere.
 	return ret0, ret1
 }
 
-// List indicates an expected call of List
+// List indicates an expected call of List.
 func (mr *MockReleaseServiceMockRecorder) List(ctx, app interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockReleaseService)(nil).List), ctx, app)
-}
-
-// Create mocks base method
-func (m *MockReleaseService) Create(ctx context.Context, app, name string, config *cfg.Config, imageSHA256 string, dryRun bool, interval time.Duration) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, app, name, config, imageSHA256, dryRun, interval)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Create indicates an expected call of Create
-func (mr *MockReleaseServiceMockRecorder) Create(ctx, app, name, config, imageSHA256, dryRun, interval interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockReleaseService)(nil).Create), ctx, app, name, config, imageSHA256, dryRun, interval)
-}
-
-// Enable mocks base method
-func (m *MockReleaseService) Enable(ctx context.Context, app, name string, dryRun bool, interval time.Duration) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Enable", ctx, app, name, dryRun, interval)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Enable indicates an expected call of Enable
-func (mr *MockReleaseServiceMockRecorder) Enable(ctx, app, name, dryRun, interval interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Enable", reflect.TypeOf((*MockReleaseService)(nil).Enable), ctx, app, name, dryRun, interval)
-}
-
-// Disable mocks base method
-func (m *MockReleaseService) Disable(ctx context.Context, app, name string, dryRun bool, interval time.Duration) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Disable", ctx, app, name, dryRun, interval)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Disable indicates an expected call of Disable
-func (mr *MockReleaseServiceMockRecorder) Disable(ctx, app, name, dryRun, interval interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Disable", reflect.TypeOf((*MockReleaseService)(nil).Disable), ctx, app, name, dryRun, interval)
-}
-
-// Delete mocks base method
-func (m *MockReleaseService) Delete(ctx context.Context, app, name string, dryRun, async bool, interval time.Duration) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", ctx, app, name, dryRun, async, interval)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Delete indicates an expected call of Delete
-func (mr *MockReleaseServiceMockRecorder) Delete(ctx, app, name, dryRun, async, interval interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockReleaseService)(nil).Delete), ctx, app, name, dryRun, async, interval)
 }

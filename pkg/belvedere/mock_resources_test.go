@@ -5,51 +5,38 @@
 package belvedere
 
 import (
+	reflect "reflect"
+
 	cfg "github.com/codahale/belvedere/pkg/belvedere/cfg"
 	deployments "github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
 	gomock "github.com/golang/mock/gomock"
 	dns "google.golang.org/api/dns/v1"
-	reflect "reflect"
 )
 
-// ResourceBuilder is a mock of Builder interface
+// ResourceBuilder is a mock of Builder interface.
 type ResourceBuilder struct {
 	ctrl     *gomock.Controller
 	recorder *ResourceBuilderMockRecorder
 }
 
-// ResourceBuilderMockRecorder is the mock recorder for ResourceBuilder
+// ResourceBuilderMockRecorder is the mock recorder for ResourceBuilder.
 type ResourceBuilderMockRecorder struct {
 	mock *ResourceBuilder
 }
 
-// NewResourceBuilder creates a new mock instance
+// NewResourceBuilder creates a new mock instance.
 func NewResourceBuilder(ctrl *gomock.Controller) *ResourceBuilder {
 	mock := &ResourceBuilder{ctrl: ctrl}
 	mock.recorder = &ResourceBuilderMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *ResourceBuilder) EXPECT() *ResourceBuilderMockRecorder {
 	return m.recorder
 }
 
-// Base mocks base method
-func (m *ResourceBuilder) Base(dnsZone string) []deployments.Resource {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Base", dnsZone)
-	ret0, _ := ret[0].([]deployments.Resource)
-	return ret0
-}
-
-// Base indicates an expected call of Base
-func (mr *ResourceBuilderMockRecorder) Base(dnsZone interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Base", reflect.TypeOf((*ResourceBuilder)(nil).Base), dnsZone)
-}
-
-// App mocks base method
+// App mocks base method.
 func (m *ResourceBuilder) App(project, app string, managedZone *dns.ManagedZone, config *cfg.Config) []deployments.Resource {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "App", project, app, managedZone, config)
@@ -57,13 +44,27 @@ func (m *ResourceBuilder) App(project, app string, managedZone *dns.ManagedZone,
 	return ret0
 }
 
-// App indicates an expected call of App
+// App indicates an expected call of App.
 func (mr *ResourceBuilderMockRecorder) App(project, app, managedZone, config interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "App", reflect.TypeOf((*ResourceBuilder)(nil).App), project, app, managedZone, config)
 }
 
-// Release mocks base method
+// Base mocks base method.
+func (m *ResourceBuilder) Base(dnsZone string) []deployments.Resource {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Base", dnsZone)
+	ret0, _ := ret[0].([]deployments.Resource)
+	return ret0
+}
+
+// Base indicates an expected call of Base.
+func (mr *ResourceBuilderMockRecorder) Base(dnsZone interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Base", reflect.TypeOf((*ResourceBuilder)(nil).Base), dnsZone)
+}
+
+// Release mocks base method.
 func (m *ResourceBuilder) Release(project, region, app, release, imageSHA256 string, config *cfg.Config) []deployments.Resource {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Release", project, region, app, release, imageSHA256, config)
@@ -71,7 +72,7 @@ func (m *ResourceBuilder) Release(project, region, app, release, imageSHA256 str
 	return ret0
 }
 
-// Release indicates an expected call of Release
+// Release indicates an expected call of Release.
 func (mr *ResourceBuilderMockRecorder) Release(project, region, app, release, imageSHA256, config interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Release", reflect.TypeOf((*ResourceBuilder)(nil).Release), project, region, app, release, imageSHA256, config)

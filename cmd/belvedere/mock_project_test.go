@@ -6,78 +6,51 @@ package main
 
 import (
 	context "context"
-	belvedere "github.com/codahale/belvedere/pkg/belvedere"
-	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 	time "time"
+
+	belvedere "github.com/codahale/belvedere/pkg/belvedere"
+	gomock "github.com/golang/mock/gomock"
 )
 
-// MockProject is a mock of Project interface
+// MockProject is a mock of Project interface.
 type MockProject struct {
 	ctrl     *gomock.Controller
 	recorder *MockProjectMockRecorder
 }
 
-// MockProjectMockRecorder is the mock recorder for MockProject
+// MockProjectMockRecorder is the mock recorder for MockProject.
 type MockProjectMockRecorder struct {
 	mock *MockProject
 }
 
-// NewMockProject creates a new mock instance
+// NewMockProject creates a new mock instance.
 func NewMockProject(ctrl *gomock.Controller) *MockProject {
 	mock := &MockProject{ctrl: ctrl}
 	mock.recorder = &MockProjectMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockProject) EXPECT() *MockProjectMockRecorder {
 	return m.recorder
 }
 
-// Name mocks base method
-func (m *MockProject) Name() string {
+// Apps mocks base method.
+func (m *MockProject) Apps() belvedere.AppService {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Name")
-	ret0, _ := ret[0].(string)
+	ret := m.ctrl.Call(m, "Apps")
+	ret0, _ := ret[0].(belvedere.AppService)
 	return ret0
 }
 
-// Name indicates an expected call of Name
-func (mr *MockProjectMockRecorder) Name() *gomock.Call {
+// Apps indicates an expected call of Apps.
+func (mr *MockProjectMockRecorder) Apps() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockProject)(nil).Name))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Apps", reflect.TypeOf((*MockProject)(nil).Apps))
 }
 
-// Setup mocks base method
-func (m *MockProject) Setup(ctx context.Context, dnsZone string, dryRun bool, interval time.Duration) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Setup", ctx, dnsZone, dryRun, interval)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Setup indicates an expected call of Setup
-func (mr *MockProjectMockRecorder) Setup(ctx, dnsZone, dryRun, interval interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Setup", reflect.TypeOf((*MockProject)(nil).Setup), ctx, dnsZone, dryRun, interval)
-}
-
-// Teardown mocks base method
-func (m *MockProject) Teardown(ctx context.Context, dryRun, async bool, interval time.Duration) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Teardown", ctx, dryRun, async, interval)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Teardown indicates an expected call of Teardown
-func (mr *MockProjectMockRecorder) Teardown(ctx, dryRun, async, interval interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Teardown", reflect.TypeOf((*MockProject)(nil).Teardown), ctx, dryRun, async, interval)
-}
-
-// DNSServers mocks base method
+// DNSServers mocks base method.
 func (m *MockProject) DNSServers(ctx context.Context) ([]belvedere.DNSServer, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DNSServers", ctx)
@@ -86,13 +59,13 @@ func (m *MockProject) DNSServers(ctx context.Context) ([]belvedere.DNSServer, er
 	return ret0, ret1
 }
 
-// DNSServers indicates an expected call of DNSServers
+// DNSServers indicates an expected call of DNSServers.
 func (mr *MockProjectMockRecorder) DNSServers(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DNSServers", reflect.TypeOf((*MockProject)(nil).DNSServers), ctx)
 }
 
-// Instances mocks base method
+// Instances mocks base method.
 func (m *MockProject) Instances(ctx context.Context, app, release string) ([]belvedere.Instance, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Instances", ctx, app, release)
@@ -101,13 +74,27 @@ func (m *MockProject) Instances(ctx context.Context, app, release string) ([]bel
 	return ret0, ret1
 }
 
-// Instances indicates an expected call of Instances
+// Instances indicates an expected call of Instances.
 func (mr *MockProjectMockRecorder) Instances(ctx, app, release interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Instances", reflect.TypeOf((*MockProject)(nil).Instances), ctx, app, release)
 }
 
-// MachineTypes mocks base method
+// Logs mocks base method.
+func (m *MockProject) Logs() belvedere.LogService {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Logs")
+	ret0, _ := ret[0].(belvedere.LogService)
+	return ret0
+}
+
+// Logs indicates an expected call of Logs.
+func (mr *MockProjectMockRecorder) Logs() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Logs", reflect.TypeOf((*MockProject)(nil).Logs))
+}
+
+// MachineTypes mocks base method.
 func (m *MockProject) MachineTypes(ctx context.Context, region string) ([]belvedere.MachineType, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "MachineTypes", ctx, region)
@@ -116,55 +103,27 @@ func (m *MockProject) MachineTypes(ctx context.Context, region string) ([]belved
 	return ret0, ret1
 }
 
-// MachineTypes indicates an expected call of MachineTypes
+// MachineTypes indicates an expected call of MachineTypes.
 func (mr *MockProjectMockRecorder) MachineTypes(ctx, region interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MachineTypes", reflect.TypeOf((*MockProject)(nil).MachineTypes), ctx, region)
 }
 
-// Logs mocks base method
-func (m *MockProject) Logs() belvedere.LogService {
+// Name mocks base method.
+func (m *MockProject) Name() string {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Logs")
-	ret0, _ := ret[0].(belvedere.LogService)
+	ret := m.ctrl.Call(m, "Name")
+	ret0, _ := ret[0].(string)
 	return ret0
 }
 
-// Logs indicates an expected call of Logs
-func (mr *MockProjectMockRecorder) Logs() *gomock.Call {
+// Name indicates an expected call of Name.
+func (mr *MockProjectMockRecorder) Name() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Logs", reflect.TypeOf((*MockProject)(nil).Logs))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockProject)(nil).Name))
 }
 
-// Secrets mocks base method
-func (m *MockProject) Secrets() belvedere.SecretsService {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Secrets")
-	ret0, _ := ret[0].(belvedere.SecretsService)
-	return ret0
-}
-
-// Secrets indicates an expected call of Secrets
-func (mr *MockProjectMockRecorder) Secrets() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Secrets", reflect.TypeOf((*MockProject)(nil).Secrets))
-}
-
-// Apps mocks base method
-func (m *MockProject) Apps() belvedere.AppService {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Apps")
-	ret0, _ := ret[0].(belvedere.AppService)
-	return ret0
-}
-
-// Apps indicates an expected call of Apps
-func (mr *MockProjectMockRecorder) Apps() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Apps", reflect.TypeOf((*MockProject)(nil).Apps))
-}
-
-// Releases mocks base method
+// Releases mocks base method.
 func (m *MockProject) Releases() belvedere.ReleaseService {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Releases")
@@ -172,8 +131,50 @@ func (m *MockProject) Releases() belvedere.ReleaseService {
 	return ret0
 }
 
-// Releases indicates an expected call of Releases
+// Releases indicates an expected call of Releases.
 func (mr *MockProjectMockRecorder) Releases() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Releases", reflect.TypeOf((*MockProject)(nil).Releases))
+}
+
+// Secrets mocks base method.
+func (m *MockProject) Secrets() belvedere.SecretsService {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Secrets")
+	ret0, _ := ret[0].(belvedere.SecretsService)
+	return ret0
+}
+
+// Secrets indicates an expected call of Secrets.
+func (mr *MockProjectMockRecorder) Secrets() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Secrets", reflect.TypeOf((*MockProject)(nil).Secrets))
+}
+
+// Setup mocks base method.
+func (m *MockProject) Setup(ctx context.Context, dnsZone string, dryRun bool, interval time.Duration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Setup", ctx, dnsZone, dryRun, interval)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Setup indicates an expected call of Setup.
+func (mr *MockProjectMockRecorder) Setup(ctx, dnsZone, dryRun, interval interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Setup", reflect.TypeOf((*MockProject)(nil).Setup), ctx, dnsZone, dryRun, interval)
+}
+
+// Teardown mocks base method.
+func (m *MockProject) Teardown(ctx context.Context, dryRun, async bool, interval time.Duration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Teardown", ctx, dryRun, async, interval)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Teardown indicates an expected call of Teardown.
+func (mr *MockProjectMockRecorder) Teardown(ctx, dryRun, async, interval interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Teardown", reflect.TypeOf((*MockProject)(nil).Teardown), ctx, dryRun, async, interval)
 }

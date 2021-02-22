@@ -6,36 +6,51 @@ package belvedere
 
 import (
 	context "context"
-	deployments "github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
-	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 	time "time"
+
+	deployments "github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
+	gomock "github.com/golang/mock/gomock"
 )
 
-// DeploymentsManager is a mock of Manager interface
+// DeploymentsManager is a mock of Manager interface.
 type DeploymentsManager struct {
 	ctrl     *gomock.Controller
 	recorder *DeploymentsManagerMockRecorder
 }
 
-// DeploymentsManagerMockRecorder is the mock recorder for DeploymentsManager
+// DeploymentsManagerMockRecorder is the mock recorder for DeploymentsManager.
 type DeploymentsManagerMockRecorder struct {
 	mock *DeploymentsManager
 }
 
-// NewDeploymentsManager creates a new mock instance
+// NewDeploymentsManager creates a new mock instance.
 func NewDeploymentsManager(ctrl *gomock.Controller) *DeploymentsManager {
 	mock := &DeploymentsManager{ctrl: ctrl}
 	mock.recorder = &DeploymentsManagerMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *DeploymentsManager) EXPECT() *DeploymentsManagerMockRecorder {
 	return m.recorder
 }
 
-// Get mocks base method
+// Delete mocks base method.
+func (m *DeploymentsManager) Delete(ctx context.Context, project, name string, dryRun, async bool, interval time.Duration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", ctx, project, name, dryRun, async, interval)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *DeploymentsManagerMockRecorder) Delete(ctx, project, name, dryRun, async, interval interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*DeploymentsManager)(nil).Delete), ctx, project, name, dryRun, async, interval)
+}
+
+// Get mocks base method.
 func (m *DeploymentsManager) Get(ctx context.Context, project, name string) (*deployments.Deployment, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", ctx, project, name)
@@ -44,13 +59,13 @@ func (m *DeploymentsManager) Get(ctx context.Context, project, name string) (*de
 	return ret0, ret1
 }
 
-// Get indicates an expected call of Get
+// Get indicates an expected call of Get.
 func (mr *DeploymentsManagerMockRecorder) Get(ctx, project, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*DeploymentsManager)(nil).Get), ctx, project, name)
 }
 
-// Insert mocks base method
+// Insert mocks base method.
 func (m *DeploymentsManager) Insert(ctx context.Context, project, name string, resources []deployments.Resource, labels deployments.Labels, dryRun bool, interval time.Duration) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Insert", ctx, project, name, resources, labels, dryRun, interval)
@@ -58,41 +73,13 @@ func (m *DeploymentsManager) Insert(ctx context.Context, project, name string, r
 	return ret0
 }
 
-// Insert indicates an expected call of Insert
+// Insert indicates an expected call of Insert.
 func (mr *DeploymentsManagerMockRecorder) Insert(ctx, project, name, resources, labels, dryRun, interval interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*DeploymentsManager)(nil).Insert), ctx, project, name, resources, labels, dryRun, interval)
 }
 
-// Update mocks base method
-func (m *DeploymentsManager) Update(ctx context.Context, project, name string, resources []deployments.Resource, dryRun bool, interval time.Duration) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, project, name, resources, dryRun, interval)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Update indicates an expected call of Update
-func (mr *DeploymentsManagerMockRecorder) Update(ctx, project, name, resources, dryRun, interval interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*DeploymentsManager)(nil).Update), ctx, project, name, resources, dryRun, interval)
-}
-
-// Delete mocks base method
-func (m *DeploymentsManager) Delete(ctx context.Context, project, name string, dryRun, async bool, interval time.Duration) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", ctx, project, name, dryRun, async, interval)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Delete indicates an expected call of Delete
-func (mr *DeploymentsManagerMockRecorder) Delete(ctx, project, name, dryRun, async, interval interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*DeploymentsManager)(nil).Delete), ctx, project, name, dryRun, async, interval)
-}
-
-// List mocks base method
+// List mocks base method.
 func (m *DeploymentsManager) List(ctx context.Context, project, filter string) ([]deployments.Deployment, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List", ctx, project, filter)
@@ -101,8 +88,22 @@ func (m *DeploymentsManager) List(ctx context.Context, project, filter string) (
 	return ret0, ret1
 }
 
-// List indicates an expected call of List
+// List indicates an expected call of List.
 func (mr *DeploymentsManagerMockRecorder) List(ctx, project, filter interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*DeploymentsManager)(nil).List), ctx, project, filter)
+}
+
+// Update mocks base method.
+func (m *DeploymentsManager) Update(ctx context.Context, project, name string, resources []deployments.Resource, dryRun bool, interval time.Duration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", ctx, project, name, resources, dryRun, interval)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update.
+func (mr *DeploymentsManagerMockRecorder) Update(ctx, project, name, resources, dryRun, interval interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*DeploymentsManager)(nil).Update), ctx, project, name, resources, dryRun, interval)
 }

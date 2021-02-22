@@ -6,36 +6,37 @@ package main
 
 import (
 	context "context"
-	belvedere "github.com/codahale/belvedere/pkg/belvedere"
-	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 	time "time"
+
+	belvedere "github.com/codahale/belvedere/pkg/belvedere"
+	gomock "github.com/golang/mock/gomock"
 )
 
-// MockLogService is a mock of LogService interface
+// MockLogService is a mock of LogService interface.
 type MockLogService struct {
 	ctrl     *gomock.Controller
 	recorder *MockLogServiceMockRecorder
 }
 
-// MockLogServiceMockRecorder is the mock recorder for MockLogService
+// MockLogServiceMockRecorder is the mock recorder for MockLogService.
 type MockLogServiceMockRecorder struct {
 	mock *MockLogService
 }
 
-// NewMockLogService creates a new mock instance
+// NewMockLogService creates a new mock instance.
 func NewMockLogService(ctrl *gomock.Controller) *MockLogService {
 	mock := &MockLogService{ctrl: ctrl}
 	mock.recorder = &MockLogServiceMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockLogService) EXPECT() *MockLogServiceMockRecorder {
 	return m.recorder
 }
 
-// List mocks base method
+// List mocks base method.
 func (m *MockLogService) List(ctx context.Context, app, release, instance string, maxAge time.Duration, filters []string) ([]belvedere.LogEntry, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List", ctx, app, release, instance, maxAge, filters)
@@ -44,7 +45,7 @@ func (m *MockLogService) List(ctx context.Context, app, release, instance string
 	return ret0, ret1
 }
 
-// List indicates an expected call of List
+// List indicates an expected call of List.
 func (mr *MockLogServiceMockRecorder) List(ctx, app, release, instance, maxAge, filters interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockLogService)(nil).List), ctx, app, release, instance, maxAge, filters)

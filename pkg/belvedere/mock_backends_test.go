@@ -6,35 +6,36 @@ package belvedere
 
 import (
 	context "context"
-	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 	time "time"
+
+	gomock "github.com/golang/mock/gomock"
 )
 
-// BackendsService is a mock of Service interface
+// BackendsService is a mock of Service interface.
 type BackendsService struct {
 	ctrl     *gomock.Controller
 	recorder *BackendsServiceMockRecorder
 }
 
-// BackendsServiceMockRecorder is the mock recorder for BackendsService
+// BackendsServiceMockRecorder is the mock recorder for BackendsService.
 type BackendsServiceMockRecorder struct {
 	mock *BackendsService
 }
 
-// NewBackendsService creates a new mock instance
+// NewBackendsService creates a new mock instance.
 func NewBackendsService(ctrl *gomock.Controller) *BackendsService {
 	mock := &BackendsService{ctrl: ctrl}
 	mock.recorder = &BackendsServiceMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *BackendsService) EXPECT() *BackendsServiceMockRecorder {
 	return m.recorder
 }
 
-// Add mocks base method
+// Add mocks base method.
 func (m *BackendsService) Add(ctx context.Context, project, region, backendService, instanceGroup string, dryRun bool, interval time.Duration) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Add", ctx, project, region, backendService, instanceGroup, dryRun, interval)
@@ -42,13 +43,13 @@ func (m *BackendsService) Add(ctx context.Context, project, region, backendServi
 	return ret0
 }
 
-// Add indicates an expected call of Add
+// Add indicates an expected call of Add.
 func (mr *BackendsServiceMockRecorder) Add(ctx, project, region, backendService, instanceGroup, dryRun, interval interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*BackendsService)(nil).Add), ctx, project, region, backendService, instanceGroup, dryRun, interval)
 }
 
-// Remove mocks base method
+// Remove mocks base method.
 func (m *BackendsService) Remove(ctx context.Context, project, region, backendService, instanceGroup string, dryRun bool, interval time.Duration) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Remove", ctx, project, region, backendService, instanceGroup, dryRun, interval)
@@ -56,7 +57,7 @@ func (m *BackendsService) Remove(ctx context.Context, project, region, backendSe
 	return ret0
 }
 
-// Remove indicates an expected call of Remove
+// Remove indicates an expected call of Remove.
 func (mr *BackendsServiceMockRecorder) Remove(ctx, project, region, backendService, instanceGroup, dryRun, interval interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Remove", reflect.TypeOf((*BackendsService)(nil).Remove), ctx, project, region, backendService, instanceGroup, dryRun, interval)

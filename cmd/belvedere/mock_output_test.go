@@ -5,34 +5,35 @@
 package main
 
 import (
-	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
+
+	gomock "github.com/golang/mock/gomock"
 )
 
-// MockOutput is a mock of Output interface
+// MockOutput is a mock of Output interface.
 type MockOutput struct {
 	ctrl     *gomock.Controller
 	recorder *MockOutputMockRecorder
 }
 
-// MockOutputMockRecorder is the mock recorder for MockOutput
+// MockOutputMockRecorder is the mock recorder for MockOutput.
 type MockOutputMockRecorder struct {
 	mock *MockOutput
 }
 
-// NewMockOutput creates a new mock instance
+// NewMockOutput creates a new mock instance.
 func NewMockOutput(ctrl *gomock.Controller) *MockOutput {
 	mock := &MockOutput{ctrl: ctrl}
 	mock.recorder = &MockOutputMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockOutput) EXPECT() *MockOutputMockRecorder {
 	return m.recorder
 }
 
-// Print mocks base method
+// Print mocks base method.
 func (m *MockOutput) Print(v interface{}) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Print", v)
@@ -40,7 +41,7 @@ func (m *MockOutput) Print(v interface{}) error {
 	return ret0
 }
 
-// Print indicates an expected call of Print
+// Print indicates an expected call of Print.
 func (mr *MockOutputMockRecorder) Print(v interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Print", reflect.TypeOf((*MockOutput)(nil).Print), v)
