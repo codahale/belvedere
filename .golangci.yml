@@ -13,6 +13,7 @@ linters:
     - errorlint
     - exhaustive
     - exportloopref
+    - forcetypeassert
     - funlen
     - gci
     - gochecknoglobals
@@ -34,14 +35,14 @@ linters:
     - gosimple
     - govet
     - ifshort
+    - importas
     - ineffassign
-    - interfacer
     - lll
     - makezero
-    - maligned
     - misspell
     - nakedret
     - nestif
+    - nilerr
     - noctx
     - nolintlint
     - paralleltest
@@ -60,12 +61,15 @@ linters:
     - unparam
     - unused
     - varcheck
+    - wastedassign
     - whitespace
     - wsl
 #    - exhaustivestruct
 #    - forbidigo
 #    - goheader
 #    - gomnd
+#    - interfacer
+#    - maligned
 #    - nlreturn
 #    - testpackage
 #    - typecheck
