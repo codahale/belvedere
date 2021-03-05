@@ -8,7 +8,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.1.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/mock v1.5.0
-	github.com/google/go-cmp v0.5.4
+	github.com/google/go-cmp v0.5.5
 	github.com/jedib0t/go-pretty/v6 v6.1.0
 	github.com/mattn/go-isatty v0.0.12
 	github.com/mitchellh/go-homedir v1.1.0
