@@ -1,7 +1,7 @@
 package cfg
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/codahale/belvedere/internal/assert"
@@ -11,12 +11,14 @@ import (
 func TestParse(t *testing.T) {
 	t.Parallel()
 
-	b, err := ioutil.ReadFile("config-example.yaml")
+	f, err := os.Open("config-example.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	got, err := Parse(b)
+	defer func() { _ = f.Close() }()
+
+	got, err := Parse(f)
 	if err != nil {
 		t.Fatal(err)
 	}

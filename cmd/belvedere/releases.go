@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 
 	"github.com/codahale/belvedere/cmd/belvedere/internal/cli"
@@ -90,7 +91,7 @@ instead.`,
 				return err
 			}
 
-			config, err := cfg.Parse(b)
+			config, err := cfg.Parse(bytes.NewReader(b))
 			if err != nil {
 				return err
 			}

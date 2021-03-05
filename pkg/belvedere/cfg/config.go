@@ -3,6 +3,7 @@ package cfg
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/ghodss/yaml"
 	"google.golang.org/api/compute/v1"
@@ -42,7 +43,13 @@ const (
 )
 
 // Parse loads the given bytes as a YAML configuration.
-func Parse(b []byte) (*Config, error) {
+func Parse(r io.Reader) (*Config, error) {
+	// Read the configuration.
+	b, err := io.ReadAll(r)
+	if err != nil {
+		return nil, fmt.Errorf("error reading config: %w", err)
+	}
+
 	// Unmarshal from YAML using the YAML->JSON route. This allows us to embed GCP API structs in
 	// our Config struct.
 	var config Config
