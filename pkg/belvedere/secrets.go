@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"time"
 
 	"github.com/codahale/belvedere/pkg/belvedere/internal/gcp"
@@ -23,9 +24,9 @@ type SecretsService interface {
 	// List returns a list of all Belvedere-managed secrets.
 	List(ctx context.Context) ([]Secret, error)
 	// Create creates a new secret with the given name and value.
-	Create(ctx context.Context, name string, value []byte, dryRun bool) error
+	Create(ctx context.Context, name string, value io.Reader, dryRun bool) error
 	// Update updates the given secret with a new value.
-	Update(ctx context.Context, name string, value []byte, dryRun bool) error
+	Update(ctx context.Context, name string, value io.Reader, dryRun bool) error
 	// Delete deletes the given secret.
 	Delete(ctx context.Context, name string, dryRun bool) error
 	// Grant modifies the given secret's IAM policy to grant read access to the given app.
@@ -63,13 +64,19 @@ func (s *secretsService) List(ctx context.Context) ([]Secret, error) {
 	return secrets, nil
 }
 
-func (s *secretsService) Create(ctx context.Context, name string, value []byte, dryRun bool) error {
+func (s *secretsService) Create(ctx context.Context, name string, value io.Reader, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.Create")
 	defer span.End()
 
+	// Buffer the secret.
+	b, err := io.ReadAll(value)
+	if err != nil {
+		return fmt.Errorf("error reading secret: %w", err)
+	}
+
 	span.AddAttributes(
 		trace.StringAttribute("name", name),
-		trace.StringAttribute("value", obscure(value)),
+		trace.StringAttribute("value", obscure(b)),
 	)
 
 	if dryRun {
@@ -86,17 +93,32 @@ func (s *secretsService) Create(ctx context.Context, name string, value []byte, 
 		return fmt.Errorf("error creating secret: %w", err)
 	}
 
-	// Update the secret's value.
-	return s.Update(ctx, name, value, false)
+	// Add a version to the given secret.
+	if _, err := s.sm.Projects.Secrets.AddVersion(
+		fmt.Sprintf("projects/%s/secrets/%s", s.project, name),
+		&secretmanager.AddSecretVersionRequest{
+			Payload: &secretmanager.SecretPayload{Data: base64.StdEncoding.EncodeToString(b)},
+		},
+	).Context(ctx).Do(); err != nil {
+		return fmt.Errorf("error adding secret version: %w", err)
+	}
+
+	return nil
 }
 
-func (s *secretsService) Update(ctx context.Context, name string, value []byte, dryRun bool) error {
+func (s *secretsService) Update(ctx context.Context, name string, value io.Reader, dryRun bool) error {
 	ctx, span := trace.StartSpan(ctx, "belvedere.secrets.Update")
 	defer span.End()
 
+	// Buffer the secret.
+	b, err := io.ReadAll(value)
+	if err != nil {
+		return fmt.Errorf("error reading secret: %w", err)
+	}
+
 	span.AddAttributes(
 		trace.StringAttribute("name", name),
-		trace.StringAttribute("value", obscure(value)),
+		trace.StringAttribute("value", obscure(b)),
 	)
 
 	if dryRun {
@@ -107,7 +129,7 @@ func (s *secretsService) Update(ctx context.Context, name string, value []byte, 
 	if _, err := s.sm.Projects.Secrets.AddVersion(
 		fmt.Sprintf("projects/%s/secrets/%s", s.project, name),
 		&secretmanager.AddSecretVersionRequest{
-			Payload: &secretmanager.SecretPayload{Data: base64.StdEncoding.EncodeToString(value)},
+			Payload: &secretmanager.SecretPayload{Data: base64.StdEncoding.EncodeToString(b)},
 		},
 	).Context(ctx).Do(); err != nil {
 		return fmt.Errorf("error adding secret version: %w", err)

@@ -6,6 +6,7 @@ package main
 
 import (
 	context "context"
+	io "io"
 	reflect "reflect"
 
 	belvedere "github.com/codahale/belvedere/pkg/belvedere"
@@ -36,7 +37,7 @@ func (m *MockSecretsService) EXPECT() *MockSecretsServiceMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockSecretsService) Create(ctx context.Context, name string, value []byte, dryRun bool) error {
+func (m *MockSecretsService) Create(ctx context.Context, name string, value io.Reader, dryRun bool) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, name, value, dryRun)
 	ret0, _ := ret[0].(error)
@@ -107,7 +108,7 @@ func (mr *MockSecretsServiceMockRecorder) Revoke(ctx, name, app, dryRun interfac
 }
 
 // Update mocks base method.
-func (m *MockSecretsService) Update(ctx context.Context, name string, value []byte, dryRun bool) error {
+func (m *MockSecretsService) Update(ctx context.Context, name string, value io.Reader, dryRun bool) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", ctx, name, value, dryRun)
 	ret0, _ := ret[0].(error)

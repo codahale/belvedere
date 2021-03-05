@@ -57,7 +57,7 @@ func TestSecretsCreate(t *testing.T) {
 
 	secrets := NewMockSecretsService(ctrl)
 	secrets.EXPECT().
-		Create(gomock.Any(), "my-secret", value, true)
+		Create(gomock.Any(), "my-secret", bytes.NewReader(value), true)
 
 	project.EXPECT().Secrets().Return(secrets)
 
@@ -89,7 +89,7 @@ func TestSecretsCreate_WithFilename(t *testing.T) {
 
 	secrets := NewMockSecretsService(ctrl)
 	secrets.EXPECT().
-		Create(gomock.Any(), "my-secret", value, true)
+		Create(gomock.Any(), "my-secret", bytes.NewReader(value), true)
 
 	project.EXPECT().Secrets().Return(secrets)
 
@@ -121,7 +121,7 @@ func TestSecretsUpdate(t *testing.T) {
 
 	secrets := NewMockSecretsService(ctrl)
 	secrets.EXPECT().
-		Update(gomock.Any(), "my-secret", value, true)
+		Update(gomock.Any(), "my-secret", bytes.NewReader(value), true)
 
 	project.EXPECT().Secrets().Return(secrets)
 
@@ -153,7 +153,7 @@ func TestSecretsUpdate_WithFilename(t *testing.T) {
 
 	secrets := NewMockSecretsService(ctrl)
 	secrets.EXPECT().
-		Update(gomock.Any(), "my-secret", value, true)
+		Update(gomock.Any(), "my-secret", bytes.NewReader(value), true)
 
 	project.EXPECT().Secrets().Return(secrets)
 

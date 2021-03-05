@@ -2,6 +2,7 @@ package belvedere
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/codahale/belvedere/internal/assert"
@@ -96,7 +97,7 @@ func TestSecretsService_Create(t *testing.T) {
 		sm:      sm,
 	}
 
-	if err := secrets.Create(context.Background(), "my-secret", []byte("secret"), false); err != nil {
+	if err := secrets.Create(context.Background(), "my-secret", strings.NewReader("secret"), false); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -129,7 +130,7 @@ func TestSecretsService_Update(t *testing.T) {
 		sm:      sm,
 	}
 
-	if err := secrets.Update(context.Background(), "my-secret", []byte("secret"), false); err != nil {
+	if err := secrets.Update(context.Background(), "my-secret", strings.NewReader("secret"), false); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 
 	"github.com/codahale/belvedere/cmd/belvedere/internal/cli"
@@ -79,7 +80,7 @@ instead.`,
 				return err
 			}
 
-			return project.Secrets().Create(ctx, name, b, mf.DryRun)
+			return project.Secrets().Create(ctx, name, bytes.NewReader(b), mf.DryRun)
 		},
 	}
 }
@@ -110,7 +111,7 @@ instead.`,
 				return err
 			}
 
-			return project.Secrets().Update(ctx, name, b, mf.DryRun)
+			return project.Secrets().Update(ctx, name, bytes.NewReader(b), mf.DryRun)
 		},
 	}
 }
