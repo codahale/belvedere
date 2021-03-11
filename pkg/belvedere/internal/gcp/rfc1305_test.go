@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/codahale/belvedere/internal/assert"
+	"github.com/codahale/gubbins/assert"
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
 

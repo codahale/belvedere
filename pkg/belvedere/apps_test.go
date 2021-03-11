@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codahale/belvedere/internal/assert"
-	"github.com/codahale/belvedere/internal/httpmock"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
+	"github.com/codahale/gubbins/assert"
+	"github.com/codahale/gubbins/httpmock"
 	"github.com/golang/mock/gomock"
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/dns/v1"

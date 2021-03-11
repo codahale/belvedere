@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/codahale/belvedere/internal/httpmock"
+	"github.com/codahale/gubbins/httpmock"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	"google.golang.org/api/option"
 )

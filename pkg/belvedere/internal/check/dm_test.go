@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/codahale/belvedere/internal/assert"
-	"github.com/codahale/belvedere/internal/httpmock"
+	"github.com/codahale/gubbins/assert"
+	"github.com/codahale/gubbins/httpmock"
 	"google.golang.org/api/deploymentmanager/v2"
 	"google.golang.org/api/option"
 )

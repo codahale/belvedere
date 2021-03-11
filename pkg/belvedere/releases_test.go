@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codahale/belvedere/internal/assert"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
 	"github.com/codahale/belvedere/pkg/belvedere/internal/deployments"
+	"github.com/codahale/gubbins/assert"
 	"github.com/golang/mock/gomock"
 )
 

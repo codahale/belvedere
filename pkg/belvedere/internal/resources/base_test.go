@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/codahale/belvedere/internal/assert"
+	"github.com/codahale/gubbins/assert"
 )
 
 func TestBaseResources(t *testing.T) {

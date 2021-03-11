@@ -3,7 +3,7 @@ package resources
 import (
 	"testing"
 
-	"github.com/codahale/belvedere/internal/assert"
+	"github.com/codahale/gubbins/assert"
 )
 
 func TestName(t *testing.T) {

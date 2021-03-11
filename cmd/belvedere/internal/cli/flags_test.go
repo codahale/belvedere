@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codahale/belvedere/internal/assert"
+	"github.com/codahale/gubbins/assert"
 	"github.com/spf13/pflag"
 )
 

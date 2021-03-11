@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/codahale/belvedere/internal/assert"
+	"github.com/codahale/gubbins/assert"
 )
 
 type example struct {

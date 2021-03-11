@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codahale/belvedere/internal/assert"
+	"github.com/codahale/gubbins/assert"
 	"go.opencensus.io/trace"
 )
 

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/codahale/belvedere/internal/assert"
 	"github.com/codahale/belvedere/pkg/belvedere/cfg"
+	"github.com/codahale/gubbins/assert"
 	"google.golang.org/api/compute/v1"
 )
 

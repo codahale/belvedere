@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codahale/belvedere/internal/assert"
+	"github.com/codahale/gubbins/assert"
 	"google.golang.org/api/googleapi"
 )
 

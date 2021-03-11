@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/codahale/belvedere/internal/assert"
+	"github.com/codahale/gubbins/assert"
 )
 
 func TestArgs_String(t *testing.T) {

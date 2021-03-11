@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codahale/belvedere/internal/httpmock"
+	"github.com/codahale/gubbins/httpmock"
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/option"
 )
