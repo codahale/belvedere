@@ -3,7 +3,7 @@ module github.com/codahale/belvedere
 go 1.16
 
 require (
-	cloud.google.com/go v0.79.0
+	cloud.google.com/go v0.80.0
 	github.com/alessio/shellescape v1.4.1
 	github.com/cenkalti/backoff/v4 v4.1.0
 	github.com/codahale/gubbins v0.0.1
